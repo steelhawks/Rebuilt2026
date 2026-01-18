@@ -16,9 +16,6 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public final class Constants {
 
-    public static final double ENDGAME_PERIOD = 20;
-    public static final double MATCH_TIME_SECONDS = 150;
-
     public static final int POWER_DISTRIBUTION_CAN_ID =
         getRobot() == RobotType.ALPHABOT
             ? 0
@@ -43,7 +40,7 @@ public final class Constants {
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.OMEGABOT;
+    private static final RobotType ROBOT = RobotType.SIMBOT;
 
     /**
      * The robot type.
