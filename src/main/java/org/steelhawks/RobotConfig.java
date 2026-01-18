@@ -4,6 +4,7 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.shooter.Shooter;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
@@ -245,6 +246,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
+        Shooter createShooter();
     }
 
     // OmegaBot factory
@@ -297,6 +299,11 @@ public class RobotConfig {
         @Override
         public ObjectVision createObjectVision() {
             return new ObjectVision();
+        }
+
+        @Override
+        public Shooter createShooter() {
+            return null;
         }
     }
 
@@ -352,6 +359,11 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null; // Not available on AlphaBot
         }
+
+        @Override
+        public Shooter createShooter() {
+            return null;
+        }
     }
 
     // Last year robot factory
@@ -406,6 +418,11 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null;
         }
+
+        @Override
+        public Shooter createShooter() {
+            return null;
+        }
     }
 
     // SimBot factory
@@ -441,6 +458,11 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return new ObjectVision();
         }
+
+        @Override
+        public Shooter createShooter() {
+            return null;
+        }
     }
 
     // Replay factory
@@ -472,6 +494,11 @@ public class RobotConfig {
 
         @Override
         public ObjectVision createObjectVision() {
+            return null;
+        }
+
+        @Override
+        public Shooter createShooter() {
             return null;
         }
     }

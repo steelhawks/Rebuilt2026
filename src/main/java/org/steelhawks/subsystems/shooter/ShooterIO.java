@@ -20,7 +20,11 @@ public interface ShooterIO {
 
     }
 
-    default void runShooter(double percentageOutput) {
+    default void runOpenLoop(double percentageOutput) {
+
+    }
+
+    default void runSpeed(double speed) {
 
     }
 
