@@ -70,7 +70,7 @@ public class Shooter extends SubsystemBase {
                     shooterIO.runVelocity(inputs.velocityGoal, ShooterConstants.kS.get() + (ShooterConstants.kV.get() * inputs.velocityGoal));
                     if (currentSampleNum < ShooterConstants.NUMBER_OF_SAMPLES && isSpunUp()) {
                         // add sample. only add the sample if the flywheel velocity is within range
-                        samples[currentSampleNum] = inputs.appliedVolts;
+                        samples[currentSampleNum] = inputs.motor1AppliedVolts;
                         currentSampleNum++;
                     }
                     if (currentSampleNum >= ShooterConstants.NUMBER_OF_SAMPLES) {
@@ -95,7 +95,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public double getCurrentVelocity() {
-        return inputs.velocityRadPerSec;
+        return inputs.motor1VelocityRadPerSec;
     }
 
     public boolean isSpunUp () {

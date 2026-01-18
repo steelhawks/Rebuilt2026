@@ -5,12 +5,18 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
     @AutoLog
     class ShooterIOInputs {
-        public boolean connected = false;
-        public double velocityRadPerSec = 0;
-        public double appliedVolts = 0;
-        public double currentAmps = 0;
-        public double tempCelsius = 0;
+        public boolean motor1Connected = false;
+        public double motor1VelocityRadPerSec = 0;
+        public double motor1AppliedVolts = 0;
+        public double motor1Current = 0;
+        public double motor1Temp = 0;
         public double velocityGoal = 0;
+
+        public boolean motor2Connected = false;
+        public double motor2VelocityRadPerSec = 0;
+        public double motor2AppliedVolts = 0;
+        public double motor2Current = 0;
+        public double motor2Temp = 0;
     }
 
     default void updateInputs(ShooterIOInputs inputs) {}
