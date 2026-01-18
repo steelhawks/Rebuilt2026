@@ -112,6 +112,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new SimBotFactory())
                 .build();
         };

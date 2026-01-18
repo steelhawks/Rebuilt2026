@@ -13,4 +13,6 @@ public class ShooterConstants {
     public static final LoggedTunableNumber kV = new LoggedTunableNumber("Shooter/kV", 0);
 
     public static final double TOLERANCE = 0.0;
+
+    public static final int NUMBER_OF_SAMPLES = 67;
 }

@@ -14,6 +14,17 @@ public class Shooter extends SubsystemBase {
     private final ShooterIO shooterIO;
     private LoggedTunableNumber tuningVoltage;
 
+    enum State {
+        SPIN_UP,
+        SAMPLING,
+        HOLDING
+    }
+
+    private double[] samples = new double[ShooterConstants.NUMBER_OF_SAMPLES];
+    private double sampleAverage = 0.0;
+    private State currentPhase = State.SPIN_UP;
+    private int currentSampleNum = 0;
+
     public Shooter(ShooterIO shooterIO) {
         this.shooterIO = shooterIO;
     }
@@ -46,14 +57,36 @@ public class Shooter extends SubsystemBase {
                 && Toggles.Shooter.shooterOpenLoopOverride.get();
 
         if (shouldRun) {
-            boolean atGoal = Math.abs(inputs.velocityGoal - getCurrentVelocity()) < ShooterConstants.TOLERANCE;
-            if (atGoal) {
-                shooterIO.runVelocity(inputs.velocityGoal, ShooterConstants.kS.get() + (ShooterConstants.kV.get() * inputs.velocityGoal));
-            } else  {
-                shooterIO.runOpenLoop(ShooterConstants.kS.getAsDouble() + (ShooterConstants.kV.getAsDouble() * inputs.velocityGoal));
+            switch (currentPhase) {
+                case SPIN_UP -> {
+                    shooterIO.runVelocity(inputs.velocityGoal, ShooterConstants.kS.get() + (ShooterConstants.kV.get() * inputs.velocityGoal));
+                    if (isSpunUp()) {
+                        // spun up, transition to sampling
+                        currentPhase = State.SAMPLING;
+                        currentSampleNum = 0;
+                    }
+                }
+                case SAMPLING -> {
+                    shooterIO.runVelocity(inputs.velocityGoal, ShooterConstants.kS.get() + (ShooterConstants.kV.get() * inputs.velocityGoal));
+                    if (currentSampleNum < ShooterConstants.NUMBER_OF_SAMPLES && isSpunUp()) {
+                        // add sample. only add the sample if the flywheel velocity is within range
+                        samples[currentSampleNum] = inputs.appliedVolts;
+                        currentSampleNum++;
+                    }
+                    if (currentSampleNum >= ShooterConstants.NUMBER_OF_SAMPLES) {
+                        // samples collected, calculate average and start holding
+                        sampleAverage = calculateAverageSampledVoltage();
+                        currentPhase = State.HOLDING;
+                    }
+                }
+                case HOLDING -> {
+                    shooterIO.runOpenLoop(sampleAverage);
+                }
             }
         } else {
             shooterIO.stop();
+            currentPhase = State.HOLDING;
+            sampleAverage = 0;
         }
     }
 
@@ -69,11 +102,22 @@ public class Shooter extends SubsystemBase {
         return Math.abs(inputs.velocityGoal - getCurrentVelocity()) < ShooterConstants.TOLERANCE;
     }
 
+    private double calculateAverageSampledVoltage() {
+        double sum = 0;
+        for (double d : samples) {
+            sum += d;
+        }
+        return sum / ShooterConstants.NUMBER_OF_SAMPLES;
+    }
+
     public Command setVelocityRotPerSec(double velocityRotPerSec) {
         return Commands.runOnce(
-                () -> shooterIO.runVelocity(velocityRotPerSec,
-                        ShooterConstants.kS.getAsDouble() + (ShooterConstants.kV.getAsDouble() * inputs.velocityGoal)
-                )
+                () -> {
+                    if (!isSpunUp()) {
+                        currentPhase = State.SPIN_UP;
+                    }
+                    inputs.velocityGoal = velocityRotPerSec;
+                }
         );
     }
 }
