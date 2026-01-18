@@ -7,6 +7,7 @@ import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.shooter.Shooter;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -20,6 +21,7 @@ public class RobotContainer {
     public static Swerve s_Swerve = null;
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
+    public static Shooter s_Shooter = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -34,6 +36,7 @@ public class RobotContainer {
         s_LEDStrip = config.hasLEDStrip ? config.createLEDStrip().orElseThrow() : null;
         s_Vision = config.hasVision ? config.createVision(s_Swerve::accept).orElseThrow() : null;
         s_ObjVision = config.hasObjectVision ? config.createObjectVision().orElseThrow() : null;
+        s_Shooter = config.hasShooter ? config.createShooter().orElseThrow() : null;
 
         if (config.hasAutos) {
             Autos.init();

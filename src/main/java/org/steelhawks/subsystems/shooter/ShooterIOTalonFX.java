@@ -15,6 +15,7 @@ import org.steelhawks.util.PhoenixUtil;
 
 public class ShooterIOTalonFX implements ShooterIO {
     public final TalonFX flywheelMotor;
+    private final TalonFXConfiguration config = new TalonFXConfiguration();
 
     private final StatusSignal<AngularVelocity> velocity;
     private final StatusSignal<Voltage> voltage;
@@ -27,12 +28,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     public ShooterIOTalonFX() {
         flywheelMotor = new TalonFX(0, Constants.getCANBus());
 
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = ShooterConstants.kP;
-        config.Slot0.kI = ShooterConstants.kI;
-        config.Slot0.kD = ShooterConstants.kD;
-        config.Slot0.kV = ShooterConstants.kV;
-        config.Slot0.kS = ShooterConstants.kS;
+        config.Slot0.kP = ShooterConstants.kP.getAsDouble();
+        config.Slot0.kI = ShooterConstants.kI.getAsDouble();
+        config.Slot0.kD = ShooterConstants.kD.getAsDouble();
 
         PhoenixUtil.tryUntilOk(5, () -> flywheelMotor.getConfigurator().apply(config));
 
@@ -78,14 +76,23 @@ public class ShooterIOTalonFX implements ShooterIO {
     }
 
     @Override
-    public void runVelocity(double rps) {
+    public void runVelocity(double rps, double feedforward) {
         flywheelMotor.setControl(
                 velocityOut.withVelocity(rps)
+                        .withFeedForward(feedforward)
         );
     }
 
     @Override
     public void stop() {
         flywheelMotor.stopMotor();
+    }
+
+    @Override
+    public void setPID(double kP, double kI, double kD) {
+        config.Slot0.kP = kP;
+        config.Slot0.kI = kI;
+        config.Slot0.kD = kD;
+        PhoenixUtil.tryUntilOk(5, () -> flywheelMotor.getConfigurator().apply(config));
     }
 }

@@ -10,13 +10,16 @@ public interface ShooterIO {
         public double appliedVolts = 0;
         public double currentAmps = 0;
         public double tempCelsius = 0;
+        public double velocityGoal = 0;
     }
 
     default void updateInputs(ShooterIOInputs inputs) {}
 
     default void runOpenLoop(double volts) {}
 
-    default void runVelocity(double speed) {}
+    default void runVelocity(double rps, double feedforward) {}
+
+    default void setPID(double kP, double kI, double kD) {}
 
     default void stop() {}
 }
