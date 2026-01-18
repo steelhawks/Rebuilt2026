@@ -39,12 +39,12 @@ public class ShooterIOTalonFX implements ShooterIO {
         temp = flywheelMotor.getDeviceTemp();
         amperage = flywheelMotor.getStatorCurrent();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(50,
+        PhoenixUtil.registerSignals(false,
                 velocity,
                 voltage,
                 temp,
                 amperage
-                );
+        );
 
         flywheelMotor.optimizeBusUtilization();
 
@@ -54,14 +54,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     @Override
     public void updateInputs(ShooterIOInputs inputs) {
-        inputs.connected =
-                BaseStatusSignal.refreshAll(
-                        velocity,
-                        voltage,
-                        temp,
-                        amperage
-                ).isOK();
-
+        inputs.connected = BaseStatusSignal.isAllGood(voltage, velocity, temp, amperage);
         inputs.velocityRadPerSec = velocity.getValueAsDouble();
         inputs.appliedVolts = voltage.getValueAsDouble();
         inputs.tempCelsius = temp.getValueAsDouble();
