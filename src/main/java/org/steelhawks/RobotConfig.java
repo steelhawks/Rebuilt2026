@@ -2,6 +2,10 @@ package org.steelhawks;
 
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.flywheel.Flywheel;
+import org.steelhawks.subsystems.flywheel.FlywheelIO;
+import org.steelhawks.subsystems.flywheel.FlywheelIOSim;
+import org.steelhawks.subsystems.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.swerve.*;
@@ -9,6 +13,7 @@ import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
+import javax.swing.text.html.Option;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -19,6 +24,7 @@ public class RobotConfig {
     public final boolean hasVision;
     public final boolean hasObjectVision;
     public final boolean hasAutos;
+    public final boolean hasFlywheel;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -29,6 +35,7 @@ public class RobotConfig {
         this.hasVision = builder.hasVision;
         this.hasObjectVision = builder.hasObjectVision;
         this.hasAutos = builder.hasAutos;
+        this.hasFlywheel = builder.hasFlywheel;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -66,6 +73,13 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
+    public Optional<Flywheel> createFlywheel() {
+        if (!hasFlywheel) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createFlywheel());
+    }
+
     public static RobotConfig getConfig() {
         if (Constants.getMode() == Mode.REPLAY) {
             return getReplayConfig();
@@ -76,6 +90,7 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
+                .withFlywheel(true)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
@@ -84,6 +99,7 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(false)
+                .withFlywheel(true)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
@@ -92,6 +108,7 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(false)
+                .withFlywheel(false)
                 .withAutos(true)
                 .withFactory(new LastYearFactory())
                 .build();
@@ -100,6 +117,7 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
+                .withFlywheel(true)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
                 .build();
@@ -108,18 +126,30 @@ public class RobotConfig {
 
     private static RobotConfig getReplayConfig() {
         return switch (Constants.getRobot()) {
-            case OMEGABOT, ALPHABOT -> new Builder()
+            case OMEGABOT -> new Builder()
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(false)
+                .withFlywheel(true)
+                .withAutos(true)
+                .withFactory(new ReplayFactory())
+                .build();
+
+            case ALPHABOT -> new Builder()
+                .withLEDMatrix(false)
+                .withVision(true)
+                .withObjectVision(true)
+                .withFlywheel(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
 
             default -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
+                .withLEDStrip(true)
                 .withVision(true)
-                .withObjectVision(false)
+                .withObjectVision(true)
+                .withFlywheel(false)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -132,6 +162,7 @@ public class RobotConfig {
         private boolean hasLEDStrip = false;
         private boolean hasVision = false;
         private boolean hasObjectVision = false;
+        private boolean hasFlywheel = false;
         private boolean hasAutos = false;
         private SubsystemFactory factory = null;
 
@@ -152,6 +183,11 @@ public class RobotConfig {
 
         public Builder withObjectVision(boolean enabled) {
             this.hasObjectVision = enabled;
+            return this;
+        }
+
+        public Builder withFlywheel(boolean enabled) {
+            this.hasFlywheel = enabled;
             return this;
         }
 
@@ -229,6 +265,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
+        Flywheel createFlywheel();
     }
 
     // OmegaBot factory
@@ -282,11 +319,17 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return new ObjectVision();
         }
+
+        @Override
+        public Flywheel createFlywheel() {
+            return null;
+        }
     }
 
     // AlphaBot factory
     private static class AlphaBotFactory implements SubsystemFactory {
         private final SwerveCANBus swerveCANBus;
+        private final CANBus flywheelCANbus = new CANBus("");
 
         public AlphaBotFactory() {
             this.swerveCANBus = new SwerveCANBus(
@@ -335,6 +378,11 @@ public class RobotConfig {
         @Override
         public ObjectVision createObjectVision() {
             return null; // Not available on AlphaBot
+        }
+
+        @Override
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIOTalonFX(flywheelCANbus));
         }
     }
 
@@ -390,6 +438,11 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null;
         }
+
+        @Override
+        public Flywheel createFlywheel() {
+            return null;
+        }
     }
 
     // SimBot factory
@@ -425,6 +478,11 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return new ObjectVision();
         }
+
+        @Override
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIOSim());
+        }
     }
 
     // Replay factory
@@ -457,6 +515,11 @@ public class RobotConfig {
         @Override
         public ObjectVision createObjectVision() {
             return null;
+        }
+
+        @Override
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIO() {});
         }
     }
 }
