@@ -1,16 +1,16 @@
 package org.steelhawks.subsystems.shooter;
 
-import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
 
     private final ShooterIO io;
     private final PIDController pidController;
     private final SimpleMotorFeedforward feedforward;
-    private final Shoo inputs;
+    private final ShooterIOInputsAutoLogged inputs;
 
     public Shooter(ShooterIO io) {
         this.io = io;
@@ -21,17 +21,22 @@ public class Shooter extends SubsystemBase {
 
     public double getVelocity() {
         io.updateInputs(inputs);
-        return inputs.velocityPerSecRad;
+        return inputs.velocityRadPerSec;
 
     }
 
     @Override
     public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Shooter", inputs);
         double currentVelocity = getVelocity();
 
         double pidOutput =  pidController.calculate(currentVelocity, ShooterConstants.SHOOTER_MOTOR_MAX_RPM);
+        double ffOutput = feedforward.calculate(ShooterConstants.SHOOTER_MOTOR_MAX_RPM);
 
+        double totalVoltage = pidOutput + ffOutput;
 
+        io.runSpeed(totalVoltage);
 
     }
 

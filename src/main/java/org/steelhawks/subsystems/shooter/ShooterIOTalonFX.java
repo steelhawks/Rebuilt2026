@@ -6,17 +6,20 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.RelativeEncoder;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+
 import edu.wpi.first.units.measure.*;
 
 public class ShooterIOTalonFX implements ShooterIO {
 
     private final TalonFX shooterMotor;
+    private final TalonFX shooterMotor2;
 
     private final StatusSignal<Angle> positionRad;
     private final StatusSignal<AngularVelocity> velocityRadPerSec;
@@ -30,8 +33,11 @@ public class ShooterIOTalonFX implements ShooterIO {
     public ShooterIOTalonFX() {
 
         shooterMotor = new TalonFX(ShooterConstants.SHOOTER_MOTOR_ID, ShooterConstants.CLAW_CANBUS);
+        shooterMotor2 = new TalonFX(ShooterConstants.SHOOTER_MOTOR_ID2, ShooterConstants.CLAW_CANBUS);
 
         shooterMotor.setPosition(0.0);
+
+        shooterMotor2.setControl(new StrictFollower(shooterMotor.getDeviceID())); // false to match leader's invert
 
 
         var motorConfig = new TalonFXConfiguration()

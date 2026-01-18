@@ -14,6 +14,7 @@ public class ShooterConstants {
 
     public static final Integer SHOOTER_MOTOR_ID = 1;
     public static final Double SHOOTER_GEAR_RATIO = 2.0;
+    public static final Integer SHOOTER_MOTOR_ID2 = 2;
 
     public static final Double SHOOTER_SPEED = 0.15;
     public static final Double SHOOTER_SLOW_SPEED = 0.125;
