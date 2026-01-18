@@ -241,11 +241,13 @@ public class RobotConfig {
     }
 
     public static class ShooterCANBus extends CANBus {
-        public final int shooterMotorId;
+        public final int shooterMotor1Id;
+        public final int shooterMotor2Id;
 
-        public ShooterCANBus(String name, int shooterMotorId) {
+        public ShooterCANBus(String name, int motor1Id, int motor2Id) {
             super(name);
-            this.shooterMotorId = shooterMotorId;
+            this.shooterMotor1Id = motor1Id;
+            this.shooterMotor2Id = motor2Id;
         }
     }
 
