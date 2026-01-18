@@ -19,6 +19,7 @@ public class RobotConfig {
     public final boolean hasVision;
     public final boolean hasObjectVision;
     public final boolean hasAutos;
+    public final boolean hasShooter;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -29,6 +30,7 @@ public class RobotConfig {
         this.hasVision = builder.hasVision;
         this.hasObjectVision = builder.hasObjectVision;
         this.hasAutos = builder.hasAutos;
+        this.hasShooter = builder.hasShooter;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -65,6 +67,15 @@ public class RobotConfig {
         }
         return Optional.ofNullable(factory.createObjectVision());
     }
+
+    /*
+    public Optional<> createShooter() {
+        if (!hasShooter) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createShooter())
+    }
+     */
 
     public static RobotConfig getConfig() {
         if (Constants.getMode() == Mode.REPLAY) {
@@ -133,6 +144,7 @@ public class RobotConfig {
         private boolean hasVision = false;
         private boolean hasObjectVision = false;
         private boolean hasAutos = false;
+        private boolean hasShooter = false;
         private SubsystemFactory factory = null;
 
         public Builder withLEDMatrix(boolean enabled) {
@@ -162,6 +174,11 @@ public class RobotConfig {
 
         public Builder withFactory(SubsystemFactory factory) {
             this.factory = factory;
+            return this;
+        }
+
+        public Builder withShooter(boolean enabled) {
+            this.hasShooter = enabled;
             return this;
         }
 
