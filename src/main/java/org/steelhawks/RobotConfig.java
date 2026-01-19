@@ -1,13 +1,10 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.shooter.Shooter;
-import org.steelhawks.subsystems.shooter.ShooterIO;
-import org.steelhawks.subsystems.shooter.ShooterIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
@@ -23,7 +20,7 @@ public class RobotConfig {
     public final boolean hasVision;
     public final boolean hasObjectVision;
     public final boolean hasAutos;
-    public final boolean hasShooter;
+    public final boolean hasShooter; // hasFlywheel on main
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -34,7 +31,7 @@ public class RobotConfig {
         this.hasVision = builder.hasVision;
         this.hasObjectVision = builder.hasObjectVision;
         this.hasAutos = builder.hasAutos;
-        this.hasShooter = builder.hasShooter;
+        this.hasShooter = builder.hasShooter; // builder.hasFlywheel on main
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -91,7 +88,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withAutos(true)
-                .withFactory(new OmegaBotFactory())
+                .withFactory(new OmegaBotFactory()).withShooter(true)
                 .build();
 
             case ALPHABOT -> new Builder()
@@ -107,7 +104,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
-                .withFactory(new LastYearFactory())
+                .withFactory(new LastYearFactory()).withShooter(false)
                 .build();
 
             case SIMBOT -> new Builder()
