@@ -105,11 +105,12 @@ public class RobotConfig {
                 .build();
 
             case LAST_YEAR -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
+                .withLEDStrip(true)
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(false)
-                .withAutos(true)
+                .withAutos(false)
                 .withFactory(new LastYearFactory())
                 .build();
 
