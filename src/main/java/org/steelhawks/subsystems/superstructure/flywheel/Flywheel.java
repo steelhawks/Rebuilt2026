@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.flywheel;
+package org.steelhawks.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;

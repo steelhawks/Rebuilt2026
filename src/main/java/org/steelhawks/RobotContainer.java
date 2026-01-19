@@ -3,7 +3,8 @@ package org.steelhawks;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
-import org.steelhawks.subsystems.flywheel.Flywheel;
+import org.steelhawks.subsystems.superstructure.ShooterSuperstructure;
+import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
@@ -21,7 +22,7 @@ public class RobotContainer {
     public static Swerve s_Swerve = null;
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
-    public static Flywheel s_Flywheel = null;
+    public static ShooterSuperstructure s_Superstructure = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -31,11 +32,11 @@ public class RobotContainer {
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
 
         s_Swerve = config.createSwerve();
-        s_LEDMatrix = config.hasLEDMatrix ? config.createLEDMatrix().orElseThrow() : null;
-        s_LEDStrip = config.hasLEDStrip ? config.createLEDStrip().orElseThrow() : null;
-        s_Vision = config.hasVision ? config.createVision(s_Swerve::accept).orElseThrow() : null;
-        s_ObjVision = config.hasObjectVision ? config.createObjectVision().orElseThrow() : null;
-        s_Flywheel = config.hasFlywheel ? config.createFlywheel().orElseThrow() : null;
+        s_LEDMatrix = config.createLEDMatrix().orElse(null);
+        s_LEDStrip = config.createLEDStrip().orElse(null);
+        s_Vision = config.createVision(s_Swerve::accept).orElse(null);
+        s_ObjVision = config.createObjectVision().orElse(null);
+        s_Superstructure = config.createShooterSuperStructure().orElse(null);
 
         if (config.hasAutos) {
             Autos.init();

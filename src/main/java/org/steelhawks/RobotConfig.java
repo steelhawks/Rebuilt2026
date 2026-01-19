@@ -2,18 +2,21 @@ package org.steelhawks;
 
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
-import org.steelhawks.subsystems.flywheel.Flywheel;
-import org.steelhawks.subsystems.flywheel.FlywheelIO;
-import org.steelhawks.subsystems.flywheel.FlywheelIOSim;
-import org.steelhawks.subsystems.flywheel.FlywheelIOTalonFX;
+import org.steelhawks.subsystems.superstructure.ShooterSuperstructure;
+import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIO;
+import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
+import org.steelhawks.subsystems.superstructure.pivot.Pivot;
+import org.steelhawks.subsystems.superstructure.pivot.PivotIO;
+import org.steelhawks.subsystems.superstructure.turret.Turret;
+import org.steelhawks.subsystems.superstructure.turret.TurretIO;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
-import javax.swing.text.html.Option;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -25,6 +28,8 @@ public class RobotConfig {
     public final boolean hasObjectVision;
     public final boolean hasAutos;
     public final boolean hasFlywheel;
+    public final boolean hasTurret;
+    public final boolean hasPivot;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -36,6 +41,8 @@ public class RobotConfig {
         this.hasObjectVision = builder.hasObjectVision;
         this.hasAutos = builder.hasAutos;
         this.hasFlywheel = builder.hasFlywheel;
+        this.hasTurret = builder.hasTurret;
+        this.hasPivot = builder.hasPivot;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -73,11 +80,11 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
-    public Optional<Flywheel> createFlywheel() {
-        if (!hasFlywheel) {
-            return Optional.empty();
+    public Optional<ShooterSuperstructure> createShooterSuperStructure() {
+        if (hasFlywheel || hasTurret || hasPivot) {
+            return Optional.ofNullable(factory.createShooterSuperstructure());
         }
-        return Optional.ofNullable(factory.createFlywheel());
+        return Optional.empty();
     }
 
     public static RobotConfig getConfig() {
@@ -91,6 +98,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(true)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
@@ -100,6 +109,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(false)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
@@ -110,6 +121,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
                 .withAutos(false)
                 .withFactory(new LastYearFactory())
                 .build();
@@ -119,6 +132,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(true)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
                 .build();
@@ -132,6 +147,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -141,6 +158,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(false)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -151,6 +170,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -164,6 +185,8 @@ public class RobotConfig {
         private boolean hasVision = false;
         private boolean hasObjectVision = false;
         private boolean hasFlywheel = false;
+        private boolean hasTurret = false;
+        private boolean hasPivot = false;
         private boolean hasAutos = false;
         private SubsystemFactory factory = null;
 
@@ -189,6 +212,16 @@ public class RobotConfig {
 
         public Builder withFlywheel(boolean enabled) {
             this.hasFlywheel = enabled;
+            return this;
+        }
+
+        public Builder withTurret(boolean enabled) {
+            this.hasTurret = enabled;
+            return this;
+        }
+
+        public Builder withPivot(boolean enabled) {
+            this.hasPivot = enabled;
             return this;
         }
 
@@ -266,7 +299,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
-        Flywheel createFlywheel();
+        ShooterSuperstructure createShooterSuperstructure();
     }
 
     // OmegaBot factory
@@ -322,8 +355,11 @@ public class RobotConfig {
         }
 
         @Override
-        public Flywheel createFlywheel() {
-            return null;
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIO() {}),
+                new Turret(new TurretIO() {}),
+                new Pivot(new PivotIO() {}));
         }
     }
 
@@ -382,8 +418,11 @@ public class RobotConfig {
         }
 
         @Override
-        public Flywheel createFlywheel() {
-            return new Flywheel(new FlywheelIOTalonFX(flywheelCANbus));
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIOTalonFX(flywheelCANbus)),
+                new Turret(new TurretIO() {}),
+                null);
         }
     }
 
@@ -441,7 +480,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Flywheel createFlywheel() {
+        public ShooterSuperstructure createShooterSuperstructure() {
             return null;
         }
     }
@@ -481,8 +520,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Flywheel createFlywheel() {
-            return new Flywheel(new FlywheelIOSim());
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return null;
         }
     }
 
@@ -519,8 +558,11 @@ public class RobotConfig {
         }
 
         @Override
-        public Flywheel createFlywheel() {
-            return new Flywheel(new FlywheelIO() {});
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIO() {}),
+                new Turret(new TurretIO() {}),
+                new Pivot(new PivotIO() {}));
         }
     }
 }
