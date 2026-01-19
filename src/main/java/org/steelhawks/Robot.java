@@ -26,6 +26,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
+import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.vision.VisionConstants;
@@ -163,13 +164,20 @@ public class Robot extends LoggedRobot {
                         TunerConstantsAlpha.BackLeft,
                         TunerConstantsAlpha.BackRight
                     };
+                case CHASSIS ->
+                    new SwerveModuleConstants[]{
+                        TunerConstantsChassis.FrontLeft,
+                        TunerConstantsChassis.FrontRight,
+                        TunerConstantsChassis.BackLeft,
+                        TunerConstantsChassis.BackRight
+                    };
                 case LAST_YEAR ->
-                new SwerveModuleConstants[]{
-                    TunerConstantsLastYear.FrontLeft,
-                    TunerConstantsLastYear.FrontRight,
-                    TunerConstantsLastYear.BackLeft,
-                    TunerConstantsLastYear.BackRight
-                };
+                    new SwerveModuleConstants[]{
+                        TunerConstantsLastYear.FrontLeft,
+                        TunerConstantsLastYear.FrontRight,
+                        TunerConstantsLastYear.BackLeft,
+                        TunerConstantsLastYear.BackRight
+                    };
             };
 
         for (var constants : modules) {

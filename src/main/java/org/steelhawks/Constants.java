@@ -35,12 +35,13 @@ public final class Constants {
     public enum RobotType {
         OMEGABOT,
         ALPHABOT,
+        CHASSIS,
         LAST_YEAR,
         SIMBOT
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.SIMBOT;
+    private static final RobotType ROBOT = RobotType.CHASSIS;
 
     /**
      * The robot type.
@@ -63,13 +64,14 @@ public final class Constants {
         switch (ROBOT) {
             case OMEGABOT -> "OMEGA";
             case ALPHABOT -> "ALPHA";
+            case CHASSIS -> "CHASSIS";
             case LAST_YEAR -> "LAST_YEAR";
             case SIMBOT -> "Simulation";
         };
 
     public static Mode getMode() {
         return switch (ROBOT_TYPE) {
-            case ALPHABOT, OMEGABOT, LAST_YEAR ->
+            case ALPHABOT, OMEGABOT, CHASSIS, LAST_YEAR ->
                 RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
             case SIMBOT -> Mode.SIM;
         };
@@ -88,7 +90,7 @@ public final class Constants {
     public static CANBus getCANBus() {
         return switch (getRobot()) {
             case OMEGABOT, LAST_YEAR, SIMBOT -> new CANBus("canivore");
-            case ALPHABOT -> new CANBus("");
+            case ALPHABOT, CHASSIS -> new CANBus("");
         };
     }
 
@@ -161,9 +163,10 @@ public final class Constants {
      * @param sim The simulation constant value
      * @return The correct constant
      */
-    public static <T> T value(T hawkrider, T alpha, T omega, T sim) {
+    public static <T> T value(T hawkrider, T alpha, T chassis, T omega, T sim) {
         return switch (Constants.getRobot()) {
             case ALPHABOT -> alpha;
+            case CHASSIS -> chassis;
             case OMEGABOT -> omega;
             case LAST_YEAR -> hawkrider;
             case SIMBOT -> sim;
@@ -179,9 +182,10 @@ public final class Constants {
      * @param omega The Omega constant value
      * @return The correct constant
      */
-    public static <T> T value(T hawkrider, T alpha, T omega) {
+    public static <T> T value(T hawkrider, T alpha, T chassis, T omega) {
         return switch (Constants.getRobot()) {
             case ALPHABOT -> alpha;
+            case CHASSIS -> chassis;
             case OMEGABOT, SIMBOT -> omega;
             case LAST_YEAR -> hawkrider;
         };

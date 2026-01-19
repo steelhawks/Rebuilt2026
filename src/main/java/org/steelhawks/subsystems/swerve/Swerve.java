@@ -55,6 +55,7 @@ import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
+import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.util.LocalADStarAK;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -730,6 +731,12 @@ public class Swerve extends SubsystemBase {
                 new Translation2d(TunerConstantsAlpha.FrontRight.LocationX, TunerConstantsAlpha.FrontRight.LocationY),
                 new Translation2d(TunerConstantsAlpha.BackLeft.LocationX, TunerConstantsAlpha.BackLeft.LocationY),
                 new Translation2d(TunerConstantsAlpha.BackRight.LocationX, TunerConstantsAlpha.BackRight.LocationY)
+            };
+            case CHASSIS -> new Translation2d[] {
+                new Translation2d(TunerConstantsChassis.FrontLeft.LocationX, TunerConstantsChassis.FrontLeft.LocationY),
+                new Translation2d(TunerConstantsChassis.FrontRight.LocationX, TunerConstantsChassis.FrontRight.LocationY),
+                new Translation2d(TunerConstantsChassis.BackLeft.LocationX, TunerConstantsChassis.BackLeft.LocationY),
+                new Translation2d(TunerConstantsChassis.BackRight.LocationX, TunerConstantsChassis.BackRight.LocationY)
             };
             case LAST_YEAR -> new Translation2d[]{
                 new Translation2d(TunerConstantsLastYear.FrontLeft.LocationX, TunerConstantsLastYear.FrontLeft.LocationY),

@@ -210,6 +210,10 @@ public class VisionConstants {
         )
     };
 
+    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {};
+
+    private static final CameraConfig[] CHASSIS_OBJ_DETECT_CONFIG = {};
+
     private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
         new CameraConfig(
             "limelight-coral",
@@ -218,6 +222,8 @@ public class VisionConstants {
             CameraType.LIMELIGHT
         )
     };
+
+    private static final CameraConfig[] ALPHA_OBJ_DETECT_CONFIG = {};
 
     private static final CameraConfig[] LAST_YEAR_CAMERA_CONFIG = {
         new CameraConfig(
@@ -234,18 +240,23 @@ public class VisionConstants {
         )
     };
 
+    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {};
+
     public static CameraConfig[] getCameraConfig() {
         return switch (Constants.getRobot()) {
+            case OMEGABOT, SIMBOT -> OMEGA_CAMERA_CONFIG;
             case ALPHABOT -> ALPHA_CAMERA_CONFIG;
+            case CHASSIS -> CHASSIS_CAMERA_CONFIG;
             case LAST_YEAR -> LAST_YEAR_CAMERA_CONFIG;
-            default -> OMEGA_CAMERA_CONFIG;
         };
     }
 
     public static CameraConfig[] getObjDetectConfig() {
         return switch (Constants.getRobot()) {
-            case SIMBOT, OMEGABOT -> OMEGA_OBJ_DETECT_CONFIG;
-            default -> null;
+            case OMEGABOT, SIMBOT -> OMEGA_OBJ_DETECT_CONFIG;
+            case ALPHABOT -> ALPHA_OBJ_DETECT_CONFIG;
+            case CHASSIS -> CHASSIS_OBJ_DETECT_CONFIG;
+            case LAST_YEAR -> LAST_YEAR_OBJ_DETECT_CONFIG;
         };
     }
 

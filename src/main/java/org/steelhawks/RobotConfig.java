@@ -106,6 +106,7 @@ public class RobotConfig {
 
             case ALPHABOT -> new Builder()
                 .withLEDMatrix(true)
+                .withLEDStrip(false)
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true)
@@ -113,6 +114,18 @@ public class RobotConfig {
                 .withPivot(false)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
+                .build();
+
+            case CHASSIS -> new Builder()
+                .withLEDMatrix(false)
+                .withLEDStrip(false)
+                .withVision(true)
+                .withObjectVision(true)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
+                .withAutos(false)
+                .withFactory(new ChassisBotFactory())
                 .build();
 
             case LAST_YEAR -> new Builder()
@@ -423,6 +436,64 @@ public class RobotConfig {
                 new Flywheel(new FlywheelIOTalonFX(flywheelCANbus)),
                 new Turret(new TurretIO() {}),
                 null);
+        }
+    }
+
+    private static class ChassisBotFactory implements SubsystemFactory {
+        private final SwerveCANBus swerveCANBus;
+
+        public ChassisBotFactory() {
+            this.swerveCANBus = new SwerveCANBus(
+                TunerConstantsChassis.DrivetrainConstants.CANBusName,
+                TunerConstantsChassis.DrivetrainConstants.Pigeon2Id,
+                TunerConstantsChassis.FrontLeft.DriveMotorId,
+                TunerConstantsChassis.FrontLeft.SteerMotorId,
+                TunerConstantsChassis.FrontLeft.EncoderId,
+                TunerConstantsChassis.FrontRight.DriveMotorId,
+                TunerConstantsChassis.FrontRight.SteerMotorId,
+                TunerConstantsChassis.FrontRight.EncoderId,
+                TunerConstantsChassis.BackLeft.DriveMotorId,
+                TunerConstantsChassis.BackLeft.SteerMotorId,
+                TunerConstantsChassis.BackLeft.EncoderId,
+                TunerConstantsChassis.BackRight.DriveMotorId,
+                TunerConstantsChassis.BackRight.SteerMotorId,
+                TunerConstantsChassis.BackRight.EncoderId
+            );
+        }
+
+        @Override
+        public Swerve createSwerve() {
+            return new Swerve(
+                new GyroIOPigeon2(swerveCANBus.gyroId, swerveCANBus.bus),
+                new ModuleIOTalonFX(TunerConstantsChassis.FrontLeft),
+                new ModuleIOTalonFX(TunerConstantsChassis.FrontRight),
+                new ModuleIOTalonFX(TunerConstantsChassis.BackLeft),
+                new ModuleIOTalonFX(TunerConstantsChassis.BackRight));
+        }
+
+        @Override
+        public LEDMatrix createLEDMatrix() {
+            return null;
+        }
+
+        @Override
+        public LEDStrip createLEDStrip() {
+            return null;
+        }
+
+        @Override
+        public Vision createVision(VisionConsumer poseConsumer) {
+            return new Vision(poseConsumer, false);
+        }
+
+        @Override
+        public ObjectVision createObjectVision() {
+            return new ObjectVision();
+        }
+
+        @Override
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return null;
         }
     }
 
