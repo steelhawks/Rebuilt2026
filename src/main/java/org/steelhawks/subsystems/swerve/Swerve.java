@@ -317,18 +317,17 @@ public class Swerve extends SubsystemBase {
             this::getChassisSpeeds,
             this::runVelocity,
             new PPHolonomicDriveController(
-                new PIDConstants(
-                    AutonConstants.TRANSLATION_KP.get(),
-                    AutonConstants.TRANSLATION_KI.get(),
-                    AutonConstants.TRANSLATION_KD.get()),
-                new PIDConstants(
-                    AutonConstants.ROTATION_KP.get(),
-                    AutonConstants.ROTATION_KI.get(),
-                    AutonConstants.ROTATION_KD.get())),
+            new PIDConstants(
+            AutonConstants.TRANSLATION_KP.get(),
+            AutonConstants.TRANSLATION_KI.get(),
+            AutonConstants.TRANSLATION_KD.get()),
+            new PIDConstants(
+            AutonConstants.ROTATION_KP.get(),
+            AutonConstants.ROTATION_KI.get(),
+            AutonConstants.ROTATION_KD.get())),
             PP_CONFIG,
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
             this);
-
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
             (activePath) -> {

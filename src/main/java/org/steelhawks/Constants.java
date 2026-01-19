@@ -40,7 +40,7 @@ public final class Constants {
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.SIMBOT;
+    private static final RobotType ROBOT = RobotType.LAST_YEAR;
 
     /**
      * The robot type.
@@ -217,6 +217,14 @@ public final class Constants {
             case OMEGABOT -> omega;
             case SIMBOT -> sim;
             default -> null;
+        };
+    }
+
+    public static double omega(double omega, double sim) {
+        return switch (Constants.getRobot()) {
+            case OMEGABOT -> omega;
+            case SIMBOT -> sim;
+            default -> 0.0;
         };
     }
 
