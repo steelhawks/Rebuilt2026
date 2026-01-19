@@ -7,6 +7,8 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
+import java.util.Set;
+
 public class Flywheel extends SubsystemBase {
 
     public static final int motorId = 0;
@@ -124,11 +126,11 @@ public class Flywheel extends SubsystemBase {
     ///////////////////////
 
     public Command setTargetVelocity(double velocityRadPerSec) {
-        return Commands.runOnce(() -> {
+        return Commands.defer(() -> Commands.runOnce(() -> {
             if (Math.abs(targetVelocityRadPerSec - velocityRadPerSec) > 1.0) {
                 targetVelocityRadPerSec = velocityRadPerSec;
                 state = FlywheelState.RAMP_UP;
             }
-        }, this);
+        }), Set.of(this));
     }
 }
