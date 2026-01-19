@@ -4,6 +4,7 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.shooter.Shooter;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
@@ -18,6 +19,7 @@ public class RobotConfig {
     public final boolean hasLEDStrip;
     public final boolean hasVision;
     public final boolean hasObjectVision;
+    public final boolean hasShooter;
     public final boolean hasAutos;
 
     // Subsystem factory
@@ -28,6 +30,7 @@ public class RobotConfig {
         this.hasLEDStrip = builder.hasLEDStrip;
         this.hasVision = builder.hasVision;
         this.hasObjectVision = builder.hasObjectVision;
+        this.hasShooter = builder.hasShooter;
         this.hasAutos = builder.hasAutos;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
@@ -66,6 +69,13 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
+    public Optional<Shooter> createShooter() {
+        if (!hasShooter) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createShooter());
+    }
+
     public static RobotConfig getConfig() {
         if (Constants.getMode() == Mode.REPLAY) {
             return getReplayConfig();
@@ -77,6 +87,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
@@ -85,6 +96,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
 
@@ -93,6 +105,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new LastYearFactory())
                 .build();
 
@@ -101,6 +114,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new SimBotFactory())
                 .build();
         };
@@ -113,6 +127,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new ReplayFactory())
                 .build();
 
@@ -121,6 +136,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
+                .withShooter(true)
                 .withFactory(new ReplayFactory())
                 .build();
         };
@@ -133,6 +149,7 @@ public class RobotConfig {
         private boolean hasVision = false;
         private boolean hasObjectVision = false;
         private boolean hasAutos = false;
+        private boolean hasShooter = false;
         private SubsystemFactory factory = null;
 
         public Builder withLEDMatrix(boolean enabled) {
@@ -157,6 +174,11 @@ public class RobotConfig {
 
         public Builder withAutos(boolean enabled) {
             this.hasAutos = enabled;
+            return this;
+        }
+
+        public Builder withShooter(boolean enabled) {
+            this.hasShooter = enabled;
             return this;
         }
 
@@ -229,6 +251,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
+        Shooter createShooter();
     }
 
     // OmegaBot factory
@@ -282,6 +305,9 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return new ObjectVision();
         }
+
+        @Override
+        public Shooter createShooter() { return new Shooter(); }
     }
 
     // AlphaBot factory
@@ -336,6 +362,9 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null; // Not available on AlphaBot
         }
+
+        @Override
+        public Shooter createShooter() { return new Shooter(); }
     }
 
     // Last year robot factory
@@ -390,6 +419,9 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null;
         }
+
+        @Override
+        public Shooter createShooter() { return new Shooter(); }
     }
 
     // SimBot factory
@@ -425,6 +457,9 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return new ObjectVision();
         }
+
+        @Override
+        public Shooter createShooter() { return new Shooter(); }
     }
 
     // Replay factory
@@ -458,5 +493,8 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null;
         }
+
+        @Override
+        public Shooter createShooter() { return new Shooter(); }
     }
 }
