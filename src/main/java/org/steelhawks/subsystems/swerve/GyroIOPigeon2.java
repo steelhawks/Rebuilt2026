@@ -19,6 +19,7 @@ public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon;
     private final StatusSignal<Angle> yaw;
     private final StatusSignal<LinearAcceleration> accelerationX;
+    private final StatusSignal<LinearAcceleration> accelerationY;
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity;
@@ -28,6 +29,7 @@ public class GyroIOPigeon2 implements GyroIO {
 
         yaw = pigeon.getYaw();
         accelerationX = pigeon.getAccelerationX();
+        accelerationY = pigeon.getAccelerationY();
         yawVelocity = pigeon.getAngularVelocityZWorld();
 
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
@@ -44,6 +46,7 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.accelerationXInGs = accelerationX.getValueAsDouble();
+        inputs.accelerationYInGs = accelerationY.getValueAsDouble();
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
         inputs.odometryYawTimestamps =
