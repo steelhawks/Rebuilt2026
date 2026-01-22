@@ -81,6 +81,10 @@ public class Swerve extends SubsystemBase {
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG;
     private static final SwerveDriveSimulation DRIVE_SIMULATION;
 
+    private final LoggedTunableNumber COLLISION_ACCEL_THRESHOLD = new LoggedTunableNumber("Swerve/CollisionAccelThreshold", 0.0);
+    private double previousAx = 0.0;
+    private double previousAy = 0.0;
+
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -111,6 +115,7 @@ public class Swerve extends SubsystemBase {
 
     private final ProfiledPIDController mAlignController;
     private final Debouncer mAlignDebouncer;
+    private final Debouncer collisionDebouncer;
 
     static {
         switch (Constants.getRobot()) {
@@ -379,6 +384,7 @@ public class Swerve extends SubsystemBase {
         mAlignController.enableContinuousInput(-Math.PI, Math.PI);
         mAlignController.setTolerance(Units.degreesToRadians(3));
         mAlignDebouncer = new Debouncer(0.5, DebounceType.kRising);
+        collisionDebouncer = new Debouncer(0.2, DebounceType.kRising);
 
         // warm up pathplanner lib
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -563,7 +569,14 @@ public class Swerve extends SubsystemBase {
      * Returns the robot's acceleration in the X direction relative to the robot.
      */
     public double getRobotRelativeXAccelGs() {
-        return gyroInputs.accelerationXInGs * getPose().getRotation().getCos();
+        return gyroInputs.accelerationXInGs;
+    }
+
+    /**
+     * Returns the robot's acceleration in the Y direction relative to the robot.
+     */
+    public double getRobotRelativeYAccelGs() {
+        return gyroInputs.accelerationYInGs;
     }
 
     /**
@@ -746,6 +759,20 @@ public class Swerve extends SubsystemBase {
 
     public boolean isPathfinding() {
         return isPathfinding;
+    }
+
+    public boolean collisionDetected() {
+        double ax = gyroInputs.accelerationXInGs;
+        double ay = gyroInputs.accelerationYInGs;
+
+        double jerkX = ax - previousAx;
+        double jerkY = ay - previousAy;
+
+        previousAx = ax;
+        previousAy = ay;
+
+        double jerkMag = Math.abs(Math.hypot(jerkX, jerkY));
+        return collisionDebouncer.calculate(jerkMag > COLLISION_ACCEL_THRESHOLD.get());
     }
 
     ///////////////////////

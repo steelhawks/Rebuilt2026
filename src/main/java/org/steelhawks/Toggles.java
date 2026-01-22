@@ -50,10 +50,19 @@ public interface Toggles {
 
     interface Turret {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleCurrentOverride", false);
+    }
+
+    interface Intake {
+        LoggedNetworkBoolean isEnabled =
+            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", true);
+        LoggedNetworkBoolean toggleVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Intake/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleCurrentOverride =
+            new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
 }
