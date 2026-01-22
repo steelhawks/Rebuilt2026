@@ -530,6 +530,11 @@ public class RobotConfig {
         public ShooterSuperstructure createShooterSuperstructure() {
             return null;
         }
+
+        @Override
+        public Intake createIntake() {
+            return null;
+        }
     }
 
     // Last year robot factory

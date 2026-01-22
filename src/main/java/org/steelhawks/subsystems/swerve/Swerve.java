@@ -768,6 +768,7 @@ public class Swerve extends SubsystemBase {
         return isPathfinding;
     }
 
+    @AutoLogOutput(key = "Swerve/CollisionDetected")
     public boolean collisionDetected() {
         double ax = gyroInputs.accelerationXInGs;
         double ay = gyroInputs.accelerationYInGs;
