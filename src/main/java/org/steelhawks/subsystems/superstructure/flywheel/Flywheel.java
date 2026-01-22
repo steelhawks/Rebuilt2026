@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.superstructure.flywheel;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -56,7 +57,9 @@ public class Flywheel extends SubsystemBase {
         Logger.processInputs("Flywheel", inputs);
 
         nearTargetVelocity = Math.abs(inputs.velocityRadPerSec - targetVelocityRadPerSec) <= velocityTolerance.get();
-        final boolean shouldRun = Toggles.Flywheel.isEnabled.get();
+        final boolean shouldRun =
+            DriverStation.isEnabled()
+                && Toggles.Flywheel.isEnabled.get();
 
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {

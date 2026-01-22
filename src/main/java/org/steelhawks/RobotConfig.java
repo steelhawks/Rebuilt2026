@@ -2,6 +2,8 @@ package org.steelhawks;
 
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.intake.IntakeIO;
 import org.steelhawks.subsystems.superstructure.ShooterSuperstructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -30,6 +32,7 @@ public class RobotConfig {
     public final boolean hasFlywheel;
     public final boolean hasTurret;
     public final boolean hasPivot;
+    public final boolean hasIntake;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -43,6 +46,7 @@ public class RobotConfig {
         this.hasFlywheel = builder.hasFlywheel;
         this.hasTurret = builder.hasTurret;
         this.hasPivot = builder.hasPivot;
+        this.hasIntake = builder.hasIntake;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -87,6 +91,13 @@ public class RobotConfig {
         return Optional.empty();
     }
 
+    public Optional<Intake> createIntake() {
+        if (!hasIntake) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createIntake());
+    }
+
     public static RobotConfig getConfig() {
         if (Constants.getMode() == Mode.REPLAY) {
             return getReplayConfig();
@@ -100,6 +111,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(true)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
@@ -112,6 +124,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(false)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
@@ -136,6 +149,7 @@ public class RobotConfig {
                 .withFlywheel(false)
                 .withTurret(false)
                 .withPivot(false)
+                .withIntake(false)
                 .withAutos(false)
                 .withFactory(new LastYearFactory())
                 .build();
@@ -147,6 +161,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(true)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
                 .build();
@@ -162,6 +177,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(true)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -173,6 +189,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(false)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -185,6 +202,7 @@ public class RobotConfig {
                 .withFlywheel(false)
                 .withTurret(false)
                 .withPivot(false)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -200,6 +218,7 @@ public class RobotConfig {
         private boolean hasFlywheel = false;
         private boolean hasTurret = false;
         private boolean hasPivot = false;
+        private boolean hasIntake = false;
         private boolean hasAutos = false;
         private SubsystemFactory factory = null;
 
@@ -235,6 +254,11 @@ public class RobotConfig {
 
         public Builder withPivot(boolean enabled) {
             this.hasPivot = enabled;
+            return this;
+        }
+
+        public Builder withIntake(boolean enabled) {
+            this.hasIntake = enabled;
             return this;
         }
 
@@ -313,6 +337,7 @@ public class RobotConfig {
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
         ShooterSuperstructure createShooterSuperstructure();
+        Intake createIntake();
     }
 
     // OmegaBot factory
@@ -373,6 +398,11 @@ public class RobotConfig {
                 new Flywheel(new FlywheelIO() {}),
                 new Turret(new TurretIO() {}),
                 new Pivot(new PivotIO() {}));
+        }
+
+        @Override
+        public Intake createIntake() {
+            return new Intake(new IntakeIO() {});
         }
     }
 
@@ -436,6 +466,11 @@ public class RobotConfig {
                 new Flywheel(new FlywheelIOTalonFX(flywheelCANbus)),
                 new Turret(new TurretIO() {}),
                 null);
+        }
+
+        @Override
+        public Intake createIntake() {
+            return new Intake(new IntakeIO() {});
         }
     }
 
@@ -554,6 +589,11 @@ public class RobotConfig {
         public ShooterSuperstructure createShooterSuperstructure() {
             return null;
         }
+
+        @Override
+        public Intake createIntake() {
+            return null;
+        }
     }
 
     // SimBot factory
@@ -592,6 +632,11 @@ public class RobotConfig {
 
         @Override
         public ShooterSuperstructure createShooterSuperstructure() {
+            return null;
+        }
+
+        @Override
+        public Intake createIntake() {
             return null;
         }
     }
@@ -634,6 +679,11 @@ public class RobotConfig {
                 new Flywheel(new FlywheelIO() {}),
                 new Turret(new TurretIO() {}),
                 new Pivot(new PivotIO() {}));
+        }
+
+        @Override
+        public Intake createIntake() {
+            return new Intake(new IntakeIO() {});
         }
     }
 }
