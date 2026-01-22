@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.util.PhoenixUtil;
 
 import java.util.Queue;
@@ -31,7 +32,7 @@ public class GyroIOPigeon2 implements GyroIO {
         yaw = pigeon.getYaw();
         accelerationX = pigeon.getAccelerationX();
         accelerationY = pigeon.getAccelerationY();
-        yawVelocity = pigeon.getAngularVelocityZWorld();
+        yawVelocity = pigeon.getAngularVelocityZDevice();
 
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
@@ -55,6 +56,8 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.accelerationXInGs = accelerationX.getValueAsDouble();
         inputs.accelerationYInGs = accelerationY.getValueAsDouble();
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+
+        Logger.recordOutput("Swerve/Gyro/AccelerationInGs", Math.hypot(inputs.accelerationXInGs, inputs.accelerationYInGs));
 
         inputs.odometryYawTimestamps =
             yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
