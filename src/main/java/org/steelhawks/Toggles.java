@@ -37,4 +37,8 @@ public interface Toggles {
         LoggedNetworkBoolean turnOpenLoopOverride =
             new LoggedNetworkBoolean("Toggles/Swerve/TurnOpenLoopOverride", false);
     }
+    interface Shooter {
+        LoggedNetworkBoolean toggleVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Shooter/ToggleVoltageOverride", false);
+    }
 }
