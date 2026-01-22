@@ -32,6 +32,7 @@ import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
+import org.steelhawks.util.PhoenixUtil;
 import org.steelhawks.util.VirtualSubsystem;
 import org.steelhawks.util.autonbuilder.StartEndPosition;
 
@@ -202,6 +203,8 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         LoopTimeUtil.reset();
 
+        PhoenixUtil.refreshAll();
+        LoopTimeUtil.record("PhoenixUtil");
         VirtualSubsystem.periodicAll();
         LoopTimeUtil.record("VirtualPeriodic");
         CommandScheduler.getInstance().run();

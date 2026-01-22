@@ -82,7 +82,8 @@ public class Swerve extends SubsystemBase {
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG;
     private static final SwerveDriveSimulation DRIVE_SIMULATION;
 
-    private final LoggedTunableNumber COLLISION_ACCEL_THRESHOLD = new LoggedTunableNumber("Swerve/CollisionAccelThreshold", 0.0);
+    private final LoggedTunableNumber COLLISION_ACCEL_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionAccelThreshold", 0.3);
     private double previousAx = 0.0;
     private double previousAy = 0.0;
 
@@ -768,7 +769,7 @@ public class Swerve extends SubsystemBase {
         return isPathfinding;
     }
 
-    @AutoLogOutput(key = "Swerve/CollisionDetected")
+    @AutoLogOutput(key = "Swerve/Collision/Detected")
     public boolean collisionDetected() {
         double ax = gyroInputs.accelerationXInGs;
         double ay = gyroInputs.accelerationYInGs;
@@ -780,6 +781,7 @@ public class Swerve extends SubsystemBase {
         previousAy = ay;
 
         double jerkMag = Math.abs(Math.hypot(jerkX, jerkY));
+        Logger.recordOutput("Swerve/Collision/JerkMagnitude", jerkMag);
         return collisionDebouncer.calculate(jerkMag > COLLISION_ACCEL_THRESHOLD.get());
     }
 
