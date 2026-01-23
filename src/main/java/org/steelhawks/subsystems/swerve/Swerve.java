@@ -82,6 +82,10 @@ public class Swerve extends SubsystemBase {
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG;
     private static final SwerveDriveSimulation DRIVE_SIMULATION;
 
+    private ChassisSpeeds previousSetpoint = new ChassisSpeeds();
+    private ChassisSpeeds currentSetpoint = new ChassisSpeeds();
+    private double previousSetpointTime = 0.0;
+
     // Collision constants
     private final LoggedTunableNumber COLLISION_ACCEL_THRESHOLD =
         new LoggedTunableNumber("Swerve/CollisionAccelThreshold", 0.3);
@@ -92,6 +96,13 @@ public class Swerve extends SubsystemBase {
         new LoggedTunableNumber("Swerve/CollisionAngAccelThreshold", 0.0);
     private double previousAngularVelocityZ = 0.0;
     private double previousAngularAccelZ = 0.0;
+
+    private final LoggedTunableNumber COLLISION_JERK_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionJerkThreshold", 50.0);
+    private final LoggedTunableNumber COLLISION_ANG_JERK_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionAngJerkThreshold", 100.0);
+    private final LoggedTunableNumber COMMANDED_ACCEL_FILTER_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CommandedAccelFilterThreshold", 4.0);
 
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
@@ -496,6 +507,7 @@ public class Swerve extends SubsystemBase {
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, speedMetersPerSec);
+        currentSetpoint = discreteSpeeds;
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -775,32 +787,60 @@ public class Swerve extends SubsystemBase {
         return isPathfinding;
     }
 
+    private boolean isCommandingHighAcceleration() {
+        double dt = Timer.getFPGATimestamp() - previousSetpointTime;
+
+        if (dt < 0.001 || previousSetpointTime == 0.0) {
+            previousSetpoint = currentSetpoint;
+            previousSetpointTime = Timer.getFPGATimestamp();
+            return false;
+        }
+
+        double dvx = currentSetpoint.vxMetersPerSecond - previousSetpoint.vxMetersPerSecond;
+        double dvy = currentSetpoint.vyMetersPerSecond - previousSetpoint.vyMetersPerSecond;
+
+        double commandedAccelX = dvx / dt;
+        double commandedAccelY = dvy / dt;
+        double commandedAccelMag = Math.hypot(commandedAccelX, commandedAccelY);
+
+        Logger.recordOutput("Swerve/Collision/CommandedAccelMagnitude", commandedAccelMag);
+        previousSetpoint = currentSetpoint;
+        previousSetpointTime = Timer.getFPGATimestamp();
+
+        return commandedAccelMag > COMMANDED_ACCEL_FILTER_THRESHOLD.get();
+    }
+
     @AutoLogOutput(key = "Swerve/Collision/Detected")
     public boolean collisionDetected() {
         double ax = gyroInputs.accelerationXInGs;
         double ay = gyroInputs.accelerationYInGs;
 
-        double jerkX = ax - previousAx;
-        double jerkY = ay - previousAy;
+        double jerkX = (ax - previousAx) / Constants.UPDATE_LOOP_DT;
+        double jerkY = (ay - previousAy) / Constants.UPDATE_LOOP_DT;
 
         previousAx = ax;
         previousAy = ay;
 
         double angularVelocityZ = gyroInputs.yawVelocityRadPerSec;
-
         double angularAccelZ = (angularVelocityZ - previousAngularVelocityZ) / Constants.UPDATE_LOOP_DT;
-
-        double angularJerk = angularAccelZ - previousAngularAccelZ;
+        double angularJerk = (angularAccelZ - previousAngularAccelZ) / Constants.UPDATE_LOOP_DT;
 
         previousAngularVelocityZ = angularVelocityZ;
         previousAngularAccelZ = angularAccelZ;
 
-        double jerkMag = Math.abs(Math.hypot(jerkX, jerkY));
+        double jerkMag = Math.hypot(jerkX, jerkY);
         double angularJerkMag = Math.abs(angularJerk);
+        double accelMag = Math.hypot(ax, ay);
+
         Logger.recordOutput("Swerve/Collision/JerkMagnitude", jerkMag);
         Logger.recordOutput("Swerve/Collision/AngularJerkMagnitude", angularJerkMag);
-        return (collisionDebouncer.calculate(jerkMag > COLLISION_ACCEL_THRESHOLD.get())
-        || collisionDebouncer.calculate(angularJerkMag > COLLISION_ANG_ACCEL_THRESHOLD.get()));
+        Logger.recordOutput("Swerve/Collision/AccelMagnitude", accelMag);
+
+        // collision is high jerk thats not from commanded motion
+        boolean highCommandedAccel = isCommandingHighAcceleration();
+        boolean linearCollision = jerkMag > COLLISION_JERK_THRESHOLD.get() && !highCommandedAccel;
+        boolean angularCollision = angularJerkMag > COLLISION_ANG_JERK_THRESHOLD.get();
+        return collisionDebouncer.calculate(linearCollision || angularCollision);
     }
 
     ///////////////////////
