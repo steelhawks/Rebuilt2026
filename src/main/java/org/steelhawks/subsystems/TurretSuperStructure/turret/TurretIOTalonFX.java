@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -25,11 +26,11 @@ public class TurretIOTalonFX implements TurretIO {
     private final StatusSignal<Current> currentAmps;
     private final StatusSignal<Temperature> tempCelsius;
 
-    private final DutyCycleOut dutyCycleOut;
+    private final VelocityDutyCycle dutyCycleOut;
 
     public TurretIOTalonFX() {
         turretMotor = new TalonFX(TurretConstants.MOTOR_ID, TurretConstants.TURRET_CANBUS);
-        dutyCycleOut = new DutyCycleOut(0.0);
+        dutyCycleOut = new VelocityDutyCycle(0.0);
 
         var motorConfig = new TalonFXConfiguration();
 
@@ -83,9 +84,9 @@ public class TurretIOTalonFX implements TurretIO {
     }
 
     @Override
-    public void turnTurret(TurretIOInputs inputs, double percentageOutput) {
+    public void turnTurret(TurretIOInputs inputs, double percentageOutput, double outputFF) {
         if (inputs.amountTurned <= 360.0) {
-            turretMotor.setControl(dutyCycleOut.withOutput(percentageOutput));
+            turretMotor.setControl(dutyCycleOut.withVelocity(percentageOutput).withFeedForward(outputFF));
         } else {
             stop();
         }

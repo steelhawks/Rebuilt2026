@@ -15,7 +15,7 @@ public interface TurretIO {
 
     default void updateInputs(TurretIOInputs inputs) {}
 
-    default void turnTurret(TurretIOInputs inputs, double percentageOutput) {}
+    default void turnTurret(TurretIOInputs inputs, double percentageOutput, double outputFF) {}
 
     default void stop() {}
 
