@@ -28,5 +28,7 @@ public interface TurretIO {
 
     default void setPID(double kp, double ki, double kd) {}
 
+    default void setPosition(double position) {}
+
     default void stop() {}
 }

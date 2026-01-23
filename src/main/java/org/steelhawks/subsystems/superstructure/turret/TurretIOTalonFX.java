@@ -1,7 +1,6 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
@@ -10,7 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
+import org.steelhawks.RobotConfig;
 import org.steelhawks.util.PhoenixUtil;
 
 public class TurretIOTalonFX implements TurretIO {
@@ -31,14 +30,16 @@ public class TurretIOTalonFX implements TurretIO {
     private final TalonFXConfiguration config;
     private final TalonFX motor;
 
-    public TurretIOTalonFX(CANBus bus) {
-        motor = new TalonFX(Turret.motorId, bus);
+    public TurretIOTalonFX(RobotConfig.CANBus bus) {
+        motor = new TalonFX(Turret.motorId, bus.bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        config.Slot0.kP = Flywheel.kP.getAsDouble();
-        config.Slot0.kI = Flywheel.kI.getAsDouble();
-        config.Slot0.kD = Flywheel.kD.getAsDouble();
+        config.Slot0.kP = Turret.kP.getAsDouble();
+        config.Slot0.kI = Turret.kI.getAsDouble();
+        config.Slot0.kD = Turret.kD.getAsDouble();
+        config.Feedback.SensorToMechanismRatio = 1.58;
+        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
 
         position = motor.getPosition();
         velocity = motor.getVelocity();
@@ -47,15 +48,14 @@ public class TurretIOTalonFX implements TurretIO {
         torqueCurrent = motor.getTorqueCurrent();
         temp = motor.getDeviceTemp();
 
-        positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
-        positionVoltage = new PositionVoltage(0.0).withUpdateFreqHz(0.0).withSlot(1);
-        voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
-        torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-        dutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+        positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withSlot(0);
+        positionVoltage = new PositionVoltage(0.0).withSlot(1);
+        voltageOut = new VoltageOut(0.0);
+        torqueCurrentFOC = new TorqueCurrentFOC(0.0);
+        dutyCycleOut = new DutyCycleOut(0.0);
 
-        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
         PhoenixUtil.registerSignals(
-            bus.isNetworkFD(),
+            bus.bus.isNetworkFD(),
             position, velocity, voltage, current, torqueCurrent, temp);
     }
 
@@ -105,6 +105,13 @@ public class TurretIOTalonFX implements TurretIO {
         config.Slot0.kI = ki;
         config.Slot0.kD = kd;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
+    }
+
+    @Override
+    public void setPosition(double position) {
+        new Thread(() -> {
+            motor.setPosition(position);
+        }).start();
     }
 
     @Override

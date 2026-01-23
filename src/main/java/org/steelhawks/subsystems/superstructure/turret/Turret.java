@@ -1,12 +1,15 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.Robot;
@@ -18,19 +21,22 @@ import java.util.function.DoubleSupplier;
 
 public class Turret extends SubsystemBase {
 
-    private static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS");
-    private static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA");
-    private static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP");
-    private static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI");
-    private static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD");
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", 4.0);
+    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", 0.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 7000.0);
+    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", 0.0);
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 0.0);
 
-    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec");
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq");
-    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", 0.1);
+    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 2.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 3.0);
+    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.3);
 
-    private static final Rotation2d minRotation = new Rotation2d();
-    private static final Rotation2d maxRotation = new Rotation2d();
+    private static final LoggedTunableNumber currentHomingThres =
+        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 25.0);
+
+    private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
+    private static final Rotation2d maxRotation = new Rotation2d(Math.PI + (Math.PI / 60.0));
     public static int motorId = 1;
 
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
@@ -46,6 +52,8 @@ public class Turret extends SubsystemBase {
     private boolean brakeModeEnabled = false;
     private boolean isManual = false;
     private boolean atGoal = false;
+    private boolean isHomed = false;
+    private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
 
     public Turret(TurretIO io) {
@@ -67,24 +75,41 @@ public class Turret extends SubsystemBase {
         io.setBrakeMode(brakeModeEnabled);
     }
 
+    @AutoLogOutput(key = "Turret/AtGoal")
     public boolean atGoal() {
         return atGoal;
     }
+
+    private final Debouncer homingDebouncer =
+        new Debouncer(0.25, DebounceType.kRising);
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
-
+        Logger.recordOutput("Turret/IsHomed", isHomed);
+        Logger.recordOutput("Turret/Zeroed", isZeroed);
+        if (!isHomed) {
+            io.runPercentOutput(0.05);
+            isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
+        } else {
+            if (!isZeroed) {
+                io.setPosition(Math.PI);
+                io.stop();
+                isZeroed = true;
+            }
+        }
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && !isManual
+                && (isHomed && isZeroed)
                 && inputs.connected
                 && Toggles.Turret.isEnabled.get()
                 && !Toggles.Turret.toggleVoltageOverride.get()
                 && !Toggles.Turret.toggleCurrentOverride.get()
                 && (getPosition().getRadians() <= maxRotation.getRadians()
                     && getPosition().getRadians() >= minRotation.getRadians());
+        Logger.recordOutput("Turret/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
             setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
