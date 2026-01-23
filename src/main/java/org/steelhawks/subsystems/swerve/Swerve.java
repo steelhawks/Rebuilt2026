@@ -82,10 +82,16 @@ public class Swerve extends SubsystemBase {
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG;
     private static final SwerveDriveSimulation DRIVE_SIMULATION;
 
+    // Collision constants
     private final LoggedTunableNumber COLLISION_ACCEL_THRESHOLD =
         new LoggedTunableNumber("Swerve/CollisionAccelThreshold", 0.3);
     private double previousAx = 0.0;
     private double previousAy = 0.0;
+
+    private final LoggedTunableNumber COLLISION_ANG_ACCEL_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionAngAccelThreshold", 0.0);
+    private double previousAngularVelocityZ = 0.0;
+    private double previousAngularAccelZ = 0.0;
 
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
@@ -780,9 +786,21 @@ public class Swerve extends SubsystemBase {
         previousAx = ax;
         previousAy = ay;
 
+        double angularVelocityZ = gyroInputs.yawVelocityRadPerSec;
+
+        double angularAccelZ = (angularVelocityZ - previousAngularVelocityZ) / Constants.UPDATE_LOOP_DT;
+
+        double angularJerk = angularAccelZ - previousAngularAccelZ;
+
+        previousAngularVelocityZ = angularVelocityZ;
+        previousAngularAccelZ = angularAccelZ;
+
         double jerkMag = Math.abs(Math.hypot(jerkX, jerkY));
+        double angularJerkMag = Math.abs(angularJerk);
         Logger.recordOutput("Swerve/Collision/JerkMagnitude", jerkMag);
-        return collisionDebouncer.calculate(jerkMag > COLLISION_ACCEL_THRESHOLD.get());
+        Logger.recordOutput("Swerve/Collision/AngularJerkMagnitude", angularJerkMag);
+        return (collisionDebouncer.calculate(jerkMag > COLLISION_ACCEL_THRESHOLD.get())
+        || collisionDebouncer.calculate(angularJerkMag > COLLISION_ANG_ACCEL_THRESHOLD.get()));
     }
 
     ///////////////////////
