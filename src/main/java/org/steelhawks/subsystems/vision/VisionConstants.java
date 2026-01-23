@@ -235,6 +235,7 @@ public class VisionConstants {
             case ALPHABOT -> ALPHA_CAMERA_CONFIG;
             case CHASSIS -> CHASSIS_CAMERA_CONFIG;
             case LAST_YEAR -> LAST_YEAR_CAMERA_CONFIG;
+            case TEST_BOARD -> null;
         };
     }
 
@@ -244,6 +245,7 @@ public class VisionConstants {
             case ALPHABOT -> ALPHA_OBJ_DETECT_CONFIG;
             case CHASSIS -> CHASSIS_OBJ_DETECT_CONFIG;
             case LAST_YEAR -> LAST_YEAR_OBJ_DETECT_CONFIG;
+            case TEST_BOARD -> null;
         };
     }
 

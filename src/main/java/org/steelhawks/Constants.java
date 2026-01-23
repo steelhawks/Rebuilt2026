@@ -38,11 +38,12 @@ public final class Constants {
         ALPHABOT,
         CHASSIS,
         LAST_YEAR,
+        TEST_BOARD,
         SIMBOT
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.LAST_YEAR;
+    private static final RobotType ROBOT = RobotType.TEST_BOARD;
 
     /**
      * The robot type.
@@ -67,12 +68,13 @@ public final class Constants {
             case ALPHABOT -> "ALPHA";
             case CHASSIS -> "CHASSIS";
             case LAST_YEAR -> "LAST_YEAR";
+            case TEST_BOARD -> "TEST_BOARD";
             case SIMBOT -> "Simulation";
         };
 
     public static Mode getMode() {
         return switch (ROBOT_TYPE) {
-            case ALPHABOT, OMEGABOT, CHASSIS, LAST_YEAR ->
+            case ALPHABOT, OMEGABOT, CHASSIS, LAST_YEAR, TEST_BOARD ->
                 RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
             case SIMBOT -> Mode.SIM;
         };
@@ -91,7 +93,7 @@ public final class Constants {
     public static CANBus getCANBus() {
         return switch (getRobot()) {
             case OMEGABOT, LAST_YEAR, SIMBOT -> new CANBus("canivore");
-            case ALPHABOT, CHASSIS -> new CANBus("");
+            case ALPHABOT, CHASSIS, TEST_BOARD -> new CANBus("");
         };
     }
 
@@ -176,6 +178,7 @@ public final class Constants {
             case OMEGABOT -> omega;
             case LAST_YEAR -> hawkrider;
             case SIMBOT -> sim;
+            default -> null;
         };
     }
 
@@ -194,6 +197,7 @@ public final class Constants {
             case CHASSIS -> chassis;
             case OMEGABOT, SIMBOT -> omega;
             case LAST_YEAR -> hawkrider;
+            default -> null;
         };
     }
 

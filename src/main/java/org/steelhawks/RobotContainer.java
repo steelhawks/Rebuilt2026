@@ -9,6 +9,8 @@ import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.superstructure.turret.Turret;
+import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -24,6 +26,7 @@ public class RobotContainer {
     public static ObjectVision s_ObjVision = null;
     public static ShooterSuperstructure s_Superstructure = null;
     public static Intake s_Intake = null;
+    public static Turret s_Turret = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -35,21 +38,28 @@ public class RobotContainer {
         s_Swerve = config.createSwerve();
         s_LEDMatrix = config.createLEDMatrix().orElse(null);
         s_LEDStrip = config.createLEDStrip().orElse(null);
-        s_Vision = config.createVision(s_Swerve::accept).orElse(null);
+        if (config.hasVision) {
+            s_Vision = config.createVision(s_Swerve::accept).orElse(null);
+        }
         s_ObjVision = config.createObjectVision().orElse(null);
-        s_Superstructure = config.createShooterSuperStructure().orElse(null);
+//        s_Superstructure = config.createShooterSuperStructure().orElse(null);
         s_Intake = config.createIntake().orElse(null);
+
+
+        s_Turret = new Turret(new TurretIOTalonFX());
 
         if (config.hasAutos) {
             Autos.init();
         }
-        s_Swerve.setDefaultCommand(
-            DriveCommands.joystickDrive(
-                () -> -driver.getLeftY(),
-                () -> -driver.getLeftX(),
-                () -> -driver.getRightX()));
-        configureTriggers();
-        configureDriver();
+        if (Constants.getRobot() != RobotType.TEST_BOARD) {
+            s_Swerve.setDefaultCommand(
+                DriveCommands.joystickDrive(
+                    () -> -driver.getLeftY(),
+                    () -> -driver.getLeftX(),
+                    () -> -driver.getRightX()));
+            configureTriggers();
+            configureDriver();
+        }
     }
 
     private void configureTriggers() {}

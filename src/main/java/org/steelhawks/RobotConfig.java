@@ -14,6 +14,7 @@ import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.pivot.PivotIO;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.superstructure.turret.TurretIO;
+import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 public class RobotConfig {
     // Feature flags
+    public final boolean hasSwerve;
     public final boolean hasLEDMatrix;
     public final boolean hasLEDStrip;
     public final boolean hasVision;
@@ -38,6 +40,7 @@ public class RobotConfig {
     private final SubsystemFactory factory;
 
     private RobotConfig(Builder builder) {
+        this.hasSwerve = builder.hasSwerve;
         this.hasLEDMatrix = builder.hasLEDMatrix;
         this.hasLEDStrip = builder.hasLEDStrip;
         this.hasVision = builder.hasVision;
@@ -154,6 +157,19 @@ public class RobotConfig {
                 .withFactory(new LastYearFactory())
                 .build();
 
+            case TEST_BOARD -> new Builder()
+                .withSwerve(false)
+                .withLEDMatrix(false)
+                .withLEDStrip(false)
+                .withVision(false)
+                .withObjectVision(false)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
+                .withAutos(false)
+                .withFactory(new TestBoardFactory())
+                .build();
+
             case SIMBOT -> new Builder()
                 .withLEDMatrix(true)
                 .withVision(true)
@@ -211,6 +227,7 @@ public class RobotConfig {
 
     // Builder pattern
     public static class Builder {
+        private boolean hasSwerve = true;
         private boolean hasLEDMatrix = false;
         private boolean hasLEDStrip = false;
         private boolean hasVision = false;
@@ -221,6 +238,11 @@ public class RobotConfig {
         private boolean hasIntake = false;
         private boolean hasAutos = false;
         private SubsystemFactory factory = null;
+
+        public Builder withSwerve(boolean enabled) {
+            this.hasSwerve = enabled;
+            return this;
+        }
 
         public Builder withLEDMatrix(boolean enabled) {
             this.hasLEDMatrix = enabled;
@@ -593,6 +615,46 @@ public class RobotConfig {
         @Override
         public ShooterSuperstructure createShooterSuperstructure() {
             return null;
+        }
+
+        @Override
+        public Intake createIntake() {
+            return null;
+        }
+    }
+
+    private static class TestBoardFactory implements SubsystemFactory {
+        @Override
+        public Swerve createSwerve() {
+            return null;
+        }
+
+        @Override
+        public LEDMatrix createLEDMatrix() {
+            return null;
+        }
+
+        @Override
+        public LEDStrip createLEDStrip() {
+            return null;
+        }
+
+        @Override
+        public Vision createVision(VisionConsumer poseConsumer) {
+            return new Vision(poseConsumer, false);
+        }
+
+        @Override
+        public ObjectVision createObjectVision() {
+            return null;
+        }
+
+        @Override
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIO() {}),
+                new Turret(new TurretIOTalonFX()),
+                new Pivot(new PivotIO() {}));
         }
 
         @Override

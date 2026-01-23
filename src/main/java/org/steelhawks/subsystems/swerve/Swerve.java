@@ -776,6 +776,7 @@ public class Swerve extends SubsystemBase {
                 new Translation2d(TunerConstantsLastYear.BackLeft.LocationX, TunerConstantsLastYear.BackLeft.LocationY),
                 new Translation2d(TunerConstantsLastYear.BackRight.LocationX, TunerConstantsLastYear.BackRight.LocationY)
             };
+            case TEST_BOARD -> null;
         };
     }
 
