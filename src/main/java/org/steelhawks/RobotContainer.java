@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
@@ -46,7 +47,7 @@ public class RobotContainer {
         s_Intake = config.createIntake().orElse(null);
 
 
-        s_Turret = new Turret(new TurretIOTalonFX());
+        s_Turret = new Turret(new TurretIOTalonFX(new CANBus()));
 
         if (config.hasAutos) {
             Autos.init();

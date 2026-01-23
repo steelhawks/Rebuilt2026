@@ -31,6 +31,7 @@ public class Turret extends SubsystemBase {
 
     private static final Rotation2d minRotation = new Rotation2d();
     private static final Rotation2d maxRotation = new Rotation2d();
+    public static int motorId = 1;
 
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
     private TrapezoidProfile profile;
