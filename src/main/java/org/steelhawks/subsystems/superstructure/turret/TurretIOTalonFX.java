@@ -38,6 +38,7 @@ public class TurretIOTalonFX implements TurretIO {
         configuration.Slot0.kD = Turret.kD.get();
         configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         configuration.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        configuration.Feedback.SensorToMechanismRatio = 1.58;
 
         position = motor.getPosition();
         velocity = motor.getVelocity();

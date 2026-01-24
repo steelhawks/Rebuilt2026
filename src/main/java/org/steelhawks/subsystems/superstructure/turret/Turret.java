@@ -31,8 +31,8 @@ public class Turret extends SubsystemBase {
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.3);
     private static final LoggedTunableNumber homingTolerance = new LoggedTunableNumber("Turret/HomingTolerance", 30);
 
-    private static final Rotation2d minRotation = new Rotation2d();
-    private static final Rotation2d maxRotation = new Rotation2d();
+    private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2) - (Math.PI/60));
+    private static final Rotation2d maxRotation = new Rotation2d(Math.PI - (Math.PI / 60));
 
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
     private TrapezoidProfile profile;
