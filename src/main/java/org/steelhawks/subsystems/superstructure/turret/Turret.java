@@ -23,12 +23,12 @@ public class Turret extends SubsystemBase {
 
     public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", 4.0);
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", 0.0);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 7000.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 600.0);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", 0.0);
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 0.0);
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 20.0);
 
-    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 2.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 3.0);
+    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 30.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 40.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.3);
 
@@ -90,7 +90,7 @@ public class Turret extends SubsystemBase {
         Logger.recordOutput("Turret/IsHomed", isHomed);
         Logger.recordOutput("Turret/Zeroed", isZeroed);
         if (!isHomed) {
-            io.runPercentOutput(0.05);
+            io.runPercentOutput(0.1);
             isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
         } else {
             if (!isZeroed) {

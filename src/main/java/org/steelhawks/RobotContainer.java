@@ -69,6 +69,12 @@ public class RobotContainer {
         driver.y()
             .onTrue(
                 s_Turret.setDesiredState(new Rotation2d(Math.PI / 2.0)));
+        driver.a()
+            .onTrue(
+                s_Turret.setDesiredState(new Rotation2d(Math.PI)));
+        driver.b()
+            .onTrue(
+                s_Turret.setDesiredState(new Rotation2d(-Math.PI / 2.0)));
     }
 
     private void configureTriggers() {}

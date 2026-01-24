@@ -39,6 +39,7 @@ public class TurretIOTalonFX implements TurretIO {
         config.Slot0.kI = Turret.kI.getAsDouble();
         config.Slot0.kD = Turret.kD.getAsDouble();
         config.Feedback.SensorToMechanismRatio = 1.58;
+        config.ClosedLoopGeneral.ContinuousWrap = false;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
 
         position = motor.getPosition();
