@@ -26,11 +26,13 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
+import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
+import org.steelhawks.util.PhoenixUtil;
 import org.steelhawks.util.VirtualSubsystem;
 import org.steelhawks.util.autonbuilder.StartEndPosition;
 
@@ -163,23 +165,32 @@ public class Robot extends LoggedRobot {
                         TunerConstantsAlpha.BackLeft,
                         TunerConstantsAlpha.BackRight
                     };
+                case CHASSIS ->
+                    new SwerveModuleConstants[]{
+                        TunerConstantsChassis.FrontLeft,
+                        TunerConstantsChassis.FrontRight,
+                        TunerConstantsChassis.BackLeft,
+                        TunerConstantsChassis.BackRight
+                    };
                 case LAST_YEAR ->
-                new SwerveModuleConstants[]{
-                    TunerConstantsLastYear.FrontLeft,
-                    TunerConstantsLastYear.FrontRight,
-                    TunerConstantsLastYear.BackLeft,
-                    TunerConstantsLastYear.BackRight
-                };
+                    new SwerveModuleConstants[]{
+                        TunerConstantsLastYear.FrontLeft,
+                        TunerConstantsLastYear.FrontRight,
+                        TunerConstantsLastYear.BackLeft,
+                        TunerConstantsLastYear.BackRight
+                    };
+                case TEST_BOARD -> null;
             };
 
-        for (var constants : modules) {
-            if (constants.DriveMotorType != DriveMotorArrangement.TalonFX_Integrated
-                || constants.SteerMotorType != SteerMotorArrangement.TalonFX_Integrated) {
-                throw new RuntimeException(
-                    "You are using an unsupported swerve configuration, which this template does not support without manual customization. The 2025 release of Phoenix supports some swerve configurations which were not available during 2025 beta testing, preventing any development and support from the AdvantageKit developers.");
+        if (RobotConfig.getConfig().hasSwerve) {
+            for (var constants : modules) {
+                if (constants.DriveMotorType != DriveMotorArrangement.TalonFX_Integrated
+                    || constants.SteerMotorType != SteerMotorArrangement.TalonFX_Integrated) {
+                    throw new RuntimeException(
+                        "You are using an unsupported swerve configuration, which this template does not support without manual customization. The 2025 release of Phoenix supports some swerve configurations which were not available during 2025 beta testing, preventing any development and support from the AdvantageKit developers.");
+                }
             }
         }
-
         robotContainer = new RobotContainer();
 
         if (Constants.getRobot() == SIMBOT) {
@@ -194,6 +205,8 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         LoopTimeUtil.reset();
 
+        PhoenixUtil.refreshAll();
+        LoopTimeUtil.record("PhoenixUtil");
         VirtualSubsystem.periodicAll();
         LoopTimeUtil.record("VirtualPeriodic");
         CommandScheduler.getInstance().run();

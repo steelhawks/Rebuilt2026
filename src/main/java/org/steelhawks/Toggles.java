@@ -2,6 +2,7 @@ package org.steelhawks;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
+import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,13 +21,13 @@ public interface Toggles {
 
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =
-            new LoggedNetworkBoolean("Toggles/VisionEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Vision/VisionEnabled", true);
         public static final Map<String, LoggedNetworkBoolean> camerasEnabled;
 
         static {
             camerasEnabled = new HashMap<>();
             for (VisionConstants.CameraConfig config : VisionConstants.getCameraConfig()) {
-                camerasEnabled.put(config.name(), new LoggedNetworkBoolean("Toggles/" + config.name() + "Enabled", true));
+                camerasEnabled.put(config.name(), new LoggedNetworkBoolean("Toggles/Vision/" + config.name() + "Enabled", true));
             }
         }
     }
@@ -38,8 +39,30 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Swerve/TurnOpenLoopOverride", false);
     }
 
-    interface Shooter {
-        LoggedNetworkBoolean shooterOpenLoopOverride =
-                new LoggedNetworkBoolean("Toggles/Shooter/ShooterOpenLoopOverride", false);
+    interface Flywheel {
+        LoggedNetworkBoolean isEnabled =
+            new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
+        LoggedNetworkBoolean toggleVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Flywheel/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleCurrentOverride =
+            new LoggedNetworkBoolean("Toggles/Flywheel/ToggleCurrentOverride", false);
+    }
+
+    interface Turret {
+        LoggedNetworkBoolean isEnabled =
+            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", true);
+        LoggedNetworkBoolean toggleVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleCurrentOverride =
+            new LoggedNetworkBoolean("Toggles/Turret/ToggleCurrentOverride", false);
+    }
+
+    interface Intake {
+        LoggedNetworkBoolean isEnabled =
+            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", true);
+        LoggedNetworkBoolean toggleVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Intake/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleCurrentOverride =
+            new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
 }

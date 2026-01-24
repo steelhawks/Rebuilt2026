@@ -55,6 +55,7 @@ import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
+import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.util.LocalADStarAK;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -80,6 +81,28 @@ public class Swerve extends SubsystemBase {
 
     public static final DriveTrainSimulationConfig MAPLE_SIM_CONFIG;
     private static final SwerveDriveSimulation DRIVE_SIMULATION;
+
+    private ChassisSpeeds previousSetpoint = new ChassisSpeeds();
+    private ChassisSpeeds currentSetpoint = new ChassisSpeeds();
+    private double previousSetpointTime = 0.0;
+
+    // Collision constants
+    private final LoggedTunableNumber COLLISION_ACCEL_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionAccelThreshold", 0.3);
+    private double previousAx = 0.0;
+    private double previousAy = 0.0;
+
+    private final LoggedTunableNumber COLLISION_ANG_ACCEL_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionAngAccelThreshold", 0.0);
+    private double previousAngularVelocityZ = 0.0;
+    private double previousAngularAccelZ = 0.0;
+
+    private final LoggedTunableNumber COLLISION_JERK_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionJerkThreshold", 50.0);
+    private final LoggedTunableNumber COLLISION_ANG_JERK_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CollisionAngJerkThreshold", 100.0);
+    private final LoggedTunableNumber COMMANDED_ACCEL_FILTER_THRESHOLD =
+        new LoggedTunableNumber("Swerve/CommandedAccelFilterThreshold", 4.0);
 
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
@@ -111,6 +134,7 @@ public class Swerve extends SubsystemBase {
 
     private final ProfiledPIDController mAlignController;
     private final Debouncer mAlignDebouncer;
+    private final Debouncer collisionDebouncer;
 
     static {
         switch (Constants.getRobot()) {
@@ -317,18 +341,17 @@ public class Swerve extends SubsystemBase {
             this::getChassisSpeeds,
             this::runVelocity,
             new PPHolonomicDriveController(
-                new PIDConstants(
-                    AutonConstants.TRANSLATION_KP.get(),
-                    AutonConstants.TRANSLATION_KI.get(),
-                    AutonConstants.TRANSLATION_KD.get()),
-                new PIDConstants(
-                    AutonConstants.ROTATION_KP.get(),
-                    AutonConstants.ROTATION_KI.get(),
-                    AutonConstants.ROTATION_KD.get())),
+            new PIDConstants(
+            AutonConstants.TRANSLATION_KP.get(),
+            AutonConstants.TRANSLATION_KI.get(),
+            AutonConstants.TRANSLATION_KD.get()),
+            new PIDConstants(
+            AutonConstants.ROTATION_KP.get(),
+            AutonConstants.ROTATION_KI.get(),
+            AutonConstants.ROTATION_KD.get())),
             PP_CONFIG,
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
             this);
-
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
             (activePath) -> {
@@ -380,6 +403,7 @@ public class Swerve extends SubsystemBase {
         mAlignController.enableContinuousInput(-Math.PI, Math.PI);
         mAlignController.setTolerance(Units.degreesToRadians(3));
         mAlignDebouncer = new Debouncer(0.5, DebounceType.kRising);
+        collisionDebouncer = new Debouncer(0.2, DebounceType.kRising);
 
         // warm up pathplanner lib
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -483,6 +507,7 @@ public class Swerve extends SubsystemBase {
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, speedMetersPerSec);
+        currentSetpoint = discreteSpeeds;
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -564,7 +589,14 @@ public class Swerve extends SubsystemBase {
      * Returns the robot's acceleration in the X direction relative to the robot.
      */
     public double getRobotRelativeXAccelGs() {
-        return gyroInputs.accelerationXInGs * getPose().getRotation().getCos();
+        return gyroInputs.accelerationXInGs;
+    }
+
+    /**
+     * Returns the robot's acceleration in the Y direction relative to the robot.
+     */
+    public double getRobotRelativeYAccelGs() {
+        return gyroInputs.accelerationYInGs;
     }
 
     /**
@@ -732,12 +764,19 @@ public class Swerve extends SubsystemBase {
                 new Translation2d(TunerConstantsAlpha.BackLeft.LocationX, TunerConstantsAlpha.BackLeft.LocationY),
                 new Translation2d(TunerConstantsAlpha.BackRight.LocationX, TunerConstantsAlpha.BackRight.LocationY)
             };
+            case CHASSIS -> new Translation2d[] {
+                new Translation2d(TunerConstantsChassis.FrontLeft.LocationX, TunerConstantsChassis.FrontLeft.LocationY),
+                new Translation2d(TunerConstantsChassis.FrontRight.LocationX, TunerConstantsChassis.FrontRight.LocationY),
+                new Translation2d(TunerConstantsChassis.BackLeft.LocationX, TunerConstantsChassis.BackLeft.LocationY),
+                new Translation2d(TunerConstantsChassis.BackRight.LocationX, TunerConstantsChassis.BackRight.LocationY)
+            };
             case LAST_YEAR -> new Translation2d[]{
                 new Translation2d(TunerConstantsLastYear.FrontLeft.LocationX, TunerConstantsLastYear.FrontLeft.LocationY),
                 new Translation2d(TunerConstantsLastYear.FrontRight.LocationX, TunerConstantsLastYear.FrontRight.LocationY),
                 new Translation2d(TunerConstantsLastYear.BackLeft.LocationX, TunerConstantsLastYear.BackLeft.LocationY),
                 new Translation2d(TunerConstantsLastYear.BackRight.LocationX, TunerConstantsLastYear.BackRight.LocationY)
             };
+            case TEST_BOARD -> null;
         };
     }
 
@@ -747,6 +786,62 @@ public class Swerve extends SubsystemBase {
 
     public boolean isPathfinding() {
         return isPathfinding;
+    }
+
+    private boolean isCommandingHighAcceleration() {
+        double dt = Timer.getFPGATimestamp() - previousSetpointTime;
+
+        if (dt < 0.001 || previousSetpointTime == 0.0) {
+            previousSetpoint = currentSetpoint;
+            previousSetpointTime = Timer.getFPGATimestamp();
+            return false;
+        }
+
+        double dvx = currentSetpoint.vxMetersPerSecond - previousSetpoint.vxMetersPerSecond;
+        double dvy = currentSetpoint.vyMetersPerSecond - previousSetpoint.vyMetersPerSecond;
+
+        double commandedAccelX = dvx / dt;
+        double commandedAccelY = dvy / dt;
+        double commandedAccelMag = Math.hypot(commandedAccelX, commandedAccelY);
+
+        Logger.recordOutput("Swerve/Collision/CommandedAccelMagnitude", commandedAccelMag);
+        previousSetpoint = currentSetpoint;
+        previousSetpointTime = Timer.getFPGATimestamp();
+
+        return commandedAccelMag > COMMANDED_ACCEL_FILTER_THRESHOLD.get();
+    }
+
+    @AutoLogOutput(key = "Swerve/Collision/Detected")
+    public boolean collisionDetected() {
+        double ax = gyroInputs.accelerationXInGs;
+        double ay = gyroInputs.accelerationYInGs;
+
+        double jerkX = (ax - previousAx) / Constants.UPDATE_LOOP_DT;
+        double jerkY = (ay - previousAy) / Constants.UPDATE_LOOP_DT;
+
+        previousAx = ax;
+        previousAy = ay;
+
+        double angularVelocityZ = gyroInputs.yawVelocityRadPerSec;
+        double angularAccelZ = (angularVelocityZ - previousAngularVelocityZ) / Constants.UPDATE_LOOP_DT;
+        double angularJerk = (angularAccelZ - previousAngularAccelZ) / Constants.UPDATE_LOOP_DT;
+
+        previousAngularVelocityZ = angularVelocityZ;
+        previousAngularAccelZ = angularAccelZ;
+
+        double jerkMag = Math.hypot(jerkX, jerkY);
+        double angularJerkMag = Math.abs(angularJerk);
+        double accelMag = Math.hypot(ax, ay);
+
+        Logger.recordOutput("Swerve/Collision/JerkMagnitude", jerkMag);
+        Logger.recordOutput("Swerve/Collision/AngularJerkMagnitude", angularJerkMag);
+        Logger.recordOutput("Swerve/Collision/AccelMagnitude", accelMag);
+
+        // collision is high jerk thats not from commanded motion
+        boolean highCommandedAccel = isCommandingHighAcceleration();
+        boolean linearCollision = jerkMag > COLLISION_JERK_THRESHOLD.get() && !highCommandedAccel;
+        boolean angularCollision = angularJerkMag > COLLISION_ANG_JERK_THRESHOLD.get();
+        return collisionDebouncer.calculate(linearCollision || angularCollision);
     }
 
     ///////////////////////

@@ -4,6 +4,7 @@ import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -35,12 +36,14 @@ public final class Constants {
     public enum RobotType {
         OMEGABOT,
         ALPHABOT,
+        CHASSIS,
         LAST_YEAR,
+        TEST_BOARD,
         SIMBOT
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.SIMBOT;
+    private static final RobotType ROBOT = RobotType.TEST_BOARD;
 
     /**
      * The robot type.
@@ -63,13 +66,15 @@ public final class Constants {
         switch (ROBOT) {
             case OMEGABOT -> "OMEGA";
             case ALPHABOT -> "ALPHA";
+            case CHASSIS -> "CHASSIS";
             case LAST_YEAR -> "LAST_YEAR";
+            case TEST_BOARD -> "TEST_BOARD";
             case SIMBOT -> "Simulation";
         };
 
     public static Mode getMode() {
         return switch (ROBOT_TYPE) {
-            case ALPHABOT, OMEGABOT, LAST_YEAR ->
+            case ALPHABOT, OMEGABOT, CHASSIS, LAST_YEAR, TEST_BOARD ->
                 RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
             case SIMBOT -> Mode.SIM;
         };
@@ -88,13 +93,18 @@ public final class Constants {
     public static CANBus getCANBus() {
         return switch (getRobot()) {
             case OMEGABOT, LAST_YEAR, SIMBOT -> new CANBus("canivore");
-            case ALPHABOT -> new CANBus("");
+            case ALPHABOT, CHASSIS, TEST_BOARD -> new CANBus("");
         };
     }
 
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(30.0 + (3.125 * 2.0));
+
+        public static final Translation3d ROBOT_TO_TURRET =
+            new Translation3d(0.0, 0.0, 0.0);
+
+        public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(45.0);
     }
 
     public static final class OIConstants {
@@ -161,12 +171,14 @@ public final class Constants {
      * @param sim The simulation constant value
      * @return The correct constant
      */
-    public static <T> T value(T hawkrider, T alpha, T omega, T sim) {
+    public static <T> T value(T hawkrider, T alpha, T chassis, T omega, T sim) {
         return switch (Constants.getRobot()) {
             case ALPHABOT -> alpha;
+            case CHASSIS -> chassis;
             case OMEGABOT -> omega;
             case LAST_YEAR -> hawkrider;
             case SIMBOT -> sim;
+            default -> null;
         };
     }
 
@@ -179,11 +191,13 @@ public final class Constants {
      * @param omega The Omega constant value
      * @return The correct constant
      */
-    public static <T> T value(T hawkrider, T alpha, T omega) {
+    public static <T> T value(T hawkrider, T alpha, T chassis, T omega) {
         return switch (Constants.getRobot()) {
             case ALPHABOT -> alpha;
+            case CHASSIS -> chassis;
             case OMEGABOT, SIMBOT -> omega;
             case LAST_YEAR -> hawkrider;
+            default -> null;
         };
     }
 
@@ -217,6 +231,14 @@ public final class Constants {
             case OMEGABOT -> omega;
             case SIMBOT -> sim;
             default -> null;
+        };
+    }
+
+    public static double omega(double omega, double sim) {
+        return switch (Constants.getRobot()) {
+            case OMEGABOT -> omega;
+            case SIMBOT -> sim;
+            default -> 0.0;
         };
     }
 

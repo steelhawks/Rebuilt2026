@@ -2,10 +2,19 @@ package org.steelhawks;
 
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.intake.IntakeIO;
+import org.steelhawks.subsystems.superstructure.ShooterSuperstructure;
+import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
-import org.steelhawks.subsystems.shooter.Shooter;
-import org.steelhawks.subsystems.shooter.ShooterIOSim;
+import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIO;
+import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
+import org.steelhawks.subsystems.superstructure.pivot.Pivot;
+import org.steelhawks.subsystems.superstructure.pivot.PivotIO;
+import org.steelhawks.subsystems.superstructure.turret.Turret;
+import org.steelhawks.subsystems.superstructure.turret.TurretIO;
+import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
@@ -16,23 +25,31 @@ import java.util.Optional;
 
 public class RobotConfig {
     // Feature flags
+    public final boolean hasSwerve;
     public final boolean hasLEDMatrix;
     public final boolean hasLEDStrip;
     public final boolean hasVision;
     public final boolean hasObjectVision;
     public final boolean hasAutos;
-    public final boolean hasShooter;
+    public final boolean hasFlywheel;
+    public final boolean hasTurret;
+    public final boolean hasPivot;
+    public final boolean hasIntake;
 
     // Subsystem factory
     private final SubsystemFactory factory;
 
     private RobotConfig(Builder builder) {
+        this.hasSwerve = builder.hasSwerve;
         this.hasLEDMatrix = builder.hasLEDMatrix;
         this.hasLEDStrip = builder.hasLEDStrip;
         this.hasVision = builder.hasVision;
         this.hasObjectVision = builder.hasObjectVision;
         this.hasAutos = builder.hasAutos;
-        this.hasShooter = builder.hasShooter;
+        this.hasFlywheel = builder.hasFlywheel;
+        this.hasTurret = builder.hasTurret;
+        this.hasPivot = builder.hasPivot;
+        this.hasIntake = builder.hasIntake;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -70,11 +87,18 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
-    public Optional<Shooter> createShooter() {
-        if (!hasShooter) {
+    public Optional<ShooterSuperstructure> createShooterSuperStructure() {
+        if (hasFlywheel || hasTurret || hasPivot) {
+            return Optional.ofNullable(factory.createShooterSuperstructure());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Intake> createIntake() {
+        if (!hasIntake) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createShooter());
+        return Optional.ofNullable(factory.createIntake());
     }
 
     public static RobotConfig getConfig() {
@@ -87,32 +111,74 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
+                .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(true)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
             case ALPHABOT -> new Builder()
                 .withLEDMatrix(true)
+                .withLEDStrip(false)
                 .withVision(true)
                 .withObjectVision(false)
+                .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(false)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
 
+            case CHASSIS -> new Builder()
+                .withLEDMatrix(false)
+                .withLEDStrip(false)
+                .withVision(true)
+                .withObjectVision(true)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
+                .withAutos(false)
+                .withFactory(new ChassisBotFactory())
+                .build();
+
             case LAST_YEAR -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
+                .withLEDStrip(true)
                 .withVision(true)
                 .withObjectVision(false)
-                .withAutos(true)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
+                .withIntake(false)
+                .withAutos(false)
                 .withFactory(new LastYearFactory())
+                .build();
+
+            case TEST_BOARD -> new Builder()
+                .withSwerve(false)
+                .withLEDMatrix(false)
+                .withLEDStrip(false)
+                .withVision(false)
+                .withObjectVision(false)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
+                .withAutos(false)
+                .withFactory(new TestBoardFactory())
                 .build();
 
             case SIMBOT -> new Builder()
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
+                .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(true)
+                .withIntake(true)
                 .withAutos(true)
-                .withShooter(true)
                 .withFactory(new SimBotFactory())
                 .build();
         };
@@ -120,18 +186,39 @@ public class RobotConfig {
 
     private static RobotConfig getReplayConfig() {
         return switch (Constants.getRobot()) {
-            case OMEGABOT, ALPHABOT -> new Builder()
+            case OMEGABOT -> new Builder()
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(false)
+                .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(true)
+                .withIntake(true)
+                .withAutos(true)
+                .withFactory(new ReplayFactory())
+                .build();
+
+            case ALPHABOT -> new Builder()
+                .withLEDMatrix(false)
+                .withVision(true)
+                .withObjectVision(true)
+                .withFlywheel(true)
+                .withTurret(true)
+                .withPivot(false)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
 
             default -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
+                .withLEDStrip(true)
                 .withVision(true)
-                .withObjectVision(false)
+                .withObjectVision(true)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withPivot(false)
+                .withIntake(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -140,13 +227,22 @@ public class RobotConfig {
 
     // Builder pattern
     public static class Builder {
+        private boolean hasSwerve = true;
         private boolean hasLEDMatrix = false;
         private boolean hasLEDStrip = false;
         private boolean hasVision = false;
         private boolean hasObjectVision = false;
+        private boolean hasFlywheel = false;
+        private boolean hasTurret = false;
+        private boolean hasPivot = false;
+        private boolean hasIntake = false;
         private boolean hasAutos = false;
-        private boolean hasShooter = false;
         private SubsystemFactory factory = null;
+
+        public Builder withSwerve(boolean enabled) {
+            this.hasSwerve = enabled;
+            return this;
+        }
 
         public Builder withLEDMatrix(boolean enabled) {
             this.hasLEDMatrix = enabled;
@@ -168,6 +264,26 @@ public class RobotConfig {
             return this;
         }
 
+        public Builder withFlywheel(boolean enabled) {
+            this.hasFlywheel = enabled;
+            return this;
+        }
+
+        public Builder withTurret(boolean enabled) {
+            this.hasTurret = enabled;
+            return this;
+        }
+
+        public Builder withPivot(boolean enabled) {
+            this.hasPivot = enabled;
+            return this;
+        }
+
+        public Builder withIntake(boolean enabled) {
+            this.hasIntake = enabled;
+            return this;
+        }
+
         public Builder withAutos(boolean enabled) {
             this.hasAutos = enabled;
             return this;
@@ -175,11 +291,6 @@ public class RobotConfig {
 
         public Builder withFactory(SubsystemFactory factory) {
             this.factory = factory;
-            return this;
-        }
-
-        public Builder withShooter(boolean enabled) {
-            this.hasShooter = enabled;
             return this;
         }
 
@@ -240,17 +351,6 @@ public class RobotConfig {
         }
     }
 
-    public static class ShooterCANBus extends CANBus {
-        public final int shooterMotor1Id;
-        public final int shooterMotor2Id;
-
-        public ShooterCANBus(String name, int motor1Id, int motor2Id) {
-            super(name);
-            this.shooterMotor1Id = motor1Id;
-            this.shooterMotor2Id = motor2Id;
-        }
-    }
-
     // Subsystem factory interface
     private interface SubsystemFactory {
         Swerve createSwerve();
@@ -258,7 +358,8 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
-        Shooter createShooter();
+        ShooterSuperstructure createShooterSuperstructure();
+        Intake createIntake();
     }
 
     // OmegaBot factory
@@ -314,14 +415,23 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() {
-            return null;
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIO() {}),
+                new Turret(new TurretIO() {}),
+                new Pivot(new PivotIO() {}));
+        }
+
+        @Override
+        public Intake createIntake() {
+            return new Intake(new IntakeIO() {});
         }
     }
 
     // AlphaBot factory
     private static class AlphaBotFactory implements SubsystemFactory {
         private final SwerveCANBus swerveCANBus;
+        private final CANBus flywheelCANbus = new CANBus("");
 
         public AlphaBotFactory() {
             this.swerveCANBus = new SwerveCANBus(
@@ -373,7 +483,78 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() {
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIOTalonFX(flywheelCANbus)),
+                new Turret(new TurretIO() {}),
+                null);
+        }
+
+        @Override
+        public Intake createIntake() {
+            return new Intake(new IntakeIO() {});
+        }
+    }
+
+    private static class ChassisBotFactory implements SubsystemFactory {
+        private final SwerveCANBus swerveCANBus;
+
+        public ChassisBotFactory() {
+            this.swerveCANBus = new SwerveCANBus(
+                TunerConstantsChassis.DrivetrainConstants.CANBusName,
+                TunerConstantsChassis.DrivetrainConstants.Pigeon2Id,
+                TunerConstantsChassis.FrontLeft.DriveMotorId,
+                TunerConstantsChassis.FrontLeft.SteerMotorId,
+                TunerConstantsChassis.FrontLeft.EncoderId,
+                TunerConstantsChassis.FrontRight.DriveMotorId,
+                TunerConstantsChassis.FrontRight.SteerMotorId,
+                TunerConstantsChassis.FrontRight.EncoderId,
+                TunerConstantsChassis.BackLeft.DriveMotorId,
+                TunerConstantsChassis.BackLeft.SteerMotorId,
+                TunerConstantsChassis.BackLeft.EncoderId,
+                TunerConstantsChassis.BackRight.DriveMotorId,
+                TunerConstantsChassis.BackRight.SteerMotorId,
+                TunerConstantsChassis.BackRight.EncoderId
+            );
+        }
+
+        @Override
+        public Swerve createSwerve() {
+            return new Swerve(
+                new GyroIOPigeon2(swerveCANBus.gyroId, swerveCANBus.bus),
+                new ModuleIOTalonFX(TunerConstantsChassis.FrontLeft),
+                new ModuleIOTalonFX(TunerConstantsChassis.FrontRight),
+                new ModuleIOTalonFX(TunerConstantsChassis.BackLeft),
+                new ModuleIOTalonFX(TunerConstantsChassis.BackRight));
+        }
+
+        @Override
+        public LEDMatrix createLEDMatrix() {
+            return null;
+        }
+
+        @Override
+        public LEDStrip createLEDStrip() {
+            return null;
+        }
+
+        @Override
+        public Vision createVision(VisionConsumer poseConsumer) {
+            return new Vision(poseConsumer, false);
+        }
+
+        @Override
+        public ObjectVision createObjectVision() {
+            return new ObjectVision();
+        }
+
+        @Override
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return null;
+        }
+
+        @Override
+        public Intake createIntake() {
             return null;
         }
     }
@@ -432,7 +613,52 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() {
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return null;
+        }
+
+        @Override
+        public Intake createIntake() {
+            return null;
+        }
+    }
+
+    private static class TestBoardFactory implements SubsystemFactory {
+        @Override
+        public Swerve createSwerve() {
+            return null;
+        }
+
+        @Override
+        public LEDMatrix createLEDMatrix() {
+            return null;
+        }
+
+        @Override
+        public LEDStrip createLEDStrip() {
+            return null;
+        }
+
+        @Override
+        public Vision createVision(VisionConsumer poseConsumer) {
+            return new Vision(poseConsumer, false);
+        }
+
+        @Override
+        public ObjectVision createObjectVision() {
+            return null;
+        }
+
+        @Override
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIO() {}),
+                new Turret(new TurretIOTalonFX()),
+                new Pivot(new PivotIO() {}));
+        }
+
+        @Override
+        public Intake createIntake() {
             return null;
         }
     }
@@ -472,8 +698,13 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() {
-            return new Shooter(new ShooterIOSim());
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return null;
+        }
+
+        @Override
+        public Intake createIntake() {
+            return null;
         }
     }
 
@@ -510,8 +741,16 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() {
-            return null;
+        public ShooterSuperstructure createShooterSuperstructure() {
+            return new ShooterSuperstructure(
+                new Flywheel(new FlywheelIO() {}),
+                new Turret(new TurretIO() {}),
+                new Pivot(new PivotIO() {}));
+        }
+
+        @Override
+        public Intake createIntake() {
+            return new Intake(new IntakeIO() {});
         }
     }
 }

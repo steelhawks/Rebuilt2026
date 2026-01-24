@@ -33,6 +33,10 @@ public class FieldConstants {
     public static final Translation3d HUB_CENTER_3D =
         new Translation3d(HUB_CENTER.getX(), HUB_CENTER.getY(), 1.575);
 
+    public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
+    public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0 - 56.4);
+    public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(20.0);
+
     public static Translation2d getClosestPointOnLine(
             Translation2d startLine, Translation2d endLine) {
         Translation2d robotPoint = RobotContainer.s_Swerve.getPose().getTranslation();

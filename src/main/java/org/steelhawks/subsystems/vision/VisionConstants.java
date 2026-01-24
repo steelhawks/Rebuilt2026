@@ -113,9 +113,11 @@ public class VisionConstants {
         }
     }
 
-    private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
+    private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {};
+
+    private static final CameraConfig[] LAST_YEAR_CAMERA_CONFIG = {
         new CameraConfig(
-            "arducam-center-mount",
+            "arducam-center-left",
             new Transform3d(
                 // Left-Right: 0.098023
                 // Front-Back: 3.174653
@@ -134,7 +136,7 @@ public class VisionConstants {
         ),
 
         new CameraConfig(
-            "arducam-center-right",
+            "ardu-center-right",
             // CENTER RIGHT MOUNT, the arducam that's placed on the right side of the beam inside the robot (30 DEGREE YAW) 20250323
             new Transform3d(
                 // Left-Right: 9.062338
@@ -154,7 +156,7 @@ public class VisionConstants {
         ),
 
         new CameraConfig(
-            "arducam-back-right",
+            "ardu-back-right",
             // BACK RIGHT (30 degree yaw, 20250323) (Same mount as previous Front Right from HVR, 20230307)
             new Transform3d(
                 // Left-Right: 11.365372
@@ -172,7 +174,7 @@ public class VisionConstants {
         ),
 
         new CameraConfig(
-            "arducam-algae",
+            "ardu-left",
             // ALGAE (Mounted on 1x1 beam running through the robot, such that the camera face is parallel to the reef when scoring algae)
             new Transform3d(
                 // Left-Right: 10.251 left
@@ -210,6 +212,10 @@ public class VisionConstants {
         )
     };
 
+    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {};
+
+    private static final CameraConfig[] CHASSIS_OBJ_DETECT_CONFIG = {};
+
     private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
         new CameraConfig(
             "limelight-coral",
@@ -219,33 +225,27 @@ public class VisionConstants {
         )
     };
 
-    private static final CameraConfig[] LAST_YEAR_CAMERA_CONFIG = {
-        new CameraConfig(
-            "limelight-shooter",
-            new Transform3d(),
-            new Factors.StdDevFactors(1.2),
-            CameraType.LIMELIGHT
-        ),
-        new CameraConfig(
-            "limelight",
-            new Transform3d(),
-            new Factors.StdDevFactors(1.3),
-            CameraType.LIMELIGHT
-        )
-    };
+    private static final CameraConfig[] ALPHA_OBJ_DETECT_CONFIG = {};
+
+    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {};
 
     public static CameraConfig[] getCameraConfig() {
         return switch (Constants.getRobot()) {
+            case OMEGABOT, SIMBOT -> OMEGA_CAMERA_CONFIG;
             case ALPHABOT -> ALPHA_CAMERA_CONFIG;
+            case CHASSIS -> CHASSIS_CAMERA_CONFIG;
             case LAST_YEAR -> LAST_YEAR_CAMERA_CONFIG;
-            default -> OMEGA_CAMERA_CONFIG;
+            case TEST_BOARD -> null;
         };
     }
 
     public static CameraConfig[] getObjDetectConfig() {
         return switch (Constants.getRobot()) {
-            case SIMBOT, OMEGABOT -> OMEGA_OBJ_DETECT_CONFIG;
-            default -> null;
+            case OMEGABOT, SIMBOT -> OMEGA_OBJ_DETECT_CONFIG;
+            case ALPHABOT -> ALPHA_OBJ_DETECT_CONFIG;
+            case CHASSIS -> CHASSIS_OBJ_DETECT_CONFIG;
+            case LAST_YEAR -> LAST_YEAR_OBJ_DETECT_CONFIG;
+            case TEST_BOARD -> null;
         };
     }
 
