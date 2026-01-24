@@ -653,7 +653,7 @@ public class RobotConfig {
         public ShooterSuperstructure createShooterSuperstructure() {
             return new ShooterSuperstructure(
                 new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIOTalonFX()),
+                new Turret(new TurretIOTalonFX(new CANBus(""))),
                 new Pivot(new PivotIO() {}));
         }
 

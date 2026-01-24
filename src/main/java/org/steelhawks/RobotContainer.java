@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
@@ -46,7 +47,7 @@ public class RobotContainer {
         s_Intake = config.createIntake().orElse(null);
 
 
-        s_Turret = new Turret(new TurretIOTalonFX());
+        s_Turret = new Turret(new TurretIOTalonFX(new RobotConfig.CANBus("")));
 
         if (config.hasAutos) {
             Autos.init();
@@ -60,6 +61,14 @@ public class RobotContainer {
             configureTriggers();
             configureDriver();
         }
+
+        driver.x().onTrue(
+            s_Turret.setDesiredState(new Rotation2d(0))
+        );
+
+        driver.y().onTrue(
+            s_Turret.setDesiredState(new Rotation2d(Math.PI))
+        );
     }
 
     private void configureTriggers() {}

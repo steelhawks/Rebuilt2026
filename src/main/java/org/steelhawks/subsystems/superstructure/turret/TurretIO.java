@@ -10,6 +10,10 @@ public interface TurretIO {
         public boolean connected = false;
         public Rotation2d positionRad = new Rotation2d();
         public Rotation2d velocityRadPerSec = new Rotation2d();
+        public double appliedVolts = 0;
+        public double currentAmps = 0;
+        public double torqueCurrentAmps = 0;
+        public double temp = 0;
     }
 
     default void updateInputs(TurretIOInputs inputs) {}
@@ -23,6 +27,8 @@ public interface TurretIO {
     default void runPercentOutput(double output) {}
 
     default void setPID(double kp, double ki, double kd) {}
+
+    default void setPosition(double pos) {}
 
     default void stop() {}
 }

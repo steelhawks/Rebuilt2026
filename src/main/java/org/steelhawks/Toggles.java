@@ -65,4 +65,8 @@ public interface Toggles {
         LoggedNetworkBoolean toggleCurrentOverride =
             new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
+
+    interface Shooter {
+        LoggedNetworkBoolean shooterOpenLoopOverride = new LoggedNetworkBoolean("AdamaShooter/OpenLoop", false);
+    }
 }
