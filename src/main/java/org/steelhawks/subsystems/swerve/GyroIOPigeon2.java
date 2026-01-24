@@ -11,6 +11,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import org.littletonrobotics.junction.Logger;
+import org.steelhawks.util.PhoenixUtil;
 
 import java.util.Queue;
 
@@ -19,6 +21,7 @@ public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon;
     private final StatusSignal<Angle> yaw;
     private final StatusSignal<LinearAcceleration> accelerationX;
+    private final StatusSignal<LinearAcceleration> accelerationY;
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity;
@@ -28,23 +31,33 @@ public class GyroIOPigeon2 implements GyroIO {
 
         yaw = pigeon.getYaw();
         accelerationX = pigeon.getAccelerationX();
-        yawVelocity = pigeon.getAngularVelocityZWorld();
+        accelerationY = pigeon.getAccelerationY();
+        yawVelocity = pigeon.getAngularVelocityZDevice();
 
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
         yaw.setUpdateFrequency(Swerve.ODOMETRY_FREQUENCY);
         yawVelocity.setUpdateFrequency(50.0);
+        accelerationX.setUpdateFrequency(50.0);
+        accelerationY.setUpdateFrequency(50.0);
         pigeon.optimizeBusUtilization();
         yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(pigeon.getYaw());
+
+        PhoenixUtil.registerSignals(
+            canBus.isNetworkFD(),
+            yaw, accelerationX, accelerationY, yawVelocity);
     }
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {
-        inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
+        inputs.connected = BaseStatusSignal.isAllGood(yaw, accelerationX, accelerationY, yawVelocity);
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.accelerationXInGs = accelerationX.getValueAsDouble();
+        inputs.accelerationYInGs = accelerationY.getValueAsDouble();
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+
+        Logger.recordOutput("Swerve/Gyro/AccelerationInGs", Math.hypot(inputs.accelerationXInGs, inputs.accelerationYInGs));
 
         inputs.odometryYawTimestamps =
             yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();

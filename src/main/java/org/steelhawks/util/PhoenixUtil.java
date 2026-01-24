@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-public final class PhoenixUtil extends VirtualSubsystem {
+public final class PhoenixUtil {
 
     private static double lastStateChangeTime = Timer.getFPGATimestamp();
     private static boolean lastSwitchState = false;
@@ -22,6 +22,10 @@ public final class PhoenixUtil extends VirtualSubsystem {
     private PhoenixUtil() {
         throw new InstantiationError("PhoenixUtil is a utility class and cannot be instantiated.");
     }
+
+//    static {
+//        new PhoenixUtil();
+//    }
 
     /**
      * Attempts to check if a DigitalInput is connected by checking if the state has changed.
@@ -91,9 +95,9 @@ public final class PhoenixUtil extends VirtualSubsystem {
         }
     }
 
-    @Override
-    public void periodic() {
-        refreshAll();
-        LoopTimeUtil.record("PhoenixUtil");
-    }
+//    @Override
+//    public void periodic() {
+//        refreshAll();
+//        LoopTimeUtil.record("PhoenixUtil");
+//    }
 }
