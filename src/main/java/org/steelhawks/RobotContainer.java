@@ -48,7 +48,7 @@ public class RobotContainer {
         s_Intake = config.createIntake().orElse(null);
 
 
-        s_Turret = new Turret(new TurretIOTalonFX(new RobotConfig.CANBus("")));
+        s_Turret = new Turret(new TurretIOTalonFX(new RobotConfig.CANBus("")), s_Swerve::getPose);
 
         if (config.hasAutos) {
             Autos.init();

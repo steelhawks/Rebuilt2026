@@ -3,6 +3,8 @@ package org.steelhawks.subsystems.superstructure.turret;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,12 +14,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.Constants.RobotConstants;
+import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.Toggles;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
@@ -34,12 +40,23 @@ public class Turret extends SubsystemBase {
 
     private static final LoggedTunableNumber currentHomingThres =
         new LoggedTunableNumber("Turret/CurrentHomingThreshold", 25.0);
+    private static final double homingVolts = 0.1;
+
+    public enum TurretState {
+        TO_HUB,
+        FERRY,
+        FREE
+    }
+
+    private TurretState state = TurretState.FREE;
 
     private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
     private static final Rotation2d maxRotation = new Rotation2d(Math.PI + (Math.PI / 60.0));
     public static int motorId = 1;
 
+    private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+    private final Supplier<Pose2d> poseSupplier;
     private TrapezoidProfile profile;
     private final TurretIO io;
 
@@ -56,7 +73,8 @@ public class Turret extends SubsystemBase {
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
 
-    public Turret(TurretIO io) {
+    public Turret(TurretIO io, Supplier<Pose2d> poseSupplier) {
+        this.poseSupplier = poseSupplier;
         this.io = io;
         profile =
             new TrapezoidProfile(
@@ -80,23 +98,48 @@ public class Turret extends SubsystemBase {
         return atGoal;
     }
 
-    private final Debouncer homingDebouncer =
-        new Debouncer(0.25, DebounceType.kRising);
+    private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
+        targetAngle = MathUtil.angleModulus(targetAngle);
+        double bestAngle = currentAngle;
+        double smallestMove = Double.POSITIVE_INFINITY;
+        double[] candidates = {
+            targetAngle,
+            targetAngle + 2 * Math.PI,
+            targetAngle - 2 * Math.PI
+        };
+        for (double candidate : candidates) {
+            if (candidate >= minRotation.getRadians() &&
+                candidate <= maxRotation.getRadians()) {
+                double moveDistance = Math.abs(candidate - currentAngle);
+                if (moveDistance < smallestMove) {
+                    smallestMove = moveDistance;
+                    bestAngle = candidate;
+                }
+            }
+        }
+        // target in blind spot
+        if (smallestMove == Double.POSITIVE_INFINITY) {
+            bestAngle = MathUtil.clamp(targetAngle,
+                minRotation.getRadians(),
+                maxRotation.getRadians());
+        }
+        return Rotation2d.fromRadians(bestAngle);
+    }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
-        Logger.recordOutput("Turret/IsHomed", isHomed);
-        Logger.recordOutput("Turret/Zeroed", isZeroed);
         if (!isHomed) {
-            io.runPercentOutput(0.1);
+            io.runPercentOutput(homingVolts);
             isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
+            Logger.recordOutput("Turret/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
                 io.setPosition(Math.PI);
                 io.stop();
                 isZeroed = true;
+                Logger.recordOutput("Turret/Zeroed", true);
             }
         }
         final boolean shouldRun =
@@ -110,9 +153,9 @@ public class Turret extends SubsystemBase {
                 && (getPosition().getRadians() <= maxRotation.getRadians()
                     && getPosition().getRadians() >= minRotation.getRadians());
         Logger.recordOutput("Turret/ShouldRun", shouldRun);
-
         if (DriverStation.isDisabled()) {
             setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
+            desiredRotation = getPosition();
         }
         if (DriverStation.isDisabled() && Robot.isFirstRun()) {
             setBrakeMode(false);
@@ -149,7 +192,38 @@ public class Turret extends SubsystemBase {
                             maxAccelerationRadPerSecSq.get()));
             }
         }
+        if (isManual) {
+            if (joystickAxis != null) {
+                double appliedSpeed =
+                    joystickAxis.getAsDouble() * manualIncrement.getAsDouble();
+                Logger.recordOutput("Turret/AppliedManualSpeed", appliedSpeed);
+                boolean canMoveCCW = appliedSpeed > 0 && getPosition().getRadians() < maxRotation.getRadians();
+                boolean canMoveCW = appliedSpeed < 0 && getPosition().getRadians() > minRotation.getRadians();
+                if (canMoveCCW || canMoveCW) {
+                    io.runPercentOutput(appliedSpeed);
+                } else {
+                    io.stop();
+                }
+            }
+        }
         if (shouldRun) {
+            switch (state) {
+                case TO_HUB -> {
+                    var robot = poseSupplier.get();
+                    var hubCenter = AllianceFlip.apply(FieldConstants.HUB_CENTER_3D);
+                    var turretTranslation = new Pose3d(robot)
+                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
+                        .toPose2d()
+                        .getTranslation();
+                    var direction = hubCenter.toTranslation2d().minus(turretTranslation);
+                    double fieldRelativeAngle = direction.getAngle().getRadians(); // get field rel angle to hub, robot
+                    double turretRelativeAngle = MathUtil.angleModulus( // convert to turret rel
+                        fieldRelativeAngle - robot.getRotation().getRadians());
+                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                }
+                case FERRY -> {}
+                case FREE -> {}
+            }
             desiredRotation =
                 Rotation2d.fromRadians(
                     MathUtil.clamp(
@@ -189,36 +263,31 @@ public class Turret extends SubsystemBase {
             Logger.recordOutput("Turret/GoalPosition", 0.0);
             Logger.recordOutput("Turret/GoalVelocity", 0.0);
         }
-        if (isManual) {
-            if (joystickAxis != null) {
-                double appliedSpeed =
-                    joystickAxis.getAsDouble() * manualIncrement.getAsDouble();
-                boolean canMoveCCW = appliedSpeed > 0 && getPosition().getRadians() < maxRotation.getRadians();
-                boolean canMoveCW = appliedSpeed < 0 && getPosition().getRadians() > minRotation.getRadians();
-                if (canMoveCCW || canMoveCW) {
-                    io.runPercentOutput(appliedSpeed);
-                }
-            }
-        }
         LoopTimeUtil.record("Turret");
     }
 
     public Command setDesiredState(Rotation2d state) {
-        return Commands.runOnce(
-                () -> {
-                    desiredRotation =
+        return Commands.either(
+            Commands.runOnce(
+                () -> desiredRotation =
                         Rotation2d.fromRadians(
                             MathUtil.clamp(
-                                state.getRadians(), minRotation.getRadians(), maxRotation.getRadians()));
-                }, this)
+                                state.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
+                Commands.none(),
+                () -> this.state.equals(TurretState.FREE))
             .withName("Set Desired State");
     }
 
     public Command toggleManualControl(DoubleSupplier joystickAxis) {
-        return Commands.runOnce(() -> {
-            isManual = true;
-            Logger.recordOutput("Turret/RequestedSpeed", joystickAxis.getAsDouble());
-            this.joystickAxis = joystickAxis;
-        }, this);
+        return Commands.either(
+            Commands.runOnce(() -> {
+                isManual = false;
+                io.stop();
+            }),
+            Commands.runOnce(() -> {
+                isManual = true;
+                this.joystickAxis = joystickAxis;
+            }),
+            () -> isManual);
     }
 }

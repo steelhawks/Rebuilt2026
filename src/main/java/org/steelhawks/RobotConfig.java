@@ -1,6 +1,7 @@
 package org.steelhawks;
 
 import com.ctre.phoenix6.CANBus;
+import edu.wpi.first.math.geometry.Pose2d;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.intake.Intake;
@@ -23,6 +24,7 @@ import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class RobotConfig {
     // Feature flags
@@ -88,9 +90,9 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
-    public Optional<ShooterSuperstructure> createShooterSuperStructure() {
+    public Optional<ShooterSuperstructure> createShooterSuperStructure(Supplier<Pose2d> poseSupplier) {
         if (hasFlywheel || hasTurret || hasPivot) {
-            return Optional.ofNullable(factory.createShooterSuperstructure());
+            return Optional.ofNullable(factory.createShooterSuperstructure(poseSupplier));
         }
         return Optional.empty();
     }
@@ -359,7 +361,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
-        ShooterSuperstructure createShooterSuperstructure();
+        ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier);
         Intake createIntake();
     }
 
@@ -416,10 +418,10 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return new ShooterSuperstructure(
                 new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIO() {}),
+                new Turret(new TurretIO() {}, poseSupplier),
                 new Pivot(new PivotIO() {}));
         }
 
@@ -484,10 +486,10 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return new ShooterSuperstructure(
                 new Flywheel(new FlywheelIOTalonFX(flywheelCANbus)),
-                new Turret(new TurretIO() {}),
+                new Turret(new TurretIO() {}, poseSupplier),
                 null);
         }
 
@@ -550,7 +552,7 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return null;
         }
 
@@ -614,7 +616,7 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return null;
         }
 
@@ -651,10 +653,10 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return new ShooterSuperstructure(
                 new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIOTalonFX(new CANBus(""))),
+                new Turret(new TurretIOTalonFX(new CANBus("")), poseSupplier),
                 new Pivot(new PivotIO() {}));
         }
 
@@ -699,7 +701,7 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return null;
         }
 
@@ -742,10 +744,10 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure() {
+        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
             return new ShooterSuperstructure(
                 new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIO() {}),
+                new Turret(new TurretIO() {}, poseSupplier),
                 new Pivot(new PivotIO() {}));
         }
 
