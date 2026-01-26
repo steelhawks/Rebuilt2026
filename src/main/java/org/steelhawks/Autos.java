@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -21,6 +22,15 @@ public final class Autos {
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
     private static final LoggedDashboardChooser<Command> autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser");
+
+    private static final AutoFactory factory =
+        new AutoFactory(
+            s_Swerve::getPose, // A function that returns the current robot pose
+            s_Swerve::setPose, // A function that resets the current robot pose to the provided Pose2d
+            s_Swerve::followTrajectory, // The drive subsystem trajectory follower
+            true, // If alliance flipping should be enabled
+            s_Swerve // The drive subsystem
+        );
 
     public enum Misalignment {
         NONE,
@@ -98,15 +108,6 @@ public final class Autos {
         }
 
         return (rotError > 0) ? Misalignment.ROTATION_CCW : Misalignment.ROTATION_CW; // omega not being aligned is final scenario
-    }
-
-    public static Command followChoreoTrajectory(String choreo) {
-        try {
-            PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(choreo);
-            return DriveCommands.followPath(path).withName("Following " + choreo);
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static Command followTrajectory(String pathPlanner) {

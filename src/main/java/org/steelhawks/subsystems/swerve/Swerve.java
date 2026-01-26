@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.*;
 
+import choreo.trajectory.SwerveSample;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -13,6 +14,7 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.Debouncer;
@@ -61,6 +63,7 @@ import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.util.LocalADStarAK;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
+import org.steelhawks.util.SwerveDriveController;
 
 public class Swerve extends SubsystemBase {
 
@@ -133,6 +136,14 @@ public class Swerve extends SubsystemBase {
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
         TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_SIZE_SEC);
 
+    private final SwerveDriveController autonController =
+        new SwerveDriveController(
+            new PIDController(AutonConstants.TRANSLATION_KP.getAsDouble(), AutonConstants.TRANSLATION_KI.getAsDouble(), AutonConstants.TRANSLATION_KD.getAsDouble()),
+            new PIDController(AutonConstants.TRANSLATION_KP.getAsDouble(), AutonConstants.TRANSLATION_KI.getAsDouble(), AutonConstants.TRANSLATION_KD.getAsDouble()),
+            new ProfiledPIDController(AutonConstants.ROTATION_KP.getAsDouble(), AutonConstants.ROTATION_KI.getAsDouble(), AutonConstants.ROTATION_KD.getAsDouble(),
+                new TrapezoidProfile.Constraints(
+                    AutonConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                    AutonConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED)));
     private final ProfiledPIDController mAlignController;
     private final Debouncer mAlignDebouncer;
     private final Debouncer collisionDebouncer;
@@ -498,6 +509,16 @@ public class Swerve extends SubsystemBase {
         FieldConstants.FIELD_2D.setRobotPose(getPose());
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
+    }
+
+    // TODO TEST
+    public void followTrajectory(SwerveSample sample) {
+        var robot = getPose();
+        var nextSetpoint =
+            new Pose2d(sample.x, sample.y, new Rotation2d(sample.heading));
+        var speeds = autonController.getOutput(robot, nextSetpoint)
+            .plus(new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
+        runVelocity(speeds);
     }
 
     /**
