@@ -3,9 +3,7 @@ package org.steelhawks.subsystems.superstructure.turret;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,10 +16,13 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterPhysics;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -48,7 +49,7 @@ public class Turret extends SubsystemBase {
         FREE
     }
 
-    private TurretState state = TurretState.FERRY;
+    private TurretState state = TurretState.TO_HUB;
 
     private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
     private static final Rotation2d maxRotation = new Rotation2d(Math.PI + (Math.PI / 60.0));
@@ -124,6 +125,44 @@ public class Turret extends SubsystemBase {
                 maxRotation.getRadians());
         }
         return Rotation2d.fromRadians(bestAngle);
+    }
+
+    private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
+        List<Translation3d> trajectoryPoints = new ArrayList<>();
+        int numPoints = 50;
+        var robot = poseSupplier.get();
+        var turretTranslation = new Pose3d(robot)
+            .transformBy(RobotConstants.ROBOT_TO_TURRET)
+            .toPose2d()
+            .getTranslation();
+        var direction = target2d.minus(turretTranslation);
+        double fieldRelativeAngle = direction.getAngle().getRadians();
+        var projectileData = ShooterPhysics.Static.calculateShot(target3d, target3d);
+        if (projectileData == null) {
+            return new ArrayList<>();
+        }
+        double timeOfFlight = ShooterPhysics.calculateTimeofFlight(
+            projectileData.exitVelocity(),
+            projectileData.hoodAngle(),
+            turretTranslation.getDistance(target2d)
+        );
+
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (timeOfFlight / numPoints) * i;
+            double x = projectileData.exitVelocity() * Math.cos(projectileData.hoodAngle()) * t;
+            double y = projectileData.exitVelocity() * Math.sin(projectileData.hoodAngle()) * t
+                - 0.5 * 9.81 * t * t;
+            // to field relative
+            double fieldX = turretTranslation.getX() + x * Math.cos(fieldRelativeAngle);
+            double fieldY = turretTranslation.getY() + x * Math.sin(fieldRelativeAngle);
+            double fieldZ = RobotConstants.ROBOT_TO_TURRET.getZ() + y;
+            trajectoryPoints.add(new Translation3d(fieldX, fieldY, fieldZ));
+        }
+
+        Logger.recordOutput("Turret/ProjectileData/Velocity", projectileData.exitVelocity());
+        Logger.recordOutput("Turret/ProjectileData/AngleDeg", Math.toDegrees(projectileData.hoodAngle()));
+        Logger.recordOutput("Turret/ProjectileData/TimeOfFlight", timeOfFlight);
+        return trajectoryPoints;
     }
 
     @Override
@@ -216,12 +255,15 @@ public class Turret extends SubsystemBase {
                         .toPose2d()
                         .getTranslation();
                     var direction = hubCenter.toTranslation2d().minus(turretTranslation);
-                    double fieldRelativeAngle = direction.getAngle().getRadians(); // get field rel angle to hub, robot
-                    double turretRelativeAngle = MathUtil.angleModulus( // convert to turret rel
+                    double fieldRelativeAngle = direction.getAngle().getRadians();
+                    double turretRelativeAngle = MathUtil.angleModulus(
                         fieldRelativeAngle - robot.getRotation().getRadians());
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
                     Constants.toLoggedPoint("Turret/AimingParams/Direction", direction);
                     Logger.recordOutput("Turret/AimingParams/TurretRelativeAngle", turretRelativeAngle);
+
+                    var trajectory = createTrajectory(hubCenter, hubCenter.toTranslation2d());
+                    Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
                 }
                 case FERRY -> {
                     var robot = poseSupplier.get();
@@ -239,6 +281,10 @@ public class Turret extends SubsystemBase {
                     Constants.toLoggedPoint("Turret/Ferrying/FerryGoal", ferryGoal);
                     Constants.toLoggedPoint("Turret/Ferrying/Direction", direction);
                     Logger.recordOutput("Turret/Ferrying/TurretRelativeAngle", turretRelativeAngle);
+
+                    var ferryTarget3d = new Translation3d(ferryGoal.getX(), ferryGoal.getY(), 0.0);
+                    var trajectory = createTrajectory(ferryTarget3d, ferryGoal);
+                    Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
                 }
             }
             desiredRotation =
