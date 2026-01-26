@@ -1,20 +1,26 @@
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.superstructure.SuperStructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.util.FieldBoundingBox;
 
 public class RobotContainer {
 
@@ -76,7 +82,24 @@ public class RobotContainer {
                 s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
     }
 
-    private void configureTriggers() {}
+    private boolean isHubActive() {
+        String gameData = DriverStation.getGameSpecificMessage();
+        return !gameData.isEmpty()
+            && gameData.charAt(0) == 'B'
+            && DriverStation.getAlliance()
+                .orElse(DriverStation.Alliance.Blue)
+                .equals(DriverStation.Alliance.Blue);
+    }
+
+    private void configureTriggers() {
+        new FieldBoundingBox("AllianceSide",
+            new Translation2d(0.0, 0.0),
+            new Translation2d(Units.inchesToMeters(158.6), FieldConstants.FIELD_WIDTH),
+            s_Swerve::getPose
+        )
+            .onTrue(Commands.runOnce(() -> SuperStructure.setMode(SuperStructure.ShooterMode.TO_HUB)))
+            .onFalse(Commands.runOnce(() -> SuperStructure.setMode(SuperStructure.ShooterMode.FERRY)));
+    }
 
     private void configureDriver() {}
 }

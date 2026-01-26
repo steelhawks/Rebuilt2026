@@ -1,13 +1,38 @@
 package org.steelhawks.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.Translation3d;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 
-public class ShooterPhysics {
+public class SuperStructure {
 
+    public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
+    private static ShooterMode currentMode = ShooterMode.MANUAL;
     private static final double G = 9.81;
+
+    public enum ShooterMode {
+        TO_HUB,
+        FERRY,
+        MANUAL
+    }
+
+    public static void setMode(ShooterMode mode) {
+        if (currentMode != mode) {
+            Logger.recordOutput("SuperStructure/ModeChange",
+                currentMode.name() + " -> " + mode.name());
+            currentMode = mode;
+            Logger.recordOutput("SuperStructure/CurrentMode", mode.name());
+            // clear trajectory
+            Logger.recordOutput("Turret/ScoreTrajectory", new Translation3d[0]);
+            Logger.recordOutput("Turret/FerryTrajectory", new Translation3d[0]);
+        }
+    }
+
+    public static ShooterMode getMode() {
+        return currentMode;
+    }
 
     public static double calculateTimeofFlight(double exitVelocity, double pivotAngle, double distanceToTravel) {
         return distanceToTravel / (exitVelocity * Math.cos(pivotAngle));
@@ -114,7 +139,4 @@ public class ShooterPhysics {
     public static class Moving {
 
     }
-
-    public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
 }
-
