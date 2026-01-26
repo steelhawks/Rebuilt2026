@@ -34,8 +34,29 @@ public record ChoreoTraj(
 	public static final ChoreoTraj OutpostTrenchClimbAuto = new ChoreoTraj(
 	    "OutpostTrenchClimbAuto",
 	    OptionalInt.empty(),
-	    5.64202,
+	    5.84683,
 	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto$0 = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.of(0),
+	    1.18891,
+	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto$1 = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.of(1),
+	    2.0964,
+	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto$2 = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.of(2),
+	    2.56152,
+	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64)),
 	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
 	);
 
@@ -45,7 +66,10 @@ public record ChoreoTraj(
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
     	Map.entry("SillyAuto", SillyAuto),
-		Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto)
+		Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto),
+		Map.entry("OutpostTrenchClimbAuto$0", OutpostTrenchClimbAuto$0),
+		Map.entry("OutpostTrenchClimbAuto$1", OutpostTrenchClimbAuto$1),
+		Map.entry("OutpostTrenchClimbAuto$2", OutpostTrenchClimbAuto$2)
     );
 
     /**

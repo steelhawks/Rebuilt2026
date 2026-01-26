@@ -76,7 +76,7 @@
  },
  "generationFeatures":[],
  "codegen":{
-  "root":"../java/org/steelhawks",
+  "root":"../../java/org/steelhawks",
   "genVars":true,
   "genTrajData":true,
   "useChoreoLib":true

@@ -1,6 +1,8 @@
 package org.steelhawks;
 
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -47,6 +49,7 @@ public final class Autos {
         /* ------------- Autons ------------- */
 
         autoChooser.addDefaultOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
+        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd());
 
         if (Toggles.tuningMode.get()) {
             /* ------------- Swerve SysId ------------- */
@@ -121,5 +124,26 @@ public final class Autos {
 
     public static Command getAuto() {
         return autoChooser.get();
+    }
+
+    public static AutoRoutine outpostTrenchClimbAuto() {
+        AutoRoutine routine = factory.newRoutine("outpostTrenchClimbAuto");
+
+        AutoTrajectory startToOutpost = ChoreoTraj.OutpostTrenchClimbAuto.segment(0).asAutoTraj(routine);
+        AutoTrajectory outpostToTrench = ChoreoTraj.OutpostTrenchClimbAuto.segment(1).asAutoTraj(routine);
+        AutoTrajectory trenchToClimb = ChoreoTraj.OutpostTrenchClimbAuto.segment(2).asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                startToOutpost.resetOdometry(),
+                startToOutpost.cmd(),
+                Commands.waitSeconds(1.0),
+                outpostToTrench.cmd(),
+                Commands.waitSeconds(0.5),
+                trenchToClimb.cmd()
+            )
+        );
+
+        return routine;
     }
 }

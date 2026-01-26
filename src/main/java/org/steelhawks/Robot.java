@@ -235,10 +235,10 @@ public class Robot extends LoggedRobot {
     }
 
     public void resetPoseSim() {
-        if (Constants.getMode() == Mode.SIM) {
-            RobotContainer.s_Swerve.resetSimulation(
-                StartEndPosition.valueOf(Autos.getAuto().getName()).getPose());
-        }
+//        if (Constants.getMode() == Mode.SIM) {
+//            RobotContainer.s_Swerve.resetSimulation(
+//                ChoreoTraj.OutpostTrenchClimbAuto.initialPoseBlue());
+//        }
     }
 
     @Override
@@ -270,7 +270,7 @@ public class Robot extends LoggedRobot {
         setState(RobotState.TELEOP);
         Elastic.selectTab("Teleoperated");
         if (autonomousCommand != null)
-            CommandScheduler.getInstance().schedule(autonomousCommand);
+            autonomousCommand.cancel();
     }
 
     @Override
