@@ -12,6 +12,7 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.util.ClassPreloader;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -147,6 +148,13 @@ public class Robot extends LoggedRobot {
             DriverStation.reportWarning("Failed to disable loop overrun warnings.", false);
         }
         CommandScheduler.getInstance().setPeriod(loopOverrunWarningTimeout);
+
+        ClassPreloader.preload(
+            "edu.wpi.first.math.geometry.Transform2d",
+            "edu.wpi.first.math.geometry.Twist2d",
+            "java.lang.FdLibm$Hypot",
+            "choreo.trajectory.Trajectory",
+            "choreo.trajectory.SwerveSample");
 
         // Check for valid swerve config
         var modules =
