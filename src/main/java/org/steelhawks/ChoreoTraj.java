@@ -24,12 +24,19 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj Test = new ChoreoTraj(
-	    "Test",
+    public static final ChoreoTraj SillyAuto = new ChoreoTraj(
+	    "SillyAuto",
 	    OptionalInt.empty(),
-	    1.78222,
-	    new Pose2d(2.579, 0.487, Rotation2d.fromRadians(0)),
-	    new Pose2d(7.471, 2.358, Rotation2d.fromRadians(0.81))
+	    5.58421,
+	    new Pose2d(3.579, 1.83, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.269, 5.309, Rotation2d.fromRadians(-0.882))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.empty(),
+	    5.64202,
+	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
 	);
 
     /**
@@ -37,7 +44,8 @@ public record ChoreoTraj(
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("Test", Test)
+    	Map.entry("SillyAuto", SillyAuto),
+		Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto)
     );
 
     /**
