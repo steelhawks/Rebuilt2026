@@ -266,13 +266,13 @@ public class Turret extends SubsystemBase {
         LoopTimeUtil.record("Turret");
     }
 
-    public Command setDesiredState(Rotation2d state) {
+    public Command setDesiredRotation(Rotation2d rotation) {
         return Commands.either(
             Commands.runOnce(
                 () -> desiredRotation =
                         Rotation2d.fromRadians(
                             MathUtil.clamp(
-                                state.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
+                                rotation.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
                 Commands.none(),
                 () -> this.state.equals(TurretState.FREE))
             .withName("Set Desired State");

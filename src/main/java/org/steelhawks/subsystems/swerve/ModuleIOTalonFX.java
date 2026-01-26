@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotConfig;
 import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.util.PhoenixUtil;
@@ -77,11 +78,13 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     public ModuleIOTalonFX(
         SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
-            constants) {
+            constants,
+        RobotConfig.CANBus bus
+    ) {
         this.constants = constants;
-        driveTalon = new TalonFX(constants.DriveMotorId, Constants.getCANBus());
-        turnTalon = new TalonFX(constants.SteerMotorId, Constants.getCANBus());
-        cancoder = new CANcoder(constants.EncoderId, Constants.getCANBus());
+        driveTalon = new TalonFX(constants.DriveMotorId, bus.bus);
+        turnTalon = new TalonFX(constants.SteerMotorId, bus.bus);
+        cancoder = new CANcoder(constants.EncoderId, bus.bus);
 
         // Configure drive motor
         var driveConfig = constants.DriveMotorInitialConfigs;
@@ -178,7 +181,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             turnTemp);
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon, cancoder);
         PhoenixUtil.registerSignals(
-            TunerConstants.DrivetrainConstants.CANBusName.equals("canivore"),
+            bus.bus.isNetworkFD(),
             driveVelocity,
             driveAppliedVolts,
             driveCurrent,

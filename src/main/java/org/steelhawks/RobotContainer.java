@@ -1,18 +1,17 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.superstructure.ShooterSuperstructure;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
+import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
-import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -26,9 +25,10 @@ public class RobotContainer {
     public static Swerve s_Swerve = null;
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
-    public static ShooterSuperstructure s_Superstructure = null;
-    public static Intake s_Intake = null;
+    public static Flywheel s_Flywheel = null;
     public static Turret s_Turret = null;
+    public static Pivot s_Pivot = null;
+    public static Intake s_Intake = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -44,11 +44,10 @@ public class RobotContainer {
             s_Vision = config.createVision(s_Swerve::accept).orElse(null);
         }
         s_ObjVision = config.createObjectVision().orElse(null);
-//        s_Superstructure = config.createShooterSuperStructure().orElse(null);
+        s_Flywheel = config.createFlywheel().orElse(null);
+        s_Turret = config.createTurret(s_Swerve::getPose).orElse(null);
+        s_Pivot = config.createPivot().orElse(null);
         s_Intake = config.createIntake().orElse(null);
-
-
-        s_Turret = new Turret(new TurretIOTalonFX(new RobotConfig.CANBus("")), s_Swerve::getPose);
 
         if (config.hasAutos) {
             Autos.init();
@@ -65,16 +64,16 @@ public class RobotContainer {
 
         driver.x()
             .onTrue(
-                s_Turret.setDesiredState(new Rotation2d(0.0)));
+                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
         driver.y()
             .onTrue(
-                s_Turret.setDesiredState(new Rotation2d(Math.PI / 2.0)));
+                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
         driver.a()
             .onTrue(
-                s_Turret.setDesiredState(new Rotation2d(Math.PI)));
+                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
         driver.b()
             .onTrue(
-                s_Turret.setDesiredState(new Rotation2d(-Math.PI / 2.0)));
+                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
     }
 
     private void configureTriggers() {}

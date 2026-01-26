@@ -1,21 +1,24 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
-import org.steelhawks.subsystems.superstructure.ShooterSuperstructure;
+import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIO;
+import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOSim;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.pivot.PivotIO;
+import org.steelhawks.subsystems.superstructure.pivot.PivotIOSim;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.superstructure.turret.TurretIO;
+import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
 import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
@@ -41,6 +44,8 @@ public class RobotConfig {
 
     // Subsystem factory
     private final SubsystemFactory factory;
+
+    public record System(SubsystemBase subsystem, CANBus canBus) {}
 
     private RobotConfig(Builder builder) {
         this.hasSwerve = builder.hasSwerve;
@@ -90,11 +95,25 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
-    public Optional<ShooterSuperstructure> createShooterSuperStructure(Supplier<Pose2d> poseSupplier) {
-        if (hasFlywheel || hasTurret || hasPivot) {
-            return Optional.ofNullable(factory.createShooterSuperstructure(poseSupplier));
+    public Optional<Flywheel> createFlywheel() {
+        if (!hasTurret) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.ofNullable(factory.createFlywheel());
+    }
+
+    public Optional<Turret> createTurret(Supplier<Pose2d> poseSupplier) {
+        if (!hasTurret) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createTurret(poseSupplier));
+    }
+
+    public Optional<Pivot> createPivot() {
+        if (!hasTurret) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createPivot());
     }
 
     public Optional<Intake> createIntake() {
@@ -166,8 +185,8 @@ public class RobotConfig {
                 .withLEDStrip(false)
                 .withVision(false)
                 .withObjectVision(false)
-                .withFlywheel(false)
-                .withTurret(false)
+                .withFlywheel(true)
+                .withTurret(true)
                 .withPivot(false)
                 .withAutos(false)
                 .withFactory(new TestBoardFactory())
@@ -305,7 +324,6 @@ public class RobotConfig {
         }
     }
 
-    // Base CANBus class
     public static class CANBus {
         public final String name;
         public final com.ctre.phoenix6.CANBus bus;
@@ -316,44 +334,6 @@ public class RobotConfig {
         }
     }
 
-    // Swerve-specific CANBus configuration
-    public static class SwerveCANBus extends CANBus {
-        public final int gyroId;
-        public final int frontLeftDriveId;
-        public final int frontLeftSteerId;
-        public final int frontLeftEncoderId;
-        public final int frontRightDriveId;
-        public final int frontRightSteerId;
-        public final int frontRightEncoderId;
-        public final int backLeftDriveId;
-        public final int backLeftSteerId;
-        public final int backLeftEncoderId;
-        public final int backRightDriveId;
-        public final int backRightSteerId;
-        public final int backRightEncoderId;
-
-        public SwerveCANBus(String name, int gyroId,
-                            int frontLeftDriveId, int frontLeftSteerId, int frontLeftEncoderId,
-                            int frontRightDriveId, int frontRightSteerId, int frontRightEncoderId,
-                            int backLeftDriveId, int backLeftSteerId, int backLeftEncoderId,
-                            int backRightDriveId, int backRightSteerId, int backRightEncoderId) {
-            super(name);
-            this.gyroId = gyroId;
-            this.frontLeftDriveId = frontLeftDriveId;
-            this.frontLeftSteerId = frontLeftSteerId;
-            this.frontLeftEncoderId = frontLeftEncoderId;
-            this.frontRightDriveId = frontRightDriveId;
-            this.frontRightSteerId = frontRightSteerId;
-            this.frontRightEncoderId = frontRightEncoderId;
-            this.backLeftDriveId = backLeftDriveId;
-            this.backLeftSteerId = backLeftSteerId;
-            this.backLeftEncoderId = backLeftEncoderId;
-            this.backRightDriveId = backRightDriveId;
-            this.backRightSteerId = backRightSteerId;
-            this.backRightEncoderId = backRightEncoderId;
-        }
-    }
-
     // Subsystem factory interface
     private interface SubsystemFactory {
         Swerve createSwerve();
@@ -361,40 +341,25 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
-        ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier);
+        Flywheel createFlywheel();
+        Turret createTurret(Supplier<Pose2d> poseSupplier);
+        Pivot createPivot();
         Intake createIntake();
     }
 
     // OmegaBot factory
     private static class OmegaBotFactory implements SubsystemFactory {
-        private final SwerveCANBus swerveCANBus;
-        public OmegaBotFactory() {
-            this.swerveCANBus = new SwerveCANBus(
-                TunerConstants.DrivetrainConstants.CANBusName,
-                TunerConstants.DrivetrainConstants.Pigeon2Id,
-                TunerConstants.FrontLeft.DriveMotorId,
-                TunerConstants.FrontLeft.SteerMotorId,
-                TunerConstants.FrontLeft.EncoderId,
-                TunerConstants.FrontRight.DriveMotorId,
-                TunerConstants.FrontRight.SteerMotorId,
-                TunerConstants.FrontRight.EncoderId,
-                TunerConstants.BackLeft.DriveMotorId,
-                TunerConstants.BackLeft.SteerMotorId,
-                TunerConstants.BackLeft.EncoderId,
-                TunerConstants.BackRight.DriveMotorId,
-                TunerConstants.BackRight.SteerMotorId,
-                TunerConstants.BackRight.EncoderId
-            );
-        }
+        private final CANBus canivoreBus = new CANBus("canivore");
+        private final CANBus rioBus = new CANBus("");
 
         @Override
         public Swerve createSwerve() {
             return new Swerve(
-                new GyroIOPigeon2(swerveCANBus.gyroId, swerveCANBus.bus),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new GyroIOPigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, canivoreBus),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft, canivoreBus),
+                new ModuleIOTalonFX(TunerConstants.FrontRight, canivoreBus),
+                new ModuleIOTalonFX(TunerConstants.BackLeft, canivoreBus),
+                new ModuleIOTalonFX(TunerConstants.BackRight, canivoreBus));
         }
 
         @Override
@@ -418,11 +383,18 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
-            return new ShooterSuperstructure(
-                new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIO() {}, poseSupplier),
-                new Pivot(new PivotIO() {}));
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIOTalonFX(canivoreBus));
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return new Turret(new TurretIOTalonFX(canivoreBus), poseSupplier);
+        }
+
+        @Override
+        public Pivot createPivot() {
+            return null;
         }
 
         @Override
@@ -433,36 +405,16 @@ public class RobotConfig {
 
     // AlphaBot factory
     private static class AlphaBotFactory implements SubsystemFactory {
-        private final SwerveCANBus swerveCANBus;
-        private final CANBus flywheelCANbus = new CANBus("");
-
-        public AlphaBotFactory() {
-            this.swerveCANBus = new SwerveCANBus(
-                TunerConstantsAlpha.DrivetrainConstants.CANBusName,
-                TunerConstantsAlpha.DrivetrainConstants.Pigeon2Id,
-                TunerConstantsAlpha.FrontLeft.DriveMotorId,
-                TunerConstantsAlpha.FrontLeft.SteerMotorId,
-                TunerConstantsAlpha.FrontLeft.EncoderId,
-                TunerConstantsAlpha.FrontRight.DriveMotorId,
-                TunerConstantsAlpha.FrontRight.SteerMotorId,
-                TunerConstantsAlpha.FrontRight.EncoderId,
-                TunerConstantsAlpha.BackLeft.DriveMotorId,
-                TunerConstantsAlpha.BackLeft.SteerMotorId,
-                TunerConstantsAlpha.BackLeft.EncoderId,
-                TunerConstantsAlpha.BackRight.DriveMotorId,
-                TunerConstantsAlpha.BackRight.SteerMotorId,
-                TunerConstantsAlpha.BackRight.EncoderId
-            );
-        }
+        private final CANBus rioBus = new CANBus("");
 
         @Override
         public Swerve createSwerve() {
             return new Swerve(
-                new GyroIOPigeon2(swerveCANBus.gyroId, swerveCANBus.bus),
-                new ModuleIOTalonFX(TunerConstantsAlpha.FrontLeft),
-                new ModuleIOTalonFX(TunerConstantsAlpha.FrontRight),
-                new ModuleIOTalonFX(TunerConstantsAlpha.BackLeft),
-                new ModuleIOTalonFX(TunerConstantsAlpha.BackRight));
+                new GyroIOPigeon2(TunerConstantsAlpha.DrivetrainConstants.Pigeon2Id, rioBus),
+                new ModuleIOTalonFX(TunerConstantsAlpha.FrontLeft, rioBus),
+                new ModuleIOTalonFX(TunerConstantsAlpha.FrontRight, rioBus),
+                new ModuleIOTalonFX(TunerConstantsAlpha.BackLeft, rioBus),
+                new ModuleIOTalonFX(TunerConstantsAlpha.BackRight, rioBus));
         }
 
         @Override
@@ -486,11 +438,18 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
-            return new ShooterSuperstructure(
-                new Flywheel(new FlywheelIOTalonFX(flywheelCANbus)),
-                new Turret(new TurretIO() {}, poseSupplier),
-                null);
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIOTalonFX(rioBus));
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier);
+        }
+
+        @Override
+        public Pivot createPivot() {
+            return null;
         }
 
         @Override
@@ -500,35 +459,16 @@ public class RobotConfig {
     }
 
     private static class ChassisBotFactory implements SubsystemFactory {
-        private final SwerveCANBus swerveCANBus;
-
-        public ChassisBotFactory() {
-            this.swerveCANBus = new SwerveCANBus(
-                TunerConstantsChassis.DrivetrainConstants.CANBusName,
-                TunerConstantsChassis.DrivetrainConstants.Pigeon2Id,
-                TunerConstantsChassis.FrontLeft.DriveMotorId,
-                TunerConstantsChassis.FrontLeft.SteerMotorId,
-                TunerConstantsChassis.FrontLeft.EncoderId,
-                TunerConstantsChassis.FrontRight.DriveMotorId,
-                TunerConstantsChassis.FrontRight.SteerMotorId,
-                TunerConstantsChassis.FrontRight.EncoderId,
-                TunerConstantsChassis.BackLeft.DriveMotorId,
-                TunerConstantsChassis.BackLeft.SteerMotorId,
-                TunerConstantsChassis.BackLeft.EncoderId,
-                TunerConstantsChassis.BackRight.DriveMotorId,
-                TunerConstantsChassis.BackRight.SteerMotorId,
-                TunerConstantsChassis.BackRight.EncoderId
-            );
-        }
+        private final CANBus rioBus = new CANBus("");
 
         @Override
         public Swerve createSwerve() {
             return new Swerve(
-                new GyroIOPigeon2(swerveCANBus.gyroId, swerveCANBus.bus),
-                new ModuleIOTalonFX(TunerConstantsChassis.FrontLeft),
-                new ModuleIOTalonFX(TunerConstantsChassis.FrontRight),
-                new ModuleIOTalonFX(TunerConstantsChassis.BackLeft),
-                new ModuleIOTalonFX(TunerConstantsChassis.BackRight));
+                new GyroIOPigeon2(TunerConstantsChassis.DrivetrainConstants.Pigeon2Id, rioBus),
+                new ModuleIOTalonFX(TunerConstantsChassis.FrontLeft, rioBus),
+                new ModuleIOTalonFX(TunerConstantsChassis.FrontRight, rioBus),
+                new ModuleIOTalonFX(TunerConstantsChassis.BackLeft, rioBus),
+                new ModuleIOTalonFX(TunerConstantsChassis.BackRight, rioBus));
         }
 
         @Override
@@ -552,7 +492,17 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
+        public Flywheel createFlywheel() {
+            return null;
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return null;
+        }
+
+        @Override
+        public Pivot createPivot() {
             return null;
         }
 
@@ -562,37 +512,17 @@ public class RobotConfig {
         }
     }
 
-    // Last year robot factory
     private static class LastYearFactory implements SubsystemFactory {
-        private final SwerveCANBus swerveCANBus;
-
-        public LastYearFactory() {
-            this.swerveCANBus = new SwerveCANBus(
-                TunerConstantsLastYear.DrivetrainConstants.CANBusName,
-                TunerConstantsLastYear.DrivetrainConstants.Pigeon2Id,
-                TunerConstantsLastYear.FrontLeft.DriveMotorId,
-                TunerConstantsLastYear.FrontLeft.SteerMotorId,
-                TunerConstantsLastYear.FrontLeft.EncoderId,
-                TunerConstantsLastYear.FrontRight.DriveMotorId,
-                TunerConstantsLastYear.FrontRight.SteerMotorId,
-                TunerConstantsLastYear.FrontRight.EncoderId,
-                TunerConstantsLastYear.BackLeft.DriveMotorId,
-                TunerConstantsLastYear.BackLeft.SteerMotorId,
-                TunerConstantsLastYear.BackLeft.EncoderId,
-                TunerConstantsLastYear.BackRight.DriveMotorId,
-                TunerConstantsLastYear.BackRight.SteerMotorId,
-                TunerConstantsLastYear.BackRight.EncoderId
-            );
-        }
+        private final CANBus rioBus = new CANBus("");
 
         @Override
         public Swerve createSwerve() {
             return new Swerve(
-                new GyroIOPigeon2(swerveCANBus.gyroId, swerveCANBus.bus),
-                new ModuleIOTalonFX(TunerConstantsLastYear.FrontLeft),
-                new ModuleIOTalonFX(TunerConstantsLastYear.FrontRight),
-                new ModuleIOTalonFX(TunerConstantsLastYear.BackLeft),
-                new ModuleIOTalonFX(TunerConstantsLastYear.BackRight));
+                new GyroIOPigeon2(TunerConstantsLastYear.DrivetrainConstants.Pigeon2Id, rioBus),
+                new ModuleIOTalonFX(TunerConstantsLastYear.FrontLeft, rioBus),
+                new ModuleIOTalonFX(TunerConstantsLastYear.FrontRight, rioBus),
+                new ModuleIOTalonFX(TunerConstantsLastYear.BackLeft, rioBus),
+                new ModuleIOTalonFX(TunerConstantsLastYear.BackRight, rioBus));
         }
 
         @Override
@@ -616,7 +546,17 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
+        public Flywheel createFlywheel() {
+            return null;
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return null;
+        }
+
+        @Override
+        public Pivot createPivot() {
             return null;
         }
 
@@ -627,6 +567,8 @@ public class RobotConfig {
     }
 
     private static class TestBoardFactory implements SubsystemFactory {
+        private final CANBus rioBus = new CANBus("");
+
         @Override
         public Swerve createSwerve() {
             return null;
@@ -653,11 +595,18 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
-            return new ShooterSuperstructure(
-                new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIOTalonFX(new CANBus("")), poseSupplier),
-                new Pivot(new PivotIO() {}));
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIOTalonFX(rioBus));
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier);
+        }
+
+        @Override
+        public Pivot createPivot() {
+            return null;
         }
 
         @Override
@@ -666,7 +615,6 @@ public class RobotConfig {
         }
     }
 
-    // SimBot factory
     private static class SimBotFactory implements SubsystemFactory {
         @Override
         public Swerve createSwerve() {
@@ -701,17 +649,26 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
-            return null;
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIOSim());
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return new Turret(new TurretIOSim(), poseSupplier);
+        }
+
+        @Override
+        public Pivot createPivot() {
+            return new Pivot(new PivotIOSim());
         }
 
         @Override
         public Intake createIntake() {
-            return null;
+            return new Intake(new IntakeIOSim());
         }
     }
 
-    // Replay factory
     private static class ReplayFactory implements SubsystemFactory {
         @Override
         public Swerve createSwerve() {
@@ -744,11 +701,18 @@ public class RobotConfig {
         }
 
         @Override
-        public ShooterSuperstructure createShooterSuperstructure(Supplier<Pose2d> poseSupplier) {
-            return new ShooterSuperstructure(
-                new Flywheel(new FlywheelIO() {}),
-                new Turret(new TurretIO() {}, poseSupplier),
-                new Pivot(new PivotIO() {}));
+        public Flywheel createFlywheel() {
+            return new Flywheel(new FlywheelIO() {});
+        }
+
+        @Override
+        public Turret createTurret(Supplier<Pose2d> poseSupplier) {
+            return new Turret(new TurretIO() {}, poseSupplier);
+        }
+
+        @Override
+        public Pivot createPivot() {
+            return new Pivot(new PivotIO() {});
         }
 
         @Override
