@@ -5,20 +5,22 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
 
-	public enum State {
-		// In radians, need to tune
-		RETRACTED(0.0),
-		HOME(0.0),
-		INTAKE(0.0);
+    public static final double REDUCTION = 1.0 / 1.0;
 
-		private final double positionRad;
+    public enum State {
+		// TODO In radians, need to tune
+		RETRACTED(new Rotation2d(0.0)),
+		HOME(new Rotation2d(0.0)),
+		INTAKE(new Rotation2d(0.0));
 
-		State(double positionRad) {
+		private final Rotation2d positionRad;
+
+		State(Rotation2d positionRad) {
 			this.positionRad = positionRad;
 		}
 
 		public Rotation2d getPosition() {
-			return new Rotation2d(positionRad);
+			return positionRad;
 		}
 	}
 
@@ -34,6 +36,14 @@ public class IntakeConstants {
 	public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadPerSecSQ", 0.0);
 	public static final double TOLERANCE = 0.02;
 
+    // TODO SET IDS
+    public static final int LEFT_MOTOR_ID = 0;
+    public static final int RIGHT_MOTOR_ID = 0;
+    public static final int INTAKE_MOTOR_ID = 0;
+    public static final int ENCODER_ID = 0;
+
 	public static final Rotation2d MAX_ROTATION = new Rotation2d();
 	public static final Rotation2d MIN_ROTATION = new Rotation2d();
+
+    public static final Rotation2d MAG_OFFSET = Rotation2d.fromRotations(0.0);
 }

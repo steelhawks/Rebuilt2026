@@ -41,7 +41,13 @@ public class Intake extends SubsystemBase {
 					IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.get()));
 	}
 
-	private Rotation2d getPosition() { return inputs.positionRad; }
+    public boolean atGoal() {
+        return atGoal;
+    }
+
+	public Rotation2d getPosition() {
+        return inputs.encAbsPositionRad;
+    }
 
 	private void setBrakeMode(boolean enabled) {
 		if (brakeModeEnabled == enabled) return;
@@ -56,7 +62,7 @@ public class Intake extends SubsystemBase {
 
 		final boolean shouldRun =
 			DriverStation.isEnabled()
-			&& inputs.connected
+			&& (inputs.leftConnected && inputs.rightConnected && inputs.encConnected)
 			&& Toggles.Intake.isEnabled.get()
 			&& !Toggles.Intake.toggleCurrentOverride.get()
 			&& !Toggles.Intake.toggleVoltageOverride.get()
@@ -92,7 +98,8 @@ public class Intake extends SubsystemBase {
 				IntakeConstants.kD.get());
 			}, IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD);
 			if (IntakeConstants.MAX_VELOCITY_RAD_PER_SEC.hasChanged(hashCode())
-			|| IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.hasChanged(hashCode())) {
+			    || IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.hasChanged(hashCode())
+            ) {
 				profile =
 					new TrapezoidProfile(
 						new TrapezoidProfile.Constraints(
@@ -108,7 +115,8 @@ public class Intake extends SubsystemBase {
 			setpoint =
 				profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
 			if (setpoint.position < IntakeConstants.MIN_ROTATION.getRadians()
-			|| setpoint.position > IntakeConstants.MAX_ROTATION.getRadians()) {
+			    || setpoint.position > IntakeConstants.MAX_ROTATION.getRadians()
+            ) {
 				setpoint =
 					new TrapezoidProfile.State(
 						MathUtil.clamp(
@@ -117,9 +125,9 @@ public class Intake extends SubsystemBase {
 							IntakeConstants.MAX_ROTATION.getRadians()),
 						0.0);
 			}
-			atGoal = Math.abs(getPosition().getRadians() - goal.position) > IntakeConstants.TOLERANCE;
+			atGoal = Math.abs(getPosition().getRadians() - goal.position) <= IntakeConstants.TOLERANCE;
 			if (atGoal) {
-				io.stop();
+				io.stopPivot();
 			} else {
 				double acceleration = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
 				io.runPivotPosition(

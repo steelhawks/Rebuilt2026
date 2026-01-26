@@ -38,9 +38,10 @@ public class TurretIOTalonFX implements TurretIO {
         config.Slot0.kP = Turret.kP.getAsDouble();
         config.Slot0.kI = Turret.kI.getAsDouble();
         config.Slot0.kD = Turret.kD.getAsDouble();
-        config.Feedback.SensorToMechanismRatio = 1.58;
+        config.Feedback.SensorToMechanismRatio = 200.0 / 10.0;
         config.ClosedLoopGeneral.ContinuousWrap = false;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
+        PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
         position = motor.getPosition();
         velocity = motor.getVelocity();
@@ -63,8 +64,8 @@ public class TurretIOTalonFX implements TurretIO {
     @Override
     public void updateInputs(TurretIOInputs inputs) {
         inputs.connected = BaseStatusSignal.isAllGood(position, velocity, voltage, current, torqueCurrent, temp);
-        inputs.positionRad = new Rotation2d(position.getValueAsDouble());
-        inputs.velocityRadPerSec = new Rotation2d(velocity.getValueAsDouble());
+        inputs.positionRad = Rotation2d.fromRotations(position.getValueAsDouble());
+        inputs.velocityRadPerSec = Rotation2d.fromRotations(velocity.getValueAsDouble());
         inputs.appliedVolts = voltage.getValueAsDouble();
         inputs.currentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
