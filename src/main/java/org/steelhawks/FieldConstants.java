@@ -23,7 +23,7 @@ public class FieldConstants {
                 robotPoint.getX() - startLine.getX(), robotPoint.getY() - startLine.getY());
 
         double lineLengthSquared = lineVector.dot(lineVector);
-        double dotProduct = pointVector.dot(pointVector);
+        double dotProduct = pointVector.dot(lineVector);
 
         double t = dotProduct / lineLengthSquared; // projection of point onto line
         double lineLength = startLine.getDistance(endLine);

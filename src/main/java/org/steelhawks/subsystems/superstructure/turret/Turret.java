@@ -48,7 +48,7 @@ public class Turret extends SubsystemBase {
         FREE
     }
 
-    private TurretState state = TurretState.FREE;
+    private TurretState state = TurretState.FERRY;
 
     private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
     private static final Rotation2d maxRotation = new Rotation2d(Math.PI + (Math.PI / 60.0));
