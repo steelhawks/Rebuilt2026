@@ -43,6 +43,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.steelhawks.Constants.*;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -115,7 +116,7 @@ public class Swerve extends SubsystemBase {
         new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
     private final SwerveDriveKinematics kinematics =
-        new SwerveDriveKinematics(getModuleTranslations());
+        new SwerveDriveKinematics(Objects.requireNonNull(getModuleTranslations()));
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
         new SwerveModulePosition[]{
@@ -162,7 +163,7 @@ public class Swerve extends SubsystemBase {
                                 .withReduction(TunerConstantsAlpha.FrontLeft.DriveMotorGearRatio),
                             TunerConstantsAlpha.FrontLeft.SlipCurrent,
                             1),
-                        getModuleTranslations());
+                        Objects.requireNonNull(getModuleTranslations()));
                 MAPLE_SIM_CONFIG =
                     DriveTrainSimulationConfig.Default()
                         .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -204,7 +205,7 @@ public class Swerve extends SubsystemBase {
                                 .withReduction(TunerConstantsLastYear.FrontLeft.DriveMotorGearRatio),
                             TunerConstantsLastYear.FrontLeft.SlipCurrent,
                             1),
-                        getModuleTranslations());
+                        Objects.requireNonNull(getModuleTranslations()));
                 MAPLE_SIM_CONFIG =
                     DriveTrainSimulationConfig.Default()
                         .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -246,7 +247,7 @@ public class Swerve extends SubsystemBase {
                                 .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
                             TunerConstants.FrontLeft.SlipCurrent,
                             1),
-                        getModuleTranslations());
+                        Objects.requireNonNull(getModuleTranslations()));
                 MAPLE_SIM_CONFIG =
                     DriveTrainSimulationConfig.Default()
                     // Specify gyro type (for realistic gyro drifting and error simulation)
@@ -309,27 +310,35 @@ public class Swerve extends SubsystemBase {
         this.gyroIO = gyroIO;
         swerveModules[0] = new SwerveModule(flModuleIO, 0,
             switch (Constants.getRobot()) {
+                case OMEGABOT, SIMBOT -> TunerConstants.FrontLeft;
                 case ALPHABOT -> TunerConstantsAlpha.FrontLeft;
+                case CHASSIS -> TunerConstantsChassis.FrontLeft;
                 case LAST_YEAR -> TunerConstantsLastYear.FrontLeft;
-                default -> TunerConstants.FrontLeft;
+                default -> null;
             });
         swerveModules[1] = new SwerveModule(frModuleIO, 1,
             switch (Constants.getRobot()) {
+                case OMEGABOT, SIMBOT -> TunerConstants.FrontRight;
                 case ALPHABOT -> TunerConstantsAlpha.FrontRight;
+                case CHASSIS -> TunerConstantsChassis.FrontRight;
                 case LAST_YEAR -> TunerConstantsLastYear.FrontRight;
-                default -> TunerConstants.FrontRight;
+                default -> null;
             });
         swerveModules[2] = new SwerveModule(blModuleIO, 2,
             switch (Constants.getRobot()) {
+                case OMEGABOT, SIMBOT -> TunerConstants.BackLeft;
                 case ALPHABOT -> TunerConstantsAlpha.BackLeft;
+                case CHASSIS -> TunerConstantsChassis.BackLeft;
                 case LAST_YEAR -> TunerConstantsLastYear.BackLeft;
-                default -> TunerConstants.BackLeft;
+                default -> null;
             });
         swerveModules[3] = new SwerveModule(brModuleIO, 3,
             switch (Constants.getRobot()) {
+                case OMEGABOT, SIMBOT -> TunerConstants.BackRight;
                 case ALPHABOT -> TunerConstantsAlpha.BackRight;
+                case CHASSIS -> TunerConstantsChassis.BackRight;
                 case LAST_YEAR -> TunerConstantsLastYear.BackRight;
-                default -> TunerConstants.BackRight;
+                default -> null;
             });
 
         // Start odometry thread
@@ -342,13 +351,13 @@ public class Swerve extends SubsystemBase {
             this::runVelocity,
             new PPHolonomicDriveController(
             new PIDConstants(
-            AutonConstants.TRANSLATION_KP.get(),
-            AutonConstants.TRANSLATION_KI.get(),
-            AutonConstants.TRANSLATION_KD.get()),
+                AutonConstants.TRANSLATION_KP.get(),
+                AutonConstants.TRANSLATION_KI.get(),
+                AutonConstants.TRANSLATION_KD.get()),
             new PIDConstants(
-            AutonConstants.ROTATION_KP.get(),
-            AutonConstants.ROTATION_KI.get(),
-            AutonConstants.ROTATION_KD.get())),
+                AutonConstants.ROTATION_KP.get(),
+                AutonConstants.ROTATION_KI.get(),
+                AutonConstants.ROTATION_KD.get())),
             PP_CONFIG,
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
             this);
@@ -357,7 +366,7 @@ public class Swerve extends SubsystemBase {
             (activePath) -> {
                 FieldConstants.FIELD_2D.getObject("Path").setPoses(activePath);
                 Logger.recordOutput(
-                    "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+                    "Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
             });
         PathPlannerLogging.setLogTargetPoseCallback(
             (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
@@ -497,12 +506,7 @@ public class Swerve extends SubsystemBase {
      * @param speeds Speeds in meters/sec
      */
     public void runVelocity(ChassisSpeeds speeds) {
-        final double speedMetersPerSec =
-            switch (Constants.getRobot()) {
-                case ALPHABOT -> TunerConstantsAlpha.kSpeedAt12Volts.in(MetersPerSecond);
-                case LAST_YEAR -> TunerConstantsLastYear.kSpeedAt12Volts.in(MetersPerSecond);
-                default -> TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-            };
+        final double speedMetersPerSec = getMaxLinearSpeedMetersPerSec();
 
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -579,7 +583,7 @@ public class Swerve extends SubsystemBase {
     public void stopWithX() {
         Rotation2d[] headings = new Rotation2d[4];
         for (int i = 0; i < 4; i++) {
-            headings[i] = getModuleTranslations()[i].getAngle();
+            headings[i] = Objects.requireNonNull(getModuleTranslations())[i].getAngle();
         }
         kinematics.resetHeadings(headings);
         stop();
@@ -726,7 +730,9 @@ public class Swerve extends SubsystemBase {
      */
     public double getMaxLinearSpeedMetersPerSec() {
         return switch (Constants.getRobot()) {
+            case OMEGABOT, SIMBOT -> TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
             case ALPHABOT -> TunerConstantsAlpha.kSpeedAt12Volts.in(MetersPerSecond);
+            case CHASSIS -> TunerConstantsChassis.kSpeedAt12Volts.in(MetersPerSecond);
             case LAST_YEAR -> TunerConstantsLastYear.kSpeedAt12Volts.in(MetersPerSecond);
             default -> TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
         };
