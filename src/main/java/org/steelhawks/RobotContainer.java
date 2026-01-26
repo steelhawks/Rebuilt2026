@@ -13,7 +13,7 @@ import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
-import org.steelhawks.subsystems.superstructure.SuperStructure;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
@@ -97,8 +97,8 @@ public class RobotContainer {
             new Translation2d(Units.inchesToMeters(158.6), FieldConstants.FIELD_WIDTH),
             s_Swerve::getPose
         )
-            .onTrue(Commands.runOnce(() -> SuperStructure.setMode(SuperStructure.ShooterMode.TO_HUB)))
-            .onFalse(Commands.runOnce(() -> SuperStructure.setMode(SuperStructure.ShooterMode.FERRY)));
+            .onTrue(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.TO_HUB)))
+            .onFalse(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.FERRY)));
     }
 
     private void configureDriver() {}

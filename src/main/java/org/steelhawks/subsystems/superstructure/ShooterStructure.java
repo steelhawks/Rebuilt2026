@@ -6,7 +6,7 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 
-public class SuperStructure {
+public class ShooterStructure {
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
     private static ShooterMode currentMode = ShooterMode.MANUAL;

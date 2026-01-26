@@ -16,7 +16,7 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.superstructure.SuperStructure;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
@@ -129,11 +129,11 @@ public class Turret extends SubsystemBase {
             .getTranslation();
         var direction = target2d.minus(turretTranslation);
         double fieldRelativeAngle = direction.getAngle().getRadians();
-        var projectileData = SuperStructure.Static.calculateShot(target3d, target3d);
+        var projectileData = ShooterStructure.Static.calculateShot(target3d, target3d);
         if (projectileData == null) {
             return new ArrayList<>();
         }
-        double timeOfFlight = SuperStructure.calculateTimeofFlight(
+        double timeOfFlight = ShooterStructure.calculateTimeofFlight(
             projectileData.exitVelocity(),
             projectileData.hoodAngle(),
             turretTranslation.getDistance(target2d)
@@ -238,7 +238,7 @@ public class Turret extends SubsystemBase {
             }
         }
         if (shouldRun) {
-            switch (SuperStructure.getMode()) {
+            switch (ShooterStructure.getMode()) {
                 case TO_HUB -> {
                     var robot = poseSupplier.get();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
@@ -329,7 +329,7 @@ public class Turret extends SubsystemBase {
                             MathUtil.clamp(
                                 rotation.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
                 Commands.none(),
-                () -> SuperStructure.getMode().equals(SuperStructure.ShooterMode.MANUAL))
+                () -> ShooterStructure.getMode().equals(ShooterStructure.ShooterMode.MANUAL))
             .withName("Set Desired State");
     }
 
