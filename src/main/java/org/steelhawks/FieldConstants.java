@@ -12,40 +12,15 @@ import org.steelhawks.util.AprilTag;
 
 public class FieldConstants {
 
-    public static final double FIELD_LENGTH = VisionConstants.APRIL_TAG_LAYOUT.getFieldLength();
-    public static final double FIELD_WIDTH = VisionConstants.APRIL_TAG_LAYOUT.getFieldWidth();
-
-    public static final Field2d FIELD_2D = new Field2d();
-
-    public static AprilTag getAprilTag(int id) {
-        return new AprilTag(id, VisionConstants.APRIL_TAG_LAYOUT.getTagPose(id).get());
-    }
-
-    /*
-     * To properly use the auto flip feature, the poses MUST be for the blue alliance.
-     * The auto flip feature will automatically flip the poses for the red alliance.
-     */
-    public static final Pose2d BLUE_STARTING_POSE =
-        new Pose2d(new Translation2d(0, 0), new Rotation2d());
-
-    public static final Translation2d HUB_CENTER =
-        new Translation2d(Units.inchesToMeters(158.6 + (47.0 / 2.0)), FIELD_WIDTH / 2.0);
-    public static final Translation3d HUB_CENTER_3D =
-        new Translation3d(HUB_CENTER.getX(), HUB_CENTER.getY(), 1.575);
-
-    public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
-    public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0 - 56.4);
-    public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(20.0);
-
     public static Translation2d getClosestPointOnLine(
-            Translation2d startLine, Translation2d endLine) {
+        Translation2d startLine, Translation2d endLine) {
         Translation2d robotPoint = RobotContainer.s_Swerve.getPose().getTranslation();
 
         Vector2 lineVector =
-                new Vector2(endLine.getX() - startLine.getX(), endLine.getY() - startLine.getY());
+            new Vector2(endLine.getX() - startLine.getX(), endLine.getY() - startLine.getY());
         Vector2 pointVector =
-                new Vector2(
-                        robotPoint.getX() - startLine.getX(), robotPoint.getY() - startLine.getY());
+            new Vector2(
+                robotPoint.getX() - startLine.getX(), robotPoint.getY() - startLine.getY());
 
         double lineLengthSquared = lineVector.dot(lineVector);
         double dotProduct = pointVector.dot(pointVector);
@@ -53,11 +28,40 @@ public class FieldConstants {
         double t = dotProduct / lineLengthSquared; // projection of point onto line
         double lineLength = startLine.getDistance(endLine);
         double percentToIgnoreFromEachSide =
-                (RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2.0) / lineLength;
+            (RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2.0) / lineLength;
 
         t = Math.max(percentToIgnoreFromEachSide, Math.min(1 - percentToIgnoreFromEachSide, t));
 
         return new Translation2d(
-                startLine.getX() + t * lineVector.x, startLine.getY() + t * lineVector.y);
+            startLine.getX() + t * lineVector.x, startLine.getY() + t * lineVector.y);
+    }
+
+    public static AprilTag getAprilTag(int id) {
+        return new AprilTag(id, VisionConstants.APRIL_TAG_LAYOUT.getTagPose(id).get());
+    }
+
+    public static final double FIELD_LENGTH = VisionConstants.APRIL_TAG_LAYOUT.getFieldLength();
+    public static final double FIELD_WIDTH = VisionConstants.APRIL_TAG_LAYOUT.getFieldWidth();
+
+    public static final Field2d FIELD_2D = new Field2d();
+
+    public final static class Hub {
+        public static final Translation2d HUB_CENTER =
+            new Translation2d(Units.inchesToMeters(158.6 + (47.0 / 2.0)), FIELD_WIDTH / 2.0);
+        public static final Translation3d HUB_CENTER_3D =
+            new Translation3d(HUB_CENTER.getX(), HUB_CENTER.getY(), 1.575);
+
+        public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
+        public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0 - 56.4);
+        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(20.0);
+    }
+
+    public final static class Ferrying {
+        public static final double FERRY_LINE_X = Units.inchesToMeters(45.0 + 5.0);
+        public static final double ST_FERRY_LINE_Y = Units.inchesToMeters(65.65);
+        public static final double EN_FERRY_LINE_Y = FIELD_WIDTH - Units.inchesToMeters(65.65);
+
+        public static final Translation2d START_LINE = new Translation2d(FERRY_LINE_X, ST_FERRY_LINE_Y);
+        public static final Translation2d END_LINE = new Translation2d(FERRY_LINE_X, EN_FERRY_LINE_Y);
     }
 }

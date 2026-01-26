@@ -145,7 +145,7 @@ public class Turret extends SubsystemBase {
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && !isManual
-                && (isHomed && isZeroed)
+                && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
                 && inputs.connected
                 && Toggles.Turret.isEnabled.get()
                 && !Toggles.Turret.toggleVoltageOverride.get()
@@ -210,7 +210,7 @@ public class Turret extends SubsystemBase {
             switch (state) {
                 case TO_HUB -> {
                     var robot = poseSupplier.get();
-                    var hubCenter = AllianceFlip.apply(FieldConstants.HUB_CENTER_3D);
+                    var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                     var turretTranslation = new Pose3d(robot)
                         .transformBy(RobotConstants.ROBOT_TO_TURRET)
                         .toPose2d()
@@ -220,9 +220,26 @@ public class Turret extends SubsystemBase {
                     double turretRelativeAngle = MathUtil.angleModulus( // convert to turret rel
                         fieldRelativeAngle - robot.getRotation().getRadians());
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                    Constants.toLoggedPoint("Turret/AimingParams/Direction", direction);
+                    Logger.recordOutput("Turret/AimingParams/TurretRelativeAngle", turretRelativeAngle);
                 }
-                case FERRY -> {}
-                case FREE -> {}
+                case FERRY -> {
+                    var robot = poseSupplier.get();
+                    var ferryGoal = AllianceFlip.apply(
+                        FieldConstants.getClosestPointOnLine(FieldConstants.Ferrying.START_LINE, FieldConstants.Ferrying.END_LINE));
+                    var turretTranslation = new Pose3d(robot)
+                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
+                        .toPose2d()
+                        .getTranslation();
+                    var direction = ferryGoal.minus(turretTranslation);
+                    double fieldRelativeAngle = direction.getAngle().getRadians();
+                    double turretRelativeAngle = MathUtil.angleModulus(
+                        fieldRelativeAngle - robot.getRotation().getRadians());
+                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                    Constants.toLoggedPoint("Turret/Ferrying/FerryGoal", ferryGoal);
+                    Constants.toLoggedPoint("Turret/Ferrying/Direction", direction);
+                    Logger.recordOutput("Turret/Ferrying/TurretRelativeAngle", turretRelativeAngle);
+                }
             }
             desiredRotation =
                 Rotation2d.fromRadians(

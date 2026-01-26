@@ -2,8 +2,7 @@ package org.steelhawks;
 
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -286,5 +285,15 @@ public final class Constants {
                 Units.degreesToRadians(yaw)
             )
         );
+    }
+
+    /**
+     * Automatically logs a Translation2d as a Pose2d so that it can be viewed in AdvantageScope as a point
+     *
+     * @param name Name of the logged Translation2d.
+     * @param translation The Translation2d coordinate to be shown.
+     */
+    public static void toLoggedPoint(String name, Translation2d translation) {
+        Logger.recordOutput("Coordinate/" + name, new Pose2d(translation, new Rotation2d()));
     }
 }

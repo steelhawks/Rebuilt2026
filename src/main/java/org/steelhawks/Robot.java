@@ -11,6 +11,7 @@ import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.util.ClassPreloader;
 import edu.wpi.first.wpilibj.*;
@@ -221,14 +222,17 @@ public class Robot extends LoggedRobot {
         LoopTimeUtil.record("Commands");
 
         if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get())
-            updateSimPoseVisualizer();
+            visualizeFieldConstants();
 
         Logger.recordOutput("CANbus/CANivoreUsage", canivoreBus.getStatus().BusUtilization);
         Logger.recordOutput("CANbus/RioUsage", rioBus.getStatus().BusUtilization);
         LoopTimeUtil.record("RobotPeriodic");
     }
 
-    private void updateSimPoseVisualizer() {}
+    private void visualizeFieldConstants() {
+        Constants.toLoggedPoint("StartLine", FieldConstants.Ferrying.START_LINE);
+        Constants.toLoggedPoint("EndLine", FieldConstants.Ferrying.END_LINE);
+    }
 
     public void resetPoseSim() {
         if (Constants.getMode() == Mode.SIM) {

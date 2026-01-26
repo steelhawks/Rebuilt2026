@@ -42,9 +42,9 @@ public class ShooterPhysics {
         ) {
             double x_dist = distanceToTarget(predictedTarget);
             double y_dist = predictedTarget.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ();
-            double r = FieldConstants.FUNNEL_RADIUS * x_dist
+            double r = FieldConstants.Hub.FUNNEL_RADIUS * x_dist
                 / distanceToTarget(actualTarget);
-            double h = FieldConstants.FUNNEL_HEIGHT + FieldConstants.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
+            double h = FieldConstants.Hub.FUNNEL_HEIGHT + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
             double A1 = Math.pow(x_dist, 2);
             double B1 = x_dist;
             double D1 = y_dist;
@@ -92,12 +92,12 @@ public class ShooterPhysics {
             double v0 = Math.sqrt(G * Math.pow(x, 2) / denom);
 
             // funnel clearance checks
-            double r = FieldConstants.FUNNEL_RADIUS * x
+            double r = FieldConstants.Hub.FUNNEL_RADIUS * x
                 / distanceToTarget(actualTarget);
             double xFunnel = x - r;
             double requiredHeight =
-                FieldConstants.FUNNEL_HEIGHT
-                    + FieldConstants.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
+                FieldConstants.Hub.FUNNEL_HEIGHT
+                    + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
             double yAtFunnel =
                 xFunnel * Math.tan(theta)
                     - (G * Math.pow(xFunnel, 2))
