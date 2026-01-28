@@ -138,5 +138,79 @@ public class ShooterStructure {
 
     public static class Moving {
 
+        private static final int MAX_ITERATIONS = 5;
+        private static final double CONVERGENCE_THRESHOLD = 0.01; // meters
+
+        /**
+         * Calculates shot parameters for shooting while moving. Uses ToF iteration to predict
+         * where the target will be when the projectile arrives.
+         *
+         * <a href="https://www.chiefdelphi.com/t/time-of-flight-determination/512542">Read more</a>
+         * @param actualTarget The actual target you want to score at: Hub, Ferry.
+         * @param isFixedPitch If this is a fixed pitch shooter or not.
+         * @return ProjectileData with exit velocity, hood angle, and predicted intercept point.
+         */
+        public static ProjectileData calculateMovingShot(
+            Translation3d actualTarget,
+            boolean isFixedPitch
+        ) {
+            return calculateMovingShot(actualTarget, new Translation3d(), isFixedPitch);
+        }
+
+        /**
+         * Calculates shot parameters for shooting while moving. Uses ToF iteration to predict
+         * where the target will be when the projectile arrives.
+         *
+         * <a href="https://www.chiefdelphi.com/t/time-of-flight-determination/512542">Read more</a>
+         * @param actualTarget The actual target you want to score at: Hub, Ferry.
+         * @param targetVelocity The velocity the target is moving at.
+         * @param isFixedPitch If this is a fixed pitch shooter or not.
+         * @return ProjectileData with exit velocity, hood angle, and predicted intercept point.
+         */
+        public static ProjectileData calculateMovingShot(
+            Translation3d actualTarget,
+            Translation3d targetVelocity,
+            boolean isFixedPitch
+        ) {
+            Translation3d robotVelocity =
+                new Translation3d(
+                    RobotContainer.s_Swerve.getChassisSpeeds().vxMetersPerSecond,
+                    RobotContainer.s_Swerve.getChassisSpeeds().vyMetersPerSecond,
+                    0.0);
+            Translation3d predictedTarget = actualTarget;
+            ProjectileData solution = null;
+            for (int i = 0; i < MAX_ITERATIONS; i++) {
+                solution = isFixedPitch
+                    ? Static.calculateShotFixedPitch(actualTarget, predictedTarget)
+                    : Static.calculateShot(actualTarget, predictedTarget);
+                double distance = distanceToTarget(predictedTarget);
+                if (solution == null) {
+                    Logger.recordOutput("Shooter/Moving/ShotImpossible", true);
+                    return null;
+                }
+                double tof =
+                    calculateTimeofFlight(
+                        solution.exitVelocity(), solution.hoodAngle(), distance);
+                Translation3d relativeVelocity = targetVelocity.minus(robotVelocity);
+                Translation3d newPredictedTarget =
+                    actualTarget.plus(relativeVelocity.times(tof));
+
+                // check error
+                double error = predictedTarget.getDistance(newPredictedTarget);
+                Logger.recordOutput("Shooter/Moving/IterationError_" + i, error);
+                Logger.recordOutput("Shooter/Moving/HoodAngle_" + i, Math.toDegrees(solution.hoodAngle()));
+                Logger.recordOutput("Shooter/Moving/ExitVelocity_" + i, solution.exitVelocity());
+                if (error < CONVERGENCE_THRESHOLD) {
+                    Logger.recordOutput("Shooter/Moving/ConvergedIterations", i + 1);
+                    break;
+                }
+                predictedTarget = newPredictedTarget;
+            }
+            Logger.recordOutput("Shooter/Moving/FinalPredictedTarget",
+                new double[]{predictedTarget.getX(), predictedTarget.getY(), predictedTarget.getZ()});
+            Logger.recordOutput("Shooter/Moving/FinalHoodAngleDeg", Math.toDegrees(solution.hoodAngle()));
+            Logger.recordOutput("Shooter/Moving/FinalExitVelocity", solution.exitVelocity());
+            return solution;
+        }
     }
 }
