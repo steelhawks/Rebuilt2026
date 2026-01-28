@@ -11,7 +11,6 @@ import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.util.ClassPreloader;
 import edu.wpi.first.wpilibj.*;
@@ -36,7 +35,6 @@ import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.PhoenixUtil;
 import org.steelhawks.util.VirtualSubsystem;
-import org.steelhawks.util.autonbuilder.StartEndPosition;
 
 import java.lang.reflect.Field;
 

@@ -4,7 +4,6 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -12,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.steelhawks.util.autonbuilder.StartEndPosition;
 import org.steelhawks.commands.DriveCommands;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -49,7 +47,7 @@ public final class Autos {
         /* ------------- Autons ------------- */
 
         autoChooser.addDefaultOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
-        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd());
+        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
         if (Toggles.tuningMode.get()) {
             /* ------------- Swerve SysId ------------- */
@@ -78,14 +76,17 @@ public final class Autos {
         if (Toggles.tuningMode.get()) {
             return Misalignment.NONE;
         }
-
         String autoName = getAuto().getName();
+        ChoreoTraj trajectory = ChoreoTraj.ALL_TRAJECTORIES.get(autoName);
+        if (trajectory == null) {
+            return Misalignment.NONE;
+        }
         double radiansTolerance = Units.degreesToRadians(5);
         double xyTolerance = 0.6;
 
-        double rotError = AllianceFlip.apply(new Rotation2d(StartEndPosition.valueOf(autoName).rotRadians)).getRadians() - s_Swerve.getRotation().getRadians();
-        double xError = AllianceFlip.applyX(StartEndPosition.valueOf(autoName).x) - s_Swerve.getPose().getX();
-        double yError = AllianceFlip.applyY(StartEndPosition.valueOf(autoName).y) - s_Swerve.getPose().getY();
+        double rotError = AllianceFlip.apply(trajectory.initialPoseBlue().getRotation()).getRadians() - s_Swerve.getRotation().getRadians();
+        double xError = AllianceFlip.applyX(trajectory.initialPoseBlue().getX()) - s_Swerve.getPose().getX();
+        double yError = AllianceFlip.applyY(trajectory.initialPoseBlue().getY()) - s_Swerve.getPose().getY();
 
         boolean rotAligned = Math.abs(rotError) <= radiansTolerance;
         boolean xAligned = Math.abs(xError) <= xyTolerance;
@@ -98,18 +99,15 @@ public final class Autos {
         if (rotAligned && xAligned && yAligned) {
             return Misalignment.NONE;
         }
-
         if (!rotAligned && !xAligned && !yAligned) {
             return Misalignment.MULTIPLE;
         }
-
         if (!xAligned) {
             return (xError > 0) ? Misalignment.X_RIGHT : Misalignment.X_LEFT;
         }
         if (!yAligned) {
             return (yError > 0) ? Misalignment.Y_FORWARD : Misalignment.Y_BACKWARD;
         }
-
         return (rotError > 0) ? Misalignment.ROTATION_CCW : Misalignment.ROTATION_CW; // omega not being aligned is final scenario
     }
 
