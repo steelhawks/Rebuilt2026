@@ -95,29 +95,33 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-            switch (state) {
-                case RAMP_UP -> {
-                    io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
-                    if (nearTargetVelocity) {
-                        state = FlywheelState.SAMPLE_UNTIL_READY;
-                        currentSampleIndex = 0;
+            if (Toggles.Flywheel.toggleAdaptiveFeedforward.get()) {
+                switch (state) {
+                    case RAMP_UP -> {
+                        io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
+                        if (nearTargetVelocity) {
+                            state = FlywheelState.SAMPLE_UNTIL_READY;
+                            currentSampleIndex = 0;
+                        }
+                    }
+                    case SAMPLE_UNTIL_READY -> {
+                        io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
+                        if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
+                            voltageSamples[currentSampleIndex] = inputs.appliedVolts;
+                            currentSampleIndex++;
+                        }
+                        if (currentSampleIndex >= sampleCounts) {
+                            sampledVoltage = calculateAverageSample();
+                            state = FlywheelState.HOLD;
+                            Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
+                        }
+                    }
+                    case HOLD -> {
+                        io.runFlywheelOpenLoop(sampledVoltage, false);
                     }
                 }
-                case SAMPLE_UNTIL_READY -> {
-                    io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
-                    if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
-                        voltageSamples[currentSampleIndex] = inputs.appliedVolts;
-                        currentSampleIndex++;
-                    }
-                    if (currentSampleIndex >= sampleCounts) {
-                        sampledVoltage = calculateAverageSample();
-                        state = FlywheelState.HOLD;
-                        Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
-                    }
-                }
-                case HOLD -> {
-                    io.runFlywheelOpenLoop(sampledVoltage, false);
-                }
+            } else {
+                io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
             }
         } else {
             state = FlywheelState.HOLD;
