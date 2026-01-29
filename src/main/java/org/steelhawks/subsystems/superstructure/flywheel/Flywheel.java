@@ -39,15 +39,15 @@ public class Flywheel extends SubsystemBase {
     private LoggedTunableNumber tuningAmps;
 
     public enum FlywheelState {
-        SAMPLE_UNTIL_READY,
         RAMP_UP,
-        HOLD
+        SAMPLING,
+        RUNNING
     }
 
     private final FlywheelIO io;
     private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
-    private FlywheelState state = FlywheelState.HOLD;
+    private FlywheelState state = FlywheelState.RAMP_UP;
     private boolean nearTargetVelocity = false;
     private double targetVelocityRadPerSec = 0.0;
 
@@ -95,40 +95,41 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-            if (Toggles.Flywheel.toggleAdaptiveFeedforward.get()) {
-                switch (state) {
-                    case RAMP_UP -> {
-                        io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
-                        if (nearTargetVelocity) {
-                            state = FlywheelState.SAMPLE_UNTIL_READY;
-                            currentSampleIndex = 0;
-                        }
-                    }
-                    case SAMPLE_UNTIL_READY -> {
-                        io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
-                        if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
-                            voltageSamples[currentSampleIndex] = inputs.appliedVolts;
-                            currentSampleIndex++;
-                        }
-                        if (currentSampleIndex >= sampleCounts) {
-                            sampledVoltage = calculateAverageSample();
-                            state = FlywheelState.HOLD;
-                            Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
-                        }
-                    }
-                    case HOLD -> {
-                        io.runFlywheelOpenLoop(sampledVoltage, false);
+            double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
+                ? sampledVoltage
+                : kS.get() + kV.get() * targetVelocityRadPerSec;
+            Logger.recordOutput("Flywheel/Feedforward", feedforward);
+            switch (state) {
+                case RAMP_UP -> {
+                    io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                    if (nearTargetVelocity) {
+                        state = FlywheelState.SAMPLING;
+                        currentSampleIndex = 0;
                     }
                 }
-            } else {
-                io.runFlywheel(targetVelocityRadPerSec, kS.get() + kV.get() * targetVelocityRadPerSec, false);
+                case SAMPLING -> {
+                    io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                    if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
+                        voltageSamples[currentSampleIndex] = inputs.appliedVolts;
+                        currentSampleIndex++;
+                    }
+                    if (currentSampleIndex >= sampleCounts) {
+                        sampledVoltage = calculateAverageSample();
+                        state = FlywheelState.RUNNING;
+                        Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
+                    }
+                }
+                case RUNNING -> io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
             }
         } else {
-            state = FlywheelState.HOLD;
+            state = FlywheelState.RAMP_UP;
             sampledVoltage = 0.0;
+            currentSampleIndex = 0;
+            Logger.recordOutput("Flywheel/Feedforward", 0.0);
         }
         Logger.recordOutput("Flywheel/State", state.toString());
         Logger.recordOutput("Flywheel/TargetVelocity", targetVelocityRadPerSec);
+        Logger.recordOutput("Flywheel/AdaptiveFeedforward", sampledVoltage != 0.0);
     }
 
     private double calculateAverageSample() {
@@ -140,7 +141,7 @@ public class Flywheel extends SubsystemBase {
     }
 
     public boolean isReadyToShoot() {
-        return state == FlywheelState.HOLD && nearTargetVelocity;
+        return state == FlywheelState.RUNNING && nearTargetVelocity;
     }
 
     ///////////////////////
