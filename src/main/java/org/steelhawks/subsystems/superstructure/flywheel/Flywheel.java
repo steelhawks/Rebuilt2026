@@ -4,11 +4,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.Set;
+
+import static edu.wpi.first.units.Units.Volts;
 
 public class Flywheel extends SubsystemBase {
 
@@ -30,6 +33,7 @@ public class Flywheel extends SubsystemBase {
     private final double[] voltageSamples = new double[sampleCounts];
     private double sampledVoltage = 0.0;
     private int currentSampleIndex = 0;
+    private final SysIdRoutine routine;
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -49,6 +53,16 @@ public class Flywheel extends SubsystemBase {
 
     public Flywheel(FlywheelIO io) {
         this.io = io;
+        routine =
+            new SysIdRoutine(
+                new SysIdRoutine.Config(
+                    null,
+                    null,
+                    null,
+                    (state) -> Logger.recordOutput("Flywheel/SysIdState", state.toString())),
+                new SysIdRoutine.Mechanism(
+                    (voltage) -> io.runFlywheelOpenLoop(voltage.in(Volts), false), null, this)
+        );
     }
 
     @Override
@@ -59,8 +73,10 @@ public class Flywheel extends SubsystemBase {
         nearTargetVelocity = Math.abs(inputs.velocityRadPerSec - targetVelocityRadPerSec) <= velocityTolerance.get();
         final boolean shouldRun =
             DriverStation.isEnabled()
-                && Toggles.Flywheel.isEnabled.get();
-
+                && Toggles.Flywheel.isEnabled.get()
+                && !Toggles.Turret.toggleVoltageOverride.get()
+                && !Toggles.Turret.toggleCurrentOverride.get()
+                && !Toggles.tuningMode.get();
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {
                 if (tuningVolts == null) {
@@ -104,7 +120,6 @@ public class Flywheel extends SubsystemBase {
                 }
             }
         } else {
-            io.stop();
             state = FlywheelState.HOLD;
             sampledVoltage = 0.0;
         }
@@ -135,5 +150,15 @@ public class Flywheel extends SubsystemBase {
                 state = FlywheelState.RAMP_UP;
             }
         }), Set.of(this));
+    }
+
+    public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {
+        return Commands.runOnce(() -> Toggles.Flywheel.isEnabled.set(false)).andThen(routine.quasistatic(direction))
+            .onlyIf(Toggles.tuningMode::get);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return Commands.runOnce(() -> Toggles.Flywheel.isEnabled.set(false)).andThen(routine.dynamic(direction))
+            .onlyIf(Toggles.tuningMode::get);
     }
 }
