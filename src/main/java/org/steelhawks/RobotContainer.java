@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -68,18 +69,26 @@ public class RobotContainer {
             configureDriver();
         }
 
+//        driver.x()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
+//        driver.y()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
+//        driver.a()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
+//        driver.b()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
         driver.x()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
+            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
         driver.y()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
+            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
         driver.a()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
+            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
         driver.b()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
+        .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     private boolean isHubActive() {
