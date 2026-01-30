@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -16,8 +17,10 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
+import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
+import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -51,10 +54,12 @@ public class RobotContainer {
             s_Vision = config.createVision(s_Swerve::accept).orElse(null);
         }
         s_ObjVision = config.createObjectVision().orElse(null);
-        s_Flywheel = config.createFlywheel().orElse(null);
-        s_Turret = config.createTurret(s_Swerve::getPose).orElse(null);
-        s_Pivot = config.createPivot().orElse(null);
-        s_Intake = config.createIntake().orElse(null);
+//        s_Flywheel = config.createFlywheel().orElse(null);
+//        s_Turret = config.createTurret(s_Swerve::getPose).orElse(null);
+//        s_Pivot = config.createPivot().orElse(null);
+//        s_Intake = config.createIntake().orElse(null);
+        s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
+        s_Turret = new Turret(new TurretIOTalonFX(new RobotConfig.CANBus("")), Pose2d::new);
 
         if (config.hasAutos) {
             Autos.init();
@@ -69,26 +74,26 @@ public class RobotContainer {
             configureDriver();
         }
 
-//        driver.x()
-//            .onTrue(
-//                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
-//        driver.y()
-//            .onTrue(
-//                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
-//        driver.a()
-//            .onTrue(
-//                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
-//        driver.b()
-//            .onTrue(
-//                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
         driver.x()
-            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
+            .onTrue(
+                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
         driver.y()
-            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
+            .onTrue(
+                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
         driver.a()
-            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+            .onTrue(
+                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
         driver.b()
-        .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+            .onTrue(
+                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
+//        driver.x()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
+//        driver.y()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
+//        driver.a()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//        driver.b()
+//        .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     private boolean isHubActive() {
@@ -101,13 +106,13 @@ public class RobotContainer {
     }
 
     private void configureTriggers() {
-        new FieldBoundingBox("AllianceSide",
-            new Translation2d(0.0, 0.0),
-            new Translation2d(Units.inchesToMeters(158.6), FieldConstants.FIELD_WIDTH),
-            s_Swerve::getPose
-        )
-            .onTrue(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.TO_HUB)))
-            .onFalse(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.FERRY)));
+//        new FieldBoundingBox("AllianceSide",
+//            new Translation2d(0.0, 0.0),
+//            new Translation2d(Units.inchesToMeters(158.6), FieldConstants.FIELD_WIDTH),
+//            s_Swerve::getPose
+//        )
+//            .onTrue(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.TO_HUB)))
+//            .onFalse(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.FERRY)));
     }
 
     private void configureDriver() {}

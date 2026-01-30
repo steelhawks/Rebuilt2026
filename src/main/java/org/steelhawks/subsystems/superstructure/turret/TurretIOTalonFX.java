@@ -8,6 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
 import org.steelhawks.util.PhoenixUtil;
@@ -38,7 +39,7 @@ public class TurretIOTalonFX implements TurretIO {
         config.Slot0.kP = Turret.kP.getAsDouble();
         config.Slot0.kI = Turret.kI.getAsDouble();
         config.Slot0.kD = Turret.kD.getAsDouble();
-        config.Feedback.SensorToMechanismRatio = 200.0 / 10.0;
+        config.Feedback.SensorToMechanismRatio = 200.0 / 20.0;
         config.ClosedLoopGeneral.ContinuousWrap = false;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
@@ -83,7 +84,7 @@ public class TurretIOTalonFX implements TurretIO {
     @Override
     public void runPivot(double setpoint, double feedforward) {
         motor.setControl(
-            positionTorqueCurrentFOC.withPosition(setpoint)
+            positionTorqueCurrentFOC.withPosition(Units.radiansToRotations(setpoint))
                 .withFeedForward(feedforward));
     }
 
@@ -112,7 +113,7 @@ public class TurretIOTalonFX implements TurretIO {
     @Override
     public void setPosition(double position) {
         new Thread(() -> {
-            motor.setPosition(position);
+            motor.setPosition(Units.radiansToRotations(position));
         }).start();
     }
 

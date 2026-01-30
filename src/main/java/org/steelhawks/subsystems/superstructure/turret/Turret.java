@@ -28,11 +28,11 @@ import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", 4.0);
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", 2.0);
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", 0.0);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 600.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 1000.0); // 1500
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", 0.0);
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 20.0);
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 70.0); // 35
 
     private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 30.0);
     private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 40.0);
@@ -40,7 +40,7 @@ public class Turret extends SubsystemBase {
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.3);
 
     private static final LoggedTunableNumber currentHomingThres =
-        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 25.0);
+        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 40.0);
     private static final double homingVolts = 0.1;
 
     private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
@@ -49,7 +49,7 @@ public class Turret extends SubsystemBase {
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
-    private final Supplier<Pose2d> poseSupplier;
+    private Supplier<Pose2d> poseSupplier;
     private TrapezoidProfile profile;
     private final TurretIO io;
 
@@ -74,6 +74,10 @@ public class Turret extends SubsystemBase {
                 new TrapezoidProfile.Constraints(
                     maxVelocityRadPerSec.getAsDouble(),
                     maxAccelerationRadPerSecSq.getAsDouble()));
+    }
+
+    private Pose2d getPose() {
+        return poseSupplier != null ? poseSupplier.get() : new Pose2d();
     }
 
     private Rotation2d getPosition() {
@@ -122,7 +126,7 @@ public class Turret extends SubsystemBase {
     private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
         List<Translation3d> trajectoryPoints = new ArrayList<>();
         int numPoints = 50;
-        var robot = poseSupplier.get();
+        var robot = getPose();
         var turretTranslation = new Pose3d(robot)
             .transformBy(RobotConstants.ROBOT_TO_TURRET)
             .toPose2d()
@@ -240,7 +244,7 @@ public class Turret extends SubsystemBase {
         if (shouldRun) {
             switch (ShooterStructure.getMode()) {
                 case TO_HUB -> {
-                    var robot = poseSupplier.get();
+                    var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                     var turretTranslation = new Pose3d(robot)
                         .transformBy(RobotConstants.ROBOT_TO_TURRET)
@@ -258,7 +262,7 @@ public class Turret extends SubsystemBase {
                     Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
                 }
                 case FERRY -> {
-                    var robot = poseSupplier.get();
+                    var robot = getPose();
                     var ferryGoal = AllianceFlip.apply(
                         FieldConstants.getClosestPointOnLine(FieldConstants.Ferrying.START_LINE, FieldConstants.Ferrying.END_LINE));
                     var turretTranslation = new Pose3d(robot)
