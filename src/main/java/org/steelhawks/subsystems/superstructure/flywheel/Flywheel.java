@@ -15,17 +15,18 @@ import static edu.wpi.first.units.Units.Volts;
 
 public class Flywheel extends SubsystemBase {
 
-    public static final int motorId = 0;
+    public static final int motorId1 = 3;
+    public static final int motorId2 = 2;
     public static final LoggedTunableNumber kP =
-        new LoggedTunableNumber("Flywheel/kP", 0.0);
+        new LoggedTunableNumber("Flywheel/kP", 0.01);
     public static final LoggedTunableNumber kI =
         new LoggedTunableNumber("Flywheel/kI", 0.0);
     public static final LoggedTunableNumber kD =
         new LoggedTunableNumber("Flywheel/kD", 0.0);
     public static final LoggedTunableNumber kS =
-        new LoggedTunableNumber("Flywheel/kS", 0.0);
+        new LoggedTunableNumber("Flywheel/kS", 0.22382);
     public static final LoggedTunableNumber kV =
-        new LoggedTunableNumber("Flywheel/kV", 0.0);
+        new LoggedTunableNumber("Flywheel/kV", 0.0080032);
     public static final LoggedTunableNumber velocityTolerance =
         new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 5.0);
 
@@ -98,7 +99,6 @@ public class Flywheel extends SubsystemBase {
             double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
                 ? sampledVoltage
                 : kS.get() + kV.get() * targetVelocityRadPerSec;
-            Logger.recordOutput("Flywheel/Feedforward", feedforward);
             switch (state) {
                 case RAMP_UP -> {
                     io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
@@ -150,10 +150,9 @@ public class Flywheel extends SubsystemBase {
 
     public Command setTargetVelocity(double velocityRadPerSec) {
         return Commands.defer(() -> Commands.runOnce(() -> {
-            if (Math.abs(targetVelocityRadPerSec - velocityRadPerSec) > 1.0) {
-                targetVelocityRadPerSec = velocityRadPerSec;
-                state = FlywheelState.RAMP_UP;
-            }
+            sampledVoltage = 0.0;
+            targetVelocityRadPerSec = velocityRadPerSec;
+            state = FlywheelState.RAMP_UP;
         }), Set.of(this));
     }
 

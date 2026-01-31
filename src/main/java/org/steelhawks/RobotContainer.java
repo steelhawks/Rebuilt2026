@@ -25,6 +25,7 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.FieldBoundingBox;
+import org.steelhawks.util.LoggedTunableNumber;
 
 public class RobotContainer {
 
@@ -74,18 +75,18 @@ public class RobotContainer {
             configureDriver();
         }
 
-        driver.x()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
-        driver.y()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
-        driver.a()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
-        driver.b()
-            .onTrue(
-                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
+//        driver.x()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(0.0)));
+//        driver.y()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2.0)));
+//        driver.a()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
+//        driver.b()
+//            .onTrue(
+//                s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2.0)));
 //        driver.x()
 //            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
 //        driver.y()
@@ -94,6 +95,17 @@ public class RobotContainer {
 //            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
 //        driver.b()
 //        .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+//        LoggedTunableNumber n = new LoggedTunableNumber("Flywheel/Setpoint", 0.0);
+        driver.x()
+            .onTrue(s_Flywheel.setTargetVelocity(5.0));
+        driver.y()
+            .onTrue(s_Flywheel.setTargetVelocity(30.0));
+        driver.a()
+            .onTrue(s_Flywheel.setTargetVelocity(50.0));
+        driver.b()
+            .onTrue(s_Flywheel.setTargetVelocity(750.0));
+//        driver.x()
+//            .onTrue()
     }
 
     private boolean isHubActive() {
