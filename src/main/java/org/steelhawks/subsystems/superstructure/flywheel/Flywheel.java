@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
+import org.steelhawks.util.Maths;
 
 import java.util.Set;
 
@@ -71,7 +72,7 @@ public class Flywheel extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
 
-        nearTargetVelocity = Math.abs(inputs.velocityRadPerSec - targetVelocityRadPerSec) <= velocityTolerance.get();
+        nearTargetVelocity = Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get());
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && Toggles.Flywheel.isEnabled.get()

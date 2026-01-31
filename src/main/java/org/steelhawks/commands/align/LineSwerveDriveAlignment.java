@@ -1,13 +1,12 @@
 package org.steelhawks.commands.align;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import org.dyn4j.geometry.Vector2;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
-import org.steelhawks.util.Conversions;
+import org.steelhawks.util.Maths;
 
 import java.util.function.DoubleSupplier;
 
@@ -59,22 +58,22 @@ public class LineSwerveDriveAlignment extends SwerveDriveAlignment {
         Translation2d ptVec = point.minus(start); // from start to point
 
         double lineLenSq = Math.pow(lineVec.getNorm(), 2); // line squared
-        double rawDot = Conversions.toVector2(ptVec).dot(Conversions.toVector2(lineVec)); // projection numerator
+        double rawDot = Maths.toVector2(ptVec).dot(Maths.toVector2(lineVec)); // projection numerator
         double rawT = rawDot / lineLenSq; // how far along [0..1] un-clamped
 
         // clamp so robot doesn’t drive off the ends
         double bumper = RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2.0;
         double percentIgnore = bumper / Math.sqrt(lineLenSq);
-        return MathUtil.clamp(rawT, percentIgnore, 1 - percentIgnore);
+        return edu.wpi.first.math.MathUtil.clamp(rawT, percentIgnore, 1 - percentIgnore);
     }
 
     @Override
     public void execute() {
-        double x = -MathUtil.applyDeadband(xSupplier.getAsDouble(), DEADBAND);
-        double y = -MathUtil.applyDeadband(ySupplier.getAsDouble(), DEADBAND);
+        double x = -edu.wpi.first.math.MathUtil.applyDeadband(xSupplier.getAsDouble(), DEADBAND);
+        double y = -edu.wpi.first.math.MathUtil.applyDeadband(ySupplier.getAsDouble(), DEADBAND);
 
         // vector from start-end
-        Vector2 lineVec = Conversions.toVector2(lineEnd).subtract(Conversions.toVector2(lineStart));
+        Vector2 lineVec = Maths.toVector2(lineEnd).subtract(Maths.toVector2(lineStart));
         Vector2 lineDir = lineVec.divide(lineVec.getNormalized().getMagnitude()); // normalize
 
         Vector2 raw = new Vector2(x, y); // raw input after deadband
@@ -84,10 +83,10 @@ public class LineSwerveDriveAlignment extends SwerveDriveAlignment {
         Pose2d current = targetPose.get();
         // clamp to stay between endpoints (t in [0,1])
         double t = getClampedTOnSegment(lineStart, lineEnd, current.getTranslation());
-        double newT = MathUtil.clamp(t + distAlongLine / lineVec.getNormalized().getMagnitude(), 0, 1);
-        Vector2 newPos = Conversions.toVector2(lineStart).add(lineVec.multiply(newT));
+        double newT = edu.wpi.first.math.MathUtil.clamp(t + distAlongLine / lineVec.getNormalized().getMagnitude(), 0, 1);
+        Vector2 newPos = Maths.toVector2(lineStart).add(lineVec.multiply(newT));
 
-        setSetpoint(new Pose2d(Conversions.toTranslation2d(newPos), current.getRotation()));
+        setSetpoint(new Pose2d(Maths.toTranslation2d(newPos), current.getRotation()));
         super.execute();
     }
 }

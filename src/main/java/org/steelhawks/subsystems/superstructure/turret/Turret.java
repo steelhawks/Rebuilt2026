@@ -20,6 +20,7 @@ import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
+import org.steelhawks.util.Maths;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -300,7 +301,7 @@ public class Turret extends SubsystemBase {
                         MathUtil.clamp(setpoint.position, minRotation.getRadians(), maxRotation.getRadians()),
                         0.0);
             }
-            atGoal = Math.abs(getPosition().getRadians() - goal.position) <= tolerance.getAsDouble();
+            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble());
             if (atGoal) {
                 io.stop();
             } else {

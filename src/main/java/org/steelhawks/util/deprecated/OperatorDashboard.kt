@@ -1,12 +1,12 @@
-package org.steelhawks.util
+package org.steelhawks.util.deprecated
 
-import edu.wpi.first.networktables.*
+import edu.wpi.first.networktables.NetworkTable
+import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.networktables.StringPublisher
 import edu.wpi.first.wpilibj.Alert
-import edu.wpi.first.wpilibj.Alert.AlertType
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.DriverStation.Alliance
 import org.steelhawks.Robot
-import org.steelhawks.RobotContainer
+import org.steelhawks.util.VirtualSubsystem
 
 /**
  * OperatorDashboard.kt
@@ -42,7 +42,7 @@ object OperatorDashboard : VirtualSubsystem() {
     fun initialize() {
         for (connection in NetworkTableInstance.getDefault().connections) {
             println("Connection: $connection")
-            Alert("Connected Devices " + connection.remote_ip, AlertType.kInfo).set(true)
+            Alert("Connected Devices " + connection.remote_ip, Alert.AlertType.kInfo).set(true)
         }
     }
 
@@ -53,7 +53,7 @@ object OperatorDashboard : VirtualSubsystem() {
         if (counter % 10 == 0) { // runs this every 10 cycles every 200 ms
 
             if (DriverStation.getAlliance().isPresent) {
-                alliance.set(if (DriverStation.getAlliance().equals(Alliance.Red)) "Red" else "Blue")
+                alliance.set(if (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) "Red" else "Blue")
             }
 
             robotState.set(Robot.getState().name)

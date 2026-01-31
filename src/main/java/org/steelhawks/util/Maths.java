@@ -5,7 +5,17 @@ import edu.wpi.first.math.geometry.*;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
 
-public class Conversions {
+public class Maths {
+
+    private static final double kEpsilon = 1e-6;
+
+    public static boolean epsilonEquals(double a, double b, double epsilon) {
+        return Math.abs(a - b) <= epsilon;
+    }
+
+    public static boolean epsilonEquals(double a, double b) {
+        return epsilonEquals(a, b, kEpsilon);
+    }
 
     public static Pose2d pose2dFromRotation(Rotation2d rotation) {
         return new Pose2d(Translation2d.kZero, rotation);

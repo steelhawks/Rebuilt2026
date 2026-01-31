@@ -42,7 +42,7 @@ public class FieldBoundingPolygon extends Trigger {
                         AllianceFlip.applyX(points[i].x),
                         AllianceFlip.applyY(points[i].y));
                 }
-                Logger.recordOutput("FieldBoundingPolygon/" + name + "/Points", Conversions.toTranslation2dArray(dynamicPoints));
+                Logger.recordOutput("FieldBoundingPolygon/" + name + "/Points", Maths.toTranslation2dArray(dynamicPoints));
             }
         };
     }
@@ -51,8 +51,8 @@ public class FieldBoundingPolygon extends Trigger {
         int numPoints = points.length;
         boolean result = false;
         for (int i = 0, j = numPoints - 1; i < numPoints; j = i++) {
-            Vector2 p1 = Conversions.toVector2(AllianceFlip.apply(Conversions.toTranslation2d(points[i])));
-            Vector2 p2 = Conversions.toVector2(AllianceFlip.apply(Conversions.toTranslation2d(points[j])));
+            Vector2 p1 = Maths.toVector2(AllianceFlip.apply(Maths.toTranslation2d(points[i])));
+            Vector2 p2 = Maths.toVector2(AllianceFlip.apply(Maths.toTranslation2d(points[j])));
 
             boolean intersects = ((p1.y <= testPoint.y && testPoint.y < p2.y) ||
                 (p2.y <= testPoint.y && testPoint.y < p1.y)) &&
