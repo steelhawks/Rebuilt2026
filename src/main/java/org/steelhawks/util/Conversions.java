@@ -1,14 +1,19 @@
 package org.steelhawks.util;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import org.dyn4j.geometry.Vector2;
 import org.dyn4j.geometry.Vector3;
 
 public class Conversions {
+
+    public static Pose2d pose2dFromRotation(Rotation2d rotation) {
+        return new Pose2d(Translation2d.kZero, rotation);
+    }
+
+    public static Pose2d pose2dFromTranslation(Translation2d translation) {
+        return new Pose2d(translation, Rotation2d.kZero);
+    }
 
     /**
      * @param angle angle in degrees

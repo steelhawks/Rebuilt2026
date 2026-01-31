@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.util.Conversions;
 import org.steelhawks.util.LoggedTunableNumber;
 
 
@@ -294,6 +295,6 @@ public final class Constants {
      * @param translation The Translation2d coordinate to be shown.
      */
     public static void toLoggedPoint(String name, Translation2d translation) {
-        Logger.recordOutput("Coordinate/" + name, new Pose2d(translation, new Rotation2d()));
+        Logger.recordOutput("Coordinate/" + name, Conversions.pose2dFromTranslation(translation));
     }
 }
