@@ -57,6 +57,8 @@ public class TurretIOTalonFX implements TurretIO {
         torqueCurrentFOC = new TorqueCurrentFOC(0.0);
         dutyCycleOut = new DutyCycleOut(0.0);
 
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            100, position, velocity, voltage, current, torqueCurrent, temp);
         PhoenixUtil.registerSignals(
             bus.bus.isNetworkFD(),
             position, velocity, voltage, current, torqueCurrent, temp);
