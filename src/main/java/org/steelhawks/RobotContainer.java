@@ -75,6 +75,19 @@ public class RobotContainer {
             configureDriver();
         }
 
+//        driver.rightStick().onTrue(
+//            s_Turret.toggleManualControl(driver::getRightY)
+//        );
+
+        driver.povLeft()
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2.0)));
+        driver.povUp()
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(0.0)));
+        driver.povDown()
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
+        driver.povRight()
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
+
         driver.x()
             .onTrue(s_Flywheel.setTargetVelocity(5.0));
         driver.y()
@@ -84,7 +97,13 @@ public class RobotContainer {
         driver.b()
             .onTrue(s_Flywheel.setTargetVelocity(750.0));
 //        driver.x()
-//            .onTrue()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
+//        driver.y()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
+//        driver.a()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//        driver.b()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     private boolean isHubActive() {

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -19,15 +20,15 @@ public class Flywheel extends SubsystemBase {
     public static final int motorId1 = 2;
     public static final int motorId2 = 3;
     public static final LoggedTunableNumber kP =
-        new LoggedTunableNumber("Flywheel/kP", 0.1);
+        new LoggedTunableNumber("Flywheel/kP", 0.2);
     public static final LoggedTunableNumber kI =
         new LoggedTunableNumber("Flywheel/kI", 0.0);
     public static final LoggedTunableNumber kD =
         new LoggedTunableNumber("Flywheel/kD", 0.0);
     public static final LoggedTunableNumber kS =
-        new LoggedTunableNumber("Flywheel/kS", 0.22382);
+        new LoggedTunableNumber("Flywheel/kS", 0.042995);
     public static final LoggedTunableNumber kV =
-        new LoggedTunableNumber("Flywheel/kV", 0.0080032);
+        new LoggedTunableNumber("Flywheel/kV", 0.0090372);
     public static final LoggedTunableNumber velocityTolerance =
         new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 5.0);
 
@@ -76,9 +77,8 @@ public class Flywheel extends SubsystemBase {
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && Toggles.Flywheel.isEnabled.get()
-                && !Toggles.Turret.toggleVoltageOverride.get()
-                && !Toggles.Turret.toggleCurrentOverride.get()
-                && !Toggles.tuningMode.get();
+                && !Toggles.Flywheel.toggleVoltageOverride.get()
+                && !Toggles.Flywheel.toggleCurrentOverride.get();
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {
                 if (tuningVolts == null) {
@@ -141,6 +141,7 @@ public class Flywheel extends SubsystemBase {
         return sum / sampleCounts;
     }
 
+    @AutoLogOutput(key = "Flywheel/ReadyToShoot")
     public boolean isReadyToShoot() {
         return state == FlywheelState.RUNNING && nearTargetVelocity;
     }

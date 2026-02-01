@@ -38,7 +38,7 @@ public class Turret extends SubsystemBase {
     private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 30.0);
     private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 35.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
-    private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.3);
+    private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 
     private static final LoggedTunableNumber currentHomingThres =
         new LoggedTunableNumber("Turret/CurrentHomingThreshold", 40.0);
@@ -233,8 +233,8 @@ public class Turret extends SubsystemBase {
                 double appliedSpeed =
                     joystickAxis.getAsDouble() * manualIncrement.getAsDouble();
                 Logger.recordOutput("Turret/AppliedManualSpeed", appliedSpeed);
-                boolean canMoveCCW = appliedSpeed > 0 && getPosition().getRadians() < maxRotation.getRadians();
-                boolean canMoveCW = appliedSpeed < 0 && getPosition().getRadians() > minRotation.getRadians();
+                boolean canMoveCCW = appliedSpeed > 0 && getPosition().getRadians() <= maxRotation.getRadians();
+                boolean canMoveCW = appliedSpeed < 0 && getPosition().getRadians() >= minRotation.getRadians();
                 if (canMoveCCW || canMoveCW) {
                     io.runPercentOutput(appliedSpeed);
                 } else {
