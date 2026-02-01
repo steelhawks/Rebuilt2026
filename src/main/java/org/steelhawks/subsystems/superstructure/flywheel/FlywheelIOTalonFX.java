@@ -56,6 +56,8 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
 
         PhoenixUtil.tryUntilOk(5, () -> leftMotor.getConfigurator().apply(config));
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            100, position, velocity);
         PhoenixUtil.registerSignals(
             bus.bus.isNetworkFD(),
             position, velocity, voltage, current, torqueCurrent, temp);

@@ -16,10 +16,10 @@ import static edu.wpi.first.units.Units.Volts;
 
 public class Flywheel extends SubsystemBase {
 
-    public static final int motorId1 = 3;
-    public static final int motorId2 = 2;
+    public static final int motorId1 = 2;
+    public static final int motorId2 = 3;
     public static final LoggedTunableNumber kP =
-        new LoggedTunableNumber("Flywheel/kP", 0.01);
+        new LoggedTunableNumber("Flywheel/kP", 0.1);
     public static final LoggedTunableNumber kI =
         new LoggedTunableNumber("Flywheel/kI", 0.0);
     public static final LoggedTunableNumber kD =
