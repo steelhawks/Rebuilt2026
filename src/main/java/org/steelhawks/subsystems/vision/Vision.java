@@ -19,6 +19,8 @@ import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.VirtualSubsystem;
@@ -195,9 +197,11 @@ public class Vision extends VirtualSubsystem {
                     linearStdDev *= LINEAR_STD_DEV_MEGATAG2_FACTOR;
                     angularStdDev *= ANGULAR_STD_DEV_MEGATAG2_FACTOR;
                 }
-                if (cameraIndex < VisionConstants.getCameraConfig().length) {
-                    linearStdDev *= getCameraConfig()[cameraIndex].factors().getFactors()[0];
-                    angularStdDev *= getCameraConfig()[cameraIndex].factors().getFactors()[1];
+                if (cameraIndex < Objects.requireNonNull(VisionConstants.getCameraConfig()).length) {
+                    linearStdDev *= getCameraConfig()[cameraIndex].factors().getFactors()[0]
+                        * (RobotContainer.s_Swerve.isOnBump() ? VisionConstants.baselineDropOdomFactor.get() : 1.0);
+                    angularStdDev *= getCameraConfig()[cameraIndex].factors().getFactors()[1]
+                        * (RobotContainer.s_Swerve.isOnBump() ? VisionConstants.baselineDropOdomFactor.get() : 1.0);
                 }
                 if (useQuestNav && !Robot.isFirstRun()) {
                     assert questNav != null;

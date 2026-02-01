@@ -18,6 +18,8 @@ import java.util.Queue;
 public class GyroIOPigeon2 implements GyroIO {
 
     private final Pigeon2 pigeon;
+    private final StatusSignal<Angle> roll;
+    private final StatusSignal<Angle> pitch;
     private final StatusSignal<Angle> yaw;
     private final StatusSignal<LinearAcceleration> accelerationX;
     private final StatusSignal<LinearAcceleration> accelerationY;
@@ -28,6 +30,8 @@ public class GyroIOPigeon2 implements GyroIO {
     public GyroIOPigeon2(int pigeon2Id, CANBus canBus) {
         pigeon = new Pigeon2(pigeon2Id, canBus.bus);
 
+        roll = pigeon.getRoll();
+        pitch = pigeon.getPitch();
         yaw = pigeon.getYaw();
         accelerationX = pigeon.getAccelerationX();
         accelerationY = pigeon.getAccelerationY();
@@ -35,7 +39,10 @@ public class GyroIOPigeon2 implements GyroIO {
 
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
+        roll.setUpdateFrequency(50.0);
+        pitch.setUpdateFrequency(50.0);
         yaw.setUpdateFrequency(Swerve.ODOMETRY_FREQUENCY);
+
         yawVelocity.setUpdateFrequency(50.0);
         accelerationX.setUpdateFrequency(50.0);
         accelerationY.setUpdateFrequency(50.0);
@@ -45,12 +52,14 @@ public class GyroIOPigeon2 implements GyroIO {
 
         PhoenixUtil.registerSignals(
             canBus.bus.isNetworkFD(),
-            yaw, accelerationX, accelerationY, yawVelocity);
+            roll, pitch, yaw, accelerationX, accelerationY, yawVelocity);
     }
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = BaseStatusSignal.isAllGood(yaw, accelerationX, accelerationY, yawVelocity);
+        inputs.rollPosition = Rotation2d.fromDegrees(roll.getValueAsDouble());
+        inputs.pitchPosition = Rotation2d.fromDegrees(pitch.getValueAsDouble());
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.accelerationXInGs = accelerationX.getValueAsDouble();
         inputs.accelerationYInGs = accelerationY.getValueAsDouble();

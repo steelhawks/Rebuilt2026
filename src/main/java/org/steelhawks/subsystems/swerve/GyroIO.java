@@ -8,6 +8,8 @@ public interface GyroIO {
     @AutoLog
     class GyroIOInputs {
         public boolean connected = false;
+        public Rotation2d rollPosition = new Rotation2d();
+        public Rotation2d pitchPosition = new Rotation2d();
         public Rotation2d yawPosition = new Rotation2d();
         public double accelerationXInGs = 0.0;
         public double accelerationYInGs = 0.0;

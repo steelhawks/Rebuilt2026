@@ -33,10 +33,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
@@ -108,6 +105,9 @@ public class Swerve extends SubsystemBase {
     private final LoggedTunableNumber COMMANDED_ACCEL_FILTER_THRESHOLD =
         new LoggedTunableNumber("Swerve/CommandedAccelFilterThreshold", 4.0);
 
+    private final LoggedTunableNumber BUMP_ANGLE_THRESHOLD =
+        new LoggedTunableNumber("Swerve/BumpAngleThreshold", 12.0); // degrees; need to tune
+
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -147,6 +147,7 @@ public class Swerve extends SubsystemBase {
     private final ProfiledPIDController mAlignController;
     private final Debouncer mAlignDebouncer;
     private final Debouncer collisionDebouncer;
+    private final Debouncer bumpDebouncer;
 
     static {
         switch (Constants.getRobot()) {
@@ -424,6 +425,7 @@ public class Swerve extends SubsystemBase {
         mAlignController.setTolerance(Units.degreesToRadians(3));
         mAlignDebouncer = new Debouncer(0.5, DebounceType.kRising);
         collisionDebouncer = new Debouncer(0.2, DebounceType.kRising);
+        bumpDebouncer = new Debouncer(0.25, DebounceType.kBoth);
 
         // warm up pathplanner lib
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -869,6 +871,15 @@ public class Swerve extends SubsystemBase {
         boolean linearCollision = jerkMag > COLLISION_JERK_THRESHOLD.get() && !highCommandedAccel;
         boolean angularCollision = angularJerkMag > COLLISION_ANG_JERK_THRESHOLD.get();
         return collisionDebouncer.calculate(linearCollision || angularCollision);
+    }
+
+    @AutoLogOutput(key = "Swerve/IsOnBump")
+    public boolean isOnBump() {
+        double roll = gyroInputs.rollPosition.getDegrees();
+        double pitch = gyroInputs.pitchPosition.getDegrees();
+        double tilt = Math.hypot(roll, pitch);
+
+        return bumpDebouncer.calculate(tilt > BUMP_ANGLE_THRESHOLD.get());
     }
 
     ///////////////////////

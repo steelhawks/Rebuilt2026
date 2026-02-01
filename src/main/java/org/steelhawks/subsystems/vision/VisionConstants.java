@@ -16,8 +16,13 @@ import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIO;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIOLimelight;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIOPhoton;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionSim;
+import org.steelhawks.util.LoggedTunableNumber;
 
 public class VisionConstants {
+
+    public static LoggedTunableNumber baselineDropOdomFactor
+        = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.1);
+
     // AprilTag layout
     public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
         AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
