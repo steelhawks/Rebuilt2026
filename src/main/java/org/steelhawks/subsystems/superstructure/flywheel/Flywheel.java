@@ -28,7 +28,7 @@ public class Flywheel extends SubsystemBase {
     public static final LoggedTunableNumber kS =
         new LoggedTunableNumber("Flywheel/kS", 0.042995);
     public static final LoggedTunableNumber kV =
-        new LoggedTunableNumber("Flywheel/kV", 0.0090372 * 0.95); // 5% reduction from sysid value
+        new LoggedTunableNumber("Flywheel/kV", 0.0090372 * 0.9); // 10% reduction from sysid value
     public static final LoggedTunableNumber velocityTolerance =
         new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 5.0);
 
