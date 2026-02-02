@@ -57,6 +57,7 @@ public class Turret extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
+    private double manualGoalRad = 0.0;
     private Rotation2d desiredRotation = new Rotation2d();
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
@@ -228,19 +229,16 @@ public class Turret extends SubsystemBase {
                             maxAccelerationRadPerSecSq.get()));
             }
         }
-        if (isManual) {
-            if (joystickAxis != null) {
-                double appliedSpeed =
-                    joystickAxis.getAsDouble() * manualIncrement.getAsDouble();
-                Logger.recordOutput("Turret/AppliedManualSpeed", appliedSpeed);
-                boolean canMoveCCW = appliedSpeed > 0 && getPosition().getRadians() <= maxRotation.getRadians();
-                boolean canMoveCW = appliedSpeed < 0 && getPosition().getRadians() >= minRotation.getRadians();
-                if (canMoveCCW || canMoveCW) {
-                    io.runPercentOutput(appliedSpeed);
-                } else {
-                    io.stop();
-                }
-            }
+        if (isManual && joystickAxis != null) {
+            double delta =
+                joystickAxis.getAsDouble()
+                    * manualIncrement.getAsDouble();
+            manualGoalRad =
+                MathUtil.clamp(
+                    manualGoalRad + delta,
+                    minRotation.getRadians(),
+                    maxRotation.getRadians());
+            desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
             switch (ShooterStructure.getMode()) {
@@ -342,10 +340,12 @@ public class Turret extends SubsystemBase {
         return Commands.either(
             Commands.runOnce(() -> {
                 isManual = false;
+                desiredRotation = getPosition();
                 io.stop();
             }),
             Commands.runOnce(() -> {
                 isManual = true;
+                manualGoalRad = getPosition().getRadians();
                 this.joystickAxis = joystickAxis;
             }),
             () -> isManual);
