@@ -571,7 +571,14 @@ public class RobotConfig {
 
         @Override
         public Swerve createSwerve() {
-            return null;
+            return new Swerve(
+                new GyroIOSim(Objects.requireNonNull(
+                Swerve.getDriveSimulation(), "Drive simulation not initialized")
+                    .getGyroSimulation()),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[0]),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[1]),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[2]),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[3]));
         }
 
         @Override

@@ -225,6 +225,12 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput("CANbus/CANivoreUsage", canivoreBus.getStatus().BusUtilization);
         Logger.recordOutput("CANbus/RioUsage", rioBus.getStatus().BusUtilization);
         LoopTimeUtil.record("RobotPeriodic");
+
+        if ((Constants.getMode() == Mode.SIM)
+            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
+        ) {
+            RobotContainer.s_Swerve.updatePhysicsSimulation();
+        }
     }
 
     private void visualizeFieldConstants() {
@@ -287,13 +293,6 @@ public class Robot extends LoggedRobot {
     public void simulationInit() {
         if (Constants.getMode() == Mode.SIM) {
             RobotContainer.s_Swerve.resetSimulation(new Pose2d(3, 3, new Rotation2d()));
-        }
-    }
-
-    @Override
-    public void simulationPeriodic() {
-        if (Constants.getMode() == Mode.SIM) {
-            RobotContainer.s_Swerve.updatePhysicsSimulation();
         }
     }
 }

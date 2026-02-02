@@ -2,20 +2,15 @@ package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
@@ -24,8 +19,6 @@ import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
-import org.steelhawks.util.FieldBoundingBox;
-import org.steelhawks.util.LoggedTunableNumber;
 
 public class RobotContainer {
 
@@ -51,9 +44,7 @@ public class RobotContainer {
         s_Swerve = config.createSwerve();
         s_LEDMatrix = config.createLEDMatrix().orElse(null);
         s_LEDStrip = config.createLEDStrip().orElse(null);
-        if (config.hasVision) {
-            s_Vision = config.createVision(s_Swerve::accept).orElse(null);
-        }
+        s_Vision = config.createVision(s_Swerve::accept).orElse(null);
         s_ObjVision = config.createObjectVision().orElse(null);
 //        s_Flywheel = config.createFlywheel().orElse(null);
 //        s_Turret = config.createTurret(s_Swerve::getPose).orElse(null);
@@ -65,16 +56,13 @@ public class RobotContainer {
         if (config.hasAutos) {
             Autos.init();
         }
-        if (Constants.getRobot() != RobotType.TEST_BOARD) {
-            s_Swerve.setDefaultCommand(
-                DriveCommands.joystickDrive(
-                    () -> -driver.getLeftY(),
-                    () -> -driver.getLeftX(),
-                    () -> -driver.getRightX()));
-            configureTriggers();
-            configureDriver();
-        }
-
+        s_Swerve.setDefaultCommand(
+            DriveCommands.joystickDrive(
+            () -> -driver.getLeftY(),
+            () -> -driver.getLeftX(),
+            () -> -driver.getRightX()));
+        configureTriggers();
+        configureDriver();
 //        driver.rightStick().onTrue(
 //            s_Turret.toggleManualControl(driver::getRightY)
 //        );

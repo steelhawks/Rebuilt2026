@@ -265,19 +265,22 @@ public class Swerve extends SubsystemBase {
                     // Specify gyro type (for realistic gyro drifting and error simulation)
                     .withGyro(COTS.ofPigeon2())
                     // Specify swerve module (for realistic swerve dynamics)
-                    .withSwerveModule(COTS.ofMark4n(
+                    .withSwerveModule(COTS.ofMark4i(
                         DCMotor.getKrakenX60Foc(1),
                         DCMotor.getKrakenX60Foc(1),
                         COTS.WHEELS.COLSONS.cof,
-                        3)) // L3 Gear ratio
+                        2)) // L3 Gear ratio
                     // Configures the track length and track width (spacing between swerve modules)
-                    .withTrackLengthTrackWidth(Inches.of(25), Inches.of(25))
+                    .withTrackLengthTrackWidth(Inches.of(27.5), Inches.of(27.5))
                     // Configures the bumper size (dimensions of the robot bumper)
-                    .withBumperSize(Inches.of(36), Inches.of(36));
+                    .withBumperSize(Inches.of(33.5), Inches.of(33.5));
             }
         }
 
-        if (RobotBase.isSimulation()) {
+        if (RobotBase.isSimulation() || !org.steelhawks.RobotConfig.getConfig().hasSwerve) {
+            if (!org.steelhawks.RobotConfig.getConfig().hasSwerve) {
+                SimulatedArena.ALLOW_CREATION_ON_REAL_ROBOT = true;
+            }
             DRIVE_SIMULATION = new SwerveDriveSimulation(MAPLE_SIM_CONFIG, new Pose2d(3, 3, new Rotation2d()));
             SimulatedArena.getInstance().addDriveTrainSimulation(DRIVE_SIMULATION);
         } else {
@@ -293,8 +296,6 @@ public class Swerve extends SubsystemBase {
     }
 
     public void updatePhysicsSimulation() {
-        if (Constants.getMode() != Mode.SIM) return;
-
         // physics sim to simulate the field
         SimulatedArena.getInstance().simulationPeriodic();
 
@@ -322,37 +323,32 @@ public class Swerve extends SubsystemBase {
         this.gyroIO = gyroIO;
         swerveModules[0] = new SwerveModule(flModuleIO, 0,
             switch (Constants.getRobot()) {
-                case OMEGABOT, SIMBOT -> TunerConstants.FrontLeft;
+                case OMEGABOT, SIMBOT, TEST_BOARD -> TunerConstants.FrontLeft;
                 case ALPHABOT -> TunerConstantsAlpha.FrontLeft;
                 case CHASSIS -> TunerConstantsChassis.FrontLeft;
                 case LAST_YEAR -> TunerConstantsLastYear.FrontLeft;
-                default -> null;
             });
         swerveModules[1] = new SwerveModule(frModuleIO, 1,
             switch (Constants.getRobot()) {
-                case OMEGABOT, SIMBOT -> TunerConstants.FrontRight;
+                case OMEGABOT, SIMBOT, TEST_BOARD -> TunerConstants.FrontRight;
                 case ALPHABOT -> TunerConstantsAlpha.FrontRight;
                 case CHASSIS -> TunerConstantsChassis.FrontRight;
                 case LAST_YEAR -> TunerConstantsLastYear.FrontRight;
-                default -> null;
             });
         swerveModules[2] = new SwerveModule(blModuleIO, 2,
             switch (Constants.getRobot()) {
-                case OMEGABOT, SIMBOT -> TunerConstants.BackLeft;
+                case OMEGABOT, SIMBOT, TEST_BOARD -> TunerConstants.BackLeft;
                 case ALPHABOT -> TunerConstantsAlpha.BackLeft;
                 case CHASSIS -> TunerConstantsChassis.BackLeft;
                 case LAST_YEAR -> TunerConstantsLastYear.BackLeft;
-                default -> null;
             });
         swerveModules[3] = new SwerveModule(brModuleIO, 3,
             switch (Constants.getRobot()) {
-                case OMEGABOT, SIMBOT -> TunerConstants.BackRight;
+                case OMEGABOT, SIMBOT, TEST_BOARD -> TunerConstants.BackRight;
                 case ALPHABOT -> TunerConstantsAlpha.BackRight;
                 case CHASSIS -> TunerConstantsChassis.BackRight;
                 case LAST_YEAR -> TunerConstantsLastYear.BackRight;
-                default -> null;
             });
-
         // Start odometry thread
         PhoenixOdometryThread.getInstance().start();
 
@@ -780,7 +776,7 @@ public class Swerve extends SubsystemBase {
      */
     public static Translation2d[] getModuleTranslations() {
         return switch (Constants.getRobot()) {
-            case OMEGABOT, SIMBOT ->
+            case OMEGABOT, SIMBOT, TEST_BOARD ->
                 new Translation2d[]{
                     new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
                     new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
@@ -805,7 +801,6 @@ public class Swerve extends SubsystemBase {
                 new Translation2d(TunerConstantsLastYear.BackLeft.LocationX, TunerConstantsLastYear.BackLeft.LocationY),
                 new Translation2d(TunerConstantsLastYear.BackRight.LocationX, TunerConstantsLastYear.BackRight.LocationY)
             };
-            case TEST_BOARD -> null;
         };
     }
 

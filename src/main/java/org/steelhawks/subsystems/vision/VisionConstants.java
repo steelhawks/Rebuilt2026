@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.vision;
 
 import org.dyn4j.geometry.Rotation;
+import org.steelhawks.RobotConfig;
 import org.steelhawks.subsystems.vision.VisionConstants.CameraConfig.CameraType;
 import edu.wpi.first.wpilibj.RobotBase;
 import org.steelhawks.Constants;
@@ -240,7 +241,7 @@ public class VisionConstants {
             case ALPHABOT -> ALPHA_CAMERA_CONFIG;
             case CHASSIS -> CHASSIS_CAMERA_CONFIG;
             case LAST_YEAR -> LAST_YEAR_CAMERA_CONFIG;
-            case TEST_BOARD -> null;
+            case TEST_BOARD -> OMEGA_CAMERA_CONFIG;
         };
     }
 
@@ -263,7 +264,9 @@ public class VisionConstants {
                     case LIMELIGHT -> io[i] = new VisionIOLimelight(config[i].name, RobotContainer.s_Swerve::getRotation);
                     case PHOTON -> io[i] = new VisionIOPhoton(config[i].name, config[i].robotToCamera);
                 }
-            } else if (Constants.getRobot() == Constants.RobotType.SIMBOT && !RobotBase.isReal()) {
+            } else if ((Constants.getRobot() == Constants.RobotType.SIMBOT && !RobotBase.isReal())
+                || (RobotBase.isReal() && !RobotConfig.getConfig().hasVision)
+            ) {
                 io[i] = new VisionIOPhotonSim(
                     config[i].name,
                     config[i].robotToCamera,
