@@ -9,7 +9,7 @@ import org.steelhawks.RobotContainer;
 public class ShooterStructure {
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
-    private static ShooterMode currentMode = ShooterMode.MANUAL;
+    private static ShooterMode currentMode = ShooterMode.TO_HUB;
     private static final double G = 9.81;
 
     public enum ShooterMode {

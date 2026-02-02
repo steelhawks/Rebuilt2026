@@ -52,7 +52,7 @@ public interface Toggles {
 
     interface Turret {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", false);
+            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
