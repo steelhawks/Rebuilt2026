@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.superstructure.flywheel;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -7,7 +8,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.FieldConstants;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -97,6 +100,8 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
+//            double mps = ShooterStructure.Static.calculateShot(FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+//            targetVelocityRadPerSec = ShooterStructure.linearToAngularVelocity(mps, Units.inchesToMeters(2.0));
             double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
                 ? sampledVoltage
                 : kS.get() + kV.get() * targetVelocityRadPerSec;

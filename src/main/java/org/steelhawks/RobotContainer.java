@@ -113,5 +113,7 @@ public class RobotContainer {
 //            .onFalse(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.FERRY)));
     }
 
-    private void configureDriver() {}
+    private void configureDriver() {
+//        driver.rightTrig/
+    }
 }
