@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,7 +14,6 @@ import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
-import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -51,7 +49,6 @@ public class RobotContainer {
 //        s_Pivot = config.createPivot().orElse(null);
 //        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
-//        s_Turret = new Turret(new TurretIOTalonFX(new RobotConfig.CANBus("")), Pose2d::new);
 
         if (config.hasAutos) {
             Autos.init();
@@ -76,7 +73,9 @@ public class RobotContainer {
                 .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
             driver.povRight()
                 .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
+        }
 
+        if (config.hasFlywheel) {
             driver.x()
                 .onTrue(s_Flywheel.setTargetVelocity(5.0));
             driver.y()
