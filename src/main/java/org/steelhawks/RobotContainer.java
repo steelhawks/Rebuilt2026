@@ -67,23 +67,25 @@ public class RobotContainer {
 //            s_Turret.toggleManualControl(driver::getRightY)
 //        );
 
-        driver.povLeft()
-            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2.0)));
-        driver.povUp()
-            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(0.0)));
-        driver.povDown()
-            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
-        driver.povRight()
-            .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
+        if (config.hasTurret) {
+            driver.povLeft()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2.0)));
+            driver.povUp()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(0.0)));
+            driver.povDown()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
+            driver.povRight()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
 
-        driver.x()
-            .onTrue(s_Flywheel.setTargetVelocity(5.0));
-        driver.y()
-            .onTrue(s_Flywheel.setTargetVelocity(50.0));
-        driver.a()
-            .onTrue(s_Flywheel.setTargetVelocity(350.0));
-        driver.b()
-            .onTrue(s_Flywheel.setTargetVelocity(750.0));
+            driver.x()
+                .onTrue(s_Flywheel.setTargetVelocity(5.0));
+            driver.y()
+                .onTrue(s_Flywheel.setTargetVelocity(50.0));
+            driver.a()
+                .onTrue(s_Flywheel.setTargetVelocity(350.0));
+            driver.b()
+                .onTrue(s_Flywheel.setTargetVelocity(750.0));
+        }
 //        driver.x()
 //            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
 //        driver.y()
