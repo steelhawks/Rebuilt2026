@@ -73,9 +73,16 @@ public class ObjectVisionIOLimelight implements ObjectVisionIO {
             observations.add(
                 new ObjectObservation(
                     camIndex,
-                    new DetectionInfo(detection, convertedCornersX, convertedCornersY),
+                    new DetectionInfo(
+                        detection.classId,
+                        detection.ta,
+                        convertedCornersX[0], convertedCornersY[0],
+                        convertedCornersX[1], convertedCornersY[1],
+                        convertedCornersX[2], convertedCornersY[2],
+                        convertedCornersX[3], convertedCornersY[3]
+                    ),
                     confidence,
-                    timestamp // timestamp in seconds
+                    timestamp
                 )
             );
         }
