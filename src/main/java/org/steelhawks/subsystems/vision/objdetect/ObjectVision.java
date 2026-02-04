@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.FieldConstants;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -17,8 +16,8 @@ import java.util.stream.Collectors;
 
 public class ObjectVision extends VirtualSubsystem {
 
-    private static final double coralOverlap = 0.1; // meters
-    private static final double coralMaxAge = 5.0; // seconds
+    private static final double objectOverlap = 0.1; // meters
+    private static final double objectMaxAge = 5.0; // seconds
 
     private static final LoggedTunableNumber maxArea =
         new LoggedTunableNumber("ObjectVision/MaxArea", 20.0);
@@ -118,8 +117,8 @@ public class ObjectVision extends VirtualSubsystem {
         Constants.loggedValue("ObjectProcessing/fieldToCoral", fieldToCoral);
         CoralPose coralPose = new CoralPose(fieldToCoral.getTranslation(), observation.timestamp());
         coralPoses.removeIf(
-            c -> c.translation.getDistance(fieldToCoral.getTranslation()) <= coralOverlap
-                || now - c.timestamp > coralMaxAge);
+            c -> c.translation.getDistance(fieldToCoral.getTranslation()) <= objectOverlap
+                || now - c.timestamp > objectMaxAge);
         coralPoses.add(coralPose);
 
         // fifo
@@ -150,17 +149,17 @@ public class ObjectVision extends VirtualSubsystem {
                 0.0,
                 new Rotation3d());
             double age = timestamp - coral.timestamp; // newer = higher confidence
-            double confidence = Math.max(0.0, 1.0 - (age / coralMaxAge));
+            double confidence = Math.max(0.0, 1.0 - (age / objectMaxAge));
             detectedObjects.add(new RobotState.DetectedObject(
                 objectPose,
-                "Coral",
+                "Fuel",
                 confidence,
                 coral.timestamp
             ));
         }
         RobotState.getInstance().addObjectDetections(detectedObjects, timestamp);
         coralPoses.forEach(o ->
-            Logger.recordOutput("CoralDetections/Detection", new Pose2d(o.translation, new Rotation2d())));
+            Logger.recordOutput("FuelDetections/Detection", new Pose2d(o.translation, new Rotation2d())));
         coralObjects.setPoses(
             coralPoses.stream()
                 .map(coral -> new Pose2d(coral.translation, new Rotation2d()))

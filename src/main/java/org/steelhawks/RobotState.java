@@ -28,10 +28,9 @@ public class RobotState {
         TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
     private final TimeInterpolatableBuffer<Rotation2d> turretAngleBuffer =
         TimeInterpolatableBuffer.createBuffer(turretAngleBufferSizeSec);
-    private final List<TimestampedObjectList> objectHistory;
-    private List<DetectedObject> currentDetectedObjects;
 
-
+    private Rotation2d gyroRotation = new Rotation2d();
+    private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveDriveKinematics kinematics =
         new SwerveDriveKinematics(Objects.requireNonNull(Swerve.getModuleTranslations()));
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -41,15 +40,16 @@ public class RobotState {
             new SwerveModulePosition(),
             new SwerveModulePosition()
         };
-    private Rotation2d gyroRotation = new Rotation2d();
-    private Rotation2d rawGyroRotation = new Rotation2d();
+
     private final SwerveDrivePoseEstimator poseEstimator =
         new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
     private final SwerveDriveOdometry wheelOdometry =
         new SwerveDriveOdometry(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-    private final List<DetectedObject> detectedObjects;
     private final List<VisionObservation> visionObservations;
+    private final List<TimestampedObjectList> objectHistory;
+    private List<DetectedObject> currentDetectedObjects;
+
 
     private static RobotState instance;
 
@@ -61,9 +61,7 @@ public class RobotState {
     }
 
     private RobotState() {
-        this.detectedObjects = new ArrayList<>();
         this.visionObservations = new ArrayList<>();
-
         this.objectHistory = new ArrayList<>();
         this.currentDetectedObjects = new ArrayList<>();
     }
@@ -89,7 +87,6 @@ public class RobotState {
         turretAngleBuffer.clear();
         objectHistory.clear();
         visionObservations.clear();
-        detectedObjects.clear();
         Logger.recordOutput("RobotState/PoseReset", pose);
     }
 
@@ -122,14 +119,9 @@ public class RobotState {
     public void addObjectDetections(List<DetectedObject> objects, double timestamp) {
         currentDetectedObjects = new ArrayList<>(objects);
 
-        // Add to history
         objectHistory.add(new TimestampedObjectList(timestamp, new ArrayList<>(objects)));
-
-        // Remove old history entries
         double now = Timer.getFPGATimestamp();
         objectHistory.removeIf(entry -> now - entry.timestamp > objectMaxAgeSec);
-
-        // Log detected objects
         Pose3d[] objectPoses = objects.stream()
             .map(DetectedObject::pose)
             .toArray(Pose3d[]::new);
@@ -140,7 +132,6 @@ public class RobotState {
     public void addTurretAngle(Rotation2d angle, double timestamp) {
         turretAngleBuffer.addSample(timestamp, angle);
     }
-
 
     @AutoLogOutput(key = "RobotState/PoseEstimation/PoseEstimation")
     public Pose2d getEstimatedPose() {
@@ -155,8 +146,6 @@ public class RobotState {
     public Pose2d getWheelOdometryPose() {
         return wheelOdometry.getPoseMeters();
     }
-
-
 
     public Optional<Pose2d> getPoseAtTime(double timestamp) {
         return poseBuffer.getSample(timestamp);
@@ -188,12 +177,16 @@ public class RobotState {
     }
 
     public Optional<DetectedObject> getClosestObject() {
-        if (currentDetectedObjects.isEmpty()) {
+        return getClosestObject(currentDetectedObjects);
+    }
+
+    public Optional<DetectedObject> getClosestObject(List<DetectedObject> objects) {
+        if (objects.isEmpty()) {
             return Optional.empty();
         }
 
         Pose2d robotPose = getEstimatedPose();
-        return currentDetectedObjects.stream()
+        return objects.stream()
             .min((o1, o2) -> {
                 double dist1 = robotPose.getTranslation()
                     .getDistance(o1.pose().toPose2d().getTranslation());
