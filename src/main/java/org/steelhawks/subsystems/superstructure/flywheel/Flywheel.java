@@ -1,5 +1,7 @@
 package org.steelhawks.subsystems.superstructure.flywheel;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,6 +42,8 @@ public class Flywheel extends SubsystemBase {
     private double sampledVoltage = 0.0;
     private int currentSampleIndex = 0;
     private final SysIdRoutine routine;
+    private final Debouncer setpointDebouncer =
+        new Debouncer(0.3, DebounceType.kBoth);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -76,7 +80,9 @@ public class Flywheel extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
 
-        nearTargetVelocity = Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get());
+        nearTargetVelocity =
+            setpointDebouncer.calculate(
+                Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && Toggles.Flywheel.isEnabled.get()
