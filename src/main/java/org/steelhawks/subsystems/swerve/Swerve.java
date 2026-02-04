@@ -341,7 +341,7 @@ public class Swerve extends SubsystemBase {
 
         // Configure AutoBuilder to use RobotState
         AutoBuilder.configure(
-            () -> robotState.getEstimatedPose(),
+            robotState::getEstimatedPose,
             this::setPose,
             this::getChassisSpeeds,
             this::runVelocity,
@@ -417,7 +417,7 @@ public class Swerve extends SubsystemBase {
     @AutoLogOutput(key = "Swerve/AlignAtGoal")
     public boolean alignAtGoal() {
         double goal = mAlignController.getGoal().position;
-        double angleDifference = MathUtil.angleModulus(goal - getPose().getRotation().getRadians());
+        double angleDifference = MathUtil.angleModulus(goal - RobotState.getInstance().getEstimatedPose().getRotation().getRadians());
         return mAlignDebouncer.calculate(Math.abs(angleDifference) <= Units.degreesToRadians(5));
     }
 
@@ -449,7 +449,7 @@ public class Swerve extends SubsystemBase {
         // Update odometry - now reports to RobotState
         processOdometryObservations();
 
-        FieldConstants.FIELD_2D.setRobotPose(getPose());
+        FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
     }
@@ -496,7 +496,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void followTrajectory(SwerveSample sample) {
-        var robot = getPose();
+        var robot = RobotState.getInstance().getEstimatedPose();
         var nextSetpoint = new Pose2d(sample.x, sample.y, new Rotation2d(sample.heading));
         var speeds = autonController.getOutput(robot, nextSetpoint)
             .plus(new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
@@ -601,27 +601,6 @@ public class Swerve extends SubsystemBase {
             output += swerveModules[i].getFFCharacterizationVelocity() / 4.0;
         }
         return output;
-    }
-
-    /**
-     * Get pose from RobotState
-     */
-    @AutoLogOutput(key = "Odometry/Robot")
-    public Pose2d getPose() {
-        return robotState.getEstimatedPose();
-    }
-
-    @AutoLogOutput(key = "Odometry/RobotWheelOdom")
-    public Pose2d getWheelOdomPose() {
-        return robotState.getWheelOdometryPose();
-    }
-
-    public Optional<Pose2d> getPoseAtTime(double timestamp) {
-        return robotState.getPoseAtTime(timestamp);
-    }
-
-    public Rotation2d getRotation() {
-        return getPose().getRotation();
     }
 
     public boolean shouldContinuePathfinding(BooleanSupplier stopCondition) {
@@ -768,7 +747,7 @@ public class Swerve extends SubsystemBase {
     public Command zeroHeading() {
         return Commands.runOnce(
                 () -> {
-                    Pose2d zeroed = new Pose2d(getPose().getTranslation(), new Rotation2d());
+                    Pose2d zeroed = new Pose2d(RobotState.getInstance().getEstimatedPose().getTranslation(), new Rotation2d());
 
                     if (RobotBase.isSimulation()) {
                         zeroed = new Pose2d(DRIVE_SIMULATION.getSimulatedDriveTrainPose().getTranslation(), new Rotation2d());

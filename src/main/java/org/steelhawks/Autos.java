@@ -25,7 +25,7 @@ public final class Autos {
 
     private static final AutoFactory factory =
         new AutoFactory(
-            s_Swerve::getPose, // A function that returns the current robot pose
+            RobotState.getInstance()::getEstimatedPose, // A function that returns the current robot pose
             s_Swerve::setPose, // A function that resets the current robot pose to the provided Pose2d
             s_Swerve::followTrajectory, // The drive subsystem trajectory follower
             true, // If alliance flipping should be enabled
@@ -84,9 +84,9 @@ public final class Autos {
         double radiansTolerance = Units.degreesToRadians(5);
         double xyTolerance = 0.6;
 
-        double rotError = AllianceFlip.apply(trajectory.initialPoseBlue().getRotation()).getRadians() - s_Swerve.getRotation().getRadians();
-        double xError = AllianceFlip.applyX(trajectory.initialPoseBlue().getX()) - s_Swerve.getPose().getX();
-        double yError = AllianceFlip.applyY(trajectory.initialPoseBlue().getY()) - s_Swerve.getPose().getY();
+        double rotError = AllianceFlip.apply(trajectory.initialPoseBlue().getRotation()).getRadians() - RobotState.getInstance().getRotation().getRadians();
+        double xError = AllianceFlip.applyX(trajectory.initialPoseBlue().getX()) - RobotState.getInstance().getEstimatedPose().getX();
+        double yError = AllianceFlip.applyY(trajectory.initialPoseBlue().getY()) - RobotState.getInstance().getEstimatedPose().getY();
 
         boolean rotAligned = Math.abs(rotError) <= radiansTolerance;
         boolean xAligned = Math.abs(xError) <= xyTolerance;

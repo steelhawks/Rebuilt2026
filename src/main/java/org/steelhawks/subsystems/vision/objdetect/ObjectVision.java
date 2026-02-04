@@ -48,12 +48,12 @@ public class ObjectVision extends VirtualSubsystem {
 
     private void addCoralObservationToPose(ObjectVisionIO.ObjectObservation observation) {
         double now = Timer.getFPGATimestamp();
-        Optional<Pose2d> oldWheelOdomPose = RobotContainer.s_Swerve.getPoseAtTime(observation.timestamp());
+        Optional<Pose2d> oldWheelOdomPose = RobotState.getInstance().getPoseAtTime(observation.timestamp());
         if (Constants.loggedValue("CoralProcessing/WheelOdomEmpty", oldWheelOdomPose.isEmpty())) {
             return;
         }
-        var estimatedPose = RobotContainer.s_Swerve.getPose();
-        var wheelOdometryPose = RobotContainer.s_Swerve.getWheelOdomPose();
+        var estimatedPose = RobotState.getInstance().getEstimatedPose();
+        var wheelOdometryPose = RobotState.getInstance().getWheelOdometryPose();
         Pose2d fieldToRobot =
             estimatedPose.transformBy(new Transform2d(wheelOdometryPose, oldWheelOdomPose.get()));
         Transform3d robotToCamera =

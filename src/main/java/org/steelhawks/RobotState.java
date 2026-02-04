@@ -147,10 +147,16 @@ public class RobotState {
         return poseEstimator.getEstimatedPosition();
     }
 
+    public Rotation2d getRotation() {
+        return getEstimatedPose().getRotation();
+    }
+
     @AutoLogOutput(key = "RobotState/PoseEstimation/Odometry")
     public Pose2d getWheelOdometryPose() {
         return wheelOdometry.getPoseMeters();
     }
+
+
 
     public Optional<Pose2d> getPoseAtTime(double timestamp) {
         return poseBuffer.getSample(timestamp);

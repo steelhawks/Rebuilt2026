@@ -14,7 +14,7 @@ public class FieldConstants {
 
     public static Translation2d getClosestPointOnLine(
         Translation2d startLine, Translation2d endLine) {
-        Translation2d robotPoint = RobotContainer.s_Swerve.getPose().getTranslation();
+        Translation2d robotPoint = RobotState.getInstance().getEstimatedPose().getTranslation();
 
         Vector2 lineVector =
             new Vector2(endLine.getX() - startLine.getX(), endLine.getY() - startLine.getY());

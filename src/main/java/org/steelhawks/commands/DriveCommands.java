@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import org.steelhawks.Constants.AutonConstants;
 import org.steelhawks.Constants.Deadbands;
 import org.steelhawks.RobotContainer;
+import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -108,11 +109,11 @@ public class DriveCommands {
 
                 double omega =
                     alignController.calculate(
-                        s_Swerve.getRotation().getRadians(), validatedTarget.getRadians());
+                        RobotState.getInstance().getRotation().getRadians(), validatedTarget.getRadians());
 
                 runVelocity(linearVelocity, omega);
             }, s_Swerve)
-                .beforeStarting(() -> alignController.reset(s_Swerve.getRotation().getRadians()))
+                .beforeStarting(() -> alignController.reset(RobotState.getInstance().getRotation().getRadians()))
                     .withName("Align to Angle"),
             Set.of(s_Swerve));
     }
@@ -127,8 +128,8 @@ public class DriveCommands {
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 speeds,
                 AllianceFlip.shouldFlip()
-                    ? s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
-                        : s_Swerve.getRotation()));
+                    ? RobotState.getInstance().getRotation().plus(new Rotation2d(Math.PI))
+                        : RobotState.getInstance().getRotation()));
     }
 
     /**
@@ -324,14 +325,14 @@ public class DriveCommands {
                 Commands.runOnce(
                     () -> {
                         state.positions = drive.getWheelRadiusCharacterizationPositions();
-                        state.lastAngle = drive.getRotation();
+                        state.lastAngle = RobotState.getInstance().getRotation();
                         state.gyroDelta = 0.0;
                     }),
 
                 // Update gyro delta
                 Commands.run(
                         () -> {
-                            var rotation = drive.getRotation();
+                            var rotation = RobotState.getInstance().getRotation();
                             state.gyroDelta += Math.abs(rotation.minus(state.lastAngle).getRadians());
                             state.lastAngle = rotation;
                         })

@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
+import org.steelhawks.RobotState;
 
 public class ShooterStructure {
 
@@ -47,7 +48,7 @@ public class ShooterStructure {
     }
 
     public static double distanceToTarget(Translation3d target) {
-        return RobotContainer.s_Swerve.getPose().getTranslation().getDistance(target.toTranslation2d());
+        return RobotState.getInstance().getEstimatedPose().getTranslation().getDistance(target.toTranslation2d());
     }
 
     public static class Static {

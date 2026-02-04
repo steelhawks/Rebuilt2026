@@ -44,7 +44,7 @@ public class RobotContainer {
         s_Vision = config.createVision().orElse(null);
         s_ObjVision = config.createObjectVision().orElse(null);
 //        s_Flywheel = config.createFlywheel().orElse(null);
-        s_Turret = config.createTurret(s_Swerve::getPose).orElse(null);
+        s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
 //        s_Pivot = config.createPivot().orElse(null);
 //        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));

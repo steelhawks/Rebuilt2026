@@ -21,6 +21,7 @@ import org.steelhawks.Constants.AutonConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.RobotContainer;
+import org.steelhawks.RobotState;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -96,15 +97,15 @@ public class SwerveDriveAlignment extends Command {
     }
 
     protected boolean isXAligned() {
-        return Math.abs(targetPose.get().getX() - s_Swerve.getPose().getX()) <= XY_TOLERANCE;
+        return Math.abs(targetPose.get().getX() - RobotState.getInstance().getEstimatedPose().getX()) <= XY_TOLERANCE;
     }
 
     protected boolean isYAligned() {
-        return Math.abs(targetPose.get().getY() - s_Swerve.getPose().getY()) <= XY_TOLERANCE;
+        return Math.abs(targetPose.get().getY() - RobotState.getInstance().getEstimatedPose().getY()) <= XY_TOLERANCE;
     }
 
     protected boolean isThetaAligned() {
-        double angleDifference = MathUtil.angleModulus(targetPose.get().getRotation().getRadians() - s_Swerve.getPose().getRotation().getRadians());
+        double angleDifference = MathUtil.angleModulus(targetPose.get().getRotation().getRadians() - RobotState.getInstance().getRotation().getRadians());
         return Math.abs(angleDifference) <= THETA_TOLERANCE;
     }
 
@@ -113,12 +114,12 @@ public class SwerveDriveAlignment extends Command {
     }
 
     protected boolean isAligned() {
-        return autopilot.atTarget(s_Swerve.getPose(), new APTarget(targetPose.get()));
+        return autopilot.atTarget(RobotState.getInstance().getEstimatedPose(), new APTarget(targetPose.get()));
     }
 
     @Override
     public void initialize() {
-        startingPose = s_Swerve.getPose();
+        startingPose = RobotState.getInstance().getEstimatedPose();
         angleController.reset(startingPose.getRotation().getRadians());
 //        autopilot.calculate(s_Swerve.getPose(), s_Swerve.getChassisSpeeds(), new APTarget(s_Swerve.getPose()));
         s_Swerve.setPathfinding(true);
@@ -131,7 +132,7 @@ public class SwerveDriveAlignment extends Command {
      */
     protected ChassisSpeeds getOutput() {
         ChassisSpeeds robotRelativeSpeeds = s_Swerve.getChassisSpeeds();
-        Pose2d currPose = s_Swerve.getPose();
+        Pose2d currPose = RobotState.getInstance().getEstimatedPose();
         target = new APTarget(targetPose.get())
             .withEntryAngle(Rotation2d.kZero);
         APResult output = autopilot.calculate(currPose, robotRelativeSpeeds, target);
@@ -168,9 +169,9 @@ public class SwerveDriveAlignment extends Command {
         Logger.recordOutput("Align/SwerveAlign/TargetX", targetPose.get().getX());
         Logger.recordOutput("Align/SwerveAlign/TargetY", targetPose.get().getY());
         Logger.recordOutput("Align/SwerveAlign/TargetTheta", targetPose.get().getRotation().getDegrees());
-        Logger.recordOutput("Align/SwerveAlign/CurrentX", s_Swerve.getPose().getX());
-        Logger.recordOutput("Align/SwerveAlign/CurrentY", s_Swerve.getPose().getY());
-        Logger.recordOutput("Align/SwerveAlign/CurrentTheta", s_Swerve.getPose().getRotation().getDegrees());
+        Logger.recordOutput("Align/SwerveAlign/CurrentX", RobotState.getInstance().getEstimatedPose().getX());
+        Logger.recordOutput("Align/SwerveAlign/CurrentY", RobotState.getInstance().getEstimatedPose().getY());
+        Logger.recordOutput("Align/SwerveAlign/CurrentTheta", RobotState.getInstance().getEstimatedPose().getRotation().getDegrees());
 
         Logger.recordOutput("Align/SwerveAlign/TargetPose", targetPose.get());
         Logger.recordOutput("Align/SwerveAlign/StartingPose", startingPose);
