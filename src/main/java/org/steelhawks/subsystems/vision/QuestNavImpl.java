@@ -26,13 +26,11 @@ public class QuestNavImpl {
     private static final double VISION_THETA_DEVIATION_TOLERANCE = 0.087; // rad
     private static final Transform3d ROBOT_TO_QUEST =
         new Transform3d(0.0 , 0.0, 0.0, new Rotation3d(0.0, 0.0, 0.0));
-    private final Vision.VisionConsumer consumer;
     private final QuestNav nav;
 
     private boolean hasInitialPose = false;
 
-    public QuestNavImpl(Vision.VisionConsumer consumer) {
-        this.consumer = consumer;
+    public QuestNavImpl() {
         nav = new QuestNav();
     }
 
@@ -95,7 +93,7 @@ public class QuestNavImpl {
                 if (rejectPose) {
                     continue;
                 }
-                consumer.accept(robotPose, frame.dataTimestamp(), STD_DEV);
+//                consumer.accept(robotPose, frame.dataTimestamp(), STD_DEV);
 
                 Logger.recordOutput("QuestNav/AllPoses", allQuestPoses.toArray(new Pose2d[0]));
                 Logger.recordOutput("QuestNav/RejectedPoses", allQuestPosesRejected.toArray(new Pose2d[0]));

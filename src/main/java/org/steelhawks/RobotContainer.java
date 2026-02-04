@@ -1,7 +1,6 @@
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
@@ -42,7 +41,7 @@ public class RobotContainer {
         s_Swerve = config.createSwerve();
         s_LEDMatrix = config.createLEDMatrix().orElse(null);
         s_LEDStrip = config.createLEDStrip().orElse(null);
-        s_Vision = config.createVision(s_Swerve::accept).orElse(null);
+        s_Vision = config.createVision().orElse(null);
         s_ObjVision = config.createObjectVision().orElse(null);
 //        s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(s_Swerve::getPose).orElse(null);
@@ -85,24 +84,9 @@ public class RobotContainer {
             driver.b()
                 .onTrue(s_Flywheel.setTargetVelocity(750.0));
         }
-//        driver.x()
-//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
-//        driver.y()
-//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
-//        driver.a()
-//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
-//        driver.b()
-//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
-    private boolean isHubActive() {
-        String gameData = DriverStation.getGameSpecificMessage();
-        return !gameData.isEmpty()
-            && gameData.charAt(0) == 'B'
-            && DriverStation.getAlliance()
-                .orElse(DriverStation.Alliance.Blue)
-                .equals(DriverStation.Alliance.Blue);
-    }
+
 
     private void configureTriggers() {
 //        new FieldBoundingBox("AllianceSide",

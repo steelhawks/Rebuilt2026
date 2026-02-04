@@ -1,30 +1,13 @@
 package org.steelhawks.subsystems.vision;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.steelhawks.Toggles;
+import org.steelhawks.RobotState.PoseObservation;
 
 public interface VisionIO {
 
     /** Represents the angle to a simple target, not used for pose estimation. */
     record TargetObservation(Rotation2d tx, Rotation2d ty, int fiducialId) {}
-
-    /** Represents a robot pose sample used for pose estimation. */
-    record PoseObservation(
-        double timestamp,
-        Pose3d pose,
-        double ambiguity,
-        int tagCount,
-        double averageTagDistance,
-        PoseObservationType type) {}
-
-    enum PoseObservationType {
-        MEGATAG_1,
-        MEGATAG_2,
-        PHOTONVISION
-    }
 
     @AutoLog
     class VisionIOInputs {

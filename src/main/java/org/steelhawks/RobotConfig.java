@@ -81,11 +81,11 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createLEDStrip());
     }
 
-    public Optional<Vision> createVision(VisionConsumer poseConsumer) {
+    public Optional<Vision> createVision() {
         if (!hasVision) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createVision(poseConsumer));
+        return Optional.ofNullable(factory.createVision());
     }
 
     public Optional<ObjectVision> createObjectVision() {
@@ -339,7 +339,7 @@ public class RobotConfig {
         Swerve createSwerve();
         LEDMatrix createLEDMatrix();
         LEDStrip createLEDStrip();
-        Vision createVision(VisionConsumer poseConsumer);
+        Vision createVision();
         ObjectVision createObjectVision();
         Flywheel createFlywheel();
         Turret createTurret(Supplier<Pose2d> poseSupplier);
@@ -373,8 +373,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, false);
+        public Vision createVision() {
+            return new Vision(false);
         }
 
         @Override
@@ -428,8 +428,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, false);
+        public Vision createVision() {
+            return new Vision(false);
         }
 
         @Override
@@ -482,8 +482,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, false);
+        public Vision createVision() {
+            return new Vision(false);
         }
 
         @Override
@@ -536,8 +536,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, false);
+        public Vision createVision() {
+            return new Vision(false);
         }
 
         @Override
@@ -592,8 +592,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, false);
+        public Vision createVision() {
+            return new Vision(false);
         }
 
         @Override
@@ -646,8 +646,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, true);
+        public Vision createVision() {
+            return new Vision(true);
         }
 
         @Override
@@ -698,8 +698,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision(VisionConsumer poseConsumer) {
-            return new Vision(poseConsumer, false);
+        public Vision createVision() {
+            return new Vision(false);
         }
 
         @Override

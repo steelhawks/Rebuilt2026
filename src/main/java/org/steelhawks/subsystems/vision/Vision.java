@@ -12,21 +12,17 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import org.steelhawks.Constants;
-import org.steelhawks.Robot;
-import org.steelhawks.RobotContainer;
-import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.vision.VisionIO.PoseObservationType;
+import org.steelhawks.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.RobotState.PoseObservationType;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.VirtualSubsystem;
 
 public class Vision extends VirtualSubsystem {
-    private final VisionConsumer consumer;
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
@@ -37,17 +33,16 @@ public class Vision extends VirtualSubsystem {
 
     private final QuestNavImpl questNav;
 
-    public Vision(VisionConsumer consumer) {
-        this(consumer, false);
+    public Vision() {
+        this(false);
     }
 
-    public Vision(VisionConsumer consumer, boolean useQuestNav) {
-        this.consumer = consumer;
+    public Vision(boolean useQuestNav) {
         this.useQuestNav = useQuestNav;
         this.io = VisionConstants.getIO();
 
         if (useQuestNav) {
-            questNav = new QuestNavImpl(consumer);
+            questNav = new QuestNavImpl();
         } else {
             questNav = null;
         }
@@ -212,10 +207,13 @@ public class Vision extends VirtualSubsystem {
                 }
 
                 // Send vision observation
-                consumer.accept(
-                    observation.pose().toPose2d(),
-                    observation.timestamp(),
-                    VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+                RobotState.getInstance().addVisionObservation(
+                    new RobotState.VisionObservation(
+                        observation.timestamp(),
+                        observation.pose().toPose2d(),
+                        VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
+                    )
+                );
             }
             LoopTimeUtil.record("Normal Vision");
 

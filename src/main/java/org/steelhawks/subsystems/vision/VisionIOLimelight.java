@@ -6,6 +6,9 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.RobotController;
+import org.steelhawks.RobotState.PoseObservation;
+import org.steelhawks.RobotState.PoseObservationType;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

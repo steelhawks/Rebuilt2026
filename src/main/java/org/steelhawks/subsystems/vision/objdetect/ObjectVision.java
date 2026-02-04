@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
+import org.steelhawks.RobotState;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.VirtualSubsystem;
@@ -140,15 +141,33 @@ public class ObjectVision extends VirtualSubsystem {
             .filter(o -> o.confidence() >= confidenceThreshold.get())
             .sorted(Comparator.comparingDouble(ObjectVisionIO.ObjectObservation::timestamp))
             .forEach(this::addCoralObservationToPose);
-
+        List<RobotState.DetectedObject> detectedObjects = new ArrayList<>();
+        double timestamp = Timer.getFPGATimestamp();
+        for (CoralPose coral : coralPoses) {
+            Pose3d objectPose = new Pose3d(
+                coral.translation.getX(),
+                coral.translation.getY(),
+                0.0,
+                new Rotation3d());
+            double age = timestamp - coral.timestamp; // newer = higher confidence
+            double confidence = Math.max(0.0, 1.0 - (age / coralMaxAge));
+            detectedObjects.add(new RobotState.DetectedObject(
+                objectPose,
+                "Coral",
+                confidence,
+                coral.timestamp
+            ));
+        }
+        RobotState.getInstance().addObjectDetections(detectedObjects, timestamp);
         coralPoses.forEach(o ->
             Logger.recordOutput("CoralDetections/Detection", new Pose2d(o.translation, new Rotation2d())));
         coralObjects.setPoses(
             coralPoses.stream()
-                .map(coral -> new Pose2d(coral.translation, new Rotation2d())) // zero rotation
+                .map(coral -> new Pose2d(coral.translation, new Rotation2d()))
                 .collect(Collectors.toList()));
         allObservations.clear();
     }
+
 
     public void reset() {
         coralPoses.clear();
