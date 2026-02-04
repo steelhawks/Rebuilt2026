@@ -48,7 +48,7 @@ public class ObjectVision extends VirtualSubsystem {
     private void addCoralObservationToPose(ObjectVisionIO.ObjectObservation observation) {
         double now = Timer.getFPGATimestamp();
         Optional<Pose2d> oldWheelOdomPose = RobotContainer.s_Swerve.getPoseAtTime(observation.timestamp());
-        if (Constants.loggedValue("CoralProcessing/WheelOdomEmpty", oldWheelOdomPose.isEmpty())) {
+        if (Constants.loggedValue("ObjectProcessing/WheelOdomEmpty", oldWheelOdomPose.isEmpty())) {
             return;
         }
         var estimatedPose = RobotContainer.s_Swerve.getPose();
@@ -62,8 +62,8 @@ public class ObjectVision extends VirtualSubsystem {
         double[] txCorners = observation.info().tx();  // degrees
         double[] tyCorners = observation.info().ty();  // degrees
 
-        Constants.loggedValue("CoralProcessing/TxCorners_degrees", txCorners);
-        Constants.loggedValue("CoralProcessing/TyCorners_degrees", tyCorners);
+        Constants.loggedValue("ObjectProcessing/TxCorners_degrees", txCorners);
+        Constants.loggedValue("ObjectProcessing/TyCorners_degrees", tyCorners);
 
         // bounding box center in deg
         double minX = Math.min(Math.min(txCorners[0], txCorners[1]),
@@ -79,18 +79,18 @@ public class ObjectVision extends VirtualSubsystem {
         double tx = (minX + maxX) / 2.0;
         double ty = (minY + maxY) / 2.0;
 
-        Constants.loggedValue("CoralProcessing/tx_degrees", tx);
-        Constants.loggedValue("CoralProcessing/ty_degrees", ty);
+        Constants.loggedValue("ObjectProcessing/tx_degrees", tx);
+        Constants.loggedValue("ObjectProcessing/ty_degrees", ty);
 
         // trig
         double cameraHeight = robotToCamera.getZ();
         double cameraPitch = robotToCamera.getRotation().getY(); // radians
-        Constants.loggedValue("CoralProcessing/cameraPitch_radians", cameraPitch);
+        Constants.loggedValue("ObjectProcessing/cameraPitch_radians", cameraPitch);
         double tyRadians = Math.toRadians(ty);
         double verticalAngleFromHorizontal = -cameraPitch - tyRadians;
-        Constants.loggedValue("CoralProcessing/AngleFromHorizontal_radians", verticalAngleFromHorizontal);
-        Constants.loggedValue("CoralProcessing/AngleFromHorizontal_degrees", Math.toDegrees(verticalAngleFromHorizontal));
-        if (Constants.loggedValue("CoralProcessing/VerticalAngleError", verticalAngleFromHorizontal <= 0)) {
+        Constants.loggedValue("ObjectProcessing/AngleFromHorizontal_radians", verticalAngleFromHorizontal);
+        Constants.loggedValue("ObjectProcessing/AngleFromHorizontal_degrees", Math.toDegrees(verticalAngleFromHorizontal));
+        if (Constants.loggedValue("ObjectProcessing/VerticalAngleError", verticalAngleFromHorizontal <= 0)) {
             return;
         }
         double targetHeight = 0.0;
@@ -100,7 +100,7 @@ public class ObjectVision extends VirtualSubsystem {
             new Translation2d(
                 forwardDistance * Math.cos(txRadians),
                 forwardDistance * Math.sin(txRadians));
-        Constants.loggedValue("CoralProcessing/cameraToCoralInCameraFrame",
+        Constants.loggedValue("ObjectProcessing/cameraToCoralInCameraFrame",
             new Pose2d(cameraToCoralInCameraFrame, new Rotation2d()));
 
         Transform2d robotToCamera2d = new Transform2d(
@@ -108,13 +108,13 @@ public class ObjectVision extends VirtualSubsystem {
             robotToCamera.getRotation().toRotation2d());
         Pose2d fieldToCamera = fieldToRobot.transformBy(robotToCamera2d);
 
-        Constants.loggedValue("CoralProcessing/fieldToRobot", fieldToRobot);
-        Constants.loggedValue("CoralProcessing/fieldToCamera", fieldToCamera);
-        Constants.loggedValue("CoralProcessing/forwardDistance", forwardDistance);
+        Constants.loggedValue("ObjectProcessing/fieldToRobot", fieldToRobot);
+        Constants.loggedValue("ObjectProcessing/fieldToCamera", fieldToCamera);
+        Constants.loggedValue("ObjectProcessing/forwardDistance", forwardDistance);
 
         Pose2d fieldToCoral = fieldToCamera
             .transformBy(new Transform2d(cameraToCoralInCameraFrame, new Rotation2d()));
-        Constants.loggedValue("CoralProcessing/fieldToCoral", fieldToCoral);
+        Constants.loggedValue("ObjectProcessing/fieldToCoral", fieldToCoral);
         CoralPose coralPose = new CoralPose(fieldToCoral.getTranslation(), observation.timestamp());
         coralPoses.removeIf(
             c -> c.translation.getDistance(fieldToCoral.getTranslation()) <= coralOverlap
@@ -124,7 +124,7 @@ public class ObjectVision extends VirtualSubsystem {
         // fifo
         while (coralPoses.size() > (int) maxDetectableObjects.get()) {
             CoralPose removed = coralPoses.removeFirst();
-            Logger.recordOutput("CoralProcessing/RemovedOldest",
+            Logger.recordOutput("ObjectProcessing/RemovedOldest",
                 new Pose2d(removed.translation, new Rotation2d()));
         }
     }
