@@ -11,11 +11,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.Constants;
+import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.Robot;
-import org.steelhawks.Toggles;
+import org.steelhawks.RobotState.ShooterMode;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -241,7 +239,7 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
-            switch (ShooterStructure.getMode()) {
+            switch (RobotState.getInstance().getMode()) {
                 case TO_HUB -> {
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
@@ -332,7 +330,7 @@ public class Turret extends SubsystemBase {
                             MathUtil.clamp(
                                 rotation.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
                 Commands.none(),
-                () -> ShooterStructure.getMode().equals(ShooterStructure.ShooterMode.MANUAL))
+                () -> RobotState.getInstance().getMode().equals(ShooterMode.MANUAL))
             .withName("Set Desired State");
     }
 
