@@ -52,6 +52,41 @@ public record ChoreoTraj(
 	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64)),
 	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
 	);
+	public static final ChoreoTraj TrenchMiddleClimb = new ChoreoTraj(
+	    "TrenchMiddleClimb",
+	    OptionalInt.empty(),
+	    4.79452,
+	    new Pose2d(4.385, 0.599, Rotation2d.fromRadians(0.124)),
+	    new Pose2d(1.41, 2.854, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj TrenchMiddleClimb$0 = new ChoreoTraj(
+	    "TrenchMiddleClimb",
+	    OptionalInt.of(0),
+	    1.00403,
+	    new Pose2d(4.385, 0.599, Rotation2d.fromRadians(0.124)),
+	    new Pose2d(7.543, 1.098, Rotation2d.fromRadians(1.613))
+	);
+	public static final ChoreoTraj TrenchMiddleClimb$1 = new ChoreoTraj(
+	    "TrenchMiddleClimb",
+	    OptionalInt.of(1),
+	    0.7527699999999999,
+	    new Pose2d(7.543, 1.098, Rotation2d.fromRadians(1.613)),
+	    new Pose2d(7.629, 2.594, Rotation2d.fromRadians(1.849))
+	);
+	public static final ChoreoTraj TrenchMiddleClimb$2 = new ChoreoTraj(
+	    "TrenchMiddleClimb",
+	    OptionalInt.of(2),
+	    1.8423800000000001,
+	    new Pose2d(7.629, 2.594, Rotation2d.fromRadians(1.849)),
+	    new Pose2d(2.719, 1.189, Rotation2d.fromRadians(1.12))
+	);
+	public static final ChoreoTraj TrenchMiddleClimb$3 = new ChoreoTraj(
+	    "TrenchMiddleClimb",
+	    OptionalInt.of(3),
+	    1.1953400000000003,
+	    new Pose2d(2.719, 1.189, Rotation2d.fromRadians(1.12)),
+	    new Pose2d(1.41, 2.854, Rotation2d.fromRadians(0))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -61,7 +96,12 @@ public record ChoreoTraj(
     	Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto),
 		Map.entry("OutpostTrenchClimbAuto$0", OutpostTrenchClimbAuto$0),
 		Map.entry("OutpostTrenchClimbAuto$1", OutpostTrenchClimbAuto$1),
-		Map.entry("OutpostTrenchClimbAuto$2", OutpostTrenchClimbAuto$2)
+		Map.entry("OutpostTrenchClimbAuto$2", OutpostTrenchClimbAuto$2),
+		Map.entry("TrenchMiddleClimb", TrenchMiddleClimb),
+		Map.entry("TrenchMiddleClimb$0", TrenchMiddleClimb$0),
+		Map.entry("TrenchMiddleClimb$1", TrenchMiddleClimb$1),
+		Map.entry("TrenchMiddleClimb$2", TrenchMiddleClimb$2),
+		Map.entry("TrenchMiddleClimb$3", TrenchMiddleClimb$3)
     );
 
     /**
