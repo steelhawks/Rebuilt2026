@@ -38,6 +38,7 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.steelhawks.*;
 import org.steelhawks.Constants.*;
 
+import java.sql.SQLOutput;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -66,6 +67,8 @@ public class Swerve extends SubsystemBase {
     public static final double DRIVE_BASE_RADIUS;
 
     // PathPlanner config constants
+    private static final DCMotor DRIVE_MOTOR;
+    private static final DCMotor TURN_MOTOR;
     private static final double ROBOT_MASS_KG;
     private static final double ROBOT_MOI;
     private static final double WHEEL_COF;
@@ -139,6 +142,8 @@ public class Swerve extends SubsystemBase {
                         Math.max(
                             Math.hypot(TunerConstantsAlpha.BackLeft.LocationX, TunerConstantsAlpha.BackLeft.LocationY),
                             Math.hypot(TunerConstantsAlpha.BackRight.LocationX, TunerConstantsAlpha.BackRight.LocationY)));
+                DRIVE_MOTOR = DCMotor.getKrakenX60(1);
+                TURN_MOTOR = DCMotor.getKrakenX60(1);
                 ROBOT_MASS_KG = Units.lbsToKilograms(124.8);
                 ROBOT_MOI = (1.0 / 12.0) * ROBOT_MASS_KG * (2 * Math.pow(Units.inchesToMeters(25), 2));
                 WHEEL_COF = COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof;
@@ -150,7 +155,7 @@ public class Swerve extends SubsystemBase {
                             TunerConstantsAlpha.FrontLeft.WheelRadius,
                             TunerConstantsAlpha.kSpeedAt12Volts.in(MetersPerSecond),
                             WHEEL_COF,
-                            DCMotor.getKrakenX60Foc(1)
+                            DRIVE_MOTOR
                                 .withReduction(TunerConstantsAlpha.FrontLeft.DriveMotorGearRatio),
                             TunerConstantsAlpha.FrontLeft.SlipCurrent,
                             1),
@@ -162,8 +167,8 @@ public class Swerve extends SubsystemBase {
                         .withGyro(COTS.ofPigeon2())
                         .withSwerveModule(
                             new SwerveModuleSimulationConfig(
-                                DCMotor.getKrakenX60(1),
-                                DCMotor.getFalcon500(1),
+                                DRIVE_MOTOR,
+                                TURN_MOTOR,
                                 TunerConstantsAlpha.FrontLeft.DriveMotorGearRatio,
                                 TunerConstantsAlpha.FrontLeft.SteerMotorGearRatio,
                                 Volts.of(TunerConstantsAlpha.FrontLeft.DriveFrictionVoltage),
@@ -181,6 +186,8 @@ public class Swerve extends SubsystemBase {
                         Math.max(
                             Math.hypot(TunerConstantsLastYear.BackLeft.LocationX, TunerConstantsLastYear.BackLeft.LocationY),
                             Math.hypot(TunerConstantsLastYear.BackRight.LocationX, TunerConstantsLastYear.BackRight.LocationY)));
+                DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
+                TURN_MOTOR = DCMotor.getKrakenX60Foc(1);
                 ROBOT_MASS_KG = Units.lbsToKilograms(138 + (6.0 / 16.0));
                 ROBOT_MOI = (1.0 / 12.0) * ROBOT_MASS_KG * (2 * Math.pow(Units.inchesToMeters(30), 2));
                 WHEEL_COF = COTS.WHEELS.COLSONS.cof;
@@ -192,7 +199,7 @@ public class Swerve extends SubsystemBase {
                             TunerConstantsLastYear.FrontLeft.WheelRadius,
                             TunerConstantsLastYear.kSpeedAt12Volts.in(MetersPerSecond),
                             WHEEL_COF,
-                            DCMotor.getKrakenX60Foc(1)
+                            DRIVE_MOTOR
                                 .withReduction(TunerConstantsLastYear.FrontLeft.DriveMotorGearRatio),
                             TunerConstantsLastYear.FrontLeft.SlipCurrent,
                             1),
@@ -204,8 +211,8 @@ public class Swerve extends SubsystemBase {
                         .withGyro(COTS.ofPigeon2())
                         .withSwerveModule(
                             new SwerveModuleSimulationConfig(
-                                DCMotor.getKrakenX60(1),
-                                DCMotor.getFalcon500(1),
+                                DRIVE_MOTOR,
+                                TURN_MOTOR,
                                 TunerConstantsLastYear.FrontLeft.DriveMotorGearRatio,
                                 TunerConstantsLastYear.FrontLeft.SteerMotorGearRatio,
                                 Volts.of(TunerConstantsLastYear.FrontLeft.DriveFrictionVoltage),
@@ -223,6 +230,8 @@ public class Swerve extends SubsystemBase {
                         Math.max(
                             Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
                             Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+                DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
+                TURN_MOTOR = DCMotor.getKrakenX60Foc(1);
                 ROBOT_MASS_KG = Units.lbsToKilograms(108.4 + 11.4 + 14);
                 ROBOT_MOI = (1.0 / 12.0) * ROBOT_MASS_KG * (2 * Math.pow(Units.inchesToMeters(25), 2));
                 WHEEL_COF = COTS.WHEELS.COLSONS.cof;
@@ -234,7 +243,7 @@ public class Swerve extends SubsystemBase {
                             TunerConstants.FrontLeft.WheelRadius,
                             TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
                             WHEEL_COF,
-                            DCMotor.getKrakenX60(1)
+                            DRIVE_MOTOR
                                 .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
                             TunerConstants.FrontLeft.SlipCurrent,
                             1),
@@ -243,8 +252,8 @@ public class Swerve extends SubsystemBase {
                     DriveTrainSimulationConfig.Default()
                         .withGyro(COTS.ofPigeon2())
                         .withSwerveModule(COTS.ofMark4i(
-                            DCMotor.getKrakenX60Foc(1),
-                            DCMotor.getKrakenX60Foc(1),
+                            DRIVE_MOTOR,
+                            TURN_MOTOR,
                             COTS.WHEELS.COLSONS.cof,
                             2))
                         .withTrackLengthTrackWidth(Inches.of(27.5), Inches.of(27.5))
@@ -537,6 +546,54 @@ public class Swerve extends SubsystemBase {
         for (int i = 0; i < 4; i++) {
             swerveModules[i].runAngularCharacterization(output);
         }
+    }
+
+    /** Calculates the drive wheel coefficient of static friction. */
+    public double runWheelCOFCharacterizer() {
+        double totalFrictionForce =
+            (DRIVE_MOTOR.getTorque(TunerConstants.FrontLeft.SlipCurrent)
+                * TunerConstants.FrontLeft.DriveMotorGearRatio
+                / TunerConstants.FrontLeft.WheelRadius)
+                * 4;
+        double cof = totalFrictionForce / (ROBOT_MASS_KG * 9.81);
+        Logger.recordOutput("Swerve/Characterizer/DriveWheelCOF", cof);
+        System.out.println("Drive COF: " + cof);
+        return cof;
+    }
+
+    public record MotorMax(double speed, double torque) {}
+
+    public MotorMax calculateMotorMaxSpeedAndTorque() {
+        // leave headroom for inefficiency and pid
+        final double headroom = 0.80;
+        double maxSpeed =
+            Units.radiansPerSecondToRotationsPerMinute(
+                DRIVE_MOTOR.freeSpeedRadPerSec * headroom);
+        double maxTorque =
+            DRIVE_MOTOR.getTorque(TunerConstants.FrontLeft.SlipCurrent) * headroom;
+        System.out.println(
+            "Motor Max Speed (rpm): " + maxSpeed + ", Motor Max Torque: " + maxTorque);
+        Logger.recordOutput("Swerve/Characterizer/MaxSpeed", maxSpeed);
+        Logger.recordOutput("Swerve/Characterizer/MaxTorque", maxTorque);
+        return new MotorMax(maxSpeed, maxTorque);
+    }
+
+    public double calculateMotorMaxSpeed() {
+        return calculateMotorMaxSpeedAndTorque().speed;
+    }
+
+    public double calculateMotorMaxTorque() {
+        return calculateMotorMaxSpeedAndTorque().torque;
+    }
+
+    /** Returns the distance traveled by each individual drive wheel in radians */
+    private double[] getWheelDistancesRadians() {
+        SwerveModulePosition[] positions = getModulePositions();
+        double[] distances = new double[4];
+        for (int i = 0; i < 4; i++) {
+            distances[i] = positions[i].distanceMeters / TunerConstants.FrontLeft.WheelRadius;
+        }
+        return distances;
     }
 
     public void stop() {
