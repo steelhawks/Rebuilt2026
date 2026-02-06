@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.superstructure.flywheel;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,11 +34,18 @@ public class Flywheel extends SubsystemBase {
         new LoggedTunableNumber("Flywheel/kV", 0.0090372 * 0.9); // 10% reduction from sysid value
     public static final LoggedTunableNumber velocityTolerance =
         new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 5.0);
+    // the amount after which the sampling routine will time out
+    public static final LoggedTunableNumber samplingTimeoutDuration =
+        new LoggedTunableNumber("Flywheel/SamplingTimeoutDurationSeconds", 2.0);
+    // if this number of samples is reached, an average voltage will be calculated even if the sampling process times out
+    public static final LoggedTunableNumber timeoutAvgMinSamples =
+        new LoggedTunableNumber("Flywheel/SamplingTimeoutMinSamplesForAvgCalculation", 10);
 
     private static final int sampleCounts = 50;
     private final double[] voltageSamples = new double[sampleCounts];
     private double sampledVoltage = 0.0;
     private int currentSampleIndex = 0;
+    private long timeStartedSampling = 0;
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
         new Debouncer(0.3, DebounceType.kBoth);
@@ -114,6 +122,7 @@ public class Flywheel extends SubsystemBase {
                     if (nearTargetVelocity) {
                         state = FlywheelState.SAMPLING;
                         currentSampleIndex = 0;
+                        timeStartedSampling = RobotController.getFPGATime();
                     }
                 }
                 case SAMPLING -> {
@@ -126,6 +135,15 @@ public class Flywheel extends SubsystemBase {
                         sampledVoltage = calculateAverageSample();
                         state = FlywheelState.RUNNING;
                         Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
+                    } else if (RobotController.getFPGATime() - timeStartedSampling > (samplingTimeoutDuration.get() * 1e6)) {
+                        if (currentSampleIndex >= timeoutAvgMinSamples.get()) { // not good not terrible, calculate an average
+                            sampledVoltage = calculateAverageSample();
+                        } else {
+                            sampledVoltage = 0.0; // calculate the FF voltage using the equation above instead of using the sampled value
+                        }
+
+                        state = FlywheelState.RUNNING;
+                        Logger.recordOutput("Flywheel/SampledVoltage", 0);
                     }
                 }
                 case RUNNING -> io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
