@@ -143,7 +143,7 @@ public class Flywheel extends SubsystemBase {
                         }
 
                         state = FlywheelState.RUNNING;
-                        Logger.recordOutput("Flywheel/SampledVoltage", 0);
+                        Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
                     }
                 }
                 case RUNNING -> io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
