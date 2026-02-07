@@ -1,0 +1,918 @@
+{
+  "version": 1,
+  "dashboardId": "cec76cb0-65bd-4911-bc90-e4a428aab1b3",
+  "dashboards": {
+    "auto": {
+      "id": "auto",
+      "viewport": {
+        "x": 43.924760070140564,
+        "y": 65.88714010521085,
+        "scale": 0.9150991681279285
+      },
+      "widgets": [
+        {
+          "id": "12ca17e6-aece-4773-b44e-f4207d315d8b",
+          "type": "chooser",
+          "layout": {
+            "left": 0,
+            "top": 0,
+            "width": 18,
+            "height": 11
+          },
+          "constraints": {
+            "width": {
+              "min": 6
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/SmartDashboard/Auto Chooser/*",
+          "props": {
+            "interactive": true,
+            "title": "Auto Chooser"
+          }
+        },
+        {
+          "id": "2bf5b882-0508-4cc2-a937-3fb766dcd5d6",
+          "type": "field2d",
+          "layout": {
+            "left": 27,
+            "top": 0,
+            "width": 20,
+            "height": 36
+          },
+          "constraints": {
+            "width": {
+              "min": 6
+            },
+            "height": {
+              "min": 11
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/RobotState/PoseEstimation/Odometry",
+          "lookback": 5,
+          "props": {
+            "style": "default",
+            "orientation": "270",
+            "bumperSizeInch": 32
+          }
+        },
+        {
+          "id": "fd0e48a6-7e28-4086-ae76-9335bbcc8a12",
+          "type": "swerve",
+          "layout": {
+            "left": 0,
+            "top": 16,
+            "width": 10,
+            "height": 11
+          },
+          "constraints": {
+            "width": {
+              "min": 5
+            },
+            "height": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+          "props": {
+            "chassisRotation": true,
+            "chassisSpeedsVisible": true,
+            "maxLinearSpeed": 5,
+            "maxAngularSpeed": 360,
+            "title": "SwerveStates/Measured"
+          }
+        },
+        {
+          "id": "26e26342-12b7-419e-acbc-b3010cef7198",
+          "type": "match.time",
+          "layout": {
+            "left": 0,
+            "top": 28,
+            "width": 18,
+            "height": 7
+          },
+          "constraints": {
+            "width": {
+              "min": 9
+            },
+            "height": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/DriverStation/MatchTime",
+          "props": {
+            "gameDataVisible": true,
+            "attention": 5,
+            "cautionAt": 30,
+            "dangerAt": 10
+          }
+        },
+        {
+          "id": "75752927-cc7a-40f2-915d-e28ede4ad3e2",
+          "type": "gyro",
+          "layout": {
+            "left": 11,
+            "top": 18,
+            "width": 7,
+            "height": 9
+          },
+          "constraints": {
+            "width": {
+              "min": 5
+            },
+            "height": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/Swerve/Gyro/YawPosition",
+          "props": {
+            "variant": "yaw",
+            "yawClockwise": false,
+            "yawSymmetric": false
+          }
+        },
+        {
+          "id": "3e08a78d-2cec-495b-b5b6-dfe3abd34bc8",
+          "type": "gyro",
+          "layout": {
+            "left": 19,
+            "top": 18,
+            "width": 7,
+            "height": 9
+          },
+          "constraints": {
+            "width": {
+              "min": 5
+            },
+            "height": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/Swerve/Gyro/PitchPosition",
+          "props": {
+            "variant": "pitch",
+            "yawClockwise": false,
+            "yawSymmetric": false
+          }
+        },
+        {
+          "id": "0fa5ff94-fdca-4e1d-b905-6eeb6ace49b1",
+          "type": "gyro",
+          "layout": {
+            "left": 19,
+            "top": 28,
+            "width": 7,
+            "height": 7
+          },
+          "constraints": {
+            "width": {
+              "min": 5
+            },
+            "height": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/Swerve/Gyro/RollPosition",
+          "props": {
+            "variant": "roll",
+            "yawClockwise": false,
+            "yawSymmetric": false
+          }
+        },
+        {
+          "id": "8782daad-7cb5-4c39-8523-ca21d59f4ba8",
+          "type": "color",
+          "layout": {
+            "left": 19,
+            "top": 0,
+            "width": 7,
+            "height": 5
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/Flywheel/Connected",
+          "props": {
+            "boolean": {
+              "true": "#00c951",
+              "false": "#fb2c36"
+            },
+            "title": "Flywheel/Connected"
+          }
+        },
+        {
+          "id": "eb825f40-3a47-4729-ae72-bdd07d0691e9",
+          "type": "color",
+          "layout": {
+            "left": 19,
+            "top": 6,
+            "width": 7,
+            "height": 5
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/Turret/Connected",
+          "props": {
+            "boolean": {
+              "true": "#00c951",
+              "false": "#fb2c36"
+            },
+            "title": "Turret/Connected"
+          }
+        },
+        {
+          "id": "f661c502-1907-4220-90da-a15ddaac767c",
+          "type": "color",
+          "layout": {
+            "left": 19,
+            "top": 12,
+            "width": 7,
+            "height": 5
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/ObjectVision//Connected",
+          "props": {
+            "boolean": {
+              "true": "#00c951",
+              "false": "#fb2c36"
+            },
+            "title": "ObjectVision/Connected"
+          }
+        },
+        {
+          "id": "74fa7fba-1b47-46c2-b874-b9d6e2d74575",
+          "type": "fms",
+          "layout": {
+            "left": 2,
+            "top": -21,
+            "width": 12,
+            "height": 7
+          },
+          "constraints": {
+            "width": {
+              "min": 9
+            },
+            "height": {
+              "min": 7
+            }
+          },
+          "slot": "nt:/FMSInfo/*",
+          "props": {}
+        }
+      ]
+    },
+    "teleop": {
+      "id": "teleop",
+      "viewport": {
+        "scale": 0.5013882179505389,
+        "x": 72.1999033848776,
+        "y": 216.59971015463282
+      },
+      "widgets": [
+        {
+          "id": "8233c8c6-d532-4811-91a7-a17973684e68",
+          "type": "field2d",
+          "layout": {
+            "height": 70,
+            "left": 54,
+            "top": -17,
+            "width": 34
+          },
+          "constraints": {
+            "height": {
+              "min": 11
+            },
+            "width": {
+              "min": 6
+            }
+          },
+          "lookback": 5,
+          "props": {
+            "style": "default",
+            "orientation": "270",
+            "bumperSizeInch": 27
+          }
+        },
+        {
+          "id": "ecab7da5-a4a4-4d44-a5ac-2dc104341558",
+          "type": "camera",
+          "layout": {
+            "left": -5,
+            "top": 1,
+            "width": 57,
+            "height": 36
+          },
+          "constraints": {
+            "height": {
+              "min": 9
+            },
+            "width": {
+              "min": 12
+            }
+          },
+          "lookback": 5,
+          "props": {
+            "address": "",
+            "port": 1181
+          }
+        },
+        {
+          "id": "1daf121c-0844-4875-9d64-070f1a0705ca",
+          "type": "match.time",
+          "layout": {
+            "left": -5,
+            "top": 38,
+            "width": 18,
+            "height": 12
+          },
+          "constraints": {
+            "height": {
+              "min": 6
+            },
+            "width": {
+              "min": 9
+            }
+          },
+          "slot": "nt:/AdvantageKit/DriverStation/MatchTime",
+          "props": {
+            "gameDataVisible": true,
+            "attention": 5,
+            "cautionAt": 30,
+            "dangerAt": 10
+          }
+        },
+        {
+          "id": "3d616279-7a4a-4151-957b-b31053468363",
+          "type": "alerts",
+          "layout": {
+            "height": 17,
+            "left": -5,
+            "top": -17,
+            "width": 37
+          },
+          "constraints": {
+            "height": {
+              "min": 3
+            },
+            "width": {
+              "min": 5
+            }
+          },
+          "slot": "nt:/SmartDashboard/Alerts/*",
+          "props": {
+            "errorsVisible": true,
+            "warningsVisible": true,
+            "infosVisible": true
+          }
+        },
+        {
+          "id": "88acda3f-06f8-4eff-bb9f-adb73c3497f6",
+          "type": "value",
+          "layout": {
+            "left": 33,
+            "top": -17,
+            "width": 13,
+            "height": 9
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/DriverStation/MatchType",
+          "props": {
+            "alignment": "center",
+            "size": "lg",
+            "mono": false,
+            "valueFormat": {
+              "maximumFractionDigits": 2
+            },
+            "title": "Match Type"
+          }
+        },
+        {
+          "id": "c14193b5-5f51-473c-851e-d6dbc2bb6809",
+          "type": "value",
+          "layout": {
+            "left": 47,
+            "top": -17,
+            "width": 6,
+            "height": 9
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/DriverStation/MatchNumber",
+          "props": {
+            "alignment": "center",
+            "size": "lg",
+            "mono": false,
+            "valueFormat": {
+              "maximumFractionDigits": 2
+            },
+            "title": "Match Number"
+          }
+        },
+        {
+          "id": "d7cc19b3-d3fc-447f-a6f1-496ef992d021",
+          "type": "fms",
+          "layout": {
+            "left": 11,
+            "top": 61,
+            "width": 12,
+            "height": 7
+          },
+          "constraints": {
+            "width": {
+              "min": 9
+            },
+            "height": {
+              "min": 7
+            }
+          },
+          "slot": "nt:/FMSInfo/*",
+          "props": {}
+        },
+        {
+          "id": "34765a4d-0d3e-41ab-910f-81b97b2d8fbd",
+          "type": "fms",
+          "layout": {
+            "left": -6,
+            "top": -26,
+            "width": 12,
+            "height": 7
+          },
+          "constraints": {
+            "width": {
+              "min": 9
+            },
+            "height": {
+              "min": 7
+            }
+          },
+          "slot": "nt:/FMSInfo/*",
+          "props": {}
+        },
+        {
+          "id": "22ef1d4b-5bc2-498d-b676-23c9310f350b",
+          "type": "fms",
+          "layout": {
+            "left": 14,
+            "top": 38,
+            "width": 9,
+            "height": 8
+          },
+          "constraints": {
+            "width": {
+              "min": 9
+            },
+            "height": {
+              "min": 7
+            }
+          },
+          "slot": "nt:/FMSInfo/*",
+          "props": {}
+        }
+      ]
+    },
+    "custom": [
+      {
+        "id": "cec76cb0-65bd-4911-bc90-e4a428aab1b3",
+        "viewport": {
+          "x": 196.1553801983992,
+          "y": 170.0013295052793,
+          "scale": 0.5448760561066645
+        },
+        "widgets": [
+          {
+            "id": "d03156b9-c0ce-4761-8b72-4af90f02f619",
+            "type": "field2d",
+            "layout": {
+              "left": 38,
+              "top": -12,
+              "width": 34,
+              "height": 64
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 11
+              }
+            },
+            "lookback": 5,
+            "props": {
+              "style": "default",
+              "orientation": "270",
+              "bumperSizeInch": 32
+            }
+          },
+          {
+            "id": "df97690c-da9a-45de-9c86-344d9bf59691",
+            "type": "alerts",
+            "layout": {
+              "left": -14,
+              "top": -12,
+              "width": 25,
+              "height": 13
+            },
+            "constraints": {
+              "width": {
+                "min": 5
+              },
+              "height": {
+                "min": 3
+              }
+            },
+            "slot": "nt:/SmartDashboard/Alerts/*",
+            "props": {
+              "errorsVisible": true,
+              "warningsVisible": true,
+              "infosVisible": true
+            }
+          },
+          {
+            "id": "c3431275-02f5-415c-82fa-03904af1c0cc",
+            "type": "chart.line",
+            "layout": {
+              "left": -14,
+              "top": 2,
+              "width": 25,
+              "height": 11
+            },
+            "constraints": {
+              "width": {
+                "min": 4
+              },
+              "height": {
+                "min": 4
+              }
+            },
+            "slot": "nt:/AdvantageKit/Flywheel/AppliedVolts",
+            "lookback": 5,
+            "props": {
+              "valueFormat": {
+                "maximumFractionDigits": 1
+              },
+              "axisFormat": {
+                "maximumFractionDigits": 2
+              },
+              "title": "Flywheel/AppliedVolts"
+            }
+          },
+          {
+            "id": "792d8422-92f7-449c-b97b-a8c4dfca9f4d",
+            "type": "chart.line",
+            "layout": {
+              "left": -14,
+              "top": 38,
+              "width": 25,
+              "height": 11
+            },
+            "constraints": {
+              "width": {
+                "min": 4
+              },
+              "height": {
+                "min": 4
+              }
+            },
+            "slot": "nt:/AdvantageKit/Turret/CurrentAmps",
+            "lookback": 5,
+            "props": {
+              "valueFormat": {
+                "maximumFractionDigits": 1
+              },
+              "axisFormat": {
+                "maximumFractionDigits": 2
+              },
+              "title": "Turret/CurrentAmps"
+            }
+          },
+          {
+            "id": "6ad447ab-c4e9-41da-a4c6-6f6c6a9fc60c",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": -12,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/TuningMode",
+            "props": {
+              "interactive": true,
+              "title": "Tuning Mode"
+            }
+          },
+          {
+            "id": "a21ee7e0-5066-423c-a0fd-7357857bb913",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": -5,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/DebugMode",
+            "props": {
+              "interactive": true,
+              "title": "Debug Mode"
+            }
+          },
+          {
+            "id": "358acd81-5e72-4055-b083-8ae3d4970625",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 4,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/Flywheel/IsEnabled",
+            "props": {
+              "interactive": true,
+              "title": "Flywheel/IsEnabled"
+            }
+          },
+          {
+            "id": "9a08df76-df3b-4181-82ca-9e6fbd1fb37e",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 11,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/Flywheel/ToggleVoltageOverride",
+            "props": {
+              "interactive": true,
+              "title": "Flywheel/ToggleVoltageOverride"
+            }
+          },
+          {
+            "id": "6d51d065-a045-4f67-b5de-8c295a3c6aa8",
+            "type": "chart.line",
+            "layout": {
+              "left": -14,
+              "top": 14,
+              "width": 25,
+              "height": 11
+            },
+            "constraints": {
+              "width": {
+                "min": 4
+              },
+              "height": {
+                "min": 4
+              }
+            },
+            "slot": "nt:/AdvantageKit/Flywheel/CurrentAmps",
+            "lookback": 5,
+            "props": {
+              "valueFormat": {
+                "maximumFractionDigits": 1
+              },
+              "axisFormat": {
+                "maximumFractionDigits": 2
+              },
+              "title": "Flywheel/CurrentAmps"
+            }
+          },
+          {
+            "id": "059d3193-cb3a-4a14-acac-809e5ad48197",
+            "type": "chart.line",
+            "layout": {
+              "left": -14,
+              "top": 26,
+              "width": 25,
+              "height": 11
+            },
+            "constraints": {
+              "width": {
+                "min": 4
+              },
+              "height": {
+                "min": 4
+              }
+            },
+            "slot": "nt:/AdvantageKit/Turret/AppliedVolts",
+            "lookback": 5,
+            "props": {
+              "valueFormat": {
+                "maximumFractionDigits": 1
+              },
+              "axisFormat": {
+                "maximumFractionDigits": 2
+              },
+              "title": "Turret/AppliedVolts"
+            }
+          },
+          {
+            "id": "95319bb3-bcda-4011-85fd-9382e99241f5",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 18,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/Flywheel/ToggleCurrentOverride",
+            "props": {
+              "interactive": true,
+              "title": "Flywheel/ToggleCurrentOverride"
+            }
+          },
+          {
+            "id": "61071bd6-018f-4937-944c-0e4fa662a8a4",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 28,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/Turret/IsEnabled",
+            "props": {
+              "interactive": true,
+              "title": "Turret/IsEnabled"
+            }
+          },
+          {
+            "id": "c204d99f-b28a-45f1-81f5-9ca78443ea9f",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 54,
+              "width": 6,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "props": {
+              "interactive": true
+            }
+          },
+          {
+            "id": "24f27c29-8b76-48e5-86d7-c63d7929a5fa",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 35,
+              "width": 25,
+              "height": 7
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/Turret/ToggleVoltageOverride",
+            "props": {
+              "interactive": true,
+              "title": "Turret/ToggleVoltageOverride"
+            }
+          },
+          {
+            "id": "0d5abe99-fe7a-4486-91bc-61cc8a5d5644",
+            "type": "toggle",
+            "layout": {
+              "left": 14,
+              "top": 63,
+              "width": 6,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "props": {
+              "interactive": true
+            }
+          },
+          {
+            "id": "abef3db5-4ad8-4fc2-9403-86f2ec2b6ed1",
+            "type": "toggle",
+            "layout": {
+              "left": 12,
+              "top": 43,
+              "width": 25,
+              "height": 6
+            },
+            "constraints": {
+              "width": {
+                "min": 6
+              },
+              "height": {
+                "min": 5
+              }
+            },
+            "slot": "nt:/AdvantageKit/NetworkInputs/Toggles/Turret/ToggleCurrentOverride",
+            "props": {
+              "interactive": true,
+              "title": "Turret/ToggleCurrentOverride"
+            }
+          }
+        ]
+      },
+      {
+        "id": "c8d80440-ea87-43b4-ad66-baeb41cfc155",
+        "viewport": {
+          "x": -345.60074104070884,
+          "y": -216.000463150443,
+          "scale": 1.8000038595870251
+        },
+        "widgets": []
+      }
+    ]
+  }
+}
