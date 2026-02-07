@@ -239,7 +239,7 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
-            switch (RobotState.getInstance().getMode()) {
+            switch (RobotState.getInstance().getShooterMode()) {
                 case TO_HUB -> {
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
@@ -330,7 +330,7 @@ public class Turret extends SubsystemBase {
                             MathUtil.clamp(
                                 rotation.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
                 Commands.none(),
-                () -> RobotState.getInstance().getMode().equals(ShooterMode.MANUAL))
+                () -> RobotState.getInstance().getShooterMode().equals(ShooterMode.MANUAL))
             .withName("Set Desired State");
     }
 

@@ -20,6 +20,7 @@ import org.steelhawks.Constants.AutonConstants;
 import org.steelhawks.Constants.Deadbands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -44,6 +45,8 @@ public class DriveCommands {
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
 
+    private static Translation2d lastVelocity = new Translation2d();
+
     private DriveCommands() {}
 
     private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
@@ -65,23 +68,40 @@ public class DriveCommands {
         DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
         return Commands.run(
             () -> {
-                Translation2d linearVelocity =
-                    getLinearVelocityFromJoysticks(
-                        Toggles.rateLimitSwerveEnabled.get()
-                            ? joystickLimiter.calculate(xSupplier.getAsDouble())
-                            : xSupplier.getAsDouble(),
-                        Toggles.rateLimitSwerveEnabled.get()
-                            ? joystickLimiter.calculate(ySupplier.getAsDouble())
-                            : ySupplier.getAsDouble());
+                Translation2d linearVelocity;
+                if (RobotState.getInstance().getAimState() == ShootingState.NOTHING) {
+                    linearVelocity =
+                        getLinearVelocityFromJoysticks(
+                            Toggles.rateLimitSwerveEnabled.get()
+                                ? joystickLimiter.calculate(xSupplier.getAsDouble())
+                                : xSupplier.getAsDouble(),
+                            Toggles.rateLimitSwerveEnabled.get()
+                                ? joystickLimiter.calculate(ySupplier.getAsDouble())
+                                : ySupplier.getAsDouble());
+                    lastVelocity = linearVelocity;
+                } else if (RobotState.getInstance().getAimState() == ShootingState.SHOOTING_MOVING) {
+                    // constant velocity mode, just lock magnitude not direction
+                    double x = xSupplier.getAsDouble();
+                    double y = ySupplier.getAsDouble();
+                    double magnitude = Math.hypot(x, y);
 
+                    if (magnitude < Deadbands.DRIVE_DEADBAND) {
+                        linearVelocity = new Translation2d();
+                    } else {
+                        Rotation2d direction = new Rotation2d(Math.atan2(y, x));
+                        double constantMagnitude = 0.5; // 50% speed
+                        linearVelocity = new Pose2d(new Translation2d(), direction)
+                            .transformBy(new Transform2d(constantMagnitude, 0.0, new Rotation2d()))
+                            .getTranslation();
+                    }
+                    lastVelocity = linearVelocity;
+                }
                 double omega =
                     MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Deadbands.DRIVE_DEADBAND);
-
-                // square for more precise control
                 omega = Math.copySign(Math.pow(omega, 2), omega);
-                runVelocity(linearVelocity, omega);
+                runVelocity(lastVelocity, omega);
             }, s_Swerve)
-                .withName("Teleop Drive");
+        .withName("Teleop Drive");
     }
 
     /**

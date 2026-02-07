@@ -52,7 +52,15 @@ public class RobotState extends VirtualSubsystem {
         MANUAL
     }
 
-    private ShooterMode currentMode = ShooterMode.TO_HUB;
+    public enum ShootingState {
+        SHOOTING_STATIONARY,
+        SHOOTING_MOVING,
+        SHOOTING, // used to signify that we are just shooting, the set function will automatically decide if we are sotm or stationary
+        NOTHING
+    }
+
+    private ShooterMode currentShooterMode = ShooterMode.TO_HUB;
+    private ShootingState shootingState = ShootingState.NOTHING;
     private ShiftState shiftState = ShiftState.AUTO;
 
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
@@ -82,7 +90,6 @@ public class RobotState extends VirtualSubsystem {
     private List<DetectedObject> currentDetectedObjects;
 
     // Goal Tracking
-
     private final LatchedBoolean teleopStarted = new LatchedBoolean();
     private final LatchedBoolean autoStarted = new LatchedBoolean();
     private Alliance initialActiveHub = null;
@@ -91,11 +98,12 @@ public class RobotState extends VirtualSubsystem {
     private final Timer timer = new Timer();
     private static RobotState instance;
 
-    public void setMode(ShooterMode mode) {
-        if (currentMode != mode) {
+    public void setShooterMode(ShooterMode mode) {
+        // TODO add check to see if we are moving, just a velocity check then do the locks
+        if (currentShooterMode != mode) {
             Logger.recordOutput("ShooterMode/ModeChange",
-                currentMode.name() + " -> " + mode.name());
-            currentMode = mode;
+                currentShooterMode.name() + " -> " + mode.name());
+            currentShooterMode = mode;
             Logger.recordOutput("ShooterMode/CurrentMode", mode.name());
             // clear trajectory
             Logger.recordOutput("Turret/ScoreTrajectory", new Translation3d[0]);
@@ -103,8 +111,21 @@ public class RobotState extends VirtualSubsystem {
         }
     }
 
-    public ShooterMode getMode() {
-        return currentMode;
+    public void setAimState(ShootingState state) {
+        if (shootingState != state) {
+            Logger.recordOutput("AimState/ModeChange",
+                shootingState.name() + " -> " + state.name());
+            shootingState = state;
+            Logger.recordOutput("AimState/CurrentMode", state.name());
+        }
+    }
+
+    public ShootingState getAimState() {
+        return shootingState;
+    }
+
+    public ShooterMode getShooterMode() {
+        return currentShooterMode;
     }
 
     public static RobotState getInstance() {
@@ -154,12 +175,12 @@ public class RobotState extends VirtualSubsystem {
                 }
             }
         }
-        if (currentMode == ShooterMode.MANUAL) {
+        if (currentShooterMode == ShooterMode.MANUAL) {
             return;
         }
         ShooterMode desiredMode = calculateDesiredMode();
-        if (desiredMode != currentMode) {
-            setMode(desiredMode);
+        if (desiredMode != currentShooterMode) {
+            setShooterMode(desiredMode);
         }
     }
 
