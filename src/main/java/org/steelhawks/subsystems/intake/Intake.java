@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
 		}
 		if (shouldRun) {
 			if (RobotContainer.s_Swerve.collisionDetected()) {
-				desiredGoal = IntakeConstants.State.RETRACTED;
+				setDesiredState(IntakeConstants.State.RETRACTED);
 			}
 			double previousVelocity = setpoint.velocity;
 			setpoint =
@@ -151,16 +151,17 @@ public class Intake extends SubsystemBase {
 		}
 	}
 
-	public Command setDesiredState(IntakeConstants.State state) {
-		return Commands.runOnce(
-			() -> {
-				inputs.goal = MathUtil.clamp(
-					state.getPosition().getRadians(),
-					IntakeConstants.MIN_ROTATION.getRadians(),
-					IntakeConstants.MAX_ROTATION.getRadians());
-				goal = new TrapezoidProfile.State(inputs.goal, 0.0);
-				desiredGoal = state;
-			}, this);
+	public void setDesiredState(IntakeConstants.State state) {
+        inputs.goal = MathUtil.clamp(
+            state.getPosition().getRadians(),
+            IntakeConstants.MIN_ROTATION.getRadians(),
+            IntakeConstants.MAX_ROTATION.getRadians());
+        goal = new TrapezoidProfile.State(inputs.goal, 0.0);
+        desiredGoal = state;
 	}
+
+    public Command setDesiredStateCommand(IntakeConstants.State state) {
+        return Commands.runOnce(() -> setDesiredState(state), this);
+    }
 }
 
