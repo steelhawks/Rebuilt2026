@@ -52,6 +52,8 @@ public final class Autos {
         if (Toggles.tuningMode.get()) {
             /* ------------- Swerve SysId ------------- */
 
+            autoChooser.addOption("Swerve Drive (Quick Characterizer)", DriveCommands.feedforwardCharacterization(s_Swerve));
+
             autoChooser.addOption("Swerve Drive (Quasistatic Forward)", s_Swerve.driveSysIdQuasistatic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Swerve Drive (Quasistatic Backward)", s_Swerve.driveSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 

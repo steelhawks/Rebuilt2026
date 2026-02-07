@@ -158,7 +158,7 @@ public class RobotConfig {
                 .withLEDMatrix(false)
                 .withLEDStrip(false)
                 .withVision(true)
-                .withObjectVision(true)
+                .withObjectVision(false)
                 .withFlywheel(false)
                 .withTurret(false)
                 .withPivot(false)
