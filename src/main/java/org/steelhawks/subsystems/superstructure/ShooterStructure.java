@@ -10,7 +10,7 @@ import org.steelhawks.RobotState;
 public class ShooterStructure {
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
-    private static final double G = -9.81;
+    private static final double G = 9.81;
 
     public static double calculateTimeofFlight(double exitVelocity, double pivotAngle, double distanceToTravel) {
         return distanceToTravel / (exitVelocity * Math.cos(pivotAngle));
