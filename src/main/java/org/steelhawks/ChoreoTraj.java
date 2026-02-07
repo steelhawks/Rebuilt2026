@@ -24,35 +24,7 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj OutpostTrenchClimbAuto = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.empty(),
-	    5.84683,
-	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto$0 = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.of(0),
-	    1.18891,
-	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto$1 = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.of(1),
-	    2.0964,
-	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto$2 = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.of(2),
-	    2.56152,
-	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64)),
-	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
-	);
-	public static final ChoreoTraj TrenchMiddleClimb = new ChoreoTraj(
+    public static final ChoreoTraj TrenchMiddleClimb = new ChoreoTraj(
 	    "TrenchMiddleClimb",
 	    OptionalInt.empty(),
 	    4.79452,
@@ -87,21 +59,57 @@ public record ChoreoTraj(
 	    new Pose2d(2.719, 1.189, Rotation2d.fromRadians(1.12)),
 	    new Pose2d(1.41, 2.854, Rotation2d.fromRadians(0))
 	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.empty(),
+	    5.84683,
+	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto$0 = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.of(0),
+	    1.18891,
+	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto$1 = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.of(1),
+	    2.0964,
+	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64))
+	);
+	public static final ChoreoTraj OutpostTrenchClimbAuto$2 = new ChoreoTraj(
+	    "OutpostTrenchClimbAuto",
+	    OptionalInt.of(2),
+	    2.56152,
+	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64)),
+	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj NewPath = new ChoreoTraj(
+	    "NewPath",
+	    OptionalInt.empty(),
+	    5.14092,
+	    new Pose2d(3.282, 2.355, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.285, 2.376, Rotation2d.fromRadians(0))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto),
-		Map.entry("OutpostTrenchClimbAuto$0", OutpostTrenchClimbAuto$0),
-		Map.entry("OutpostTrenchClimbAuto$1", OutpostTrenchClimbAuto$1),
-		Map.entry("OutpostTrenchClimbAuto$2", OutpostTrenchClimbAuto$2),
-		Map.entry("TrenchMiddleClimb", TrenchMiddleClimb),
+    	Map.entry("TrenchMiddleClimb", TrenchMiddleClimb),
 		Map.entry("TrenchMiddleClimb$0", TrenchMiddleClimb$0),
 		Map.entry("TrenchMiddleClimb$1", TrenchMiddleClimb$1),
 		Map.entry("TrenchMiddleClimb$2", TrenchMiddleClimb$2),
-		Map.entry("TrenchMiddleClimb$3", TrenchMiddleClimb$3)
+		Map.entry("TrenchMiddleClimb$3", TrenchMiddleClimb$3),
+		Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto),
+		Map.entry("OutpostTrenchClimbAuto$0", OutpostTrenchClimbAuto$0),
+		Map.entry("OutpostTrenchClimbAuto$1", OutpostTrenchClimbAuto$1),
+		Map.entry("OutpostTrenchClimbAuto$2", OutpostTrenchClimbAuto$2),
+		Map.entry("NewPath", NewPath)
     );
 
     /**

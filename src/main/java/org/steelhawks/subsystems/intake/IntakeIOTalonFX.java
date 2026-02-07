@@ -124,6 +124,16 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
         intakeDutyCycleOut = new DutyCycleOut(0.0);
 
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            100,
+            leftPosition,
+            leftVelocity,
+            rightPosition,
+            rightVelocity,
+            intakePosition,
+            intakeVelocity,
+            encoderPosition,
+            encoderVelocity);
         PhoenixUtil.registerSignals(
             canBus.bus.isNetworkFD(),
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
@@ -181,7 +191,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void runPivotPosition(double position, double feedforward) {
         leftMotor.setControl(
             positionTorqueCurrentFOC
-                .withPosition(position)
+                .withPosition(Units.radiansToRotations(position))
                 .withFeedForward(feedforward));
     }
 
