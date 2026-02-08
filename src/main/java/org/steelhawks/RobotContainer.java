@@ -10,6 +10,7 @@ import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.spindexer.Spindexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
@@ -31,6 +32,7 @@ public class RobotContainer {
     public static Turret s_Turret = null;
     public static Pivot s_Pivot = null;
     public static Intake s_Intake = null;
+    public static Spindexer s_Spindexer = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -49,6 +51,7 @@ public class RobotContainer {
 //        s_Pivot = config.createPivot().orElse(null);
         s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
+        s_Spindexer = config.createSpindexer().orElse(null);
 
         if (config.hasAutos) {
             Autos.init();

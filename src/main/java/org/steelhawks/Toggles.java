@@ -67,4 +67,9 @@ public interface Toggles {
         LoggedNetworkBoolean toggleCurrentOverride =
             new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
+
+    interface Spindexer {
+        LoggedNetworkBoolean isEnabled =
+            new LoggedNetworkBoolean("Toggles/Spindexer/IsEnabled", true);
+    }
 }
