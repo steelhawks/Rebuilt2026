@@ -163,5 +163,12 @@ public class Intake extends SubsystemBase {
     public Command setDesiredStateCommand(IntakeConstants.State state) {
         return Commands.runOnce(() -> setDesiredState(state), this);
     }
+
+	public Command runIntake() {
+		return Commands.run(
+			() -> {
+				io.runIntake(1.0);
+			}, this).finallyDo(io::stopIntake);
+	}
 }
 

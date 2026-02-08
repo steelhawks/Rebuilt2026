@@ -7,6 +7,7 @@ import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
 import org.steelhawks.subsystems.intake.IntakeIOSim;
+import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
@@ -454,7 +455,7 @@ public class RobotConfig {
 
         @Override
         public Intake createIntake() {
-            return new Intake(new IntakeIO() {});
+            return new Intake(new IntakeIOTalonFX(rioBus));
         }
     }
 

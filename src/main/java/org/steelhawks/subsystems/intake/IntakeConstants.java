@@ -37,10 +37,10 @@ public class IntakeConstants {
 	public static final double TOLERANCE = 0.02;
 
     // TODO SET IDS
-    public static final int LEFT_MOTOR_ID = 0;
-    public static final int RIGHT_MOTOR_ID = 0;
-    public static final int INTAKE_MOTOR_ID = 0;
-    public static final int ENCODER_ID = 0;
+    public static final int LEFT_MOTOR_ID = 13;
+    public static final int RIGHT_MOTOR_ID = 14;
+    public static final int INTAKE_MOTOR_ID = 15;
+    public static final int ENCODER_ID = 16;
 
 	public static final Rotation2d MAX_ROTATION = new Rotation2d();
 	public static final Rotation2d MIN_ROTATION = new Rotation2d();

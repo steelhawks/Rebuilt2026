@@ -84,6 +84,10 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
+        intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        intakeConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        tryUntilOk(5, () -> intakeMotor.getConfigurator().apply(intakeConfig));
+
         cancoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.MAG_OFFSET.getRotations();
         cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // TODO FIND
         tryUntilOk(5, () -> pivotEncoder.getConfigurator().apply(cancoderConfig));

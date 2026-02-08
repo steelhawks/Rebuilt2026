@@ -47,7 +47,7 @@ public class RobotContainer {
 //        s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
 //        s_Pivot = config.createPivot().orElse(null);
-//        s_Intake = config.createIntake().orElse(null);
+        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
 
         if (config.hasAutos) {
@@ -101,12 +101,15 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
+//        driver.rightTrigger()
+//            .whileTrue(Commands.runOnce(() -> {
+//                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
+//            }))
+//            .onFalse(Commands.runOnce(() -> {
+//                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
+//            }));
         driver.rightTrigger()
-            .whileTrue(Commands.runOnce(() -> {
-                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
-            }))
-            .onFalse(Commands.runOnce(() -> {
-                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
-            }));
+            .whileTrue(
+                s_Intake.runIntake());
     }
 }
