@@ -5,7 +5,9 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
 
-    public static final double REDUCTION = 1.0 / 1.0;
+    public static final double REDUCTION = (6.0 / 1.0);
+    public static final double MASS_KG = 0.0;
+    public static final double DIST_FROM_PIVOT_TO_COM = 0.0;
 
     public enum State {
 		// TODO In radians, need to tune
@@ -31,6 +33,7 @@ public class IntakeConstants {
 	public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", 0.0);
 	public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);
 	public static final LoggedTunableNumber kV = new LoggedTunableNumber("Intake/kV", 0.0);
+    public static final LoggedTunableNumber kMassRadius =  new LoggedTunableNumber("Intake/kMOI", MASS_KG * DIST_FROM_PIVOT_TO_COM);
 
 	public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityRadPerSec", 0.0);
 	public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadPerSecSQ", 0.0);

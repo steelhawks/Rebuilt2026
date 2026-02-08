@@ -596,6 +596,10 @@ public class Swerve extends SubsystemBase {
         return distances;
     }
 
+    public Rotation2d getPitch() {
+        return gyroInputs.pitchPosition;
+    }
+
     public void stop() {
         runVelocity(new ChassisSpeeds());
     }
