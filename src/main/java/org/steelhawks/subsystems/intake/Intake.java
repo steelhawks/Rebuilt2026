@@ -174,5 +174,10 @@ public class Intake extends SubsystemBase {
 				io.runIntake(1.0);
 			}, this).finallyDo(io::stopIntake);
 	}
+
+	public Command outtakeIntake() {
+		return Commands.run(
+			() -> io.runIntake(-1.0), this).finallyDo(io::stopIntake);
+	}
 }
 
