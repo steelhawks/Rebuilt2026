@@ -6,10 +6,12 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.Toggles;
 
 public class ShooterStructure {
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
+    public static ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
 
     public static double calculateTimeofFlight(double exitVelocity, double pivotAngle, double distanceToTravel) {
@@ -40,28 +42,77 @@ public class ShooterStructure {
          *
          * <a href="https://www.desmos.com/calculator/ezjqolho6g">Desmos Graph</a>
          */
+//        public static ProjectileData calculateShot(
+//            Translation3d actualTarget, Translation3d predictedTarget
+//        ) {
+//            double x_dist = distanceToTarget(predictedTarget);
+//            double y_dist = predictedTarget.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ();
+//            double r = FieldConstants.Hub.FUNNEL_RADIUS * x_dist
+//                / distanceToTarget(actualTarget);
+//            double h = FieldConstants.Hub.FUNNEL_HEIGHT + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
+//            double A1 = Math.pow(x_dist, 2);
+//            double B1 = x_dist;
+//            double D1 = y_dist;
+//            double A2 = -x_dist * x_dist + Math.pow((x_dist - r), 2);
+//            double B2 = -r;
+//            double D2 = h;
+//            double Bm = -B2 / B1;
+//            double A3 = Bm * A1 + A2;
+//            double D3 = Bm * D1 + D2;
+//            double a = D3 / A3;
+//            double b = (D1 - A1 * a) / B1;
+        //            Logger.recordOutput("Turret/Debug/x_dist: ", x_dist);
+//            Logger.recordOutput("Turret/Debug/y_dist: ", y_dist);
+//            Logger.recordOutput("Turret/Debug/r: ", r);
+//            Logger.recordOutput("Turret/Debug/h: ", h);
+//            Logger.recordOutput("Turret/Debug/a: ", a);
+//            Logger.recordOutput("Turret/Debug/b: ", b);
+
+//            double theta = Math.atan(b);
+//            double v0 = Math.sqrt(-G / (2 * a * Math.pow(Math.cos(theta), 2)));
+//            return new ProjectileData(v0, theta, predictedTarget);
+//        }
+
         public static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget
         ) {
             double x_dist = distanceToTarget(predictedTarget);
             double y_dist = predictedTarget.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ();
-            double r = FieldConstants.Hub.FUNNEL_RADIUS * x_dist
-                / distanceToTarget(actualTarget);
-            double h = FieldConstants.Hub.FUNNEL_HEIGHT + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
-            double A1 = Math.pow(x_dist, 2);
-            double B1 = x_dist;
-            double D1 = y_dist;
-            double A2 = -x_dist * x_dist + Math.pow((x_dist - r), 2);
-            double B2 = -r;
-            double D2 = h;
-            double Bm = -B2 / B1;
-            double A3 = Bm * A1 + A2;
-            double D3 = Bm * D1 + D2;
-            double a = D3 / A3;
-            double b = (D1 - A1 * a) / B1;
-            double theta = Math.atan(b);
-            double v0 = Math.sqrt(-G / (2 * a * Math.pow(Math.cos(theta), 2)));
-            return new ProjectileData(v0, theta, predictedTarget);
+            double bestTheta = -1;
+            double bestV0 = -1;
+            for (double theta = RobotConstants.MIN_HOOD_ANGLE.getRadians();
+                 theta <= RobotConstants.MAX_HOOD_ANGLE.getRadians();
+                 theta += RobotConstants.ANGLE_INCREMENT
+            ) {
+                double denom = 2 * Math.pow(Math.cos(theta), 2) * (x_dist * Math.tan(theta) - y_dist);
+                if (denom <= 0) continue;
+                double v0 = Math.sqrt(G * x_dist * x_dist / denom);
+                if (Double.isNaN(v0)) continue;
+                double r = FieldConstants.Hub.FUNNEL_RADIUS * x_dist
+                    / distanceToTarget(actualTarget);
+                double xFunnel = x_dist - r;
+                double requiredHeight = (FieldConstants.Hub.FUNNEL_HEIGHT
+                    + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR)
+                    - RobotConstants.ROBOT_TO_TURRET.getZ();
+                double yAtFunnel = xFunnel * Math.tan(theta)
+                    - (G * xFunnel * xFunnel) / (2 * v0 * v0 * Math.pow(Math.cos(theta), 2));
+                // prefer lower angles
+                if (yAtFunnel >= requiredHeight) {
+                    bestTheta = theta;
+                    bestV0 = v0;
+                    break;
+                }
+            }
+            if (bestTheta < 0) {
+                return kNoSolution;
+            }
+            if (Toggles.debugMode.get()) {
+                Logger.recordOutput("Turret/Debug/x_dist", x_dist);
+                Logger.recordOutput("Turret/Debug/y_dist", y_dist);
+                Logger.recordOutput("Turret/Debug/bestTheta", Math.toDegrees(bestTheta));
+                Logger.recordOutput("Turret/Debug/bestV0", bestV0);
+            }
+            return new ProjectileData(bestV0, bestTheta, predictedTarget);
         }
 
         /**
@@ -85,29 +136,22 @@ public class ShooterStructure {
         ) {
             final double theta = RobotConstants.FIXED_SHOOTER_ANGLE;
             double x = distanceToTarget(predictedTarget);
-            double y = predictedTarget.getZ()
-                - RobotConstants.ROBOT_TO_TURRET.getZ();
-            double denom = 2 * Math.pow(Math.cos(theta), 2)
-                * (x * Math.tan(theta) - y);
-            if (denom <= 0) { // impossible at 45 deg or wtv angle at
-                return null;
+            double y = predictedTarget.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ();
+            double denom = 2 * Math.pow(Math.cos(theta), 2) * (x * Math.tan(theta) - y);
+            if (denom <= 0) {
+                return kNoSolution;
             }
             double v0 = Math.sqrt(G * Math.pow(x, 2) / denom);
-
-            // funnel clearance checks
             double r = FieldConstants.Hub.FUNNEL_RADIUS * x
                 / distanceToTarget(actualTarget);
             double xFunnel = x - r;
-            double requiredHeight =
-                FieldConstants.Hub.FUNNEL_HEIGHT
-                    + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
-            double yAtFunnel =
-                xFunnel * Math.tan(theta)
-                    - (G * Math.pow(xFunnel, 2))
-                    / (2 * v0 * v0 * Math.pow(Math.cos(theta), 2));
-
-            if (yAtFunnel < requiredHeight) { // will hit funnel
-                return null;
+            double requiredHeight = (FieldConstants.Hub.FUNNEL_HEIGHT
+                + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR)
+                - RobotConstants.ROBOT_TO_TURRET.getZ();
+            double yAtFunnel = xFunnel * Math.tan(theta)
+                - (G * Math.pow(xFunnel, 2)) / (2 * v0 * v0 * Math.pow(Math.cos(theta), 2));
+            if (yAtFunnel < requiredHeight) {
+                return kNoSolution;
             }
             return new ProjectileData(v0, theta, predictedTarget);
         }

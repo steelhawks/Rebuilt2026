@@ -49,11 +49,11 @@ public class FieldConstants {
         public static final Translation2d HUB_CENTER =
             new Translation2d(Units.inchesToMeters(158.6 + (47.0 / 2.0)), FIELD_WIDTH / 2.0);
         public static final Translation3d HUB_CENTER_3D =
-            new Translation3d(HUB_CENTER.getX(), HUB_CENTER.getY(), 1.575);
+            new Translation3d(HUB_CENTER.getX(), HUB_CENTER.getY(), Units.inchesToMeters(72.0));
 
         public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
-        public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0 - 56.4);
-        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(12.0);
+        public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0);
+        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(7.0);
     }
 
     public final static class Ferrying {
