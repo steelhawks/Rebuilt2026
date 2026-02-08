@@ -21,8 +21,5 @@ public interface SpindexerIO {
 
 	default void runSpindexer(double output) {}
 
-	default void stopSpindexer() {}
-
-
-
+	default void stop() {}
 }

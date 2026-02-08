@@ -31,11 +31,10 @@ public class SpindexerIOTalonFX implements SpindexerIO {
 		motor = new TalonFX(MOTOR_ID, canBus.bus);
 
 		config = new TalonFXConfiguration();
-		config.Feedback.SensorToMechanismRatio = 1.0 / 1.0;
-		config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		config.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
+		config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 		PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
-
 		PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
 		position = motor.getPosition();
@@ -46,7 +45,6 @@ public class SpindexerIOTalonFX implements SpindexerIO {
 		temp = motor.getDeviceTemp();
 
 		dutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
-
 		BaseStatusSignal.setUpdateFrequencyForAll(
 		50,
 			velocity,
@@ -91,7 +89,7 @@ public class SpindexerIOTalonFX implements SpindexerIO {
 	}
 
 	@Override
-	public void stopSpindexer() {
+	public void stop() {
 		motor.stopMotor();
 	}
 }
