@@ -114,5 +114,9 @@ public class RobotContainer {
         driver.rightTrigger()
             .whileTrue(
                 s_Intake.runIntake());
+
+        driver.leftTrigger()
+            .whileTrue(
+                s_Intake.outtakeIntake());
     }
 }
