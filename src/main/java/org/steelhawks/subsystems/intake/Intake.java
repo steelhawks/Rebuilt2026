@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.intake;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -130,11 +131,14 @@ public class Intake extends SubsystemBase {
 				io.stopPivot();
 			} else {
 				double acceleration = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
+                double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
+                double drivetrainAccelG = rawAccelY - Math.sin(RobotContainer.s_Swerve.getPitch().getRadians());
+                double drivetrainAccel = drivetrainAccelG * 9.81;
+                double kT = DCMotor.getKrakenX44Foc(2).KtNMPerAmp * IntakeConstants.REDUCTION;
 				io.runPivotPosition(
 					setpoint.position,
 				(IntakeConstants.kG.get() * Math.cos(getPosition().getRadians())) +
-//					- (IntakeConstants.kG.get() * Math.sin(getPosition().getRadians())
-//						* RobotContainer.s_Swerve.getRobotRelativeYAccelGs()) +
+                    -(IntakeConstants.kMassRadius.getAsDouble() * drivetrainAccel * Math.sin(getPosition().getRadians())) / kT +
 					IntakeConstants.kS.get() * Math.signum(setpoint.velocity) +
 					IntakeConstants.kA.get() * acceleration);
 			}
