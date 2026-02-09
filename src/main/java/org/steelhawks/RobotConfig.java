@@ -6,8 +6,10 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
-import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
+import org.steelhawks.subsystems.oldintake.*;
+import org.steelhawks.subsystems.oldintake.OldIntakeIOTalonFX;
+import org.steelhawks.subsystems.oldintake.OldIntakeIO;
 import org.steelhawks.subsystems.spindexer.Spindexer;
 import org.steelhawks.subsystems.spindexer.SpindexerIO;
 import org.steelhawks.subsystems.spindexer.SpindexerIOSim;
@@ -27,7 +29,6 @@ import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
 import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
-import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
 import java.util.Objects;
@@ -123,11 +124,11 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createPivot());
     }
 
-    public Optional<Intake> createIntake() {
+    public Optional<OldIntake> createIntake() {
         if (!hasIntake) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createIntake());
+        return Optional.ofNullable(factory.createOldIntake());
     }
 
     public Optional<Spindexer> createSpindexer() {
@@ -375,6 +376,7 @@ public class RobotConfig {
         Flywheel createFlywheel();
         Turret createTurret(Supplier<Pose2d> poseSupplier);
         Pivot createPivot();
+        OldIntake createOldIntake();
         Intake createIntake();
         Spindexer createSpindexer();
     }
@@ -427,6 +429,11 @@ public class RobotConfig {
         @Override
         public Pivot createPivot() {
             return null;
+        }
+
+        @Override
+        public OldIntake createOldIntake() {
+            return new OldIntake(new OldIntakeIO() {});
         }
 
         @Override
@@ -488,6 +495,11 @@ public class RobotConfig {
         }
 
         @Override
+        public OldIntake createOldIntake() {
+            return new OldIntake(new OldIntakeIOTalonFX(rioBus));
+        }
+
+        @Override
         public Intake createIntake() {
             return new Intake(new IntakeIOTalonFX(rioBus));
         }
@@ -545,6 +557,11 @@ public class RobotConfig {
         }
 
         @Override
+        public OldIntake createOldIntake() {
+            return null;
+        }
+
+        @Override
         public Intake createIntake() {
             return null;
         }
@@ -598,6 +615,11 @@ public class RobotConfig {
 
         @Override
         public Pivot createPivot() {
+            return null;
+        }
+
+        @Override
+        public OldIntake createOldIntake() {
             return null;
         }
 
@@ -661,6 +683,11 @@ public class RobotConfig {
         }
 
         @Override
+        public OldIntake createOldIntake() {
+            return null;
+        }
+
+        @Override
         public Intake createIntake() {
             return null;
         }
@@ -718,8 +745,13 @@ public class RobotConfig {
         }
 
         @Override
+        public OldIntake createOldIntake() {
+            return new OldIntake(new OldIntakeIOSim());
+        }
+
+        @Override
         public Intake createIntake() {
-            return new Intake(new IntakeIOSim());
+            return null;
         }
 
         @Override
@@ -770,6 +802,11 @@ public class RobotConfig {
         @Override
         public Pivot createPivot() {
             return new Pivot(new PivotIO() {});
+        }
+
+        @Override
+        public OldIntake createOldIntake() {
+            return new OldIntake(new OldIntakeIO() {});
         }
 
         @Override

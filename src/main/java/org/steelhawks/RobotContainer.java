@@ -3,9 +3,8 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
-import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.oldintake.OldIntake;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
@@ -31,7 +30,7 @@ public class RobotContainer {
     public static Flywheel s_Flywheel = null;
     public static Turret s_Turret = null;
     public static Pivot s_Pivot = null;
-    public static Intake s_Intake = null;
+    public static OldIntake s_OldIntake = null;
     public static Spindexer s_Spindexer = null;
 
     private final CommandXboxController driver =

@@ -1,52 +1,49 @@
 package org.steelhawks.subsystems.intake;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
 
-    public static final double REDUCTION = (6.0 / 1.0);
+    public static final double REDUCTION = (4.0 / 1.0);
+    public static final double PINION_RADIUS = Units.inchesToMeters(1.033922 / 2.0);
+    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
     public static final double MASS_KG = 0.0;
-    public static final double DIST_FROM_PIVOT_TO_COM = 0.0;
+
+    public static final double INTAKE_SPEED = 0.5;
 
     public enum State {
-		// TODO In radians, need to tune
-		RETRACTED(new Rotation2d(0.0)),
-		HOME(new Rotation2d(0.0)),
-		INTAKE(new Rotation2d(0.0));
+        // TODO In meters, need to tune
+        RETRACTED(0.0),
+        HOME(0.0),
+        INTAKE(0.0);
 
-		private final Rotation2d positionRad;
+        private final double positionMeters;
 
-		State(Rotation2d positionRad) {
-			this.positionRad = positionRad;
-		}
+        State(double positionMeters) {
+            this.positionMeters = positionMeters;
+        }
 
-		public Rotation2d getPosition() {
-			return positionRad;
-		}
-	}
+        public double getPosition() {
+            return positionMeters;
+        }
+    }
 
-	public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 0.0);
-	public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
-	public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/kD", 0.0);
-	public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 0.0);
-	public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", 0.0);
-	public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);
-	public static final LoggedTunableNumber kV = new LoggedTunableNumber("Intake/kV", 0.0);
-    public static final LoggedTunableNumber kMassRadius =  new LoggedTunableNumber("Intake/kMassRadius", MASS_KG * DIST_FROM_PIVOT_TO_COM);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 0.0);
+    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/kD", 0.0);
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 0.0);
+    public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", 0.0);
+    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);
 
-	public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityRadPerSec", 0.0);
-	public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadPerSecSQ", 0.0);
-	public static final double TOLERANCE = 0.02;
+    public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", 0.0);
+    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", 0.0);
+    public static final double TOLERANCE = 0.02;
 
-    // TODO SET IDS
-    public static final int LEFT_MOTOR_ID = 13;
-    public static final int RIGHT_MOTOR_ID = 14;
-    public static final int INTAKE_MOTOR_ID = 15;
-    public static final int ENCODER_ID = 16;
+    public static final double MAX_EXTENSION = Units.inchesToMeters(17.706);
+    public static final double MIN_EXTENSION = 0.0;
 
-	public static final Rotation2d MAX_ROTATION = new Rotation2d();
-	public static final Rotation2d MIN_ROTATION = new Rotation2d();
-
-    public static final Rotation2d MAG_OFFSET = Rotation2d.fromRotations(0.0);
+    public static final int LEFT_ID = 0;
+    public static final int RIGHT_ID = 0;
+    public static final int INTAKE_ID = 0;
 }
