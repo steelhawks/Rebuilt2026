@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.intake;
 
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -126,14 +127,30 @@ public class Intake extends SubsystemBase {
             if (atGoal) {
                 io.stopRack();
             } else {
-                double acceleration = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
+                // drivetrain accel
                 double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
-                double drivetrainAccelG = rawAccelY - Math.sin(RobotContainer.s_Swerve.getPitch().getRadians());
+                double pitchRadians = RobotContainer.s_Swerve.getPitch().getRadians();
+                double drivetrainAccelG = rawAccelY - Math.sin(pitchRadians);
+                double drivetrainAccel = drivetrainAccelG * 9.81;
+                // physics based ff
+                double mass = IntakeConstants.MASS_KG;
+                double rackAngle = IntakeConstants.RACK_ANGLE.getRadians();
+                double pinionRadius = IntakeConstants.PINION_RADIUS;
+                double gearRatio = IntakeConstants.REDUCTION;
+                double frictionMultiplier = 1.3;
+                double rackAccel = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
+                double forceGravity = mass * 9.81 * Math.sin(rackAngle);
+                double forceRackAccel = mass * rackAccel;
+                double forceDrivetrain = mass * drivetrainAccel * Math.cos(rackAngle);
+                double totalForce = forceGravity + forceRackAccel + forceDrivetrain;
+                double torqueAtPinion = totalForce * pinionRadius * frictionMultiplier;
+                double motorTorque = torqueAtPinion / gearRatio;
+                double kT = DCMotor.getKrakenX44Foc(2).KtNMPerAmp;
+                double feedforwardCurrent = motorTorque / kT;
+                double staticFriction = IntakeConstants.kS.get() * Math.signum(setpoint.velocity);
                 io.runRackPosition(
                     setpoint.position,
-                    IntakeConstants.kG.get() +
-                        IntakeConstants.kS.get() * Math.signum(setpoint.velocity) +
-                        IntakeConstants.kA.get() * acceleration);
+                    feedforwardCurrent + staticFriction);
             }
             Logger.recordOutput("Intake/SetpointPosition", setpoint.position);
             Logger.recordOutput("Intake/SetpointVelocity", setpoint.velocity);

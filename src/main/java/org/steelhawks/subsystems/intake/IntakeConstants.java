@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.intake;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -11,6 +12,7 @@ public class IntakeConstants {
     public static final double MASS_KG = 0.0;
 
     public static final double INTAKE_SPEED = 0.5;
+    public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(35.0);
 
     public enum State {
         // TODO In meters, need to tune
