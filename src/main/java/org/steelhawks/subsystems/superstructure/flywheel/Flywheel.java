@@ -146,7 +146,14 @@ public class Flywheel extends SubsystemBase {
                         Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
                     }
                 }
-                case RUNNING -> io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                case RUNNING -> {
+                    if (nearTargetVelocity) {
+                        io.runFlywheelOpenLoop(feedforward, false);
+                    } else {
+                        // recover velocity if needed
+                        io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                    }
+                }
             }
         } else {
             state = FlywheelState.RAMP_UP;
