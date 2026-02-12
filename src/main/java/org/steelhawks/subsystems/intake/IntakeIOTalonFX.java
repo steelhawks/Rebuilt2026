@@ -5,11 +5,13 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.*;
 
@@ -55,6 +57,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         right_motor = new TalonFX(IntakeConstants.EXTENSION_RIGHT_MOTOR_ID);
         intake_motor = new TalonFX(IntakeConstants.ROLLER_MOTOR_ID);
 
+        left_motor.setControl(new Follower(IntakeConstants.EXTENSION_RIGHT_MOTOR_ID, MotorAlignmentValue.Opposed));
+
         var extensionConfig = new TalonFXConfiguration();
         extensionConfig.CurrentLimits.SupplyCurrentLimit = IntakeConstants.EXTENSION_CURRENT_LIMIT.getAsDouble();
         extensionConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -63,6 +67,8 @@ public class IntakeIOTalonFX implements IntakeIO {
                 .withInverted(InvertedValue.CounterClockwise_Positive)
                 .withNeutralMode(NeutralModeValue.Brake);
         extensionConfig.Feedback.SensorToMechanismRatio = IntakeConstants.EXTENSION_GEAR_RATIO.getAsDouble();
+
+        left_motor.getConfigurator().apply(extensionConfig);
 
         var extensionSlot0Configs = new Slot0Configs();
         extensionSlot0Configs
@@ -78,7 +84,15 @@ public class IntakeIOTalonFX implements IntakeIO {
                 .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
                 .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
                 .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
-                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
+                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble());
+
+        var rollerSlot0Configs = new Slot0Configs();
+        rollerSlot0Configs
+                .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
+                .withKP(IntakeConstants.ROLLER_KP.getAsDouble())
+                .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
+                .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
+                .withKA(IntakeConstants.ROLLER_KA.getAsDouble());
 
     }
 
