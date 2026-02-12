@@ -62,7 +62,6 @@ public class IntakeConstants {
     public static final TunableNumber ROLLER_KS = new TunableNumber("Roller KS", 0.0);
     public static final TunableNumber ROLLER_KA = new TunableNumber("Roller KA", 0.0);
     public static final TunableNumber ROLLER_KV = new TunableNumber("Roller KV", 0.0);
-    public static final TunableNumber ROLLER_KG = new TunableNumber("Roller KG", 0.0);
 
     public static final double POSITION_TOLERANCE = 0.02;
 

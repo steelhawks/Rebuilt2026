@@ -82,17 +82,37 @@ public class IntakeIOTalonFX implements IntakeIO {
         var extensionSlot1Configs = new Slot1Configs();
         extensionSlot1Configs
                 .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
-                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
-                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
-                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble());
+                .withKP(IntakeConstants.EXTENSION_VELOCITY_KP.getAsDouble())
+                .withKI(IntakeConstants.EXTENSION_VELOCITY_KI.getAsDouble())
+                .withKD(IntakeConstants.EXTENSION_VELOCITY_KD.getAsDouble())
+                .withKV(IntakeConstants.EXTENSION_VELOCITY_KV.getAsDouble())
+                .withKS(IntakeConstants.EXTENSION_VELOCITY_KS.getAsDouble())
+                .withKG(IntakeConstants.EXTENSION_VELOCITY_KG.getAsDouble());
+
+        left_motor.getConfigurator().apply(extensionSlot0Configs);
+        left_motor.getConfigurator().apply(extensionSlot1Configs);
+
+        var rollerConfig = new TalonFXConfiguration()
+                .withMotorOutput(new MotorOutputConfigs()
+                        .withNeutralMode(NeutralModeValue.Brake)
+                        .withInverted(InvertedValue.CounterClockwise_Positive));
+
+        intake_motor.getConfigurator().apply(rollerConfig);
 
         var rollerSlot0Configs = new Slot0Configs();
         rollerSlot0Configs
                 .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
                 .withKP(IntakeConstants.ROLLER_KP.getAsDouble())
-                .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
-                .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
-                .withKA(IntakeConstants.ROLLER_KA.getAsDouble());
+                .withKI(IntakeConstants.ROLLER_KI.getAsDouble())
+                .withKD(IntakeConstants.ROLLER_KD.getAsDouble())
+                .withKS(IntakeConstants.ROLLER_KS.getAsDouble())
+                .withKV(IntakeConstants.ROLLER_KV.getAsDouble());
+
+        intake_motor.getConfigurator().apply(rollerSlot0Configs);
+
+
+
+
 
     }
 
