@@ -29,6 +29,7 @@ public class Intake extends SubsystemBase {
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
     private boolean atGoal = false;
+    private IntakeVisualizer visualizer;
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -37,6 +38,11 @@ public class Intake extends SubsystemBase {
                 new TrapezoidProfile.Constraints(
                     IntakeConstants.MAX_VELOCITY_RAD_PER_SEC.get(),
                     IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.get()));
+        visualizer = new IntakeVisualizer(
+            () -> inputs.leftPositionMeters,
+            0,
+            -135
+        );
     }
 
     public boolean atGoal() {
@@ -162,6 +168,10 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/SetpointVelocity", 0.0);
             Logger.recordOutput("Intake/GoalPosition", 0.0);
             Logger.recordOutput("Intake/GoalVelocity", 0.0);
+        }
+
+        if (Constants.getRobot() == Constants.RobotType.SIMBOT) {
+            visualizer.update();
         }
     }
 

@@ -95,6 +95,8 @@ public class RobotContainer {
         if (config.hasIntake) {
             driver.leftBumper()
                 .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+            driver.rightBumper()
+                .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
         }
     }
 

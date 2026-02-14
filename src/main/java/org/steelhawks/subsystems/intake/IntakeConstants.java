@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.intake;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import org.steelhawks.Constants;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
@@ -31,15 +32,15 @@ public class IntakeConstants {
         }
     }
 
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 0.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", Constants.omega(0, 900));
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
     public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/kD", 0.0);
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 0.0);
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 1);
     public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", 0.0);
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);
 
-    public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", 0.0);
-    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", 0.0);
+    public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", Constants.omega(0, 2));
+    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", Constants.omega(0, 5));
     public static final double TOLERANCE = 0.02;
 
     public static final double MAX_EXTENSION = Units.inchesToMeters(17.706);
