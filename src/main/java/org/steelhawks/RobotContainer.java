@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
+import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,6 +33,7 @@ public class RobotContainer {
     public static Turret s_Turret = null;
     public static Pivot s_Pivot = null;
     public static OldIntake s_OldIntake = null;
+    public static Intake s_Intake = null;
     public static Spindexer s_Spindexer = null;
 
     private final CommandXboxController driver =
@@ -48,7 +51,7 @@ public class RobotContainer {
 //        s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
 //        s_Pivot = config.createPivot().orElse(null);
-//        s_Intake = config.createIntake().orElse(null);
+        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
         s_Spindexer = config.createSpindexer().orElse(null);
 
@@ -87,6 +90,11 @@ public class RobotContainer {
                 .onTrue(s_Flywheel.setTargetVelocity(350.0));
             driver.b()
                 .onTrue(s_Flywheel.setTargetVelocity(750.0));
+        }
+
+        if (config.hasIntake) {
+            driver.leftBumper()
+                .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
         }
     }
 

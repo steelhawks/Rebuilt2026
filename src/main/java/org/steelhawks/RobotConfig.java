@@ -6,6 +6,7 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
+import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
 import org.steelhawks.subsystems.oldintake.*;
 import org.steelhawks.subsystems.oldintake.OldIntakeIOTalonFX;
@@ -48,6 +49,7 @@ public class RobotConfig {
     public final boolean hasPivot;
     public final boolean hasIntake;
     public final boolean hasSpindexer;
+    public final boolean hasOldIntake;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -65,6 +67,7 @@ public class RobotConfig {
         this.hasTurret = builder.hasTurret;
         this.hasPivot = builder.hasPivot;
         this.hasIntake = builder.hasIntake;
+        this.hasOldIntake = builder.hasOldIntake;
         this.hasSpindexer = builder.hasSpindexer;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
@@ -124,11 +127,19 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createPivot());
     }
 
-    public Optional<OldIntake> createIntake() {
-        if (!hasIntake) {
+    public Optional<OldIntake> createOldIntake() {
+        if (!hasOldIntake) {
             return Optional.empty();
         }
         return Optional.ofNullable(factory.createOldIntake());
+    }
+
+    public Optional<Intake> createIntake() {
+        if (!hasIntake) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(factory.createIntake());
     }
 
     public Optional<Spindexer> createSpindexer() {
@@ -286,6 +297,7 @@ public class RobotConfig {
         private boolean hasIntake = false;
         private boolean hasSpindexer = false;
         private boolean hasAutos = false;
+        private boolean hasOldIntake = false;
         private SubsystemFactory factory = null;
 
         public Builder withSwerve(boolean enabled) {
@@ -751,7 +763,7 @@ public class RobotConfig {
 
         @Override
         public Intake createIntake() {
-            return null;
+            return new Intake(new IntakeIOSim());
         }
 
         @Override

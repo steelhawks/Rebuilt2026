@@ -103,7 +103,9 @@ public class IntakeIOSim implements IntakeIO {
             double currentPosition = inputs.leftPositionMeters;
             double pidOutput = rackPidController.calculate(currentPosition, goalPosition);
             double commandedCurrent = pidOutput + feedforwardCurrent;
-            double volts = commandedCurrent * DCMotor.getKrakenX44Foc(1).rOhms * leftMotorSim.getAngularVelocityRadPerSec() * DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
+            // TODO: Actually make this formula work. i found it online and it's V = I * R * omega * kV, but there's probably a better solution and I dont know what to use for omega.
+            // Currently fudged so omega is always 0.2
+            double volts = commandedCurrent * DCMotor.getKrakenX44Foc(1).rOhms * 0.2 * DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
 
             leftMotorSim.setInputVoltage(volts);
             rightMotorSim.setInputVoltage(volts);
