@@ -18,7 +18,7 @@ public class IntakeIOSim implements IntakeIO {
     private final DCMotorSim rightMotorSim;
     private final DCMotorSim intakeMotorSim;
 
-    private static final double RADIUS = IntakeConstants.METERS_PER_ROTATION / (2*Math.PI);
+    private static final double RADIUS = IntakeConstants.METERS_PER_ROTATION / (2 * Math.PI);
     private double feedforwardCurrent = 0;
     private double goalPosition = 0;
 
@@ -90,8 +90,8 @@ public class IntakeIOSim implements IntakeIO {
         inputs.rightCurrentAmps = rightMotorSim.getCurrentDrawAmps();
         inputs.rightTorqueCurrentAmps = rightMotorSim.getCurrentDrawAmps();
         inputs.rightTempCelsius = rightMotorSim.getCurrentDrawAmps() * 0.1;
-        inputs.intakeConnected = true;
 
+        inputs.intakeConnected = true;
         inputs.intakePositionRad = new Rotation2d(intakeMotorSim.getAngularPositionRad());
         inputs.intakeVelocityRadPerSec = intakeMotorSim.getAngularVelocityRadPerSec();
         inputs.intakeAppliedVolts = intakeMotorSim.getInputVoltage();
@@ -103,13 +103,17 @@ public class IntakeIOSim implements IntakeIO {
             double currentPosition = inputs.leftPositionMeters;
             double pidOutput = rackPidController.calculate(currentPosition, goalPosition);
             double commandedCurrent = pidOutput + feedforwardCurrent;
-            // TODO: Actually make this formula work. i found it online and it's V = I * R * omega * kV, but there's probably a better solution and I dont know what to use for omega.
-            // Currently fudged so omega is always 0.2
-            double volts = commandedCurrent * DCMotor.getKrakenX44Foc(1).rOhms * 0.2 * DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
-
-            leftMotorSim.setInputVoltage(volts);
-            rightMotorSim.setInputVoltage(volts);
+            setMotorAmps(commandedCurrent);
         }
+    }
+
+    private void setMotorAmps(double commandedCurrent) {
+        DCMotor motor = DCMotor.getKrakenX44Foc(2);
+        double omega = leftMotorSim.getAngularVelocityRadPerSec();
+        double backEmf = omega / motor.KvRadPerSecPerVolt;
+        double volts = commandedCurrent * motor.rOhms + backEmf;
+        leftMotorSim.setInputVoltage(volts);
+        rightMotorSim.setInputVoltage(volts);
     }
 
     @Override
@@ -127,11 +131,7 @@ public class IntakeIOSim implements IntakeIO {
     @Override
     public void runRackOpenLoop(double output, boolean isTorqueCurrent) {
         if (isTorqueCurrent) {
-            double omega = intakeMotorSim.getAngularVelocityRadPerSec();
-            double volts = output * DCMotor.getKrakenX44Foc(1).rOhms * leftMotorSim.getAngularVelocityRadPerSec() * DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
-
-            leftMotorSim.setInputVoltage(volts);
-            rightMotorSim.setInputVoltage(volts);
+            setMotorAmps(output);
         } else {
             leftMotorSim.setInputVoltage(output);
             rightMotorSim.setInputVoltage(output);
@@ -159,7 +159,7 @@ public class IntakeIOSim implements IntakeIO {
     @Override
     public void runIntake(double output) {
         intakeMotorSim.setInputVoltage(output * 12);
-        if (output != 0) intakeSimulation.startIntake();
+        if (output >= 0) intakeSimulation.startIntake();
     }
 
     @Override
