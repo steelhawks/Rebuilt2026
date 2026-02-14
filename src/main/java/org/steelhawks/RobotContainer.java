@@ -51,6 +51,7 @@ public class RobotContainer {
 //        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
         s_Spindexer = config.createSpindexer().orElse(null);
+        s_OldIntake = config.createIntake().orElse(null);
 
         if (config.hasAutos) {
             Autos.init();
@@ -66,6 +67,7 @@ public class RobotContainer {
 //        driver.rightStick().onTrue(
 //            s_Turret.toggleManualControl(driver::getRightY)
 //        );
+        driver.rightTrigger().whileTrue(s_OldIntake.runIntake());
 
         if (config.hasTurret) {
             driver.povLeft()

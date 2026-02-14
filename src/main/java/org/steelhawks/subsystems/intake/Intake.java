@@ -128,6 +128,7 @@ public class Intake extends SubsystemBase {
                 io.stopRack();
             } else {
                 // drivetrain accel
+                //RAHMAN IS BEST
                 double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
                 double pitchRadians = RobotContainer.s_Swerve.getPitch().getRadians();
                 double drivetrainAccelG = rawAccelY - Math.sin(pitchRadians);
