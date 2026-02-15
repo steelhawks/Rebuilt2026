@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.Constants;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
@@ -23,15 +24,15 @@ public class Flywheel extends SubsystemBase {
     public static final int motorId1 = 2;
     public static final int motorId2 = 3;
     public static final LoggedTunableNumber kP =
-        new LoggedTunableNumber("Flywheel/kP", 0.2);
+        new LoggedTunableNumber("Flywheel/kP", Constants.omega(0.2, 0.003));
     public static final LoggedTunableNumber kI =
         new LoggedTunableNumber("Flywheel/kI", 0.0);
     public static final LoggedTunableNumber kD =
-        new LoggedTunableNumber("Flywheel/kD", 0.0);
+        new LoggedTunableNumber("Flywheel/kD", Constants.omega(0, 0.001));
     public static final LoggedTunableNumber kS =
-        new LoggedTunableNumber("Flywheel/kS", 0.042995);
+        new LoggedTunableNumber("Flywheel/kS", Constants.omega(0.042995, 0.001));
     public static final LoggedTunableNumber kV =
-        new LoggedTunableNumber("Flywheel/kV", 0.0090372 * 0.9); // 10% reduction from sysid value
+        new LoggedTunableNumber("Flywheel/kV", Constants.omega(.0090372 * 0.9, 0.00734)); // 10% reduction from sysid value
     public static final LoggedTunableNumber velocityTolerance =
         new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 5.0);
     // the amount after which the sampling routine will time out
@@ -164,6 +165,7 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Flywheel/State", state.toString());
         Logger.recordOutput("Flywheel/TargetVelocity", targetVelocityRadPerSec);
         Logger.recordOutput("Flywheel/AdaptiveFeedforward", sampledVoltage != 0.0);
+        Logger.recordOutput("Flywheel/NearTargetVelocity", nearTargetVelocity);
     }
 
     private double calculateAverageSample() {

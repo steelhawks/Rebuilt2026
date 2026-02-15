@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 
 public class FlywheelIOSim implements FlywheelIO {
@@ -59,7 +60,9 @@ public class FlywheelIOSim implements FlywheelIO {
             double volts = 0;
 
             if (useTorqueCurrent) {
-
+                double pid = velocityController.calculate(inputs.velocityRadPerSec, velocitySetpoint);
+                double commandedCurrent = pid + feedforward;
+                volts = currentToVolts(commandedCurrent);
             } else {
                 double pid = velocityController.calculate(inputs.velocityRadPerSec, velocitySetpoint);
                 volts = pid + feedforward;
@@ -82,7 +85,9 @@ public class FlywheelIOSim implements FlywheelIO {
     public void runFlywheelOpenLoop(double output, boolean isTorqueCurrent) {
         enablePid = false;
         if (isTorqueCurrent) {
-
+            double volts = currentToVolts(output);
+            leftMotorSim.setInputVoltage(volts);
+            rightMotorSim.setInputVoltage(volts);
         } else {
             leftMotorSim.setInputVoltage(output);
             rightMotorSim.setInputVoltage(output);
@@ -99,5 +104,15 @@ public class FlywheelIOSim implements FlywheelIO {
         enablePid = false;
         leftMotorSim.setInputVoltage(0);
         rightMotorSim.setInputVoltage(0);
+    }
+
+    public double currentToVolts(double current) {
+        DCMotor motor = DCMotor.getKrakenX60Foc(1);
+        double resistance = motor.rOhms;
+        double omega = leftMotorSim.getAngularVelocityRadPerSec();
+        double backEMF = omega / motor.KvRadPerSecPerVolt;
+        double volts = current * resistance + backEMF;
+
+        return volts;
     }
 }

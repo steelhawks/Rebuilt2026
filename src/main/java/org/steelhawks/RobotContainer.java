@@ -80,7 +80,7 @@ public class RobotContainer {
 
         if (config.hasFlywheel) {
             driver.x()
-                .onTrue(s_Flywheel.setTargetVelocity(5.0));
+                .onTrue(s_Flywheel.setTargetVelocity(0));
             driver.y()
                 .onTrue(s_Flywheel.setTargetVelocity(50.0));
             driver.a()
