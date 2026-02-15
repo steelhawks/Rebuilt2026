@@ -6,6 +6,10 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotContainer;
+import org.steelhawks.RobotState;
+
+import static edu.wpi.first.units.Units.Radians;
 
 public class TurretIOSim implements TurretIO {
 
@@ -32,7 +36,8 @@ public class TurretIOSim implements TurretIO {
                 Turret.reduction),
             DCMotor.getKrakenX60Foc(1));
         turretVisualizer = new TurretVisualizer(
-            () -> new Rotation2d(mMotor.getAngularPosition()).getRadians());
+            mMotor::getAngularPositionRad,
+            () -> RobotState.getInstance().getEstimatedPose());
     }
 
     public double currentToVolts(double current) {
