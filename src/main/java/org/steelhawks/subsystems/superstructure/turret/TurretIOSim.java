@@ -13,13 +13,11 @@ public class TurretIOSim implements TurretIO {
     private boolean pidEnabled = false;
     private double desiredPosition;
     private double ff;
-
     // volts = current * resistance + backEMF
     // backEMF = omega / kV
-
     private final double MAX_VOLTS = 12.0;
-
     private final DCMotorSim mMotor;
+    private final TurretVisualizer turretVisualizer;
 
     public TurretIOSim() {
         mController = new PIDController(
@@ -29,9 +27,12 @@ public class TurretIOSim implements TurretIO {
         mMotor = new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX60Foc(1),
-                0.001,
+                0.001, // complete bs how do u do this
+            // my guess is the torque divided by angular accel but idk
                 Turret.reduction),
             DCMotor.getKrakenX60Foc(1));
+        turretVisualizer = new TurretVisualizer(
+            () -> new Rotation2d(mMotor.getAngularPosition()).getRadians());
     }
 
     public double currentToVolts(double current) {
@@ -60,6 +61,8 @@ public class TurretIOSim implements TurretIO {
             double pid = mController.calculate(inputs.positionRad.getRadians(), desiredPosition);
             mMotor.setInputVoltage(currentToVolts(pid + ff));
         }
+
+        turretVisualizer.update();
     }
 
     @Override

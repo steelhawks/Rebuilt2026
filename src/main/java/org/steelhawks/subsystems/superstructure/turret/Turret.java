@@ -27,11 +27,11 @@ import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.omega(2.0, 0.0));
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.omega(2.0, 0.2));
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.omega(0.0, 0.0));
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.omega(1000.0, 0.0)); // 1500
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.omega(1000.0, 200.0)); // 1500
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.omega(0.0, 0.0));
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.omega(70.0, 0.0)); // 35
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.omega(70.0, 7.0)); // 35
 
     private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 40.0);
     private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 60.0);
@@ -41,7 +41,7 @@ public class Turret extends SubsystemBase {
 
 
     private static final LoggedTunableNumber currentHomingThres =
-        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 40.0);
+        new LoggedTunableNumber("Turret/CurrentHomingThreshold",40.0);
     private static final double homingVolts = 0.1;
 
     private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
@@ -167,6 +167,15 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
+        if (Constants.getRobot().equals(Constants.RobotType.SIMBOT)
+            && !isHomed
+            && !isZeroed) {
+            isHomed = true;
+            Logger.recordOutput("Turret/IsHomed", true);
+            io.setPosition(0);
+            isZeroed = true;
+            Logger.recordOutput("Turret/Zeroed", true);
+        }
         if (!isHomed) {
             io.runPercentOutput(homingVolts);
             isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
