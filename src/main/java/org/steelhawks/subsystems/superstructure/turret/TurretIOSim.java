@@ -76,6 +76,7 @@ public class TurretIOSim implements TurretIO {
 
     @Override
     public void runOpenLoop(double output, boolean isTorqueCurrent) {
+        pidEnabled = false;
         mMotor.setInputVoltage(
             isTorqueCurrent
             ? currentToVolts(output)
@@ -84,6 +85,7 @@ public class TurretIOSim implements TurretIO {
 
     @Override
     public void runPercentOutput(double output) {
+        pidEnabled = false;
         mMotor.setInputVoltage(output * MAX_VOLTS);
     }
 
@@ -99,6 +101,7 @@ public class TurretIOSim implements TurretIO {
 
     @Override
     public void stop() {
+        mMotor.setInputVoltage(0);
         mMotor.setAngularVelocity(0.0);
         pidEnabled = false;
     }
