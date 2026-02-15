@@ -225,9 +225,35 @@ public class VisionConstants {
 
     private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
         new CameraConfig(
-            "limelight-coral",
-            new Transform3d(),
-            new Factors.StdDevFactors(3.0),
+            "BackLeft",
+            new Transform3d(
+                Units.inchesToMeters(-9.7),
+                Units.inchesToMeters(-11.125),
+                Units.inchesToMeters(9),
+                new Rotation3d(
+                    Units.degreesToRadians(0),
+                    Units.degreesToRadians(15),
+                    Units.degreesToRadians(45)
+                )
+            ),
+            // TODO: Tune StdDevs
+            new Factors.StdDevFactors(0),
+            CameraType.LIMELIGHT
+        ),
+        new CameraConfig(
+            "BackRight",
+            new Transform3d(
+                Units.inchesToMeters(10.1),
+                Units.inchesToMeters(-10.65),
+                Units.inchesToMeters(9),
+                new Rotation3d(
+                    Units.degreesToRadians(0),
+                    Units.degreesToRadians(15),
+                    Units.degreesToRadians(45)
+                )
+            ),
+            // TODO: Tune StdDevs
+            new Factors.StdDevFactors(0),
             CameraType.LIMELIGHT
         )
     };
