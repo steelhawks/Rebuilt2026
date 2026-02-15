@@ -9,6 +9,7 @@ import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.oldintake.OldIntakeConstants;
 import org.steelhawks.subsystems.spindexer.Spindexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
@@ -51,7 +52,7 @@ public class RobotContainer {
 //        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
         s_Spindexer = config.createSpindexer().orElse(null);
-        s_OldIntake = config.createIntake().orElse(null);
+        s_OldIntake = config.createOldIntake().orElse(null);
 
         if (config.hasAutos) {
             Autos.init();
@@ -64,31 +65,37 @@ public class RobotContainer {
         driver.x().onTrue(s_Swerve.zeroHeading());
         configureTriggers();
         configureDriver();
-//        driver.rightStick().onTrue(
-//            s_Turret.toggleManualControl(driver::getRightY)
-//        );
-        driver.rightTrigger().whileTrue(s_OldIntake.runIntake());
 
-        if (config.hasTurret) {
-            driver.povLeft()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2.0)));
-            driver.povUp()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(0.0)));
-            driver.povDown()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
-            driver.povRight()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
+        if (config.hasIntake) {
+            driver.rightTrigger().whileTrue(s_OldIntake.runIntake());
+
+            driver.x().onTrue(
+                s_OldIntake.setDesiredStateCommand(OldIntakeConstants.State.HOME));
+            driver.y().onTrue(
+                s_OldIntake.setDesiredStateCommand(OldIntakeConstants.State.INTAKE));
         }
 
+//        if (config.hasTurret) {
+//            driver.povLeft()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2.0)));
+//            driver.povUp()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(0.0)));
+//            driver.povDown()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
+//            driver.povRight()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
+//        }
+
         if (config.hasFlywheel) {
-            driver.x()
-                .onTrue(s_Flywheel.setTargetVelocity(5.0));
-            driver.y()
-                .onTrue(s_Flywheel.setTargetVelocity(50.0));
-            driver.a()
-                .onTrue(s_Flywheel.setTargetVelocity(350.0));
-            driver.b()
-                .onTrue(s_Flywheel.setTargetVelocity(750.0));
+//            driver.x()
+//                .onTrue(s_Flywheel.setTargetVelocity(5.0));
+//            driver.y()
+//                .onTrue(s_Flywheel.setTargetVelocity(50.0));
+//            driver.a()
+//                .onTrue(s_Flywheel.setTargetVelocity(350.0));
+//            driver.b()
+//                .onTrue(s_Flywheel.setTargetVelocity(750.0));
+            driver.rightTrigger().whileTrue(s_Flywheel.shooting());
         }
     }
 

@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,7 +11,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.FieldConstants;
+import org.steelhawks.RobotState;
+import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -19,6 +24,9 @@ import java.util.Set;
 import static edu.wpi.first.units.Units.Volts;
 
 public class Flywheel extends SubsystemBase {
+
+    public static final double FLYWHEEL_RADIUS = Units.inchesToMeters(1.0);
+    public static final double IDLE_MULTIPLIER = 0.5;
 
     public static final int motorId1 = 2;
     public static final int motorId2 = 3;
@@ -113,6 +121,26 @@ public class Flywheel extends SubsystemBase {
         if (shouldRun) {
 //            double mps = ShooterStructure.Static.calculateShot(FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
 //            targetVelocityRadPerSec = ShooterStructure.linearToAngularVelocity(mps, Units.inchesToMeters(2.0));
+            switch (RobotState.getInstance().getAimState()) {
+                case NOTHING -> {
+                    double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                        FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                    setTargetVelocity(rps * IDLE_MULTIPLIER);
+                }
+                case SHOOTING_MOVING -> {
+                    double mps = ShooterStructure.Moving.calculateMovingShot(
+                        FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
+                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                    setTargetVelocity(rps);
+                }
+                case SHOOTING_STATIONARY -> {
+                    double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                        FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                    setTargetVelocity(rps);
+                }
+            }
             double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
                 ? sampledVoltage
                 : kS.get() + kV.get() * targetVelocityRadPerSec;
@@ -183,12 +211,20 @@ public class Flywheel extends SubsystemBase {
     /* COMMAND FACTORIES */
     ///////////////////////
 
-    public Command setTargetVelocity(double velocityRadPerSec) {
-        return Commands.defer(() -> Commands.runOnce(() -> {
-            sampledVoltage = 0.0;
-            targetVelocityRadPerSec = velocityRadPerSec;
-            state = FlywheelState.RAMP_UP;
-        }), Set.of(this));
+    public void setTargetVelocity(double velocityRadPerSec) {
+        sampledVoltage = 0.0;
+        targetVelocityRadPerSec = velocityRadPerSec;
+        state = FlywheelState.RAMP_UP;
+    }
+
+    public Command shooting() {
+        return Commands.run(() -> RobotState.getInstance().setAimState(ShootingState.SHOOTING))
+            .finallyDo(() -> RobotState.getInstance().setAimState(ShootingState.NOTHING));
+    }
+
+    public Command setTargetVelocityCmd(double velocityRadPerSec) {
+        return Commands.defer(
+            () -> Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec)), Set.of(this));
     }
 
     public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {

@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -26,6 +27,7 @@ import java.util.*;
 
 public class RobotState extends VirtualSubsystem {
 
+    private static final double movingVelocityThreshold = 0.5; // m/s
     private static final double poseBufferSizeSec = 2.0;
     private static final double turretAngleBufferSizeSec = 2.0;
     private static final double objectMaxAgeSec = 1.0;
@@ -68,6 +70,7 @@ public class RobotState extends VirtualSubsystem {
     private final TimeInterpolatableBuffer<Rotation2d> turretAngleBuffer =
         TimeInterpolatableBuffer.createBuffer(turretAngleBufferSizeSec);
 
+    private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
     private Rotation2d gyroRotation = new Rotation2d();
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveDriveKinematics kinematics =
@@ -98,6 +101,10 @@ public class RobotState extends VirtualSubsystem {
     private final Timer timer = new Timer();
     private static RobotState instance;
 
+    public void updateChassisSpeeds(ChassisSpeeds speeds) {
+        this.currentChassisSpeeds = speeds;
+    }
+
     public void setShooterMode(ShooterMode mode) {
         // TODO add check to see if we are moving, just a velocity check then do the locks
         if (currentShooterMode != mode) {
@@ -121,6 +128,17 @@ public class RobotState extends VirtualSubsystem {
     }
 
     public ShootingState getAimState() {
+        if (shootingState == ShootingState.NOTHING) {
+            return ShootingState.NOTHING;
+        }
+        double linearVelocity = Math.hypot(
+            currentChassisSpeeds.vxMetersPerSecond,
+            currentChassisSpeeds.vyMetersPerSecond
+        );
+        boolean isMoving = linearVelocity > movingVelocityThreshold;
+        if (shootingState == ShootingState.SHOOTING) {
+            return isMoving ? ShootingState.SHOOTING_MOVING : ShootingState.SHOOTING_STATIONARY;
+        }
         return shootingState;
     }
 

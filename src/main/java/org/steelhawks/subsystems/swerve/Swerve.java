@@ -455,9 +455,8 @@ public class Swerve extends SubsystemBase {
             Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[]{});
         }
 
-        // Update odometry - now reports to RobotState
         processOdometryObservations();
-
+        robotState.updateChassisSpeeds(getChassisSpeeds());
         FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");

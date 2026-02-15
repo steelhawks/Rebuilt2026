@@ -124,7 +124,7 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createPivot());
     }
 
-    public Optional<OldIntake> createIntake() {
+    public Optional<OldIntake> createOldIntake() {
         if (!hasIntake) {
             return Optional.empty();
         }
