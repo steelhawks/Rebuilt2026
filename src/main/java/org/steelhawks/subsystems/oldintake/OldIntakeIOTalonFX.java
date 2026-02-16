@@ -130,14 +130,27 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         // critical status signsls to 100hZ
         BaseStatusSignal.setUpdateFrequencyForAll(
             100,
-            rightPosition,
-            rightVelocity,
             leftPosition,
             leftVelocity,
+            leftVoltage,
+            leftCurrent,
+            leftTorqueCurrent,
+            leftTemp,
+            rightPosition,
+            rightVelocity,
+            rightVoltage,
+            rightCurrent,
+            rightTorqueCurrent,
+            rightTemp,
             intakePosition,
             intakeVelocity,
+            intakeVoltage,
+            intakeCurrent,
+            intakeTorqueCurrent,
+            intakeTemp,
             encoderAngle,
-            encoderVelocity
+            encoderVelocity,
+            encoderVolts
         );
 
         PhoenixUtil.registerSignals(
