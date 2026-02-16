@@ -57,9 +57,9 @@ public class RobotContainer {
         }
         s_Swerve.setDefaultCommand(
             DriveCommands.joystickDrive(
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
-            () -> -driver.getRightX()));
+            () -> -driver.getLeftY(), //1
+            () -> -driver.getLeftX(), //0
+            () -> -driver.getRightX())); //4
         driver.x().onTrue(s_Swerve.zeroHeading());
         configureTriggers();
         configureDriver();
