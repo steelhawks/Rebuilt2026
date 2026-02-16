@@ -206,7 +206,7 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
     public void runPivotPosition(double position, double feedforward) {
         leftMotor.setControl(
             positionTorqueCurrentFoc
-                .withPosition(position)
+                .withPosition(Units.radiansToRotations(position))
                 .withFeedForward(feedforward)
         );
     }
