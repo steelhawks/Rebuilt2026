@@ -238,7 +238,7 @@ public class VisionConstants {
             ),
             // TODO: Tune StdDevs
             new Factors.StdDevFactors(0),
-            CameraType.LIMELIGHT
+            CameraType.PHOTON
         ),
         new CameraConfig(
             "BackRight",
@@ -254,7 +254,7 @@ public class VisionConstants {
             ),
             // TODO: Tune StdDevs
             new Factors.StdDevFactors(0),
-            CameraType.LIMELIGHT
+            CameraType.PHOTON
         )
     };
 
