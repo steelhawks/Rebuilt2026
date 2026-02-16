@@ -1,8 +1,8 @@
 package org.steelhawks;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
-import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,8 +68,10 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
 
-    interface Spindexer {
-        LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Spindexer/IsEnabled", true);
+    interface Indexer {
+        LoggedNetworkBoolean isSpindexerEnabled =
+            new LoggedNetworkBoolean("Toggles/Indexer/Spindexer/IsEnabled", true);
+        LoggedNetworkBoolean isFeederEnabled =
+            new LoggedNetworkBoolean("Toggles/Indexer/Feeder/IsEnabled", true);
     }
 }

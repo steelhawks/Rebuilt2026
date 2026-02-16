@@ -1,8 +1,8 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.oldintake.OldIntakeConstants;
-import org.steelhawks.subsystems.spindexer.Spindexer;
+import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
@@ -32,7 +32,7 @@ public class RobotContainer {
     public static Turret s_Turret = null;
     public static Pivot s_Pivot = null;
     public static OldIntake s_OldIntake = null;
-    public static Spindexer s_Spindexer = null;
+    public static Indexer s_Indexer = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -51,7 +51,7 @@ public class RobotContainer {
 //        s_Pivot = config.createPivot().orElse(null);
 //        s_Intake = config.createIntake().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
-        s_Spindexer = config.createSpindexer().orElse(null);
+        s_Indexer = config.createIndexer().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
 
         if (config.hasAutos) {
@@ -95,7 +95,11 @@ public class RobotContainer {
 //                .onTrue(s_Flywheel.setTargetVelocity(350.0));
 //            driver.b()
 //                .onTrue(s_Flywheel.setTargetVelocity(750.0));
-            driver.rightTrigger().whileTrue(s_Flywheel.shooting());
+            driver.rightTrigger().whileTrue(s_Flywheel.shooting()
+                .alongWith(
+                    Commands.waitUntil(s_Flywheel::isReadyToShoot),
+                    s_Indexer.setDesiredStateCmd(Indexer.IndexerState.RUNNING)
+                ));
         }
     }
 
