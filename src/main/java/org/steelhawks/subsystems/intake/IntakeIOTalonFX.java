@@ -14,8 +14,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.util.PhoenixUtil;
 
 
 public class IntakeIOTalonFX implements IntakeIO {
@@ -106,6 +106,9 @@ public class IntakeIOTalonFX implements IntakeIO {
                         .withNeutralMode(NeutralModeValue.Brake)
                         .withInverted(InvertedValue.CounterClockwise_Positive));
 
+        rollerConfig.CurrentLimits.SupplyCurrentLimit = IntakeConstants.ROLLER_CURRENT_LIMIT.getAsDouble();
+        rollerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
         intake_motor.getConfigurator().apply(rollerConfig);
 
         var rollerSlot0Configs = new Slot0Configs();
@@ -178,14 +181,87 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.rightExtensionCurrentAmps = rightExtensionCurrentAmps.getValueAsDouble();
         inputs.rightExtensionTempCelsius = leftExtensionTemp.getValueAsDouble();
 
+        inputs.rollerConnected = BaseStatusSignal.isAllGood(rollerPosition, rollerVelocityPerSec, rollerTemp, rollerCurrentAmps, rollerAppliedVoltage);
+        inputs.rollerPosition = new Rotation2d(rollerPosition.getValueAsDouble());
+        inputs.rollerVelocity = rollerVelocityPerSec.getValueAsDouble();
+        inputs.rollerAppliedVolts = rollerAppliedVoltage.getValueAsDouble();
+        inputs.rollerCurrentAmps = rollerCurrentAmps.getValueAsDouble();
+        inputs.rollerTempCelsius = rollerTemp.getValueAsDouble();
+
         inputs.isExtended = inputs.rightExtensionPosition >= IntakeConstants.MAX_EXTENSION - IntakeConstants.POSITION_TOLERANCE;
-        inputs.isRetracted = inputs.rightExtensionPosition <= IntakeConstants.MAX_EXTENSION + IntakeConstants.POSITION_TOLERANCE;
-
-
-
+        inputs.isRetracted = inputs.rightExtensionPosition <= IntakeConstants.MIN_EXTENSION + IntakeConstants.POSITION_TOLERANCE;
     }
 
+    @Override
+    public void setExtensionVoltage(double voltage) {
+        left_motor.setControl(extensionVoltage.withOutput(voltage));
+    }
 
+    @Override
+    public void setExtensionVelocity(double velocityPerSec, double ffOutput) {
+        left_motor.setControl(extensionVelocityVoltage
+                .withVelocity(velocityPerSec / IntakeConstants.PINION_ROTATION)
+                .withFeedForward(ffOutput)
+                .withSlot(1));
+    }
+
+    @Override
+    public void stopExtension() { left_motor.stopMotor(); }
+
+    @Override
+    public void setExtensionBrakeMode(boolean enable) {
+        left_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        right_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    }
+
+    @Override
+    public void setExtensionPosition(double positionMeters, double ffVolts) {
+        left_motor.setControl(
+                extensionPositionVoltage
+                        .withPosition(positionMeters / IntakeConstants.PINION_ROTATION)
+                        .withFeedForward(ffVolts)
+                        .withSlot(0)
+        );
+    }
+
+    @Override
+    public void resetExtension( double positionMeters ) {
+        left_motor.setPosition(positionMeters / IntakeConstants.PINION_ROTATION);
+    }
+
+    @Override
+    public void setRollerVoltage(double voltage) {
+        intake_motor.setControl(rollerVoltage.withOutput(voltage));
+    }
+
+    @Override
+    public void setRollerVelocity(double velocityPerSec, double ffVolts) {
+        intake_motor.setControl(rollerVelocityVoltage.withVelocity(velocityPerSec / (2.0 * Math.PI)).withFeedForward(ffVolts));
+    }
+
+    @Override
+    public void stopRoller() { intake_motor.stopMotor(); }
+
+    @Override
+    public void setRollerBrakeMode(boolean enable) {
+        left_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        right_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    }
+
+    @Override
+    public double getExtensionSetpoint() {
+        return extensionPositionVoltage.Position * IntakeConstants.PINION_ROTATION;
+    }
+
+    @Override
+    public double getExtensionVelocitySetpoint() {
+        return extensionVelocityVoltage.Velocity * IntakeConstants.PINION_ROTATION;
+    }
+
+    @Override
+    public double getRollerVelocitySetpoint() {
+        return rollerVelocityVoltage.Velocity * (2.0 * Math.PI);
+    }
 
 
 }

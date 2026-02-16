@@ -19,14 +19,9 @@ public class IntakeConstants {
     public static final double PINION_ROTATION = PINION_CIRCUMFERENCE / EXTENSION_GEAR_RATIO.getAsDouble();
 
     public static final TunableNumber EXTENSION_CURRENT_LIMIT = new TunableNumber("Extension Current Limit", 0.0);
-    public static final TunableNumber EXTENSION_CURRENT_THRESHOLD  = new TunableNumber("Extension Current Threshold", 0.0);
-    public static final double EXTENSION_CURRENT_TIME = 1.0;
 
     public static final TunableNumber ROLLER_CURRENT_LIMIT = new TunableNumber("Roller Current Limit", 0.0);
-    public static final TunableNumber ROLLER_CURRENT_THRESHOLD  = new TunableNumber("Roller Current Threshold", 0.0);
-    public static final double ROLLER_CURRENT_TIME = 1.0;
 
-    public static double MAX_VOLTAGE = 0.0;
     public static double MIN_EXTENSION = 0.0;
     public static double MAX_EXTENSION = Units.inchesToMeters(24.0);
 

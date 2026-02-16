@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.intake;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO {
@@ -23,7 +24,7 @@ public interface IntakeIO {
 
         // intake electrical data
         public boolean rollerConnected = false;
-        public double rollerPosition = 0.0;
+        public Rotation2d rollerPosition = new Rotation2d();
         public double rollerVelocity = 0.0;
         public double rollerCurrentAmps = 0.0;
         public double rollerTempCelsius = 0.0;
@@ -52,8 +53,6 @@ public interface IntakeIO {
     // stop only extension
     default void stopExtension() {}
 
-    // limit current (going to be using Torque FOC)
-    default void setExtensionCurrentLimit(double currentLimit) {}
 
     // set the brake type
     default void setExtensionBrakeMode(boolean enabled) {}
@@ -70,8 +69,6 @@ public interface IntakeIO {
     // stop only extension
     default void stopRoller() {}
 
-    // limit current (going to be using Torque FOC)
-    default void setRollerCurrentLimit(double currentLimit) {}
 
     // set the brake type
     default void setRollerBrakeMode(boolean enabled) {}
