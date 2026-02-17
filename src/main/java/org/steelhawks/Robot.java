@@ -49,7 +49,7 @@ public class Robot extends LoggedRobot {
     private static boolean isFirstRun = true;
     private Command autonomousCommand;
 
-    private final CANBus canivoreBus = new CANBus("canivore");
+//    private final CANBus canivoreBus = new CANBus("canivore");
     private final CANBus rioBus = new CANBus();
 
     public enum RobotState {
@@ -222,7 +222,7 @@ public class Robot extends LoggedRobot {
         if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get())
             visualizeFieldConstants();
 
-        Logger.recordOutput("CANbus/CANivoreUsage", canivoreBus.getStatus().BusUtilization);
+//        Logger.recordOutput("CANbus/CANivoreUsage", canivoreBus.getStatus().BusUtilization);
         Logger.recordOutput("CANbus/RioUsage", rioBus.getStatus().BusUtilization);
         LoopTimeUtil.record("RobotPeriodic");
 
