@@ -69,20 +69,21 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
-        if (!isHomed) {
-            io.runRackOpenLoop(testingVolts, false);
-            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
-            Logger.recordOutput("Intake/IsHomed", isHomed);
-        } else {
-            if (!isZeroed) {
-                io.setPosition(0.0);
-                io.stopRack();
-                isZeroed = true;
-                Logger.recordOutput("Intake/Zeroed", true);
-            }
-        }
+//        if (!isHomed) {
+//            io.runRackOpenLoop(testingVolts, false);
+//            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
+//            Logger.recordOutput("Intake/IsHomed", isHomed);
+//        } else {
+//            if (!isZeroed) {
+//                io.setPosition(0.0);
+//                io.stopRack();
+//                isZeroed = true;
+//                Logger.recordOutput("Intake/Zeroed", true);
+//            }
+//        }
         final boolean shouldRun =
             DriverStation.isEnabled()
+                && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
                 && (inputs.leftConnected && inputs.rightConnected)
                 && Toggles.Intake.isEnabled.get()
                 && !Toggles.Intake.toggleCurrentOverride.get()

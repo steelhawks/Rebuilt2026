@@ -214,23 +214,21 @@ public class Robot extends LoggedRobot {
 
         PhoenixUtil.refreshAll();
         LoopTimeUtil.record("PhoenixUtil");
-        VirtualSubsystem.periodicAll();
+//        VirtualSubsystem.periodicAll();
         LoopTimeUtil.record("VirtualPeriodic");
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
 
-        if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get())
+        if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get()) {
             visualizeFieldConstants();
-
-//        Logger.recordOutput("CANbus/CANivoreUsage", canivoreBus.getStatus().BusUtilization);
-        Logger.recordOutput("CANbus/RioUsage", rioBus.getStatus().BusUtilization);
+        }
         LoopTimeUtil.record("RobotPeriodic");
 
-        if ((Constants.getMode() == Mode.SIM)
-            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
-        ) {
-            RobotContainer.s_Swerve.updatePhysicsSimulation();
-        }
+//        if ((Constants.getMode() == Mode.SIM)
+//            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
+//        ) {
+//            RobotContainer.s_Swerve.updatePhysicsSimulation();
+//        }
     }
 
     private void visualizeFieldConstants() {

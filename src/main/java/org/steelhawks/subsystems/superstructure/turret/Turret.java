@@ -34,7 +34,7 @@ public class Turret extends SubsystemBase {
     public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 70.0); // 35
 
     private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 15.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 5.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 
@@ -165,7 +165,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
-        if (!isHomed) {
+        if (!isHomed && Toggles.Turret.isEnabled.get()) {
             io.runPercentOutput(homingVolts);
             isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
             Logger.recordOutput("Turret/IsHomed", isHomed);

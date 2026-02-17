@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.oldintake.OldIntakeConstants;
-import org.steelhawks.subsystems.spindexer.Spindexer;
+import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.pivot.Pivot;
@@ -35,6 +34,9 @@ public class RobotContainer {
     public static Turret s_Turret = null;
 //    public static Pivot s_Pivot = null;
     public static Spindexer s_Spindexer = null;
+    public static Pivot s_Pivot = null;
+    public static OldIntake s_OldIntake = null;
+    public static Indexer s_Indexer = null;
     public static Intake s_Intake = null;
 
     private final CommandXboxController driver =
@@ -48,13 +50,16 @@ public class RobotContainer {
 //        s_LEDMatrix = config.createLEDMatrix().orElse(null);
 //        s_LEDStrip = config.createLEDStrip().orElse(null);
         s_Vision = config.createVision().orElse(null);
-        s_ObjVision = config.createObjectVision().orElse(null);
+//        s_ObjVision = config.createObjectVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
 //        s_Pivot = config.createPivot().orElse(null);
         s_Intake = config.createIntake().orElse(null);
 //        s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
 //        s_Spindexer = config.createSpindexer().orElse(null);
+        s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
+        s_Indexer = config.createIndexer().orElse(null);
+        s_OldIntake = config.createOldIntake().orElse(null);
 
         if (config.hasAutos) {
             Autos.init();
