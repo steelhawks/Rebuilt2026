@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
 
     private static final LoggedTunableNumber currentHomingThres =
-        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 60.0);
+        new LoggedTunableNumber("Intake/CurrentHomingThreshold", 60.0);
 
     public Intake(IntakeIO io) {
         this.io = io;
