@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.FieldConstants;
+import org.steelhawks.Robot;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
@@ -97,10 +98,11 @@ public class Flywheel extends SubsystemBase {
             setpointDebouncer.calculate(
                 Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
         final boolean shouldRun =
-            DriverStation.isEnabled()
-                && Toggles.Flywheel.isEnabled.get()
-                && !Toggles.Flywheel.toggleVoltageOverride.get()
-                && !Toggles.Flywheel.toggleCurrentOverride.get();
+//            DriverStation.isEnabled()
+//                && Toggles.Flywheel.isEnabled.get()
+//                && !Toggles.Flywheel.toggleVoltageOverride.get()
+//                && !Toggles.Flywheel.toggleCurrentOverride.get();
+        true;
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {
                 if (tuningVolts == null) {
@@ -121,24 +123,31 @@ public class Flywheel extends SubsystemBase {
         if (shouldRun) {
 //            double mps = ShooterStructure.Static.calculateShot(FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
 //            targetVelocityRadPerSec = ShooterStructure.linearToAngularVelocity(mps, Units.inchesToMeters(2.0));
+            Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
             switch (RobotState.getInstance().getAimState()) {
                 case NOTHING -> {
                     double mps = ShooterStructure.Static.calculateShotFixedPitch(
                         FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                     double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
-                    setTargetVelocity(rps * IDLE_MULTIPLIER);
+                    if (rps != targetVelocityRadPerSec) {
+                        setTargetVelocity(rps * IDLE_MULTIPLIER);
+                    }
                 }
                 case SHOOTING_MOVING -> {
                     double mps = ShooterStructure.Moving.calculateMovingShot(
                         FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
                     double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
-                    setTargetVelocity(rps);
+                    if (rps != targetVelocityRadPerSec) {
+                        setTargetVelocity(rps);
+                    }
                 }
                 case SHOOTING_STATIONARY -> {
                     double mps = ShooterStructure.Static.calculateShotFixedPitch(
                         FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                     double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
-                    setTargetVelocity(rps);
+                    if (rps != targetVelocityRadPerSec) {
+                        setTargetVelocity(rps * 2);
+                    }
                 }
             }
             double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
@@ -223,8 +232,8 @@ public class Flywheel extends SubsystemBase {
     }
 
     public Command setTargetVelocityCmd(double velocityRadPerSec) {
-        return Commands.defer(
-            () -> Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec)), Set.of(this));
+        return Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec), this)
+        .finallyDo(io::stop);
     }
 
     public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {

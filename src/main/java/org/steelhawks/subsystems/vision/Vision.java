@@ -12,6 +12,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,13 +23,12 @@ import org.steelhawks.RobotState.PoseObservationType;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.VirtualSubsystem;
 
-public class Vision extends VirtualSubsystem {
+public class Vision extends SubsystemBase {
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
     private static int[] allowedTagIds;
-    private boolean prevPathfinding;
     private final boolean useQuestNav;
 
     private final QuestNavImpl questNav;
@@ -60,8 +60,6 @@ public class Vision extends VirtualSubsystem {
                 new Alert(
                     "Vision camera " + i + " is disconnected.", AlertType.kWarning);
         }
-
-        prevPathfinding = RobotContainer.s_Swerve.isPathfinding();
         whitelistTagIds(ALL_ALLOWED_TAGS);
     }
 
@@ -113,9 +111,6 @@ public class Vision extends VirtualSubsystem {
             }
             Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
         }
-
-        boolean currPathfinding = RobotContainer.s_Swerve.isPathfinding();
-
         // Initialize logging values
         List<Pose3d> allTagPoses = new LinkedList<>();
         List<Pose3d> allRobotPoses = new LinkedList<>();
@@ -148,7 +143,7 @@ public class Vision extends VirtualSubsystem {
                     }
                 }
                 if (!isWhitelisted) {
-                    return;
+                    continue;
                 }
                 var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
                 if (tagPose.isPresent()) {

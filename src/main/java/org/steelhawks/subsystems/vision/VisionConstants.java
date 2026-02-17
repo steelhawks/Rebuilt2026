@@ -219,42 +219,52 @@ public class VisionConstants {
         )
     };
 
-    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {};
+    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {
+        new CameraConfig(
+        "limelight-chassis",
+        new Transform3d(),
+        new Factors.StdDevFactors(3),
+        CameraType.LIMELIGHT)
+    };
 
     private static final CameraConfig[] CHASSIS_OBJ_DETECT_CONFIG = {};
 
     private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
         new CameraConfig(
-            "BackLeft",
+            "FrontLeft", // rename on photon client
             new Transform3d(
-                Units.inchesToMeters(-9.7),
-                Units.inchesToMeters(-11.125),
-                Units.inchesToMeters(9),
+                // 10.1 inches left from the center of robot
+                // 10.4 inches upwards from the center of robot
+                // 8.5 inches tall
+                // measured by hand may be inaccurate
+                Units.inchesToMeters(-10.1), // prev -9.7
+                Units.inchesToMeters(10.4), // prev 11.125
+                Units.inchesToMeters(8.5), // prev 9
                 new Rotation3d(
                     Units.degreesToRadians(0),
                     Units.degreesToRadians(15),
-                    Units.degreesToRadians(45)
+                    Units.degreesToRadians(0)
                 )
             ),
             // TODO: Tune StdDevs
-            new Factors.StdDevFactors(0),
-            CameraType.LIMELIGHT
+            new Factors.StdDevFactors(1),
+            CameraType.PHOTON
         ),
         new CameraConfig(
-            "BackRight",
+            "FrontRight", // rename on photon client
             new Transform3d(
                 Units.inchesToMeters(10.1),
-                Units.inchesToMeters(-10.65),
-                Units.inchesToMeters(9),
+                Units.inchesToMeters(10.4), // prev 10.65
+                Units.inchesToMeters(8.5), // prev 9
                 new Rotation3d(
                     Units.degreesToRadians(0),
                     Units.degreesToRadians(15),
-                    Units.degreesToRadians(45)
+                    Units.degreesToRadians(0)
                 )
             ),
             // TODO: Tune StdDevs
-            new Factors.StdDevFactors(0),
-            CameraType.LIMELIGHT
+            new Factors.StdDevFactors(1),
+            CameraType.PHOTON
         )
     };
 
