@@ -65,85 +65,23 @@ public class RobotContainer {
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
         driver.x().onTrue(s_Swerve.zeroHeading());
-        configureTriggers();
         configureDriver();
-
-//        if (config.hasOldIntake) {
-//            driver.rightTrigger().whileTrue(s_OldIntake.runIntake());
-//
-//            driver.x().onTrue(
-//                s_OldIntake.setDesiredStateCommand(OldIntakeConstants.State.HOME));
-//            driver.y().onTrue(
-//                s_OldIntake.setDesiredStateCommand(OldIntakeConstants.State.INTAKE));
-//        }
-
-        if (config.hasIntake) {
-            driver.rightTrigger().whileTrue(s_Intake.runIntake());
-            driver.leftTrigger().whileTrue(s_Intake.outtakeIntake());
-//
-//            driver.x().onTrue(
-//                s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-//            driver.y().onTrue(
-//                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-        }
-
-//        driver.x().whileTrue(
-//            DriveCommands.feedforwardCharacterization(s_Swerve)
-//        );
-        // driver.rightTrigger().whileTrue(s_OldIntake.runIntake());
-
-//        if (config.hasTurret) {
-//            driver.povLeft()
-//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2.0)));
-//            driver.povUp()
-//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(0.0)));
-//            driver.povDown()
-//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI)));
-//            driver.povRight()
-//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2.0)));
-//        }
-
-//        if (config.hasFlywheel) {
-//            driver.x()
-//                .onTrue(s_Flywheel.setTargetVelocity(5.0));
-//            driver.y()
-//                .onTrue(s_Flywheel.setTargetVelocity(50.0));
-//            driver.a()
-//                .onTrue(s_Flywheel.setTargetVelocity(350.0));
-//            driver.b()
-//                .onTrue(s_Flywheel.setTargetVelocity(750.0));
-//            driver.rightTrigger().whileTrue(s_Flywheel.shooting());
-//        }
-    }
-
-
-
-    private void configureTriggers() {
-//        new FieldBoundingBox("AllianceSide",
-//            new Translation2d(0.0, 0.0),
-//            new Translation2d(Units.inchesToMeters(158.6), FieldConstants.FIELD_WIDTH),
-//            s_Swerve::getPose
-//        )
-//            .onTrue(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.TO_HUB)))
-//            .onFalse(Commands.runOnce(() -> ShooterStructure.setMode(ShooterStructure.ShooterMode.FERRY)));
     }
 
     private void configureDriver() {
-        driver.rightBumper()
-            .whileTrue(s_Flywheel.setTargetVelocityCmd(500.0));
-//        driver.rightTrigger()
-//            .whileTrue(Commands.runOnce(() -> {
-//                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
-//            }))
-//            .onFalse(Commands.runOnce(() -> {
-//                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
-//            }));
-//        driver.rightTrigger()
-//            .whileTrue(
-//                s_Intake.runIntake());
-//
-//        driver.leftTrigger()
-//            .whileTrue(
-//                s_Intake.outtakeIntake());
+        driver.leftBumper()
+            .whileTrue(Commands.runOnce(() -> {
+                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
+            }))
+            .onFalse(Commands.runOnce(() -> {
+                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
+            }));
+        driver.rightTrigger()
+            .whileTrue(
+                s_Intake.runIntake());
+
+        driver.leftTrigger()
+            .whileTrue(
+                s_Intake.outtakeIntake());
     }
 }
