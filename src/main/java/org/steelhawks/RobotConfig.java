@@ -775,7 +775,7 @@ public class RobotConfig {
 
         @Override
         public Intake createIntake() {
-            return null;
+            return new Intake(new IntakeIO() {});
         }
 
         @Override

@@ -77,7 +77,7 @@ public class RobotContainer {
 //                s_OldIntake.setDesiredStateCommand(OldIntakeConstants.State.INTAKE));
 //        }
 
-//        if (config.hasIntake) {
+        if (config.hasIntake) {
             driver.rightTrigger().whileTrue(s_Intake.runIntake());
             driver.leftTrigger().whileTrue(s_Intake.outtakeIntake());
 //
@@ -85,7 +85,7 @@ public class RobotContainer {
 //                s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
 //            driver.y().onTrue(
 //                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-//        }
+        }
 
 //        driver.x().whileTrue(
 //            DriveCommands.feedforwardCharacterization(s_Swerve)
