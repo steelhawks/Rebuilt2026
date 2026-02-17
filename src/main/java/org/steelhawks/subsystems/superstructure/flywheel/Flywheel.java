@@ -12,15 +12,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.FieldConstants;
-import org.steelhawks.Robot;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
-
-import java.util.Set;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -29,8 +26,8 @@ public class Flywheel extends SubsystemBase {
     public static final double FLYWHEEL_RADIUS = Units.inchesToMeters(1.0);
     public static final double IDLE_MULTIPLIER = 0.5;
 
-    public static final int motorId1 = 2;
-    public static final int motorId2 = 3;
+    public static final int leftMotorId = 2;
+    public static final int rightMotorId = 3;
     public static final LoggedTunableNumber kP =
         new LoggedTunableNumber("Flywheel/kP", 0.2);
     public static final LoggedTunableNumber kI =
@@ -98,11 +95,10 @@ public class Flywheel extends SubsystemBase {
             setpointDebouncer.calculate(
                 Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
         final boolean shouldRun =
-//            DriverStation.isEnabled()
-//                && Toggles.Flywheel.isEnabled.get()
-//                && !Toggles.Flywheel.toggleVoltageOverride.get()
-//                && !Toggles.Flywheel.toggleCurrentOverride.get();
-        true;
+            DriverStation.isEnabled()
+                && Toggles.Flywheel.isEnabled.get()
+                && !Toggles.Flywheel.toggleVoltageOverride.get()
+                && !Toggles.Flywheel.toggleCurrentOverride.get();
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {
                 if (tuningVolts == null) {
@@ -121,8 +117,6 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-//            double mps = ShooterStructure.Static.calculateShot(FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
-//            targetVelocityRadPerSec = ShooterStructure.linearToAngularVelocity(mps, Units.inchesToMeters(2.0));
             Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
             switch (RobotState.getInstance().getAimState()) {
                 case NOTHING -> {

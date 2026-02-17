@@ -31,7 +31,6 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
-import javax.swing.text.html.Option;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -168,7 +167,7 @@ public class RobotConfig {
                 .build();
 
             case ALPHABOT -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
                 .withLEDStrip(false)
                 .withVision(true)
                 .withObjectVision(false)

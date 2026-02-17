@@ -31,7 +31,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     private final TalonFX leftMotor, rightMotor;
 
     public FlywheelIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(Flywheel.motorId1, bus.bus);
+        leftMotor = new TalonFX(Flywheel.leftMotorId, bus.bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -47,7 +47,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         torqueCurrent = leftMotor.getTorqueCurrent();
         temp = leftMotor.getDeviceTemp();
 
-        rightMotor = new TalonFX(Flywheel.motorId2, bus.bus);
+        rightMotor = new TalonFX(Flywheel.rightMotorId, bus.bus);
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);

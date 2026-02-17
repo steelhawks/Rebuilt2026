@@ -49,9 +49,6 @@ public class Robot extends LoggedRobot {
     private static boolean isFirstRun = true;
     private Command autonomousCommand;
 
-//    private final CANBus canivoreBus = new CANBus("canivore");
-    private final CANBus rioBus = new CANBus();
-
     public enum RobotState {
         DISABLED,
         TELEOP,

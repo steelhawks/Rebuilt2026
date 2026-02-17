@@ -27,8 +27,6 @@ public class Intake extends SubsystemBase {
 
     private double homingVolts = -2.0;
 
-    private double testingVolts = 2.0;
-
     private IntakeConstants.State desiredGoal = IntakeConstants.State.HOME;
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
@@ -69,18 +67,18 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
-//        if (!isHomed) {
-//            io.runRackOpenLoop(testingVolts, false);
-//            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
-//            Logger.recordOutput("Intake/IsHomed", isHomed);
-//        } else {
-//            if (!isZeroed) {
-//                io.setPosition(0.0);
-//                io.stopRack();
-//                isZeroed = true;
-//                Logger.recordOutput("Intake/Zeroed", true);
-//            }
-//        }
+        if (!isHomed && Toggles.Intake.isEnabled.get()) {
+            io.runRackOpenLoop(homingVolts, false);
+            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
+            Logger.recordOutput("Intake/IsHomed", isHomed);
+        } else {
+            if (!isZeroed) {
+                io.setPosition(0.0);
+                io.stopRack();
+                isZeroed = true;
+                Logger.recordOutput("Intake/Zeroed", true);
+            }
+        }
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
