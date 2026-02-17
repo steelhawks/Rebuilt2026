@@ -219,7 +219,13 @@ public class VisionConstants {
         )
     };
 
-    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {};
+    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {
+        new CameraConfig(
+        "limelight-chassis",
+        new Transform3d(),
+        new Factors.StdDevFactors(3),
+        CameraType.LIMELIGHT)
+    };
 
     private static final CameraConfig[] CHASSIS_OBJ_DETECT_CONFIG = {};
 
