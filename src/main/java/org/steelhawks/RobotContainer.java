@@ -23,17 +23,17 @@ public class RobotContainer {
 
     private final RobotConfig config = RobotConfig.getConfig();
 
+    public static Swerve s_Swerve = null;
 //    public static LEDMatrix s_LEDMatrix = null;
 //    public static LEDStrip s_LEDStrip = null;
-    public static Swerve s_Swerve = null;
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
     public static Flywheel s_Flywheel = null;
     public static Turret s_Turret = null;
 //    public static Pivot s_Pivot = null;
+    public static Intake s_Intake = null;
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
-    public static Intake s_Intake = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -47,14 +47,13 @@ public class RobotContainer {
 //        s_LEDStrip = config.createLEDStrip().orElse(null);
         s_Vision = config.createVision().orElse(null);
 //        s_ObjVision = config.createObjectVision().orElse(null);
-        s_Flywheel = config.createFlywheel().orElse(null);
+//        s_Flywheel = config.createFlywheel().orElse(null);
+        s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
 //        s_Pivot = config.createPivot().orElse(null);
         s_Intake = config.createIntake().orElse(null);
-//        s_Flywheel = config.createFlywheel().orElse(null);
-        s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
-        s_Indexer = config.createIndexer().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
+        s_Indexer = config.createIndexer().orElse(null);
 
         if (config.hasAutos) {
             Autos.init();
