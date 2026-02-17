@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.vision.objdetect;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.FieldConstants;
@@ -14,7 +15,7 @@ import org.steelhawks.util.VirtualSubsystem;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ObjectVision extends VirtualSubsystem {
+public class ObjectVision extends SubsystemBase {
 
     private static final double objectOverlap = 0.1; // meters
     private static final double objectMaxAge = 5.0; // seconds
