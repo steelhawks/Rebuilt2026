@@ -159,5 +159,13 @@ public class Intake extends SubsystemBase {
         setExtensionGoal(8);
     }
 
+    public boolean atTargetPosition() {
+        double positionError = Math.abs(goal.position - inputs.leftExtensionPosition);
+        double velocityError = Math.abs(setpoint.velocity);
+
+        return positionError < IntakeConstants.POSITION_TOLERANCE
+                && velocityError < IntakeConstants.MAX_VELOCITY_PER_SEC.getAsDouble();
+    }
+
 
 }
