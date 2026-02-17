@@ -126,19 +126,18 @@ public class RobotState extends VirtualSubsystem {
     }
 
     public ShootingState getAimState() {
-//        if (shootingState == ShootingState.NOTHING) {
-//            return ShootingState.NOTHING;
-//        }
-//        double linearVelocity = Math.hypot(
-//            currentChassisSpeeds.vxMetersPerSecond,
-//            currentChassisSpeeds.vyMetersPerSecond
-//        );
-//        boolean isMoving = linearVelocity > movingVelocityThreshold;
-//        if (shootingState == ShootingState.SHOOTING) {
-//            return isMoving ? ShootingState.SHOOTING_MOVING : ShootingState.SHOOTING_STATIONARY;
-//        }
-//        return shootingState;
-        return ShootingState.NOTHING;
+        if (shootingState == ShootingState.NOTHING) {
+            return ShootingState.NOTHING;
+        }
+        double linearVelocity = Math.hypot(
+            currentChassisSpeeds.vxMetersPerSecond,
+            currentChassisSpeeds.vyMetersPerSecond
+        );
+        boolean isMoving = linearVelocity > movingVelocityThreshold;
+        if (shootingState == ShootingState.SHOOTING) {
+            return isMoving ? ShootingState.SHOOTING_MOVING : ShootingState.SHOOTING_STATIONARY;
+        }
+        return shootingState;
     }
 
     public ShooterMode getShooterMode() {

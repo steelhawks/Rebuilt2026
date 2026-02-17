@@ -69,13 +69,13 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-//        driver.leftBumper()
-//            .whileTrue(Commands.runOnce(() -> {
-//                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
-//            }))
-//            .onFalse(Commands.runOnce(() -> {
-//                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
-//            }));
+        driver.leftBumper()
+            .whileTrue(Commands.runOnce(() -> {
+                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
+            }))
+            .onFalse(Commands.runOnce(() -> {
+                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
+            }));
         driver.rightTrigger()
             .whileTrue(
                 s_Intake.runIntake());
