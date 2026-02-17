@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Toggles;
-import org.steelhawks.util.AlertUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Indexer extends SubsystemBase {
@@ -19,9 +18,9 @@ public class Indexer extends SubsystemBase {
     private static final double WHEEL_RADIUS = Units.inchesToMeters(4.0);
 
 	public enum IndexerState {
-		RUNNING(0.8, 0.4),
+		RUNNING(0.6, -1.0),
 		STOPPED(0.0, 0.0),
-		OUTTAKING(-0.8, -0.4);
+		OUTTAKING(-0.6, 1.0);
 
 		final double spindexerOutput;
         final double feederOutput;
@@ -40,10 +39,6 @@ public class Indexer extends SubsystemBase {
 
 	public Indexer(IndexerIO io) {
 		this.io = io;
-        new AlertUtil("[Indexer]: Spindexer Motor disconnected.", AlertType.kError)
-            .withCondition(() -> !spindexerInputs.connected);
-        new AlertUtil("[Indexer]: Feeder Motor connected.", AlertType.kError)
-            .withCondition(() -> !feederInputs.connected);
 	}
 
 	@Override

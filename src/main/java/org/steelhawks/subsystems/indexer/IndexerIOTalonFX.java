@@ -70,33 +70,30 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederTemp = feederMotor.getDeviceTemp();
 
 		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
 		BaseStatusSignal.setUpdateFrequencyForAll(
 		50,
 			spindexerVelocity,
             spindexerVoltage,
             spindexerCurrent,
-            spindexerTorqueCurrent);
+            spindexerTorqueCurrent,
+			feederVelocity,
+			feederVoltage,
+			feederCurrent,
+			feederTorqueCurrent);
 		PhoenixUtil.registerSignals(canBus.bus.isNetworkFD(),
             spindexerPosition,
             spindexerVelocity,
             spindexerVoltage,
             spindexerCurrent,
             spindexerTorqueCurrent,
-            spindexerTemp);
-
-        BaseStatusSignal.setUpdateFrequencyForAll(
-            50,
-            feederVelocity,
-            feederVoltage,
-            feederCurrent,
-            feederTorqueCurrent);
-        PhoenixUtil.registerSignals(canBus.bus.isNetworkFD(),
-            feederPosition,
-            feederVelocity,
-            feederVoltage,
-            feederCurrent,
-            feederTorqueCurrent,
-            feederTemp);
+            spindexerTemp,
+			feederPosition,
+			feederVelocity,
+			feederVoltage,
+			feederCurrent,
+			feederTorqueCurrent,
+			feederTemp);
 	}
 
 	@Override
@@ -118,7 +115,6 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederInputs.currentAmps = feederCurrent.getValueAsDouble();
         feederInputs.torqueCurrentAmps = feederTorqueCurrent.getValueAsDouble();
         feederInputs.tempCelsius = feederTemp.getValueAsDouble();
-
 	}
 
 	@Override
