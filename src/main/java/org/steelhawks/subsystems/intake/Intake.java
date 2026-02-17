@@ -27,6 +27,8 @@ public class Intake extends SubsystemBase {
 
     private double homingVolts = -2.0;
 
+    private double testingVolts = 2.0;
+
     private IntakeConstants.State desiredGoal = IntakeConstants.State.HOME;
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
@@ -68,7 +70,7 @@ public class Intake extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
         if (!isHomed) {
-            io.runRackOpenLoop(homingVolts, false);
+            io.runRackOpenLoop(testingVolts, false);
             isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {

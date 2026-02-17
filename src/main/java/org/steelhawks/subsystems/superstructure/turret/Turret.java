@@ -33,8 +33,8 @@ public class Turret extends SubsystemBase {
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", 0.0);
     public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 70.0); // 35
 
-    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 40.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 60.0);
+    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 15.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 
@@ -249,8 +249,9 @@ public class Turret extends SubsystemBase {
                         .getTranslation();
                     var direction = hubCenter.toTranslation2d().minus(turretTranslation);
                     double fieldRelativeAngle = direction.getAngle().getRadians();
+                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
                     double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians());
+                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
                     Constants.toLoggedPoint("Turret/AimingParams/Direction", direction);
                     Logger.recordOutput("Turret/AimingParams/TurretRelativeAngle", turretRelativeAngle);
@@ -268,8 +269,9 @@ public class Turret extends SubsystemBase {
                         .getTranslation();
                     var direction = ferryGoal.minus(turretTranslation);
                     double fieldRelativeAngle = direction.getAngle().getRadians();
+                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
                     double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians());
+                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
                     Constants.toLoggedPoint("Turret/Ferrying/FerryGoal", ferryGoal);
                     Constants.toLoggedPoint("Turret/Ferrying/Direction", direction);

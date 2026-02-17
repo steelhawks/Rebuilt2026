@@ -223,8 +223,8 @@ public class Flywheel extends SubsystemBase {
     }
 
     public Command setTargetVelocityCmd(double velocityRadPerSec) {
-        return Commands.defer(
-            () -> Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec)), Set.of(this));
+        return Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec), this)
+        .finallyDo(io::stop);
     }
 
     public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {
