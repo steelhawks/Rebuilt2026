@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.intake;
 
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -24,11 +25,20 @@ public class Intake extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
+    private double homingVolts = -2.0;
+
     private IntakeConstants.State desiredGoal = IntakeConstants.State.HOME;
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
     private boolean atGoal = false;
+    private boolean isHomed = false;
+    private boolean isZeroed = false;
+
+    private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
+
+    private static final LoggedTunableNumber currentHomingThres =
+        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 60.0);
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -57,7 +67,18 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
-
+        if (!isHomed) {
+            io.runRackOpenLoop(homingVolts, false);
+            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
+            Logger.recordOutput("Intake/IsHomed", isHomed);
+        } else {
+            if (!isZeroed) {
+                io.setPosition(0.0);
+                io.stopRack();
+                isZeroed = true;
+                Logger.recordOutput("Intake/Zeroed", true);
+            }
+        }
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && (inputs.leftConnected && inputs.rightConnected)
@@ -151,7 +172,7 @@ public class Intake extends SubsystemBase {
                 double staticFriction = IntakeConstants.kS.get() * Math.signum(setpoint.velocity);
                 io.runRackPosition(
                     setpoint.position,
-                    feedforwardCurrent + staticFriction);
+                    staticFriction);
             }
             Logger.recordOutput("Intake/SetpointPosition", setpoint.position);
             Logger.recordOutput("Intake/SetpointVelocity", setpoint.velocity);
