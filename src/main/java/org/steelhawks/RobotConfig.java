@@ -31,6 +31,7 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
+import javax.swing.text.html.Option;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -46,6 +47,7 @@ public class RobotConfig {
     public final boolean hasFlywheel;
     public final boolean hasTurret;
     public final boolean hasPivot;
+    public final boolean hasOldIntake;
     public final boolean hasIntake;
     public final boolean hasIndexer;
 
@@ -64,6 +66,7 @@ public class RobotConfig {
         this.hasFlywheel = builder.hasFlywheel;
         this.hasTurret = builder.hasTurret;
         this.hasPivot = builder.hasPivot;
+        this.hasOldIntake = builder.hasOldIntake;
         this.hasIntake = builder.hasIntake;
         this.hasIndexer = builder.hasIndexer;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
@@ -125,7 +128,7 @@ public class RobotConfig {
     }
 
     public Optional<OldIntake> createOldIntake() {
-        if (!hasIntake) {
+        if (!hasOldIntake) {
             return Optional.empty();
         }
         return Optional.ofNullable(factory.createOldIntake());
@@ -136,6 +139,12 @@ public class RobotConfig {
             return Optional.empty();
         }
         return Optional.ofNullable(factory.createIndexer());
+    }
+    public Optional<Intake> createIntake() {
+        if (!hasIntake) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createIntake());
     }
 
     public static RobotConfig getConfig() {
@@ -151,6 +160,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(true)
+                .withOldIntake(false)
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
@@ -165,6 +175,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(false)
+                .withOldIntake(false)
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
@@ -179,6 +190,7 @@ public class RobotConfig {
                 .withFlywheel(false)
                 .withTurret(false)
                 .withPivot(false)
+                .withOldIntake(false)
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
@@ -193,6 +205,7 @@ public class RobotConfig {
                 .withFlywheel(false)
                 .withTurret(false)
                 .withPivot(false)
+                .withOldIntake(false)
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
@@ -208,6 +221,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(false)
+                .withOldIntake(false)
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
@@ -221,6 +235,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(true)
+                .withOldIntake(false)
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
@@ -238,6 +253,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(true)
+                .withOldIntake(false)
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
@@ -251,6 +267,7 @@ public class RobotConfig {
                 .withFlywheel(true)
                 .withTurret(true)
                 .withPivot(false)
+                .withOldIntake(false)
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
@@ -265,6 +282,7 @@ public class RobotConfig {
                 .withFlywheel(false)
                 .withTurret(false)
                 .withPivot(false)
+                .withOldIntake(false)
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
@@ -283,6 +301,7 @@ public class RobotConfig {
         private boolean hasFlywheel = false;
         private boolean hasTurret = false;
         private boolean hasPivot = false;
+        private boolean hasOldIntake = false;
         private boolean hasIntake = false;
         private boolean hasIndexer = false;
         private boolean hasAutos = false;
@@ -325,6 +344,11 @@ public class RobotConfig {
 
         public Builder withPivot(boolean enabled) {
             this.hasPivot = enabled;
+            return this;
+        }
+
+        public Builder withOldIntake(boolean enabled) {
+            this.hasOldIntake = enabled;
             return this;
         }
 
