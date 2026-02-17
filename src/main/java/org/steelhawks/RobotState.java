@@ -88,7 +88,6 @@ public class RobotState extends VirtualSubsystem {
     private final SwerveDriveOdometry wheelOdometry =
         new SwerveDriveOdometry(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-    private final List<VisionObservation> visionObservations;
     private final List<TimestampedObjectList> objectHistory;
     private List<DetectedObject> currentDetectedObjects;
 
@@ -106,7 +105,6 @@ public class RobotState extends VirtualSubsystem {
     }
 
     public void setShooterMode(ShooterMode mode) {
-        // TODO add check to see if we are moving, just a velocity check then do the locks
         if (currentShooterMode != mode) {
             Logger.recordOutput("ShooterMode/ModeChange",
                 currentShooterMode.name() + " -> " + mode.name());
@@ -156,51 +154,51 @@ public class RobotState extends VirtualSubsystem {
 
     @Override
     public void periodic() {
-        if (autoStarted.update(DriverStation.isAutonomous())) {
-            shiftState = ShiftState.AUTO;
-            initialActiveHub = null;
-            activeHub = null;
-            timer.stop();
-            timer.reset();
-            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
-        }
-        if (teleopStarted.update(DriverStation.isTeleop())) {
-            shiftState = ShiftState.TRANSITION;
-            String gameData = DriverStation.getGameSpecificMessage();
-            if (gameData.isEmpty()) {
-                initialActiveHub = Alliance.Blue;
-            } else {
-                initialActiveHub = (gameData.charAt(0) == 'B') ? Alliance.Red : Alliance.Blue;
-                Logger.recordOutput("RobotState/GameData", gameData);
-            }
-            activeHub = initialActiveHub;
-            Logger.recordOutput("RobotState/InitialActiveHub", initialActiveHub.name());
-            timer.restart();
-            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
-        }
-
-        if (DriverStation.isTeleop() && timer.isRunning()) {
-            if (timer.advanceIfElapsed(shiftState.time)) {
-                if (shiftState != ShiftState.END_GAME) {
-                    shiftState = ShiftState.values()[shiftState.ordinal() + 1];
-                    if (shiftState == ShiftState.SHIFT1 ||
-                        shiftState == ShiftState.SHIFT2 ||
-                        shiftState == ShiftState.SHIFT3 ||
-                        shiftState == ShiftState.SHIFT4) {
-                        activeHub = (activeHub == Alliance.Blue) ? Alliance.Red : Alliance.Blue;
-                    }
-                    Logger.recordOutput("RobotState/ShiftState", shiftState.name());
-                    Logger.recordOutput("RobotState/ActiveHub", activeHub != null ? activeHub.name() : "BOTH");
-                }
-            }
-        }
-        if (currentShooterMode == ShooterMode.MANUAL) {
-            return;
-        }
-        ShooterMode desiredMode = calculateDesiredMode();
-        if (desiredMode != currentShooterMode) {
-            setShooterMode(desiredMode);
-        }
+//        if (autoStarted.update(DriverStation.isAutonomous())) {
+//            shiftState = ShiftState.AUTO;
+//            initialActiveHub = null;
+//            activeHub = null;
+//            timer.stop();
+//            timer.reset();
+//            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
+//        }
+//        if (teleopStarted.update(DriverStation.isTeleop())) {
+//            shiftState = ShiftState.TRANSITION;
+//            String gameData = DriverStation.getGameSpecificMessage();
+//            if (gameData.isEmpty()) {
+//                initialActiveHub = Alliance.Blue;
+//            } else {
+//                initialActiveHub = (gameData.charAt(0) == 'B') ? Alliance.Red : Alliance.Blue;
+//                Logger.recordOutput("RobotState/GameData", gameData);
+//            }
+//            activeHub = initialActiveHub;
+//            Logger.recordOutput("RobotState/InitialActiveHub", initialActiveHub.name());
+//            timer.restart();
+//            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
+//        }
+//
+//        if (DriverStation.isTeleop() && timer.isRunning()) {
+//            if (timer.advanceIfElapsed(shiftState.time)) {
+//                if (shiftState != ShiftState.END_GAME) {
+//                    shiftState = ShiftState.values()[shiftState.ordinal() + 1];
+//                    if (shiftState == ShiftState.SHIFT1 ||
+//                        shiftState == ShiftState.SHIFT2 ||
+//                        shiftState == ShiftState.SHIFT3 ||
+//                        shiftState == ShiftState.SHIFT4) {
+//                        activeHub = (activeHub == Alliance.Blue) ? Alliance.Red : Alliance.Blue;
+//                    }
+//                    Logger.recordOutput("RobotState/ShiftState", shiftState.name());
+//                    Logger.recordOutput("RobotState/ActiveHub", activeHub != null ? activeHub.name() : "BOTH");
+//                }
+//            }
+//        }
+//        if (currentShooterMode == ShooterMode.MANUAL) {
+//            return;
+//        }
+//        ShooterMode desiredMode = calculateDesiredMode();
+//        if (desiredMode != currentShooterMode) {
+//            setShooterMode(desiredMode);
+//        }
     }
 
     private ShooterMode calculateDesiredMode() {
@@ -268,7 +266,6 @@ public class RobotState extends VirtualSubsystem {
     }
 
     private RobotState() {
-        this.visionObservations = new ArrayList<>();
         this.objectHistory = new ArrayList<>();
         this.currentDetectedObjects = new ArrayList<>();
     }
@@ -284,7 +281,6 @@ public class RobotState extends VirtualSubsystem {
         poseBuffer.addSample(Timer.getFPGATimestamp(), pose);
         turretAngleBuffer.clear();
         objectHistory.clear();
-        visionObservations.clear();
         Logger.recordOutput("RobotState/PoseReset", pose);
     }
 
@@ -308,9 +304,6 @@ public class RobotState extends VirtualSubsystem {
             observation.timestamp(),
             observation.stdDevs()
         );
-        visionObservations.add(observation);
-        Logger.recordOutput("RobotState/VisionObservations",
-            visionObservations.toArray(new VisionObservation[0]));
         Logger.recordOutput("RobotState/LatestVisionPose", observation.robotPose());
     }
 
@@ -352,7 +345,6 @@ public class RobotState extends VirtualSubsystem {
     /**
      * Get the turret angle at a specific timestamp
      */
-    @AutoLogOutput(key = "RobotState/Turret/AngleAtTime")
     public Optional<Rotation2d> getTurretAngleAtTime(double timestamp) {
         return turretAngleBuffer.getSample(timestamp);
     }

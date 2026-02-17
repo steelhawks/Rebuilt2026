@@ -48,7 +48,7 @@ public class RobotContainer {
 //        s_LEDMatrix = config.createLEDMatrix().orElse(null);
 //        s_LEDStrip = config.createLEDStrip().orElse(null);
         s_Vision = config.createVision().orElse(null);
-        s_ObjVision = config.createObjectVision().orElse(null);
+//        s_ObjVision = config.createObjectVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
 //        s_Pivot = config.createPivot().orElse(null);
@@ -69,13 +69,13 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-        driver.leftBumper()
-            .whileTrue(Commands.runOnce(() -> {
-                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
-            }))
-            .onFalse(Commands.runOnce(() -> {
-                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
-            }));
+//        driver.leftBumper()
+//            .whileTrue(Commands.runOnce(() -> {
+//                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
+//            }))
+//            .onFalse(Commands.runOnce(() -> {
+//                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
+//            }));
         driver.rightTrigger()
             .whileTrue(
                 s_Intake.runIntake());

@@ -143,7 +143,7 @@ public class Vision extends SubsystemBase {
                     }
                 }
                 if (!isWhitelisted) {
-                    return;
+                    continue;
                 }
                 var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
                 if (tagPose.isPresent()) {
