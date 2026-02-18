@@ -198,11 +198,12 @@ public class Flywheel extends SubsystemBase {
     }
 
     private double calculateAverageSample() {
+        if (currentSampleIndex == 0) return 0.0;
         double sum = 0.0;
-        for (double sample : voltageSamples) {
-            sum += sample;
+        for (int i = 0; i < currentSampleIndex; i++) {
+            sum += voltageSamples[i];
         }
-        return sum / sampleCounts;
+        return sum / currentSampleIndex;
     }
 
     @AutoLogOutput(key = "Flywheel/ReadyToShoot")
