@@ -213,4 +213,3 @@ public class Intake extends SubsystemBase {
             () -> io.runIntake(-IntakeConstants.INTAKE_SPEED), this).finallyDo(io::stopIntake);
     }
 }
-

@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
@@ -34,7 +33,6 @@ import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.PhoenixUtil;
-import org.steelhawks.util.VirtualSubsystem;
 
 import java.lang.reflect.Field;
 
