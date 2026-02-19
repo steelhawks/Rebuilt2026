@@ -115,7 +115,7 @@ public class Flywheel extends SubsystemBase {
                         FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                     double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                     if (rps != targetVelocityRadPerSec) {
-                        setTargetVelocity(rps * 2);
+                        setTargetVelocity(rps);
                     }
                 }
             }

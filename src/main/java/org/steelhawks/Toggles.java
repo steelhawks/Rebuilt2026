@@ -9,7 +9,7 @@ import java.util.Map;
 public interface Toggles {
 
     LoggedNetworkBoolean debugMode =
-        new LoggedNetworkBoolean("Toggles/DebugMode", true);
+        new LoggedNetworkBoolean("Toggles/DebugMode", false);
     LoggedNetworkBoolean tuningMode =
         new LoggedNetworkBoolean("Toggles/TuningMode", false);
     LoggedNetworkBoolean motionMagicEnabled =
@@ -40,7 +40,7 @@ public interface Toggles {
 
     interface Flywheel {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", false);
+            new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Flywheel/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
@@ -51,7 +51,7 @@ public interface Toggles {
 
     interface Turret {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", false);
+            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =

@@ -9,7 +9,7 @@ import org.steelhawks.util.LoggedTunableNumber;
 public class ShooterConstants {
 
     public static final class Flywheel {
-        public static final double FLYWHEEL_RADIUS = Units.inchesToMeters(1.0);
+        public static final double FLYWHEEL_RADIUS = Units.inchesToMeters(2.0);
         public static final double IDLE_MULTIPLIER = 0.5;
 
         public static final int LEFT_FLYWHEEL_ID = 2;

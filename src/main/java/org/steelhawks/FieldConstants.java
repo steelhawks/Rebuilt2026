@@ -53,7 +53,7 @@ public class FieldConstants {
 
         public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
         public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0);
-        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(7.0);
+        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(5.0);
     }
 
     public final static class Ferrying {
