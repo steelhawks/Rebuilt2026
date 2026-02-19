@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Robot;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -38,8 +39,8 @@ public class Hood extends SubsystemBase {
             && Toggles.Hood.isEnabled.get()
             && !Toggles.Hood.voltageOverride.get()
             && Toggles.Hood.currentOverride.get()
-            && (getPositionDeg() >= HoodConstants.MIN_ANGLE.getDegrees())
-            && (getPositionDeg() <= HoodConstants.MAX_ANGLE.getDegrees());
+            && (getPositionDeg() >= ShooterConstants.Hood.MIN_ANGLE.getDegrees())
+            && (getPositionDeg() <= ShooterConstants.Hood.MAX_ANGLE.getDegrees());
 
         if (DriverStation.isDisabled()) {
             setpoint = Rotation2d.fromDegrees(getPositionDeg());
@@ -64,17 +65,17 @@ public class Hood extends SubsystemBase {
             LoggedTunableNumber.ifChanged(
                 this.hashCode(),
                 () -> io.setPID(
-                    HoodConstants.kP.get(),
-                    HoodConstants.kI.get(),
-                    HoodConstants.kD.get()
-                ), HoodConstants.kP, HoodConstants.kI, HoodConstants.kD
+                    ShooterConstants.Hood.kP.get(),
+                    ShooterConstants.Hood.kI.get(),
+                    ShooterConstants.Hood.kD.get()
+                ), ShooterConstants.Hood.kP, ShooterConstants.Hood.kI, ShooterConstants.Hood.kD
             );
         }
         if (shouldRun) {
-            atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), HoodConstants.TOLERANCE);
+            atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), ShooterConstants.Hood.TOLERANCE);
             io.runHoodPosition(
                 setpoint,
-                HoodConstants.kG.get());
+                ShooterConstants.Hood.kG.get());
         }
     }
 
@@ -85,8 +86,8 @@ public class Hood extends SubsystemBase {
     public void setDesiredPosition(Rotation2d position) {
         inputs.goal = MathUtil.clamp(
             position.getDegrees(),
-            HoodConstants.MIN_ANGLE.getDegrees(),
-            HoodConstants.MAX_ANGLE.getDegrees());
+            ShooterConstants.Hood.MIN_ANGLE.getDegrees(),
+            ShooterConstants.Hood.MAX_ANGLE.getDegrees());
         setpoint = Rotation2d.fromDegrees(inputs.goal);
     }
 

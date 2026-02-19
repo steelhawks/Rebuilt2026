@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
@@ -43,8 +44,8 @@ public class HoodIOTalonFX implements HoodIO {
     private final VoltageOut voltageOut;
 
     public HoodIOTalonFX(RobotConfig.CANBus bus) {
-        hoodMotor = new TalonFX(HoodConstants.MOTOR_ID, bus.bus);
-        cancoder = new CANcoder(HoodConstants.CANCODER_ID);
+        hoodMotor = new TalonFX(ShooterConstants.Hood.MOTOR_ID, bus.bus);
+        cancoder = new CANcoder(ShooterConstants.Hood.CANCODER_ID);
 
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
@@ -55,14 +56,14 @@ public class HoodIOTalonFX implements HoodIO {
 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        motorConfig.Slot0.kP = HoodConstants.kP.get();
-        motorConfig.Slot0.kI = HoodConstants.kI.get();
-        motorConfig.Slot0.kD = HoodConstants.kD.get();
-        motorConfig.Feedback.SensorToMechanismRatio = HoodConstants.REDUCTION;
+        motorConfig.Slot0.kP = ShooterConstants.Hood.kP.get();
+        motorConfig.Slot0.kI = ShooterConstants.Hood.kI.get();
+        motorConfig.Slot0.kD = ShooterConstants.Hood.kD.get();
+        motorConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Hood.REDUCTION;
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
 
         cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        cancoderConfig.MagnetSensor.MagnetOffset = HoodConstants.MAG_OFFSET.getRotations();
+        cancoderConfig.MagnetSensor.MagnetOffset = ShooterConstants.Hood.MAG_OFFSET.getRotations();
         tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         position = hoodMotor.getPosition();
