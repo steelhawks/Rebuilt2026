@@ -11,6 +11,7 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
+import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
@@ -25,6 +26,7 @@ public class RobotContainer {
     public static ObjectVision s_ObjVision = null;
     public static Flywheel s_Flywheel = null;
     public static Turret s_Turret = null;
+    public static Hood s_Hood = null;
     public static Intake s_Intake = null;
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;

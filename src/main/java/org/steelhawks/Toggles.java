@@ -73,4 +73,15 @@ public interface Toggles {
         LoggedNetworkBoolean isFeederEnabled =
             new LoggedNetworkBoolean("Toggles/Indexer/Feeder/IsEnabled", true);
     }
+
+    interface Hood {
+        LoggedNetworkBoolean isEnabled =
+            new LoggedNetworkBoolean("Toggles/Hood/IsEnabled", true);
+        LoggedNetworkBoolean disableBrakeMode =
+            new LoggedNetworkBoolean("Toggles/Hood/DisableBrakeMode", true);
+        LoggedNetworkBoolean currentOverride =
+            new LoggedNetworkBoolean("Toggles/Hood/ToggleCurrentOverride");
+        LoggedNetworkBoolean voltageOverride =
+            new LoggedNetworkBoolean("Toggles/Hood/ToggleVoltageOverride");
+    }
 }
