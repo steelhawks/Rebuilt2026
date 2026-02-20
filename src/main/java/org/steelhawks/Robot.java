@@ -285,7 +285,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationInit() {
         if (Constants.getMode() == Mode.SIM) {
-            RobotContainer.s_Swerve.resetSimulation(new Pose2d(3, 3, new Rotation2d()));
+            RobotContainer.s_Swerve.resetSimulation(new Pose2d(1.5, 1, new Rotation2d()));
         }
     }
 }

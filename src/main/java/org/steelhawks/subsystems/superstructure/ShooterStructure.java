@@ -7,7 +7,8 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
-import org.steelhawks.Toggles;
+
+import static edu.wpi.first.units.Units.Meters;
 
 public class ShooterStructure {
 
@@ -28,7 +29,7 @@ public class ShooterStructure {
     }
 
     public static double linearToAngularVelocity(double linearVelocityMetersPerSec, double radius) {
-        return linearVelocityMetersPerSec / radius;
+        return (linearVelocityMetersPerSec) / radius;
     }
 
     public static double distanceToTarget(Translation3d target) {
@@ -48,6 +49,39 @@ public class ShooterStructure {
 
     public static class Static {
 
+        public static ProjectileData calculateShot(
+            Translation3d actualTarget, Translation3d predictedTarget) {
+            double x_dist = distanceToTarget(predictedTarget);
+            double y_dist = predictedTarget
+                .getMeasureZ()
+                .minus(RobotConstants.ROBOT_TO_TURRET.getMeasureZ()).in(Meters);
+            double r = FieldConstants.Hub.FUNNEL_RADIUS
+                * x_dist
+                / distanceToTarget(actualTarget);
+            double h = FieldConstants.Hub.FUNNEL_HEIGHT + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
+            double A1 = x_dist * x_dist;
+            double B1 = x_dist;
+            double D1 = y_dist;
+            double A2 = -x_dist * x_dist + (x_dist - r) * (x_dist - r);
+            double B2 = -r;
+            double D2 = h;
+            double Bm = -B2 / B1;
+            double A3 = Bm * A1 + A2;
+            double D3 = Bm * D1 + D2;
+            double a = D3 / A3;
+            double b = (D1 - A1 * a) / B1;
+            double theta = Math.atan(b);
+            double v0 = Math.sqrt(-G / (2 * a * (Math.cos(theta)) * (Math.cos(theta))));
+            if (Double.isNaN(v0) || Double.isNaN(theta)) {
+                v0 = 0;
+                theta = 0;
+            }
+            return new ProjectileData(
+                v0,
+                theta,
+                predictedTarget);
+        }
+
         /**
          * Computes a ballistic solution by iterating angles from MIN to MAX hood angle,
          * finding the lowest angle that:
@@ -60,69 +94,69 @@ public class ShooterStructure {
          * @param predictedTarget Used for shooting on the move: where we aim.
          * @return ProjectileData with exit velocity, hood angle, and target. Returns kNoSolution if no valid angle found.
          */
-        public static ProjectileData calculateShot(
-            Translation3d actualTarget, Translation3d predictedTarget
-        ) {
-            double x_dist = distanceToTarget(predictedTarget);
-            double turretH = turretHeightAboveField();
-            double y_dist = predictedTarget.getZ() - turretH;
-            double r = FieldConstants.Hub.FUNNEL_RADIUS
-                * x_dist / distanceToTarget(actualTarget);
-            double xFunnel = x_dist - r;
-            double requiredHeight = (FieldConstants.Hub.FUNNEL_HEIGHT
-                + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR)
-                - turretH;
-
-            double bestTheta = -1;
-            double bestV0 = -1;
-
-            for (double theta = RobotConstants.MIN_HOOD_ANGLE.getRadians();
-                 theta <= RobotConstants.MAX_HOOD_ANGLE.getRadians();
-                 theta += RobotConstants.ANGLE_INCREMENT
-            ) {
-                double cosTheta = Math.cos(theta);
-                double tanTheta = Math.tan(theta);
-                double denom = 2 * cosTheta * cosTheta * (x_dist * tanTheta - y_dist);
-                if (denom <= 0) continue;
-
-                double v0 = Math.sqrt(G * x_dist * x_dist / denom);
-                if (Double.isNaN(v0) || Double.isInfinite(v0)) continue;
-                double yAtFunnel = xFunnel * tanTheta
-                    - (G * xFunnel * xFunnel) / (2.0 * v0 * v0 * cosTheta * cosTheta);
-
-                if (yAtFunnel >= requiredHeight) {
-                    bestTheta = theta;
-                    bestV0 = v0;
-                    break;
-                }
-            }
-
-            if (bestTheta < 0) {
-                if (Toggles.debugMode.get()) {
-                    Logger.recordOutput("Turret/Debug/NoSolution", true);
-                    Logger.recordOutput("Turret/Debug/x_dist", x_dist);
-                    Logger.recordOutput("Turret/Debug/y_dist", y_dist);
-                    Logger.recordOutput("Turret/Debug/requiredHeight", requiredHeight);
-                    Logger.recordOutput("Turret/Debug/xFunnel", xFunnel);
-                }
-                return kNoSolution;
-            }
-
-            if (Toggles.debugMode.get()) {
-                double cosB = Math.cos(bestTheta);
-                double yAtFunnelFinal = xFunnel * Math.tan(bestTheta)
-                    - (G * xFunnel * xFunnel) / (2.0 * bestV0 * bestV0 * cosB * cosB);
-                Logger.recordOutput("Turret/Debug/x_dist", x_dist);
-                Logger.recordOutput("Turret/Debug/y_dist", y_dist);
-                Logger.recordOutput("Turret/Debug/xFunnel", xFunnel);
-                Logger.recordOutput("Turret/Debug/requiredHeight", requiredHeight);
-                Logger.recordOutput("Turret/Debug/yAtFunnel", yAtFunnelFinal);
-                Logger.recordOutput("Turret/Debug/funnelClearance", yAtFunnelFinal - requiredHeight);
-                Logger.recordOutput("Turret/Debug/bestTheta", Math.toDegrees(bestTheta));
-                Logger.recordOutput("Turret/Debug/bestV0", bestV0);
-            }
-            return new ProjectileData(bestV0, bestTheta, predictedTarget);
-        }
+//        public static ProjectileData calculateShot(
+//            Translation3d actualTarget, Translation3d predictedTarget
+//        ) {
+//            double x_dist = distanceToTarget(predictedTarget);
+//            double turretH = turretHeightAboveField();
+//            double y_dist = predictedTarget.getZ() - turretH;
+//            double r = FieldConstants.Hub.FUNNEL_RADIUS
+//                * x_dist / distanceToTarget(actualTarget);
+//            double xFunnel = x_dist - r;
+//            double requiredHeight = (FieldConstants.Hub.FUNNEL_HEIGHT
+//                + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR)
+//                - turretH;
+//
+//            double bestTheta = -1;
+//            double bestV0 = -1;
+//
+//            for (double theta = RobotConstants.MIN_HOOD_ANGLE.getRadians();
+//                 theta <= RobotConstants.MAX_HOOD_ANGLE.getRadians();
+//                 theta += RobotConstants.ANGLE_INCREMENT
+//            ) {
+//                double cosTheta = Math.cos(theta);
+//                double tanTheta = Math.tan(theta);
+//                double denom = 2 * cosTheta * cosTheta * (x_dist * tanTheta - y_dist);
+//                if (denom <= 0) continue;
+//
+//                double v0 = Math.sqrt(G * x_dist * x_dist / denom);
+//                if (Double.isNaN(v0) || Double.isInfinite(v0)) continue;
+//                double yAtFunnel = xFunnel * tanTheta
+//                    - (G * xFunnel * xFunnel) / (2.0 * v0 * v0 * cosTheta * cosTheta);
+//
+//                if (yAtFunnel >= requiredHeight) {
+//                    bestTheta = theta;
+//                    bestV0 = v0;
+//                    break;
+//                }
+//            }
+//
+//            if (bestTheta < 0) {
+//                if (Toggles.debugMode.get()) {
+//                    Logger.recordOutput("Turret/Debug/NoSolution", true);
+//                    Logger.recordOutput("Turret/Debug/x_dist", x_dist);
+//                    Logger.recordOutput("Turret/Debug/y_dist", y_dist);
+//                    Logger.recordOutput("Turret/Debug/requiredHeight", requiredHeight);
+//                    Logger.recordOutput("Turret/Debug/xFunnel", xFunnel);
+//                }
+//                return kNoSolution;
+//            }
+//
+//            if (Toggles.debugMode.get()) {
+//                double cosB = Math.cos(bestTheta);
+//                double yAtFunnelFinal = xFunnel * Math.tan(bestTheta)
+//                    - (G * xFunnel * xFunnel) / (2.0 * bestV0 * bestV0 * cosB * cosB);
+//                Logger.recordOutput("Turret/Debug/x_dist", x_dist);
+//                Logger.recordOutput("Turret/Debug/y_dist", y_dist);
+//                Logger.recordOutput("Turret/Debug/xFunnel", xFunnel);
+//                Logger.recordOutput("Turret/Debug/requiredHeight", requiredHeight);
+//                Logger.recordOutput("Turret/Debug/yAtFunnel", yAtFunnelFinal);
+//                Logger.recordOutput("Turret/Debug/funnelClearance", yAtFunnelFinal - requiredHeight);
+//                Logger.recordOutput("Turret/Debug/bestTheta", Math.toDegrees(bestTheta));
+//                Logger.recordOutput("Turret/Debug/bestV0", bestV0);
+//            }
+//            return new ProjectileData(bestV0, bestTheta, predictedTarget);
+//        }
 
         /**
          * Computes a ballistic launch solution for a shooter with a fixed pitch angle.

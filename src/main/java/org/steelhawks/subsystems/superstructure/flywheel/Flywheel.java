@@ -14,6 +14,7 @@ import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
@@ -115,7 +116,7 @@ public class Flywheel extends SubsystemBase {
                         FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                     double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                     if (rps != targetVelocityRadPerSec) {
-                        setTargetVelocity(rps);
+                        setTargetVelocity(ShooterConstants.Flywheel.stationaryHoodVelocityFactor * rps);
                     }
                 }
             }

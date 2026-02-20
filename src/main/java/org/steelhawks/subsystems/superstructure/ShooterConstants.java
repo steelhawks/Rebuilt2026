@@ -38,6 +38,8 @@ public class ShooterConstants {
             new LoggedTunableNumber("Flywheel/SamplingTimeoutMinSamplesForAvgCalculation", 10);
 
         public static final int sampleCounts = 50;
+
+        public static final double stationaryHoodVelocityFactor = 2.0;
     }
 
     public static final class Hood {
