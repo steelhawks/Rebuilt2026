@@ -5,6 +5,7 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import kotlin.Unit;
 import org.dyn4j.geometry.Vector2;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
@@ -63,5 +64,17 @@ public class FieldConstants {
 
         public static final Translation2d START_LINE = new Translation2d(FERRY_LINE_X, ST_FERRY_LINE_Y);
         public static final Translation2d END_LINE = new Translation2d(FERRY_LINE_X, EN_FERRY_LINE_Y);
+    }
+
+    public final static class Trench {
+        public static final double TRENCH_WIDTH = Units.inchesToMeters(2.0 * (143.5 - 120.0));
+        public static final double TRENCH_LENGTH = Units.inchesToMeters(50.343905);
+
+        public static final double TRENCH_START_X = Units.inchesToMeters(182.11 - (TRENCH_WIDTH / 2.0));
+        public static final double TRENCH_END_X = Units.inchesToMeters(182.11 + (TRENCH_WIDTH / 2.0));
+    }
+
+    public final static class Bump {
+
     }
 }

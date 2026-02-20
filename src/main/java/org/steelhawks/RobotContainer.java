@@ -50,10 +50,11 @@ public class RobotContainer {
             Autos.init();
         }
         s_Swerve.setDefaultCommand(
-            DriveCommands.joystickDrive(
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
-            () -> -driver.getRightX()));
+            new TeleopSwerve(
+                s_Swerve,
+                () -> -driver.getLeftY(),
+                () -> -driver.getLeftX(),
+                () -> -driver.getRightX()));
         driver.x().onTrue(s_Swerve.zeroHeading());
         configureDriver();
     }
@@ -72,6 +73,7 @@ public class RobotContainer {
 
         driver.leftTrigger()
             .whileTrue(
-                s_Intake.outtakeIntake());
+                TeleopSwerve.setDriveState(TeleopSwerve.DriveState.NORMAL)
+                    .alongWith(new VibrateController(driver).repeatedly()));
     }
 }
