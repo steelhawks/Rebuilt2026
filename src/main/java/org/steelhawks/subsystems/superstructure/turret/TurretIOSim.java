@@ -6,10 +6,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 
-import static edu.wpi.first.units.Units.Radians;
 
 public class TurretIOSim implements TurretIO {
 
@@ -45,9 +43,7 @@ public class TurretIOSim implements TurretIO {
         double resistance = motor.rOhms;
         double omega = mMotor.getAngularVelocityRadPerSec();
         double backEMF = omega / motor.KvRadPerSecPerVolt;
-        double volts = current * resistance + backEMF;
-
-        return volts;
+        return current * resistance + backEMF;
     }
 
     @Override
@@ -66,13 +62,7 @@ public class TurretIOSim implements TurretIO {
             double pid = mController.calculate(inputs.positionRad.getRadians(), desiredPosition);
             mMotor.setInputVoltage(currentToVolts(pid + ff));
         }
-
         turretVisualizer.update();
-    }
-
-    @Override
-    public void setBrakeMode(boolean enabled) {
-        TurretIO.super.setBrakeMode(enabled);
     }
 
     @Override
@@ -87,8 +77,8 @@ public class TurretIOSim implements TurretIO {
         pidEnabled = false;
         mMotor.setInputVoltage(
             isTorqueCurrent
-            ? currentToVolts(output)
-            : output);
+                ? currentToVolts(output)
+                : output);
     }
 
     @Override

@@ -100,14 +100,25 @@ public final class Constants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(0.0);
 
-        public static final Transform3d ROBOT_TO_TURRET =
-            new Transform3d(0.0, 0.0, Units.inchesToMeters(18.0), new Rotation3d(0.0, 0.0, 0.0));
-
+        public static final Transform3d ROBOT_TO_TURRET;
         public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(45.0);
 
         public static final Rotation2d MIN_HOOD_ANGLE = Rotation2d.fromDegrees(30.0);
         public static final Rotation2d MAX_HOOD_ANGLE = Rotation2d.fromDegrees(70.0);
         public static final double ANGLE_INCREMENT = Units.degreesToRadians(0.25);
+
+        static {
+            switch (getRobot()) {
+                case ALPHABOT -> {
+                    ROBOT_TO_TURRET =
+                        new Transform3d(0.0, 0.0, Units.inchesToMeters(18.0), new Rotation3d(0.0, 0.0, 0.0));
+                }
+                default -> {
+                    ROBOT_TO_TURRET =
+                        new Transform3d(Units.inchesToMeters(-4.490), 0.0, Units.inchesToMeters(12.153) + 0.09, new Rotation3d(0.0, 0.0, Math.PI));
+                }
+            }
+        }
     }
 
     public static final class OIConstants {
