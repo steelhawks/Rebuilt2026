@@ -38,7 +38,7 @@ public class Hood extends SubsystemBase {
             && (inputs.motorConnected && inputs.cancoderConnected)
             && Toggles.Hood.isEnabled.get()
             && !Toggles.Hood.voltageOverride.get()
-            && Toggles.Hood.currentOverride.get()
+            && !Toggles.Hood.currentOverride.get()
             && (getPositionDeg() >= ShooterConstants.Hood.MIN_ANGLE.getDegrees())
             && (getPositionDeg() <= ShooterConstants.Hood.MAX_ANGLE.getDegrees());
 
