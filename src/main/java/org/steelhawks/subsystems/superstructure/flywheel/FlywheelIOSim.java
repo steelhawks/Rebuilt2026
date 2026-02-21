@@ -6,6 +6,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 public class FlywheelIOSim implements FlywheelIO {
     private DCMotorSim leftMotorSim;
@@ -37,9 +38,9 @@ public class FlywheelIOSim implements FlywheelIO {
         );
 
         velocityController = new PIDController(
-            Flywheel.kP.get(),
-            Flywheel.kI.get(),
-            Flywheel.kD.get()
+            ShooterConstants.Flywheel.kP.get(),
+            ShooterConstants.Flywheel.kI.get(),
+            ShooterConstants.Flywheel.kD.get()
         );
     }
 
