@@ -197,6 +197,13 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
+        if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
+            isHomed = true;
+            Logger.recordOutput("Turret/IsHomed", true);
+            io.setPosition(0);
+            isZeroed = true;
+            Logger.recordOutput("Turret/Zeroed", true);
+        }
         if (!isHomed && Toggles.Turret.isEnabled.get()) {
             io.runPercentOutput(homingVolts);
             isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());

@@ -7,6 +7,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotState;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 
 public class TurretIOSim implements TurretIO {
@@ -31,7 +32,7 @@ public class TurretIOSim implements TurretIO {
                 DCMotor.getKrakenX60Foc(1),
                 0.001, // complete bs how do u do this
             // my guess is the torque divided by angular accel but idk
-                Turret.reduction),
+                ShooterConstants.Turret.MOTOR_REDUCTION),
             DCMotor.getKrakenX60Foc(1));
         turretVisualizer = new TurretVisualizer(
             mMotor::getAngularPositionRad,
