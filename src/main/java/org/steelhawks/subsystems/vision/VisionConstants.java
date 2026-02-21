@@ -120,7 +120,73 @@ public class VisionConstants {
         }
     }
 
-    private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {};
+    private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
+        new CameraConfig(
+            "ardu-middle-right",
+            new Transform3d(
+                Units.inchesToMeters(-2.048), // 2.048 down
+                Units.inchesToMeters(-12.728), // 12.728 to the right
+                Units.inchesToMeters(20.679),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(-90.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-middle-left",
+            new Transform3d(
+                Units.inchesToMeters(-2.047), // 2.047 down
+                Units.inchesToMeters(12.728), // 12.728 to the left
+                Units.inchesToMeters(20.679),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(90.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+        "ardu-back-right",
+            new Transform3d(
+                Units.inchesToMeters(-13.341), // 12.333 to the right
+                Units.inchesToMeters(-12.333), // 13.341 down
+                Units.inchesToMeters(20.774),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(-135.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-back-left",
+            new Transform3d(
+                Units.inchesToMeters(-13.303), // 12.333 to the left
+                Units.inchesToMeters(12.333), // 13.303 down
+                Units.inchesToMeters(20.774),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30),
+                Units.degreesToRadians(-225))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        )
+//        new CameraConfig(
+//        "limelight-intake",
+//            new Transform3d(
+//                Units.inchesToMeters(13.818), // 13.818 up
+//                0.0, // in the vertical middle
+//                Units.inchesToMeters(19.735),
+//                new Rotation3d(
+//                    0.0,
+//                    0.0,
+//                    Units.degreesToRadians(15.0))),
+//            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+//            CameraType.LIMELIGHT
+//        )
+    };
 
     private static final CameraConfig[] LAST_YEAR_CAMERA_CONFIG = {
         new CameraConfig(
@@ -201,20 +267,16 @@ public class VisionConstants {
 
     private static final CameraConfig[] OMEGA_OBJ_DETECT_CONFIG = {
         new CameraConfig(
-            "limelight-coral",
-//            Constants.fromOnshapeCoordinates(4.469, 9.261, 21.578, 15.0, -20.0, 0.0),
-//            Constants.fromOnshapeCoordinates(5.531, -15.261, -23.578 - 1.414, 15.0, -20.0, 0.0),
+            "limelight-intake",
             new Transform3d(
-                Units.inchesToMeters(15.261),
-                Units.inchesToMeters(5.531),
-                Units.inchesToMeters(23.578 + 1.414),  // height (keep as is)
+                Units.inchesToMeters(13.818), // 13.818 up
+                0.0, // in the vertical middle
+                Units.inchesToMeters(19.735),
                 new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-20.0),
-                    Units.degreesToRadians(15.0)
-                )
-            ),
-            new Factors.ObjFactors(0.8, LimelightFactors.LIMELIGHT_4, 1280.0, 800.0),
+                    0.0,
+                    0.0,
+                    Units.degreesToRadians(15.0))),
+            new Factors.ObjFactors(0.8, LimelightFactors.LIMELIGHT_4, 1280.0, 800.0), // TODO: tune confidence factor
             CameraType.LIMELIGHT
         )
     };
@@ -270,7 +332,25 @@ public class VisionConstants {
 
     private static final CameraConfig[] ALPHA_OBJ_DETECT_CONFIG = {};
 
-    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {};
+    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {
+        new CameraConfig(
+            "limelight-coral",
+//            Constants.fromOnshapeCoordinates(4.469, 9.261, 21.578, 15.0, -20.0, 0.0),
+//            Constants.fromOnshapeCoordinates(5.531, -15.261, -23.578 - 1.414, 15.0, -20.0, 0.0),
+            new Transform3d(
+                Units.inchesToMeters(15.261),
+                Units.inchesToMeters(5.531),
+                Units.inchesToMeters(23.578 + 1.414),  // height (keep as is)
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-20.0),
+                    Units.degreesToRadians(15.0)
+                )
+            ),
+            new Factors.ObjFactors(0.8, LimelightFactors.LIMELIGHT_4, 1280.0, 800.0),
+            CameraType.LIMELIGHT
+        )
+    };
 
     public static CameraConfig[] getCameraConfig() {
         return switch (Constants.getRobot()) {
