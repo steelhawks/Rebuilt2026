@@ -2,22 +2,18 @@ package org.steelhawks.subsystems.vision;
 
 import static org.steelhawks.subsystems.vision.VisionConstants.*;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.RobotState.PoseObservationType;
@@ -28,7 +24,7 @@ public class Vision extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
-    private static int[] allowedTagIds;
+    private static final Set<Integer> allowedTagIds = new HashSet<>();
     private final boolean useQuestNav;
 
     private final QuestNavImpl questNav;
@@ -62,7 +58,10 @@ public class Vision extends SubsystemBase {
     }
 
     public static void whitelistTagIds(int... tagIds) {
-        allowedTagIds = tagIds;
+        allowedTagIds.clear();
+        for (int id : tagIds) {
+            allowedTagIds.add(id);
+        }
     }
 
     public Rotation2d getTargetX(int cameraIndex) {
@@ -104,18 +103,9 @@ public class Vision extends SubsystemBase {
             List<Pose3d> robotPosesRejected = new LinkedList<>();
 
             for (int tagId : inputs[cameraIndex].tagIds) {
-                boolean isWhitelisted = false;
-                for (int allowedTagId : allowedTagIds) {
-                    if (tagId == allowedTagId) {
-                        isWhitelisted = true;
-                        break;
-                    }
-                }
-                if (!isWhitelisted) continue;
+                if (!allowedTagIds.contains(tagId)) continue;
                 var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
-                if (tagPose.isPresent()) {
-                    tagPoses.add(tagPose.get());
-                }
+                tagPose.ifPresent(tagPoses::add);
             }
 
             for (var observation : inputs[cameraIndex].poseObservations) {
