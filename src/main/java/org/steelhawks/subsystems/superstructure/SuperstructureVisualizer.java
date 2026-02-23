@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import org.littletonrobotics.junction.Logger;
@@ -27,10 +28,14 @@ public class SuperstructureVisualizer {
     private Supplier<Double> hoodRad = () -> 0.0;
     private Supplier<Pose2d> robotPoseSupplier = Pose2d::new;
 
-    // These are robot-relative offsets (relative to robot origin = floor center of robot)
     private static final double TURRET_X = Constants.RobotConstants.ROBOT_TO_TURRET.getX();
     private static final double TURRET_Y = Constants.RobotConstants.ROBOT_TO_TURRET.getY();
-    private static final double TURRET_Z = Constants.RobotConstants.ROBOT_TO_TURRET.getZ();
+
+    private static final Translation3d HOOD_PIVOT = new Translation3d(
+        Units.inchesToMeters(0.0),
+        Units.inchesToMeters(-4.358),
+        Units.inchesToMeters(-2.642)
+    );
 
     private SuperstructureVisualizer() {
         mechanism = new LoggedMechanism2d(3, 3);
@@ -65,30 +70,21 @@ public class SuperstructureVisualizer {
         hoodLigament.setAngle(new Rotation2d(-hood));
         Logger.recordOutput("Superstructure/Mechanism2d", mechanism);
 
-        // 2D field turret pose
         Translation2d turretOffset = new Translation2d(TURRET_X, TURRET_Y);
         Translation2d turretWorld = robot.getTranslation()
             .plus(turretOffset.rotateBy(robot.getRotation()));
         Logger.recordOutput("Superstructure/TurretPose", new Pose2d(
             turretWorld,
             robot.getRotation().plus(new Rotation2d(turret))));
-
-        // 3D component poses — robot-relative, AdvantageScope applies robot→field transform
         // model_0 = turret base yaw only
         // model_1 = hood, yaw + pitch
         Logger.recordOutput("Superstructure/ComponentPoses", new Pose3d[]{
             new Pose3d(
-                new Translation3d(TURRET_X, TURRET_Y, TURRET_Z),
-                new Rotation3d(0.0, 0.0, turret + Math.PI)
-            ),
+                Constants.RobotConstants.ROBOT_TO_TURRET.getTranslation(),
+                new Rotation3d(0.0, 0.0, turret + Math.PI)),
             new Pose3d(
-                new Translation3d(TURRET_X, TURRET_Y, TURRET_Z),
-                new Rotation3d(0.0, ShooterConstants.Hood.MAX_ANGLE.getRadians() - hood, turret + Math.PI)
-            )
-//            new Pose3d(
-//                new Translation3d(TURRET_X, TURRET_Y, TURRET_Z),
-//                new Rotation3d()
-//            )
+                Constants.RobotConstants.ROBOT_TO_TURRET.getTranslation().plus(HOOD_PIVOT),
+                new Rotation3d(0.0, -(ShooterConstants.Hood.MAX_ANGLE.getRadians() - hood), turret + Math.PI))
         });
     }
 }
