@@ -123,7 +123,7 @@ public class Swerve extends SubsystemBase {
     private final ProfiledPIDController mAlignController;
     private final Debouncer mAlignDebouncer;
     private final Debouncer collisionDebouncer;
-    private final Debouncer bumpDebouncer;
+    private final Debouncer bumpRisingDebouncer, bumpFallingDebouncer;
 
     private final SwerveDriveKinematics kinematics;
     private final SwerveModulePosition[] lastModulePositions;
@@ -413,7 +413,8 @@ public class Swerve extends SubsystemBase {
         mAlignController.setTolerance(Units.degreesToRadians(3));
         mAlignDebouncer = new Debouncer(0.5, DebounceType.kRising);
         collisionDebouncer = new Debouncer(0.2, DebounceType.kRising);
-        bumpDebouncer = new Debouncer(0.25, DebounceType.kBoth);
+        bumpRisingDebouncer = new Debouncer(0.25, DebounceType.kRising); // slow to confirm
+        bumpFallingDebouncer = new Debouncer(0.05, DebounceType.kFalling); // fast to detect landing.
 
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
         CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
@@ -455,9 +456,8 @@ public class Swerve extends SubsystemBase {
             Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[]{});
         }
 
-        // Update odometry - now reports to RobotState
         processOdometryObservations();
-
+        robotState.updateChassisSpeeds(getChassisSpeeds());
         FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
@@ -793,11 +793,9 @@ public class Swerve extends SubsystemBase {
 
     @AutoLogOutput(key = "Swerve/IsOnBump")
     public boolean isOnBump() {
-        double roll = gyroInputs.rollPosition.getDegrees();
-        double pitch = gyroInputs.pitchPosition.getDegrees();
-        double tilt = Math.hypot(roll, pitch);
-
-        return bumpDebouncer.calculate(tilt > BUMP_ANGLE_THRESHOLD.get());
+        double tilt = Math.hypot(gyroInputs.rollPosition.getDegrees(), gyroInputs.pitchPosition.getDegrees());
+        boolean rawTilt = tilt > BUMP_ANGLE_THRESHOLD.get();
+        return bumpRisingDebouncer.calculate(rawTilt) || bumpFallingDebouncer.calculate(rawTilt);
     }
 
     // Command Factories
@@ -807,16 +805,16 @@ public class Swerve extends SubsystemBase {
 
     public Command zeroHeading() {
         return Commands.runOnce(
-                () -> {
-                    Pose2d zeroed = new Pose2d(RobotState.getInstance().getEstimatedPose().getTranslation(), new Rotation2d());
+            () -> {
+                Pose2d zeroed = new Pose2d(RobotState.getInstance().getEstimatedPose().getTranslation(), new Rotation2d());
 
-                    if (RobotBase.isSimulation()) {
-                        zeroed = new Pose2d(DRIVE_SIMULATION.getSimulatedDriveTrainPose().getTranslation(), new Rotation2d());
-                    }
+                if (RobotBase.isSimulation()) {
+                    zeroed = new Pose2d(DRIVE_SIMULATION.getSimulatedDriveTrainPose().getTranslation(), new Rotation2d());
+                }
 
-                    setPose(zeroed);
-                }, this)
-            .ignoringDisable(true);
+                setPose(zeroed);
+            }, this)
+        .ignoringDisable(true);
     }
 
     public Command driveSysIdQuasistatic(SysIdRoutine.Direction direction) {

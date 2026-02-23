@@ -12,7 +12,7 @@ public class IntakeConstants {
     public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
     public static final double MASS_KG = 0.0;
 
-    public static final double INTAKE_SPEED = 0.5;
+    public static final double INTAKE_SPEED = 1.0;
     public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(35.0);
 
     public enum State {
@@ -40,13 +40,13 @@ public class IntakeConstants {
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);
 
     public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", Constants.omega(0, 2));
-    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", Constants.omega(0, 5));
+    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelMetersSecSq", Constants.omega(0, 5));
     public static final double TOLERANCE = 0.02;
 
     public static final double MAX_EXTENSION = Units.inchesToMeters(17.706);
     public static final double MIN_EXTENSION = 0.0;
 
-    public static final int LEFT_ID = 0;
-    public static final int RIGHT_ID = 0;
-    public static final int INTAKE_ID = 0;
+    public static final int LEFT_ID = 60;
+    public static final int RIGHT_ID = 61;
+    public static final int INTAKE_ID = 62;
 }

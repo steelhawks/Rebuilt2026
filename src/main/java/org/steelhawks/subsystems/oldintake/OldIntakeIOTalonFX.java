@@ -14,13 +14,13 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.RobotConfig;
 import org.steelhawks.RobotConfig.CANBus;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
 
 public class OldIntakeIOTalonFX implements OldIntakeIO {
-
     private final StatusSignal<Angle> leftPosition;
     private final StatusSignal<AngularVelocity> leftVelocity;
     private final StatusSignal<Voltage> leftVoltage;
@@ -42,60 +42,54 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
     private final StatusSignal<Current> intakeTorqueCurrent;
     private final StatusSignal<Temperature> intakeTemp;
 
-    private final StatusSignal<Angle> encoderPosition;
-    private final StatusSignal<AngularVelocity> encoderVelocity;
-    private final StatusSignal<Voltage> encoderVoltage;
-
-    private final PositionTorqueCurrentFOC positionTorqueCurrentFOC;
+    private final PositionTorqueCurrentFOC positionTorqueCurrentFoc;
     private final TorqueCurrentFOC pivotTorqueCurrentFOC;
-    private final DutyCycleOut pivotDutyCycleOut;
     private final VoltageOut pivotVoltageOut;
+    private final DutyCycleOut pivotDutyCycleOut;
 
     private final DutyCycleOut intakeDutyCycleOut;
 
-        private final TalonFXConfiguration leftConfig;
-    private final TalonFXConfiguration rightConfig;
-    private final TalonFXConfiguration intakeConfig;
-    private final CANcoderConfiguration cancoderConfig;
+    private StatusSignal<Angle> encoderAngle;
+    private StatusSignal<AngularVelocity> encoderVelocity;
+    private StatusSignal<Voltage> encoderVolts;
+
+    private TalonFXConfiguration leftConfig;
+    private TalonFXConfiguration rightConfig;
+    private TalonFXConfiguration intakeConfig;
+    private CANcoderConfiguration encoderConfig;
 
     private final TalonFX leftMotor;
     private final TalonFX rightMotor;
     private final TalonFX intakeMotor;
-    private final CANcoder pivotEncoder;
+    private final CANcoder encoder;
 
-    public OldIntakeIOTalonFX(CANBus canBus) {
-        leftMotor = new TalonFX(OldIntakeConstants.LEFT_MOTOR_ID, canBus.bus);
-        rightMotor = new TalonFX(OldIntakeConstants.RIGHT_MOTOR_ID, canBus.bus);
-        intakeMotor = new TalonFX(OldIntakeConstants.INTAKE_MOTOR_ID, canBus.bus);
-        pivotEncoder = new CANcoder(OldIntakeConstants.ENCODER_ID, canBus.bus);
+    public OldIntakeIOTalonFX(CANBus bus) {
+        leftMotor = new TalonFX(OldIntakeConstants.LEFT_MOTOR_ID, bus.bus);
+        rightMotor = new TalonFX(OldIntakeConstants.RIGHT_MOTOR_ID, bus.bus);
+        intakeMotor = new TalonFX(OldIntakeConstants.INTAKE_MOTOR_ID, bus.bus);
+        encoder = new CANcoder(OldIntakeConstants.ENCODER_ID, bus.bus);
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         leftConfig = new TalonFXConfiguration();
         rightConfig = new TalonFXConfiguration();
         intakeConfig = new TalonFXConfiguration();
-        cancoderConfig = new CANcoderConfiguration();
 
         leftConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         leftConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        leftConfig.Slot0.kP = OldIntakeConstants.kP.getAsDouble();
-        leftConfig.Slot0.kI = OldIntakeConstants.kI.getAsDouble();
-        leftConfig.Slot0.kD = OldIntakeConstants.kD.getAsDouble();
+        leftConfig.Slot0.kP = OldIntakeConstants.kP.get();
+        leftConfig.Slot0.kI = OldIntakeConstants.kI.get();
+        leftConfig.Slot0.kD = OldIntakeConstants.kD.get();
         leftConfig.Feedback.SensorToMechanismRatio = OldIntakeConstants.REDUCTION;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         intakeConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        tryUntilOk(5, () -> intakeMotor.getConfigurator().apply(intakeConfig));
+        tryUntilOk(5, () -> leftMotor.getConfigurator().apply(intakeConfig));
 
-        cancoderConfig.MagnetSensor.MagnetOffset = OldIntakeConstants.MAG_OFFSET.getRotations();
-        cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // TODO FIND
-        tryUntilOk(5, () -> pivotEncoder.getConfigurator().apply(cancoderConfig));
-
-        tryUntilOk(5, leftMotor::optimizeBusUtilization);
-        tryUntilOk(5, rightMotor::optimizeBusUtilization);
-        tryUntilOk(5, intakeMotor::optimizeBusUtilization);
-        tryUntilOk(5, pivotEncoder::optimizeBusUtilization);
+        encoderConfig.MagnetSensor.MagnetOffset = OldIntakeConstants.MAG_OFFSET.getRotations();
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        tryUntilOk(5, () -> encoder.getConfigurator().apply(encoderConfig));
 
         leftPosition = leftMotor.getPosition();
         leftVelocity = leftMotor.getVelocity();
@@ -104,89 +98,119 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         leftTorqueCurrent = leftMotor.getTorqueCurrent();
         leftTemp = leftMotor.getDeviceTemp();
 
-        rightPosition = rightMotor.getPosition();
-        rightVelocity = rightMotor.getVelocity();
-        rightVoltage = rightMotor.getMotorVoltage();
-        rightCurrent = rightMotor.getStatorCurrent();
-        rightTorqueCurrent = rightMotor.getTorqueCurrent();
-        rightTemp = rightMotor.getDeviceTemp();
+        rightPosition = leftMotor.getPosition();
+        rightVelocity = leftMotor.getVelocity();
+        rightVoltage = leftMotor.getMotorVoltage();
+        rightCurrent = leftMotor.getStatorCurrent();
+        rightTorqueCurrent = leftMotor.getTorqueCurrent();
+        rightTemp = leftMotor.getDeviceTemp();
 
-        intakePosition = intakeMotor.getPosition();
-        intakeVelocity = intakeMotor.getVelocity();
-        intakeVoltage = intakeMotor.getMotorVoltage();
-        intakeCurrent = intakeMotor.getStatorCurrent();
-        intakeTorqueCurrent = intakeMotor.getTorqueCurrent();
-        intakeTemp = intakeMotor.getDeviceTemp();
+        intakePosition = leftMotor.getPosition();
+        intakeVelocity = leftMotor.getVelocity();
+        intakeVoltage = leftMotor.getMotorVoltage();
+        intakeCurrent = leftMotor.getStatorCurrent();
+        intakeTorqueCurrent = leftMotor.getTorqueCurrent();
+        intakeTemp = leftMotor.getDeviceTemp();
 
-        encoderPosition = pivotEncoder.getAbsolutePosition();
-        encoderVelocity = pivotEncoder.getVelocity();
-        encoderVoltage = pivotEncoder.getSupplyVoltage();
+        encoderVelocity = encoder.getVelocity();
+        encoderAngle = encoder.getAbsolutePosition();
+        encoderVolts = encoder.getSupplyVoltage();
 
-        positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
-        pivotTorqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-        pivotDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
-        pivotVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
-        intakeDutyCycleOut = new DutyCycleOut(0.0);
+        tryUntilOk(5, leftMotor::optimizeBusUtilization);
+        tryUntilOk(5, rightMotor::optimizeBusUtilization);
+        tryUntilOk(5, intakeMotor::optimizeBusUtilization);
+        tryUntilOk(5, encoder::optimizeBusUtilization);
 
+        positionTorqueCurrentFoc = new PositionTorqueCurrentFOC(0).withSlot(0).withUpdateFreqHz(0);
+        pivotTorqueCurrentFOC = new TorqueCurrentFOC(0).withUpdateFreqHz(0);
+        pivotVoltageOut = new VoltageOut(0).withUpdateFreqHz(0);
+        pivotDutyCycleOut = new DutyCycleOut(0).withUpdateFreqHz(0);
+        intakeDutyCycleOut = new DutyCycleOut(0).withUpdateFreqHz(0);
+
+        // critical status signsls to 100hZ
         BaseStatusSignal.setUpdateFrequencyForAll(
             100,
             leftPosition,
             leftVelocity,
+            leftVoltage,
+            leftCurrent,
+            leftTorqueCurrent,
+            leftTemp,
             rightPosition,
             rightVelocity,
+            rightVoltage,
+            rightCurrent,
+            rightTorqueCurrent,
+            rightTemp,
             intakePosition,
             intakeVelocity,
-            encoderPosition,
-            encoderVelocity);
+            intakeVoltage,
+            intakeCurrent,
+            intakeTorqueCurrent,
+            intakeTemp,
+            encoderAngle,
+            encoderVelocity,
+            encoderVolts
+        );
+
         PhoenixUtil.registerSignals(
-            canBus.bus.isNetworkFD(),
-            leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
-            rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp,
-            intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp,
-            encoderPosition, encoderVelocity, encoderVoltage
+            bus.bus.isNetworkFD(),
+            leftPosition,
+            leftVelocity,
+            leftVoltage,
+            leftCurrent,
+            leftTorqueCurrent,
+            leftTemp,
+            rightPosition,
+            rightVelocity,
+            rightVoltage,
+            rightCurrent,
+            rightTorqueCurrent,
+            rightTemp,
+            intakePosition,
+            intakeVelocity,
+            intakeVoltage,
+            intakeCurrent,
+            intakeTorqueCurrent,
+            intakeTemp,
+            encoderAngle,
+            encoderVelocity,
+            encoderVolts
         );
     }
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        inputs.leftConnected =
-            BaseStatusSignal.isAllGood(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp);
+        inputs.leftConnected = BaseStatusSignal.isAllGood(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp);
         inputs.leftPositionRad = Rotation2d.fromRotations(leftPosition.getValueAsDouble());
-        inputs.leftVelocityRadPerSec = Units.rotationsToRadians(leftVelocity.getValueAsDouble());
-        inputs.leftAppliedVolts = leftVoltage.getValueAsDouble();
+        inputs.leftVelocityRadPerSec = leftVelocity.getValueAsDouble();
+        inputs.leftAppliedVolts = leftVelocity.getValueAsDouble();
         inputs.leftCurrentAmps = leftCurrent.getValueAsDouble();
         inputs.leftTorqueCurrentAmps = leftTorqueCurrent.getValueAsDouble();
         inputs.leftTempCelsius = leftTemp.getValueAsDouble();
 
-        inputs.rightConnected =
-            BaseStatusSignal.isAllGood(rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp);
+        inputs.rightConnected = BaseStatusSignal.isAllGood(rightPosition, rightVelocity, rightPosition, rightCurrent, rightTorqueCurrent, rightCurrent);
         inputs.rightPositionRad = Rotation2d.fromRotations(rightPosition.getValueAsDouble());
-        inputs.rightVelocityRadPerSec = Units.rotationsToRadians(rightVelocity.getValueAsDouble());
+        inputs.rightVelocityRadPerSec = rightVelocity.getValueAsDouble();
         inputs.rightAppliedVolts = rightVoltage.getValueAsDouble();
         inputs.rightCurrentAmps = rightCurrent.getValueAsDouble();
         inputs.rightTorqueCurrentAmps = rightTorqueCurrent.getValueAsDouble();
-        inputs.rightTempCelsius = rightTemp.getValueAsDouble();
 
-        inputs.intakeConnected =
-            BaseStatusSignal.isAllGood(intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
+        inputs.intakeConnected = BaseStatusSignal.isAllGood(intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         inputs.intakePositionRad = Rotation2d.fromRotations(intakePosition.getValueAsDouble());
-        inputs.intakeVelocityRadPerSec = Units.rotationsToRadians(intakeVelocity.getValueAsDouble());
+        inputs.intakeVelocityRadPerSec = intakeVelocity.getValueAsDouble();
         inputs.intakeAppliedVolts = intakeVoltage.getValueAsDouble();
         inputs.intakeCurrentAmps = intakeCurrent.getValueAsDouble();
         inputs.intakeTorqueCurrentAmps = intakeTorqueCurrent.getValueAsDouble();
         inputs.intakeTempCelsius = intakeTemp.getValueAsDouble();
 
-        inputs.encConnected = BaseStatusSignal.isAllGood(encoderPosition, encoderVelocity, encoderVoltage);
-        inputs.encAbsPositionRad = Rotation2d.fromRotations(encoderPosition.getValueAsDouble());
-        inputs.encVelocityRadPerSec = Units.rotationsToRadians(encoderVelocity.getValueAsDouble());
-        inputs.encAppliedVolts = encoderVoltage.getValueAsDouble();
+        inputs.encConnected = BaseStatusSignal.isAllGood(encoderVolts, encoderVelocity, encoderAngle);
     }
 
     @Override
     public void setBrakeMode(boolean enabled) {
         new Thread(() -> {
-            leftConfig.MotorOutput.NeutralMode =
-                enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+            leftConfig.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
             tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
         }).start();
     }
@@ -194,23 +218,24 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
     @Override
     public void runPivotPosition(double position, double feedforward) {
         leftMotor.setControl(
-            positionTorqueCurrentFOC
+            positionTorqueCurrentFoc
                 .withPosition(Units.radiansToRotations(position))
-                .withFeedForward(feedforward));
+                .withFeedForward(feedforward)
+        );
     }
 
     @Override
     public void runPivotOpenLoop(double output, boolean isTorqueCurrent) {
         leftMotor.setControl(
-            isTorqueCurrent
-                ? pivotTorqueCurrentFOC.withOutput(output)
-                : pivotVoltageOut.withOutput(output));
+            isTorqueCurrent ?
+                pivotTorqueCurrentFOC.withOutput(output)
+                : pivotVoltageOut.withOutput(output)
+        );
     }
 
     @Override
     public void runPivotPercentOut(double output) {
-        leftMotor.setControl(
-            pivotDutyCycleOut.withOutput(output));
+        leftMotor.setControl(pivotDutyCycleOut.withOutput(output));
     }
 
     @Override
@@ -223,17 +248,16 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
 
     @Override
     public void runIntake(double output) {
-        intakeMotor.setControl(
-            intakeDutyCycleOut.withOutput(output));
-    }
-
-    @Override
-    public void stopPivot() {
-        leftMotor.stopMotor();
+        intakeMotor.setControl(intakeDutyCycleOut.withOutput(output));
     }
 
     @Override
     public void stopIntake() {
         intakeMotor.stopMotor();
+    }
+
+    @Override
+    public void stopPivot() {
+        leftMotor.stopMotor();
     }
 }

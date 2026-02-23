@@ -107,9 +107,9 @@ public class OldIntake extends SubsystemBase {
 			}
 		}
 		if (shouldRun) {
-			if (RobotContainer.s_Swerve.collisionDetected()) {
-				setDesiredState(OldIntakeConstants.State.RETRACTED);
-			}
+//			if (RobotContainer.s_Swerve.collisionDetected()) {
+//				setDesiredState(OldIntakeConstants.State.RETRACTED);
+//			}
 			double previousVelocity = setpoint.velocity;
 			setpoint =
 				profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
@@ -136,7 +136,7 @@ public class OldIntake extends SubsystemBase {
 				io.runPivotPosition(
 					setpoint.position,
 				(OldIntakeConstants.kG.get() * Math.cos(getPosition().getRadians())) +
-                    -(OldIntakeConstants.kMassRadius.getAsDouble() * drivetrainAccel * Math.sin(getPosition().getRadians())) / kT +
+//                    -(OldIntakeConstants.kMassRadius.getAsDouble() * drivetrainAccel * Math.sin(getPosition().getRadians())) / kT +
 					OldIntakeConstants.kS.get() * Math.signum(setpoint.velocity) +
 					OldIntakeConstants.kA.get() * acceleration);
 			}

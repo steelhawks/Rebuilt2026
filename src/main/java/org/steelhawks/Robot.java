@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
@@ -34,7 +33,6 @@ import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.PhoenixUtil;
-import org.steelhawks.util.VirtualSubsystem;
 
 import java.lang.reflect.Field;
 
@@ -48,9 +46,6 @@ public class Robot extends LoggedRobot {
     private final RobotContainer robotContainer;
     private static boolean isFirstRun = true;
     private Command autonomousCommand;
-
-    private final CANBus canivoreBus = new CANBus("canivore");
-    private final CANBus rioBus = new CANBus();
 
     public enum RobotState {
         DISABLED,
@@ -214,23 +209,21 @@ public class Robot extends LoggedRobot {
 
         PhoenixUtil.refreshAll();
         LoopTimeUtil.record("PhoenixUtil");
-        VirtualSubsystem.periodicAll();
+//        VirtualSubsystem.periodicAll();
         LoopTimeUtil.record("VirtualPeriodic");
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
 
-        if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get())
+        if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get()) {
             visualizeFieldConstants();
-
-        Logger.recordOutput("CANbus/CANivoreUsage", canivoreBus.getStatus().BusUtilization);
-        Logger.recordOutput("CANbus/RioUsage", rioBus.getStatus().BusUtilization);
+        }
         LoopTimeUtil.record("RobotPeriodic");
 
-        if ((Constants.getMode() == Mode.SIM)
-            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
-        ) {
-            RobotContainer.s_Swerve.updatePhysicsSimulation();
-        }
+//        if ((Constants.getMode() == Mode.SIM)
+//            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
+//        ) {
+//            RobotContainer.s_Swerve.updatePhysicsSimulation();
+//        }
     }
 
     private void visualizeFieldConstants() {
@@ -292,7 +285,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationInit() {
         if (Constants.getMode() == Mode.SIM) {
-            RobotContainer.s_Swerve.resetSimulation(new Pose2d(3, 3, new Rotation2d()));
+            RobotContainer.s_Swerve.resetSimulation(new Pose2d(0, 0, new Rotation2d()));
         }
     }
 }

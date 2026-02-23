@@ -10,38 +10,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.FieldConstants;
+import org.steelhawks.RobotState;
+import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
-import java.util.Set;
-
 import static edu.wpi.first.units.Units.Volts;
+import static org.steelhawks.subsystems.superstructure.ShooterConstants.Flywheel.*;
 
 public class Flywheel extends SubsystemBase {
 
-    public static final int motorId1 = 2;
-    public static final int motorId2 = 3;
-    public static final LoggedTunableNumber kP =
-        new LoggedTunableNumber("Flywheel/kP", 0.2);
-    public static final LoggedTunableNumber kI =
-        new LoggedTunableNumber("Flywheel/kI", 0.0);
-    public static final LoggedTunableNumber kD =
-        new LoggedTunableNumber("Flywheel/kD", 0.0);
-    public static final LoggedTunableNumber kS =
-        new LoggedTunableNumber("Flywheel/kS", 0.042995);
-    public static final LoggedTunableNumber kV =
-        new LoggedTunableNumber("Flywheel/kV", 0.0090372 * 0.9); // 10% reduction from sysid value
-    public static final LoggedTunableNumber velocityTolerance =
-        new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 5.0);
-    // the amount after which the sampling routine will time out
-    public static final LoggedTunableNumber samplingTimeoutDuration =
-        new LoggedTunableNumber("Flywheel/SamplingTimeoutDurationSeconds", 2.0);
-    // if this number of samples is reached, an average voltage will be calculated even if the sampling process times out
-    public static final LoggedTunableNumber timeoutAvgMinSamples =
-        new LoggedTunableNumber("Flywheel/SamplingTimeoutMinSamplesForAvgCalculation", 10);
-
-    private static final int sampleCounts = 50;
     private final double[] voltageSamples = new double[sampleCounts];
     private double sampledVoltage = 0.0;
     private int currentSampleIndex = 0;
@@ -111,8 +92,33 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-//            double mps = ShooterStructure.Static.calculateShot(FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
-//            targetVelocityRadPerSec = ShooterStructure.linearToAngularVelocity(mps, Units.inchesToMeters(2.0));
+            Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
+            switch (RobotState.getInstance().getAimState()) {
+                case NOTHING -> {
+                    double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                        FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                    if (rps != targetVelocityRadPerSec) {
+                        setTargetVelocity(rps * IDLE_MULTIPLIER);
+                    }
+                }
+                case SHOOTING_MOVING -> {
+                    double mps = ShooterStructure.Moving.calculateMovingShot(
+                        FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
+                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                    if (rps != targetVelocityRadPerSec) {
+                        setTargetVelocity(rps);
+                    }
+                }
+                case SHOOTING_STATIONARY -> {
+                    double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                        FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                    if (rps != targetVelocityRadPerSec) {
+                        setTargetVelocity(rps);
+                    }
+                }
+            }
             double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
                 ? sampledVoltage
                 : kS.get() + kV.get() * targetVelocityRadPerSec;
@@ -167,11 +173,12 @@ public class Flywheel extends SubsystemBase {
     }
 
     private double calculateAverageSample() {
+        if (currentSampleIndex == 0) return 0.0;
         double sum = 0.0;
-        for (double sample : voltageSamples) {
-            sum += sample;
+        for (int i = 0; i < currentSampleIndex; i++) {
+            sum += voltageSamples[i];
         }
-        return sum / sampleCounts;
+        return sum / currentSampleIndex;
     }
 
     @AutoLogOutput(key = "Flywheel/ReadyToShoot")
@@ -183,12 +190,20 @@ public class Flywheel extends SubsystemBase {
     /* COMMAND FACTORIES */
     ///////////////////////
 
-    public Command setTargetVelocity(double velocityRadPerSec) {
-        return Commands.defer(() -> Commands.runOnce(() -> {
-            sampledVoltage = 0.0;
-            targetVelocityRadPerSec = velocityRadPerSec;
-            state = FlywheelState.RAMP_UP;
-        }), Set.of(this));
+    public void setTargetVelocity(double velocityRadPerSec) {
+        sampledVoltage = 0.0;
+        targetVelocityRadPerSec = velocityRadPerSec;
+        state = FlywheelState.RAMP_UP;
+    }
+
+    public Command shooting() {
+        return Commands.run(() -> RobotState.getInstance().setAimState(ShootingState.SHOOTING))
+            .finallyDo(() -> RobotState.getInstance().setAimState(ShootingState.NOTHING));
+    }
+
+    public Command setTargetVelocityCmd(double velocityRadPerSec) {
+        return Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec), this)
+        .finallyDo(io::stop);
     }
 
     public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {

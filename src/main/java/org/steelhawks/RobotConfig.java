@@ -4,26 +4,25 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.indexer.IndexerIO;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
-import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
 import org.steelhawks.subsystems.oldintake.*;
 import org.steelhawks.subsystems.oldintake.OldIntakeIOTalonFX;
 import org.steelhawks.subsystems.oldintake.OldIntakeIO;
-import org.steelhawks.subsystems.spindexer.Spindexer;
-import org.steelhawks.subsystems.spindexer.SpindexerIO;
-import org.steelhawks.subsystems.spindexer.SpindexerIOSim;
-import org.steelhawks.subsystems.spindexer.SpindexerIOTalonFX;
+import org.steelhawks.subsystems.indexer.Indexer;
+import org.steelhawks.subsystems.indexer.IndexerIOSim;
+import org.steelhawks.subsystems.indexer.IndexerIOTalonFX;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIO;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOSim;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
-import org.steelhawks.subsystems.superstructure.pivot.Pivot;
-import org.steelhawks.subsystems.superstructure.pivot.PivotIO;
-import org.steelhawks.subsystems.superstructure.pivot.PivotIOSim;
+import org.steelhawks.subsystems.superstructure.hood.Hood;
+import org.steelhawks.subsystems.superstructure.hood.HoodIO;
+import org.steelhawks.subsystems.superstructure.hood.HoodIOSim;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.superstructure.turret.TurretIO;
 import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
@@ -46,10 +45,10 @@ public class RobotConfig {
     public final boolean hasAutos;
     public final boolean hasFlywheel;
     public final boolean hasTurret;
-    public final boolean hasPivot;
-    public final boolean hasIntake;
-    public final boolean hasSpindexer;
+    public final boolean hasHood;
     public final boolean hasOldIntake;
+    public final boolean hasIntake;
+    public final boolean hasIndexer;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -65,10 +64,10 @@ public class RobotConfig {
         this.hasAutos = builder.hasAutos;
         this.hasFlywheel = builder.hasFlywheel;
         this.hasTurret = builder.hasTurret;
-        this.hasPivot = builder.hasPivot;
-        this.hasIntake = builder.hasIntake;
+        this.hasHood = builder.hasHood;
         this.hasOldIntake = builder.hasOldIntake;
-        this.hasSpindexer = builder.hasSpindexer;
+        this.hasIntake = builder.hasIntake;
+        this.hasIndexer = builder.hasIndexer;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -120,11 +119,11 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createTurret(poseSupplier));
     }
 
-    public Optional<Pivot> createPivot() {
+    public Optional<Hood> createHood() {
         if (!hasTurret) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createPivot());
+        return Optional.ofNullable(factory.createHood());
     }
 
     public Optional<OldIntake> createOldIntake() {
@@ -134,19 +133,17 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createOldIntake());
     }
 
+    public Optional<Indexer> createIndexer() {
+        if (!hasIndexer) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createIndexer());
+    }
     public Optional<Intake> createIntake() {
         if (!hasIntake) {
             return Optional.empty();
         }
-
         return Optional.ofNullable(factory.createIntake());
-    }
-
-    public Optional<Spindexer> createSpindexer() {
-        if (!hasSpindexer) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(factory.createSpindexer());
     }
 
     public static RobotConfig getConfig() {
@@ -161,23 +158,25 @@ public class RobotConfig {
                 .withObjectVision(true)
                 .withFlywheel(true)
                 .withTurret(true)
-                .withPivot(true)
+                .withHood(true)
+                .withOldIntake(false)
                 .withIntake(true)
-                .withSpindexer(true)
+                .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
             case ALPHABOT -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
                 .withLEDStrip(false)
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true)
                 .withTurret(true)
-                .withPivot(false)
+                .withHood(false)
+                .withOldIntake(false)
                 .withIntake(true)
-                .withSpindexer(true)
+                .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
@@ -189,9 +188,10 @@ public class RobotConfig {
                 .withObjectVision(false)
                 .withFlywheel(false)
                 .withTurret(false)
-                .withPivot(false)
+                .withHood(false)
+                .withOldIntake(false)
                 .withIntake(false)
-                .withSpindexer(false)
+                .withIndexer(false)
                 .withAutos(false)
                 .withFactory(new ChassisBotFactory())
                 .build();
@@ -203,9 +203,10 @@ public class RobotConfig {
                 .withObjectVision(false)
                 .withFlywheel(false)
                 .withTurret(false)
-                .withPivot(false)
+                .withHood(false)
+                .withOldIntake(false)
                 .withIntake(false)
-                .withSpindexer(false)
+                .withIndexer(false)
                 .withAutos(false)
                 .withFactory(new LastYearFactory())
                 .build();
@@ -218,9 +219,10 @@ public class RobotConfig {
                 .withObjectVision(false)
                 .withFlywheel(true)
                 .withTurret(true)
-                .withPivot(false)
+                .withHood(false)
+                .withOldIntake(false)
                 .withIntake(false)
-                .withSpindexer(false)
+                .withIndexer(false)
                 .withAutos(false)
                 .withFactory(new TestBoardFactory())
                 .build();
@@ -231,9 +233,10 @@ public class RobotConfig {
                 .withObjectVision(true)
                 .withFlywheel(true)
                 .withTurret(true)
-                .withPivot(true)
+                .withHood(true)
+                .withOldIntake(false)
                 .withIntake(true)
-                .withSpindexer(true)
+                .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
                 .build();
@@ -248,9 +251,10 @@ public class RobotConfig {
                 .withObjectVision(false)
                 .withFlywheel(true)
                 .withTurret(true)
-                .withPivot(true)
+                .withHood(true)
+                .withOldIntake(false)
                 .withIntake(true)
-                .withSpindexer(true)
+                .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -261,9 +265,10 @@ public class RobotConfig {
                 .withObjectVision(true)
                 .withFlywheel(true)
                 .withTurret(true)
-                .withPivot(false)
+                .withHood(false)
+                .withOldIntake(false)
                 .withIntake(true)
-                .withSpindexer(true)
+                .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -275,9 +280,10 @@ public class RobotConfig {
                 .withObjectVision(true)
                 .withFlywheel(false)
                 .withTurret(false)
-                .withPivot(false)
+                .withHood(false)
+                .withOldIntake(false)
                 .withIntake(true)
-                .withSpindexer(true)
+                .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -293,11 +299,11 @@ public class RobotConfig {
         private boolean hasObjectVision = false;
         private boolean hasFlywheel = false;
         private boolean hasTurret = false;
-        private boolean hasPivot = false;
-        private boolean hasIntake = false;
-        private boolean hasSpindexer = false;
-        private boolean hasAutos = false;
+        private boolean hasHood = false;
         private boolean hasOldIntake = false;
+        private boolean hasIntake = false;
+        private boolean hasIndexer = false;
+        private boolean hasAutos = false;
         private SubsystemFactory factory = null;
 
         public Builder withSwerve(boolean enabled) {
@@ -335,8 +341,13 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withPivot(boolean enabled) {
-            this.hasPivot = enabled;
+        public Builder withHood(boolean enabled) {
+            this.hasHood = enabled;
+            return this;
+        }
+
+        public Builder withOldIntake(boolean enabled) {
+            this.hasOldIntake = enabled;
             return this;
         }
 
@@ -345,8 +356,8 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withSpindexer(boolean enabled) {
-            this.hasSpindexer = enabled;
+        public Builder withIndexer(boolean enabled) {
+            this.hasIndexer = enabled;
             return this;
         }
 
@@ -387,10 +398,10 @@ public class RobotConfig {
         ObjectVision createObjectVision();
         Flywheel createFlywheel();
         Turret createTurret(Supplier<Pose2d> poseSupplier);
-        Pivot createPivot();
+        Hood createHood();
         OldIntake createOldIntake();
         Intake createIntake();
-        Spindexer createSpindexer();
+        Indexer createIndexer();
     }
 
     // OmegaBot factory
@@ -439,7 +450,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
+        public Hood createHood() {
             return null;
         }
 
@@ -454,7 +465,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Spindexer createSpindexer() { return new Spindexer(new SpindexerIO() {}); }
+        public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
     }
 
     // AlphaBot factory
@@ -502,7 +513,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
+        public Hood createHood() {
             return null;
         }
 
@@ -517,7 +528,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Spindexer createSpindexer() { return new Spindexer(new SpindexerIOTalonFX(rioBus)); }
+        public Indexer createIndexer() { return new Indexer(new IndexerIOTalonFX(rioBus)); }
     }
 
     private static class ChassisBotFactory implements SubsystemFactory {
@@ -564,7 +575,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
+        public Hood createHood() {
             return null;
         }
 
@@ -579,7 +590,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Spindexer createSpindexer() { return null; }
+        public Indexer createIndexer() { return null; }
     }
 
     private static class LastYearFactory implements SubsystemFactory {
@@ -626,7 +637,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
+        public Hood createHood() {
             return null;
         }
 
@@ -641,7 +652,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Spindexer createSpindexer() { return null; }
+        public Indexer createIndexer() { return null; }
     }
 
     private static class TestBoardFactory implements SubsystemFactory {
@@ -690,7 +701,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
+        public Hood createHood() {
             return null;
         }
 
@@ -705,7 +716,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Spindexer createSpindexer() { return null; }
+        public Indexer createIndexer() { return null; }
     }
 
     private static class SimBotFactory implements SubsystemFactory {
@@ -752,8 +763,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
-            return new Pivot(new PivotIOSim());
+        public Hood createHood() {
+            return new Hood(new HoodIOSim());
         }
 
         @Override
@@ -763,11 +774,11 @@ public class RobotConfig {
 
         @Override
         public Intake createIntake() {
-            return new Intake(new IntakeIOSim());
+            return new Intake(new IntakeIO() {});
         }
 
         @Override
-        public Spindexer createSpindexer() { return new Spindexer(new SpindexerIOSim()); }
+        public Indexer createIndexer() { return new Indexer(new IndexerIOSim()); }
     }
 
     private static class ReplayFactory implements SubsystemFactory {
@@ -812,8 +823,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Pivot createPivot() {
-            return new Pivot(new PivotIO() {});
+        public Hood createHood() {
+            return new Hood(new HoodIO() {});
         }
 
         @Override
@@ -827,6 +838,6 @@ public class RobotConfig {
         }
 
         @Override
-        public Spindexer createSpindexer() { return new Spindexer(new SpindexerIO() {}); }
+        public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
     }
 }

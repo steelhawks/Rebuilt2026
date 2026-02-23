@@ -27,14 +27,14 @@ import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", 2.0);
-    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", 0.0);
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 1000.0); // 1500
-    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", 0.0);
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 70.0); // 35
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.omega(2.0, 0.2));
+    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.omega(0.0, 0.0));
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.omega(1000.0, 200.0)); // 1500
+    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.omega(0.0, 0.0));
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.omega(70.0, 7.0)); // 35
 
-    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 40.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 60.0);
+    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 5.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 
@@ -42,8 +42,8 @@ public class Turret extends SubsystemBase {
         new LoggedTunableNumber("Turret/CurrentHomingThreshold", 40.0);
     private static final double homingVolts = 0.1;
 
-    private static final Rotation2d minRotation = new Rotation2d((-Math.PI / 2.0) - (Math.PI / 60.0));
-    private static final Rotation2d maxRotation = new Rotation2d(Math.PI + (Math.PI / 60.0));
+    private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
+    private static final Rotation2d maxRotation = new Rotation2d(Constants.value(Math.PI, 2 * Math.PI) + (Math.PI / 60.0));
     public static int motorId = 1;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
@@ -123,6 +123,38 @@ public class Turret extends SubsystemBase {
         return Rotation2d.fromRadians(bestAngle);
     }
 
+    private Translation3d predictInterceptPoint(Translation3d actualTarget) {
+        Translation3d robotVelocity = new Translation3d(
+            RobotContainer.s_Swerve.getChassisSpeeds().vxMetersPerSecond,
+            RobotContainer.s_Swerve.getChassisSpeeds().vyMetersPerSecond,
+            0.0);
+        Translation3d predictedTarget = actualTarget;
+        int maxIterations = 5;
+        double convergenceThreshold = 0.01;
+        for (int i = 0; i < maxIterations; i++) {
+            var turretTranslation = new Pose3d(getPose())
+                .transformBy(RobotConstants.ROBOT_TO_TURRET)
+                .toPose2d()
+                .getTranslation();
+            ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShot(actualTarget, predictedTarget);
+            if (solution == null || Double.isNaN(solution.exitVelocity())) break;
+            double distance = turretTranslation.getDistance(predictedTarget.toTranslation2d());
+            double tof = ShooterStructure.calculateTimeofFlight(
+                solution.exitVelocity(),
+                solution.hoodAngle(),
+                distance);
+            Translation3d newPredictedTarget = actualTarget.minus(robotVelocity.times(tof));
+            double error = predictedTarget.getDistance(newPredictedTarget);
+            Logger.recordOutput("Turret/Moving/IterationError_" + i, error);
+            if (error < convergenceThreshold) break;
+
+            predictedTarget = newPredictedTarget;
+        }
+        Logger.recordOutput("Turret/Moving/PredictedTarget",
+            new double[]{predictedTarget.getX(), predictedTarget.getY(), predictedTarget.getZ()});
+        return predictedTarget;
+    }
+
     private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
         List<Translation3d> trajectoryPoints = new ArrayList<>();
         int numPoints = 50;
@@ -165,7 +197,14 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
-        if (!isHomed) {
+        if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
+            isHomed = true;
+            Logger.recordOutput("Turret/IsHomed", true);
+            io.setPosition(0);
+            isZeroed = true;
+            Logger.recordOutput("Turret/Zeroed", true);
+        }
+        if (!isHomed && Toggles.Turret.isEnabled.get()) {
             io.runPercentOutput(homingVolts);
             isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
             Logger.recordOutput("Turret/IsHomed", isHomed);
@@ -243,40 +282,37 @@ public class Turret extends SubsystemBase {
                 case TO_HUB -> {
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+                    var predictedHub = predictInterceptPoint(hubCenter);
                     var turretTranslation = new Pose3d(robot)
                         .transformBy(RobotConstants.ROBOT_TO_TURRET)
                         .toPose2d()
                         .getTranslation();
-                    var direction = hubCenter.toTranslation2d().minus(turretTranslation);
+                    var direction = predictedHub.toTranslation2d().minus(turretTranslation);
                     double fieldRelativeAngle = direction.getAngle().getRadians();
+                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
                     double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians());
+                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    Constants.toLoggedPoint("Turret/AimingParams/Direction", direction);
-                    Logger.recordOutput("Turret/AimingParams/TurretRelativeAngle", turretRelativeAngle);
-
-                    var trajectory = createTrajectory(hubCenter, hubCenter.toTranslation2d());
+                    var trajectory = createTrajectory(hubCenter, predictedHub.toTranslation2d());
                     Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
                 }
                 case FERRY -> {
                     var robot = getPose();
-                    var ferryGoal = AllianceFlip.apply(
+                    var ferryGoal2d = AllianceFlip.apply(
                         FieldConstants.getClosestPointOnLine(FieldConstants.Ferrying.START_LINE, FieldConstants.Ferrying.END_LINE));
+                    var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
+                    var predictedFerry = predictInterceptPoint(ferryGoal3d);
                     var turretTranslation = new Pose3d(robot)
                         .transformBy(RobotConstants.ROBOT_TO_TURRET)
                         .toPose2d()
                         .getTranslation();
-                    var direction = ferryGoal.minus(turretTranslation);
+                    var direction = predictedFerry.toTranslation2d().minus(turretTranslation);
                     double fieldRelativeAngle = direction.getAngle().getRadians();
+                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
                     double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians());
+                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    Constants.toLoggedPoint("Turret/Ferrying/FerryGoal", ferryGoal);
-                    Constants.toLoggedPoint("Turret/Ferrying/Direction", direction);
-                    Logger.recordOutput("Turret/Ferrying/TurretRelativeAngle", turretRelativeAngle);
-
-                    var ferryTarget3d = new Translation3d(ferryGoal.getX(), ferryGoal.getY(), 0.0);
-                    var trajectory = createTrajectory(ferryTarget3d, ferryGoal);
+                    var trajectory = createTrajectory(ferryGoal3d, predictedFerry.toTranslation2d());
                     Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
                 }
             }

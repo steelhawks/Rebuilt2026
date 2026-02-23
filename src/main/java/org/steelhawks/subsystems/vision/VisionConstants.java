@@ -120,7 +120,73 @@ public class VisionConstants {
         }
     }
 
-    private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {};
+    private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
+        new CameraConfig(
+            "ardu-middle-right",
+            new Transform3d(
+                Units.inchesToMeters(-2.048), // 2.048 down
+                Units.inchesToMeters(-12.728), // 12.728 to the right
+                Units.inchesToMeters(20.679),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(-90.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-middle-left",
+            new Transform3d(
+                Units.inchesToMeters(-2.047), // 2.047 down
+                Units.inchesToMeters(12.728), // 12.728 to the left
+                Units.inchesToMeters(20.679),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(90.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+        "ardu-back-right",
+            new Transform3d(
+                Units.inchesToMeters(-13.341), // 12.333 to the right
+                Units.inchesToMeters(-12.333), // 13.341 down
+                Units.inchesToMeters(20.774),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(-135.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-back-left",
+            new Transform3d(
+                Units.inchesToMeters(-13.303), // 12.333 to the left
+                Units.inchesToMeters(12.333), // 13.303 down
+                Units.inchesToMeters(20.774),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30),
+                Units.degreesToRadians(-225))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        )
+//        new CameraConfig(
+//        "limelight-intake",
+//            new Transform3d(
+//                Units.inchesToMeters(13.818), // 13.818 up
+//                0.0, // in the vertical middle
+//                Units.inchesToMeters(19.735),
+//                new Rotation3d(
+//                    0.0,
+//                    0.0,
+//                    Units.degreesToRadians(15.0))),
+//            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+//            CameraType.LIMELIGHT
+//        )
+    };
 
     private static final CameraConfig[] LAST_YEAR_CAMERA_CONFIG = {
         new CameraConfig(
@@ -201,6 +267,73 @@ public class VisionConstants {
 
     private static final CameraConfig[] OMEGA_OBJ_DETECT_CONFIG = {
         new CameraConfig(
+            "limelight-intake",
+            new Transform3d(
+                Units.inchesToMeters(13.818), // 13.818 up
+                0.0, // in the vertical middle
+                Units.inchesToMeters(19.735),
+                new Rotation3d(
+                    0.0,
+                    0.0,
+                    Units.degreesToRadians(15.0))),
+            new Factors.ObjFactors(0.8, LimelightFactors.LIMELIGHT_4, 1280.0, 800.0), // TODO: tune confidence factor
+            CameraType.LIMELIGHT
+        )
+    };
+
+    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {
+        new CameraConfig(
+        "limelight-chassis",
+        new Transform3d(),
+        new Factors.StdDevFactors(3),
+        CameraType.LIMELIGHT)
+    };
+
+    private static final CameraConfig[] CHASSIS_OBJ_DETECT_CONFIG = {};
+
+    private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
+        new CameraConfig(
+            "FrontLeft", // rename on photon client
+            new Transform3d(
+                // 10.1 inches left from the center of robot
+                // 10.4 inches upwards from the center of robot
+                // 8.5 inches tall
+                // measured by hand may be inaccurate
+                Units.inchesToMeters(-10.1), // prev -9.7
+                Units.inchesToMeters(10.4), // prev 11.125
+                Units.inchesToMeters(8.5), // prev 9
+                new Rotation3d(
+                    Units.degreesToRadians(0),
+                    Units.degreesToRadians(15),
+                    Units.degreesToRadians(0)
+                )
+            ),
+            // TODO: Tune StdDevs
+            new Factors.StdDevFactors(1),
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "FrontRight", // rename on photon client
+            new Transform3d(
+                Units.inchesToMeters(10.1),
+                Units.inchesToMeters(10.4), // prev 10.65
+                Units.inchesToMeters(8.5), // prev 9
+                new Rotation3d(
+                    Units.degreesToRadians(0),
+                    Units.degreesToRadians(15),
+                    Units.degreesToRadians(0)
+                )
+            ),
+            // TODO: Tune StdDevs
+            new Factors.StdDevFactors(1),
+            CameraType.PHOTON
+        )
+    };
+
+    private static final CameraConfig[] ALPHA_OBJ_DETECT_CONFIG = {};
+
+    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {
+        new CameraConfig(
             "limelight-coral",
 //            Constants.fromOnshapeCoordinates(4.469, 9.261, 21.578, 15.0, -20.0, 0.0),
 //            Constants.fromOnshapeCoordinates(5.531, -15.261, -23.578 - 1.414, 15.0, -20.0, 0.0),
@@ -218,23 +351,6 @@ public class VisionConstants {
             CameraType.LIMELIGHT
         )
     };
-
-    private static final CameraConfig[] CHASSIS_CAMERA_CONFIG = {};
-
-    private static final CameraConfig[] CHASSIS_OBJ_DETECT_CONFIG = {};
-
-    private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
-        new CameraConfig(
-            "limelight-coral",
-            new Transform3d(),
-            new Factors.StdDevFactors(3.0),
-            CameraType.LIMELIGHT
-        )
-    };
-
-    private static final CameraConfig[] ALPHA_OBJ_DETECT_CONFIG = {};
-
-    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {};
 
     public static CameraConfig[] getCameraConfig() {
         return switch (Constants.getRobot()) {

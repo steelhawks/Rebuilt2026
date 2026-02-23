@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 public class FlywheelIOTalonFX implements FlywheelIO {
@@ -31,14 +32,14 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     private final TalonFX leftMotor, rightMotor;
 
     public FlywheelIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(Flywheel.motorId1, bus.bus);
+        leftMotor = new TalonFX(ShooterConstants.Flywheel.LEFT_FLYWHEEL_ID, bus.bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        config.Feedback.SensorToMechanismRatio = 1.0 / 2.0;
-        config.Slot0.kP = Flywheel.kP.getAsDouble();
-        config.Slot0.kI = Flywheel.kI.getAsDouble();
-        config.Slot0.kD = Flywheel.kD.getAsDouble();
+        config.Feedback.SensorToMechanismRatio = ShooterConstants.Flywheel.REDUCTION;
+        config.Slot0.kP = ShooterConstants.Flywheel.kP.getAsDouble();
+        config.Slot0.kI = ShooterConstants.Flywheel.kI.getAsDouble();
+        config.Slot0.kD = ShooterConstants.Flywheel.kD.getAsDouble();
 
         position = leftMotor.getPosition();
         velocity = leftMotor.getVelocity();
@@ -47,7 +48,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         torqueCurrent = leftMotor.getTorqueCurrent();
         temp = leftMotor.getDeviceTemp();
 
-        rightMotor = new TalonFX(Flywheel.motorId2, bus.bus);
+        rightMotor = new TalonFX(ShooterConstants.Flywheel.RIGHT_FLYWHEEL_ID, bus.bus);
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);

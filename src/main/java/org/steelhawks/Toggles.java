@@ -2,7 +2,6 @@ package org.steelhawks;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
-import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,7 @@ import java.util.Map;
 public interface Toggles {
 
     LoggedNetworkBoolean debugMode =
-        new LoggedNetworkBoolean("Toggles/DebugMode", true);
+        new LoggedNetworkBoolean("Toggles/DebugMode", false);
     LoggedNetworkBoolean tuningMode =
         new LoggedNetworkBoolean("Toggles/TuningMode", false);
     LoggedNetworkBoolean motionMagicEnabled =
@@ -68,8 +67,21 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
 
-    interface Spindexer {
+    interface Indexer {
+        LoggedNetworkBoolean isSpindexerEnabled =
+            new LoggedNetworkBoolean("Toggles/Indexer/Spindexer/IsEnabled", true);
+        LoggedNetworkBoolean isFeederEnabled =
+            new LoggedNetworkBoolean("Toggles/Indexer/Feeder/IsEnabled", true);
+    }
+
+    interface Hood {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Spindexer/IsEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Hood/IsEnabled", true);
+        LoggedNetworkBoolean disableBrakeMode =
+            new LoggedNetworkBoolean("Toggles/Hood/DisableBrakeMode", true);
+        LoggedNetworkBoolean currentOverride =
+            new LoggedNetworkBoolean("Toggles/Hood/ToggleCurrentOverride");
+        LoggedNetworkBoolean voltageOverride =
+            new LoggedNetworkBoolean("Toggles/Hood/ToggleVoltageOverride");
     }
 }
