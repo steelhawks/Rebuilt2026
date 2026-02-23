@@ -42,6 +42,7 @@ public class RobotContainer {
         s_Vision = config.createVision().orElse(null);
         s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
+        s_Hood = config.createHood().orElse(null);
         s_Intake = config.createIntake().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
