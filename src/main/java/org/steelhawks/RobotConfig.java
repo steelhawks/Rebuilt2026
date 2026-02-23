@@ -7,6 +7,7 @@ import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.indexer.IndexerIO;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
+import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
 import org.steelhawks.subsystems.oldintake.*;
 import org.steelhawks.subsystems.oldintake.OldIntakeIOTalonFX;
@@ -769,12 +770,12 @@ public class RobotConfig {
 
         @Override
         public OldIntake createOldIntake() {
-            return new OldIntake(new OldIntakeIOSim());
+            return null;
         }
 
         @Override
         public Intake createIntake() {
-            return new Intake(new IntakeIO() {});
+            return new Intake(new IntakeIOSim());
         }
 
         @Override

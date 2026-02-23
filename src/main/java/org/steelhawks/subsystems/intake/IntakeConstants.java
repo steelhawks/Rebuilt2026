@@ -9,7 +9,7 @@ public class IntakeConstants {
 
     public static final double REDUCTION = (4.0 / 1.0);
     public static final double PINION_RADIUS = Units.inchesToMeters(1.033922 / 2.0);
-    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
+    public static final double METERS_PER_RADIAN = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
     public static final double MASS_KG = 0.0;
 
     public static final double INTAKE_SPEED = 1.0;
@@ -19,7 +19,7 @@ public class IntakeConstants {
         // TODO In meters, need to tune
         RETRACTED(0.0),
         HOME(0.0),
-        INTAKE(0.0);
+        INTAKE(0.80);
 
         private final double positionMeters;
 
@@ -32,9 +32,9 @@ public class IntakeConstants {
         }
     }
 
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", Constants.omega(0, 900));
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", Constants.omega(0, 900.0));
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/kD", 0.0);
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/kD", 5.0);
     public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 1);
     public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", 0.0);
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);

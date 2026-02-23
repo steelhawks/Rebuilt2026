@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.steelhawks.Constants;
@@ -18,11 +19,12 @@ public class IntakeIOSim implements IntakeIO {
     private final DCMotorSim rightMotorSim;
     private final DCMotorSim intakeMotorSim;
 
-    private static final double RADIUS = IntakeConstants.METERS_PER_ROTATION / (2 * Math.PI);
+    private static final double RADIUS = IntakeConstants.METERS_PER_RADIAN / (2 * Math.PI);
     private double feedforwardCurrent = 0;
     private double goalPosition = 0;
 
     private final PIDController rackPidController;
+    private final IntakeVisualizer visualizer;
     private boolean enablePid;
 
     public IntakeIOSim() {
@@ -57,7 +59,7 @@ public class IntakeIOSim implements IntakeIO {
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44Foc(1),
                 0.001,
-                1
+                5.0
             ),
             DCMotor.getKrakenX44Foc(1)
         );
@@ -67,6 +69,10 @@ public class IntakeIOSim implements IntakeIO {
             IntakeConstants.kI.get(),
             IntakeConstants.kD.get()
         );
+        visualizer = new IntakeVisualizer(
+            () -> leftMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN,
+            IntakeConstants.MAX_EXTENSION,
+            -135);
     }
 
     @Override
@@ -74,18 +80,19 @@ public class IntakeIOSim implements IntakeIO {
         leftMotorSim.update(Constants.UPDATE_LOOP_DT);
         intakeMotorSim.update(Constants.UPDATE_LOOP_DT);
         rightMotorSim.update(Constants.UPDATE_LOOP_DT);
+        visualizer.update();
 
         inputs.leftConnected = true;
-        inputs.leftPositionMeters = leftMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_ROTATION;
-        inputs.leftVelocityMetersPerSec = leftMotorSim.getAngularVelocityRadPerSec() * RADIUS;
+        inputs.leftPositionMeters = leftMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN;
+        inputs.leftVelocityMetersPerSec = leftMotorSim.getAngularVelocityRadPerSec() * IntakeConstants.METERS_PER_RADIAN;
         inputs.leftAppliedVolts = leftMotorSim.getInputVoltage();
         inputs.leftCurrentAmps = leftMotorSim.getCurrentDrawAmps();
         inputs.leftTorqueCurrentAmps = leftMotorSim.getCurrentDrawAmps();
         inputs.leftTempCelsius = leftMotorSim.getCurrentDrawAmps() * 0.1;
 
         inputs.rightConnected = true;
-        inputs.rightPositionMeters = rightMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_ROTATION;
-        inputs.rightVelocityMetersPerSec = rightMotorSim.getAngularVelocityRadPerSec() * RADIUS;
+        inputs.rightPositionMeters = rightMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN;
+        inputs.rightVelocityMetersPerSec = rightMotorSim.getAngularVelocityRadPerSec() * IntakeConstants.METERS_PER_RADIAN;
         inputs.rightAppliedVolts = rightMotorSim.getInputVoltage();
         inputs.rightCurrentAmps = rightMotorSim.getCurrentDrawAmps();
         inputs.rightTorqueCurrentAmps = rightMotorSim.getCurrentDrawAmps();
@@ -151,7 +158,7 @@ public class IntakeIOSim implements IntakeIO {
 
     @Override
     public void setPosition(double meters) {
-        double angle = Units.rotationsToRadians(meters / IntakeConstants.METERS_PER_ROTATION);
+        double angle = meters / IntakeConstants.METERS_PER_RADIAN;
         leftMotorSim.setAngle(angle);
         rightMotorSim.setAngle(angle);
     }
