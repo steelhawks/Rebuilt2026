@@ -212,7 +212,7 @@ public class Vision extends SubsystemBase {
 
         LoopTimeUtil.record("Vision");
         if (questNav != null) {
-            if (DriverStation.isDisabled() && Robot.isFirstRun() && Constants.loggedValue("RobotPosesEmpty", !allRobotPoses.isEmpty())) {
+            if (DriverStation.isDisabled() && Robot.isFirstRun() && Constants.loggedValue("RobotPosesEmpty", !allRobotPosesAccepted.isEmpty())) {
                 questNav.setPose(allRobotPosesAccepted.get(0).toPose2d());
             }
             questNav.periodic(allRobotPoses);
