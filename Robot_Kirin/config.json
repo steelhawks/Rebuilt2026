@@ -1,0 +1,74 @@
+{
+  "name": "Rebuilt",
+  "rotations": [
+    { "axis": "x", "degrees": 90 },
+    { "axis": "z", "degrees": 90 }
+  ],
+  "position": [0, 0, 0],
+  "cameras": [
+    {
+      "name": "ardu-middle-right",
+      "rotations": [
+        { "axis": "y", "degrees": -30 },
+        { "axis": "z", "degrees": -90 }
+      ],
+      "position": [-0.0520, -0.3233, 0.5252],
+      "resolution": [1280, 720],
+      "fov": 90
+    },
+    {
+      "name": "ardu-middle-left",
+      "rotations": [
+        { "axis": "y", "degrees": -30 },
+        { "axis": "z", "degrees": 90 }
+      ],
+      "position": [-0.0520, 0.3233, 0.5252],
+      "resolution": [1280, 720],
+      "fov": 90
+    },
+    {
+      "name": "ardu-back-right",
+      "rotations": [
+        { "axis": "z", "degrees": -135 },
+        { "axis": "y", "degrees": 30 }
+      ],
+      "position": [-0.3389, -0.3133, 0.5277],
+      "resolution": [1280, 720],
+      "fov": 90
+    },
+    {
+      "name": "ardu-back-left",
+      "rotations": [
+        { "axis": "z", "degrees": 135 },
+        { "axis": "y", "degrees": 30 }
+      ],
+      "position": [-0.3379, 0.3133, 0.5277],
+      "resolution": [1280, 720],
+      "fov": 90
+    }
+  ],
+  "components": [
+    {
+      "zeroedRotations": [
+        { "axis": "x", "degrees": 90 },
+        { "axis": "y", "degrees": 0 },
+        { "axis": "z", "degrees": 90 }
+      ],
+      "zeroedPosition": [0.0, 0.0, 0.0]
+    },
+    {
+        "zeroedRotations": [
+            { "axis": "x", "degrees": 125 },
+            { "axis": "z", "degrees": 90 }
+        ],
+      "zeroedPosition": [-0.065, -0.11, 0.12]
+    },
+    {
+      "zeroedRotations": [
+        { "axis": "x", "degrees": 90 },
+        { "axis": "z", "degrees": 90 }
+      ],
+      "zeroedPosition": [0.235, 0, 0.16]
+    }
+  ]
+}
