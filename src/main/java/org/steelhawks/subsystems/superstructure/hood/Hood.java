@@ -7,12 +7,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -24,7 +21,7 @@ public class Hood extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
-    private Rotation2d setpoint = ShooterConstants.Hood.MAX_ANGLE;
+    private Rotation2d setpoint = Rotation2d.fromDegrees(0.0);
     private boolean brakeModeEnabled = false;
     private boolean atGoal = false;
 
@@ -44,7 +41,6 @@ public class Hood extends SubsystemBase {
             && !Toggles.Hood.currentOverride.get()
             && (getPositionDeg() >= ShooterConstants.Hood.MIN_ANGLE.getDegrees())
             && (getPositionDeg() <= ShooterConstants.Hood.MAX_ANGLE.getDegrees());
-        Logger.recordOutput("Hood/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
             setpoint = Rotation2d.fromDegrees(getPositionDeg());
@@ -76,8 +72,6 @@ public class Hood extends SubsystemBase {
             );
         }
         if (shouldRun) {
-            var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-            setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), ShooterConstants.Hood.TOLERANCE);
             io.runHoodPosition(
                 setpoint,

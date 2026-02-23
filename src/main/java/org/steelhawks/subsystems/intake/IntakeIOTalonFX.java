@@ -1,6 +1,5 @@
 package org.steelhawks.subsystems.intake;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -121,8 +120,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void updateInputs(IntakeIOInputs inputs) {
         inputs.leftConnected =
             BaseStatusSignal.isAllGood(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp);
-        inputs.leftPositionMeters = leftPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
-        inputs.leftVelocityMetersPerSec = leftVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
+        inputs.leftPositionMeters = leftPosition.getValueAsDouble() * IntakeConstants.METERS_PER_RADIAN;
+        inputs.leftVelocityMetersPerSec = leftVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_RADIAN;
         inputs.leftAppliedVolts = leftVoltage.getValueAsDouble();
         inputs.leftCurrentAmps = leftCurrent.getValueAsDouble();
         inputs.leftTorqueCurrentAmps = leftTorqueCurrent.getValueAsDouble();
@@ -130,8 +129,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         inputs.rightConnected =
             BaseStatusSignal.isAllGood(rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp);
-        inputs.rightPositionMeters = rightPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
-        inputs.rightVelocityMetersPerSec = rightVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
+        inputs.rightPositionMeters = rightPosition.getValueAsDouble() * IntakeConstants.METERS_PER_RADIAN;
+        inputs.rightVelocityMetersPerSec = rightVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_RADIAN;
         inputs.rightAppliedVolts = rightVoltage.getValueAsDouble();
         inputs.rightCurrentAmps = rightCurrent.getValueAsDouble();
         inputs.rightTorqueCurrentAmps = rightTorqueCurrent.getValueAsDouble();
@@ -160,7 +159,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void runRackPosition(double positionMeters, double feedforward) {
         leftMotor.setControl(
             positionTorqueCurrentFOC
-                .withPosition(positionMeters / IntakeConstants.METERS_PER_ROTATION)
+                .withPosition(positionMeters / IntakeConstants.METERS_PER_RADIAN)
                 .withFeedForward(feedforward));
     }
 
@@ -188,7 +187,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void setPosition(double meters) {
-        new Thread(() -> tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION)));
+        new Thread(() -> tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_RADIAN)));
     }
 
     @Override

@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -29,6 +30,7 @@ import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
@@ -253,7 +255,14 @@ public class Robot extends LoggedRobot {
     public void autonomousInit() {
         setState(RobotState.AUTON);
         Elastic.selectTab("Autonomous");
-        autonomousCommand = Autos.getAuto();
+//        autonomousCommand = Autos.getAuto();
+        autonomousCommand = Commands.sequence(
+            RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+            Commands.waitSeconds(2.0),
+            RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED),
+            Commands.waitSeconds(2.0)
+        ).repeatedly();
+
 
         if (autonomousCommand != null)
             CommandScheduler.getInstance().schedule(autonomousCommand);
