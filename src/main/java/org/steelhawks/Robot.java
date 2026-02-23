@@ -221,11 +221,11 @@ public class Robot extends LoggedRobot {
         }
         LoopTimeUtil.record("RobotPeriodic");
 
-//        if ((Constants.getMode() == Mode.SIM)
-//            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
-//        ) {
-//            RobotContainer.s_Swerve.updatePhysicsSimulation();
-//        }
+        if ((Constants.getMode() == Mode.SIM)
+            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
+        ) {
+            RobotContainer.s_Swerve.updatePhysicsSimulation();
+        }
     }
 
     private void visualizeFieldConstants() {
@@ -255,13 +255,7 @@ public class Robot extends LoggedRobot {
     public void autonomousInit() {
         setState(RobotState.AUTON);
         Elastic.selectTab("Autonomous");
-//        autonomousCommand = Autos.getAuto();
-        autonomousCommand = Commands.sequence(
-            RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
-            Commands.waitSeconds(2.0),
-            RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED),
-            Commands.waitSeconds(2.0)
-        ).repeatedly();
+        autonomousCommand = Autos.getAuto();
 
 
         if (autonomousCommand != null)
