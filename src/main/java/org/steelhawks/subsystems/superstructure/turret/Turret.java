@@ -359,6 +359,10 @@ public class Turret extends SubsystemBase {
         LoopTimeUtil.record("Turret");
     }
 
+    public Rotation2d getRotation() {
+        return inputs.positionRad;
+    }
+
     public Command setDesiredRotation(Rotation2d rotation) {
         return Commands.either(
             Commands.runOnce(

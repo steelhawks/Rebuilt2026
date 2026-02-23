@@ -144,7 +144,11 @@ public final class Autos {
                 outpostToTrench.cmd()
                     .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
                 Commands.waitSeconds(0.5),
-                trenchToClimb.cmd()
+                trenchToClimb.cmd(),
+                Commands.sequence(
+                RobotContainer.s_Flywheel.testfire(),
+                    Commands.waitSeconds(0.25)
+                ).repeatedly().withTimeout(4.0)
             )
         );
 

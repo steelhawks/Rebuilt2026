@@ -167,6 +167,7 @@ public class IntakeIOSim implements IntakeIO {
     public void runIntake(double output) {
         intakeMotorSim.setInputVoltage(output * 12);
         if (output >= 0) intakeSimulation.startIntake();
+        intakeSimulation.addGamePiecesToIntake(2);
     }
 
     @Override
