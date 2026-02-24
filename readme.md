@@ -95,9 +95,11 @@ SwerveTemplate/
 ### `src/test/java`
 - **Testing**: Contains unit tests or simulation-based tests, allowing verification of subsystem and command behavior in a safe environment.
 
-# Tuning
-<p>When you make a clone of this repo, make sure to change the following.</p>
-<p>1. Set the name of your robot at ROBOT_NAME in Constants.java</p>
-<p>2. Identify and tune the swerve drive using CTRE's Swerve Drive Generator. Information on this can be found <a href="https://v6.docs.ctr-electronics.com/en/2024/docs/tuner/tuner-swerve/creating-your-project.html">here</a>.</p>
-<p>3. Once done, start tuning Pathplanner. This can be done by first creating a straight line to tune the translation PID, then using that same line, but adding a full 360º turn to tune the rotation PID.</p>
-<p>4. Do a full and through recheck of all your code to see if anything is off or incorrect before proceeding to writing more code. This will save you in the long run.</p>
+# Branch Name Scheme
+
+- main
+- feat/
+- bugfix/
+- refactor/
+- sandbox/
+- event/
