@@ -98,30 +98,32 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-            Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
-            switch (RobotState.getInstance().getAimState()) {
-                case NOTHING -> {
-                    double mps = ShooterStructure.Static.calculateShotFixedPitch(
-                        FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
-                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
-                    if (rps != targetVelocityRadPerSec) {
-                        setTargetVelocity(rps * IDLE_MULTIPLIER);
+            if (Toggles.shooterTuningMode.get()) {
+                Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
+                switch (RobotState.getInstance().getAimState()) {
+                    case NOTHING -> {
+                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                        if (rps != targetVelocityRadPerSec) {
+                            setTargetVelocity(rps * IDLE_MULTIPLIER);
+                        }
                     }
-                }
-                case SHOOTING_MOVING -> {
-                    double mps = ShooterStructure.Moving.calculateMovingShot(
-                        FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
-                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
-                    if (rps != targetVelocityRadPerSec) {
-                        setTargetVelocity(rps);
+                    case SHOOTING_MOVING -> {
+                        double mps = ShooterStructure.Moving.calculateMovingShot(
+                            FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                        if (rps != targetVelocityRadPerSec) {
+                            setTargetVelocity(rps);
+                        }
                     }
-                }
-                case SHOOTING_STATIONARY -> {
-                    double mps = ShooterStructure.Static.calculateShotFixedPitch(
-                        FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
-                    double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
-                    if (rps != targetVelocityRadPerSec) {
-                        setTargetVelocity(ShooterConstants.Flywheel.stationaryHoodVelocityFactor * rps);
+                    case SHOOTING_STATIONARY -> {
+                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                        if (rps != targetVelocityRadPerSec) {
+                            setTargetVelocity(ShooterConstants.Flywheel.stationaryHoodVelocityFactor * rps);
+                        }
                     }
                 }
             }
@@ -197,6 +199,13 @@ public class Flywheel extends SubsystemBase {
     ///////////////////////
 
     public void setTargetVelocity(double velocityRadPerSec) {
+        if (Toggles.shooterTuningMode.get()) return;
+        sampledVoltage = 0.0;
+        targetVelocityRadPerSec = velocityRadPerSec;
+        state = FlywheelState.RAMP_UP;
+    }
+
+    public void setTargetVelocityForced(double velocityRadPerSec) {
         sampledVoltage = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;

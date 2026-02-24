@@ -1,7 +1,11 @@
 package org.steelhawks.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
@@ -12,9 +16,36 @@ import static edu.wpi.first.units.Units.Meters;
 
 public class ShooterStructure {
 
+    private static final InterpolatingDoubleTreeMap shootingTimeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap shootingFlywheelVelocityMap =
+        new InterpolatingDoubleTreeMap();
+    private static final InterpolatingTreeMap<Double, Rotation2d> shootingHoodAngleMap =
+        new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+
+    private static final InterpolatingDoubleTreeMap ferryTimeOfFlightMap =
+        new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap ferryFlywheelVelocityMap =
+        new InterpolatingDoubleTreeMap();
+    private static final InterpolatingTreeMap<Double, Rotation2d> ferryHoodAngleMap =
+        new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+
+    private static final double minShootDistance;
+    private static final double maxShootDistance;
+    private static final double minFerryDistance;
+    private static final double maxFerryDistance;
+
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
+
+    static {
+        minShootDistance = 0.0;
+        maxShootDistance = Double.MAX_VALUE;
+
+        minFerryDistance = 0.0;
+        maxFerryDistance = Double.MAX_VALUE;
+    }
 
     public static boolean isNoSolution(ProjectileData data) {
         return data == null || Double.isNaN(data.exitVelocity()) || Double.isNaN(data.hoodAngle());

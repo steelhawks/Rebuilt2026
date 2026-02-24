@@ -76,8 +76,10 @@ public class Hood extends SubsystemBase {
             );
         }
         if (shouldRun) {
-            var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-            setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+            if (!Toggles.shooterTuningMode.get()) {
+                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+            }
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), ShooterConstants.Hood.TOLERANCE);
             io.runHoodPosition(
                 setpoint,
@@ -90,6 +92,15 @@ public class Hood extends SubsystemBase {
     }
 
     public void setDesiredPosition(Rotation2d position) {
+        if (Toggles.shooterTuningMode.get()) return;
+        inputs.goal = MathUtil.clamp(
+            position.getDegrees(),
+            ShooterConstants.Hood.MIN_ANGLE.getDegrees(),
+            ShooterConstants.Hood.MAX_ANGLE.getDegrees());
+        setpoint = Rotation2d.fromDegrees(inputs.goal);
+    }
+
+    public void setDesiredPositionForced(Rotation2d position) {
         inputs.goal = MathUtil.clamp(
             position.getDegrees(),
             ShooterConstants.Hood.MIN_ANGLE.getDegrees(),

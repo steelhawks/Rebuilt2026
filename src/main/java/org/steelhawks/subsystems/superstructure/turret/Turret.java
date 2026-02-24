@@ -279,6 +279,9 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
+            if (Toggles.shooterTuningMode.get()) {
+                RobotState.getInstance().setShooterMode(ShooterMode.TO_HUB);
+            }
             switch (RobotState.getInstance().getShooterMode()) {
                 case TO_HUB -> {
                     var robot = getPose();
