@@ -17,11 +17,10 @@ public class ShootingCommands {
                     Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
                     Commands.waitUntil(RobotContainer.s_Turret::atGoal),
                     RobotContainer.s_Indexer.feed()
-                ),
-                jamRecovery()
-            )
-        ).finallyDo(() ->
-            RobotState.getInstance().setAimState(ShootingState.NOTHING));
+                        .alongWith(RobotContainer.s_Intake.agitate())),
+                jamRecovery()))
+            .finallyDo(() ->
+                RobotState.getInstance().setAimState(ShootingState.NOTHING));
     }
 
     private static Command jamRecovery() {
@@ -29,8 +28,9 @@ public class ShootingCommands {
             .andThen(
                 Commands.sequence(
                     RobotContainer.s_Indexer.outtake().withTimeout(0.3),
-                    RobotContainer.s_Indexer.runSpindexer().withTimeout(0.2)
-                ).repeatedly().until(() -> !RobotContainer.s_Indexer.isJammed())
-            ).repeatedly();
+                    RobotContainer.s_Indexer.feed().withTimeout(0.2))
+                .repeatedly()
+                    .until(() -> !RobotContainer.s_Indexer.isJammed()))
+            .repeatedly();
     }
 }

@@ -16,6 +16,8 @@ import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
+import java.util.Set;
+
 public class Intake extends SubsystemBase {
 
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
@@ -25,12 +27,11 @@ public class Intake extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
-    private double homingVolts = -2.0;
-
     private IntakeConstants.State desiredGoal = IntakeConstants.State.HOME;
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
+    private final double homingVolts = -2.0;
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
@@ -51,6 +52,10 @@ public class Intake extends SubsystemBase {
 
     public boolean atGoal() {
         return atGoal;
+    }
+
+    public IntakeConstants.State getDesiredGoal() {
+        return desiredGoal;
     }
 
     public double getPosition() {
@@ -211,13 +216,21 @@ public class Intake extends SubsystemBase {
 
     public Command runIntake() {
         return Commands.run(
-            () -> {
-                io.runIntake(IntakeConstants.INTAKE_SPEED);
-            }, this).finallyDo(io::stopIntake);
+            () -> io.runIntake(IntakeConstants.INTAKE_SPEED), this).finallyDo(io::stopIntake);
     }
 
     public Command outtakeIntake() {
         return Commands.run(
             () -> io.runIntake(-IntakeConstants.INTAKE_SPEED), this).finallyDo(io::stopIntake);
+    }
+
+    public Command agitate() {
+        return Commands.sequence(
+            setDesiredStateCommand(IntakeConstants.State.INTAKE),
+            Commands.waitUntil(this::atGoal),
+            setDesiredStateCommand(IntakeConstants.State.HOME),
+            Commands.waitUntil(this::atGoal))
+        .repeatedly()
+        .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
     }
 }
