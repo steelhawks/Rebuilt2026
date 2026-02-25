@@ -7,7 +7,7 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
 
-    public static final double REDUCTION = (4.0 / 1.0);
+    public static final double REDUCTION = (7.0 / 1.0);
     public static final double PINION_RADIUS = Units.inchesToMeters(1.033922 / 2.0);
     public static final double METERS_PER_RADIAN = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
     public static final double MASS_KG = 0.0;
