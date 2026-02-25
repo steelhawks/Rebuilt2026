@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -29,6 +30,7 @@ import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
@@ -219,11 +221,11 @@ public class Robot extends LoggedRobot {
         }
         LoopTimeUtil.record("RobotPeriodic");
 
-//        if ((Constants.getMode() == Mode.SIM)
-//            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
-//        ) {
-//            RobotContainer.s_Swerve.updatePhysicsSimulation();
-//        }
+        if ((Constants.getMode() == Mode.SIM)
+            || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
+        ) {
+            RobotContainer.s_Swerve.updatePhysicsSimulation();
+        }
     }
 
     private void visualizeFieldConstants() {
@@ -255,6 +257,7 @@ public class Robot extends LoggedRobot {
         Elastic.selectTab("Autonomous");
         autonomousCommand = Autos.getAuto();
 
+
         if (autonomousCommand != null)
             CommandScheduler.getInstance().schedule(autonomousCommand);
     }
@@ -285,7 +288,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationInit() {
         if (Constants.getMode() == Mode.SIM) {
-            RobotContainer.s_Swerve.resetSimulation(new Pose2d(3, 3, new Rotation2d()));
+            RobotContainer.s_Swerve.resetSimulation(new Pose2d(0, 0, new Rotation2d()));
         }
     }
 }

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.Robot;
@@ -53,6 +54,11 @@ public class Intake extends SubsystemBase {
         return atGoal;
     }
 
+    @AutoLogOutput(key = "Intake/IsTwisting")
+    public boolean isTwisting() {
+        return Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) < IntakeConstants.TWIST_COEFFICIENT.getAsDouble();
+    }
+
     public double getPosition() {
         return inputs.leftPositionMeters;
     }
@@ -67,6 +73,13 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
+        if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
+            isHomed = true;
+            io.setPosition(0);
+            isZeroed = true;
+            Logger.recordOutput("Intake/IsHomed", true);
+            Logger.recordOutput("Intake/Zeroed", true);
+        }
         if (!isHomed && Toggles.Intake.isEnabled.get()) {
             io.runRackOpenLoop(homingVolts, false);
             isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
@@ -88,6 +101,7 @@ public class Intake extends SubsystemBase {
                 && !Toggles.Intake.toggleVoltageOverride.get()
                 && (getPosition() >= IntakeConstants.MIN_EXTENSION
                     && getPosition() <= IntakeConstants.MAX_EXTENSION);
+        Logger.recordOutput("Intake/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
             setpoint = new TrapezoidProfile.State(getPosition(), 0.0);
@@ -134,8 +148,8 @@ public class Intake extends SubsystemBase {
             double previousVelocity = setpoint.velocity;
             setpoint =
                 profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
-            if (setpoint.position < IntakeConstants.MIN_EXTENSION
-                || setpoint.position > IntakeConstants.MAX_EXTENSION
+            if (setpoint.position <= IntakeConstants.MIN_EXTENSION
+                || setpoint.position >= IntakeConstants.MAX_EXTENSION
             ) {
                 setpoint =
                     new TrapezoidProfile.State(

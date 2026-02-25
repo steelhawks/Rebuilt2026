@@ -2,23 +2,29 @@ package org.steelhawks.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.RobotState;
+import org.steelhawks.*;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
-import static edu.wpi.first.units.Units.Volts;
+import java.util.Set;
+
+import static edu.wpi.first.units.Units.*;
 import static org.steelhawks.subsystems.superstructure.ShooterConstants.Flywheel.*;
 
 public class Flywheel extends SubsystemBase {
@@ -115,7 +121,7 @@ public class Flywheel extends SubsystemBase {
                         FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                     double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                     if (rps != targetVelocityRadPerSec) {
-                        setTargetVelocity(rps);
+                        setTargetVelocity(ShooterConstants.Flywheel.stationaryHoodVelocityFactor * rps);
                     }
                 }
             }
@@ -194,6 +200,42 @@ public class Flywheel extends SubsystemBase {
         sampledVoltage = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
+    }
+
+    public Command testfire() {
+        return Commands.defer(() ->
+            Commands.runOnce(
+            () -> {
+                var t = ShooterStructure.Moving.calculateMovingShot(FieldConstants.Hub.HUB_CENTER_3D, false);
+
+                RebuiltFuelOnFly fuelOnFly = new RebuiltFuelOnFly(
+                    // Specify the position of the chassis when the note is launched
+                    RobotState.getInstance().getEstimatedPose().getTranslation(),
+                    // Specify the translation of the shooter from the robot center (in the shooter’s reference frame)
+                    Constants.RobotConstants.ROBOT_TO_TURRET.inverse().getTranslation().toTranslation2d(),
+                    // Specify the field-relative speed of the chassis, adding it to the initial velocity of the projectile
+                    RobotContainer.s_Swerve.getChassisSpeeds(),
+                    // The shooter facing direction is the same as the robot’s facing direction
+                    RobotContainer.s_Turret.getRotation().plus(Rotation2d.kPi),
+                    // Initial height of the flying note
+                    Meters.of(Constants.RobotConstants.ROBOT_TO_TURRET.getZ()),
+                    // The launch speed is proportional to the RPM; assumed to be 16 meters/second at 6000 RPM
+                    MetersPerSecond.of(t.exitVelocity()),
+                    // The angle at which the note is launched
+                    Radians.of(t.hoodAngle())
+                );
+                fuelOnFly
+                    // Configure callbacks to visualize the flight trajectory of the projectile
+                    .withProjectileTrajectoryDisplayCallBack(
+                        // Callback for when the fuel will eventually hit the target (if configured)
+                        (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileSuccessfulShot", pose3ds.toArray(Pose3d[]::new)),
+                        // Callback for when the fuel will eventually miss the target, or if no target is configured
+                        (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileUnsuccessfulShot", pose3ds.toArray(Pose3d[]::new))
+                    );
+                // Add the projectile to the simulated arena
+                SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
+            }
+        ), Set.of(this));
     }
 
     public Command shooting() {

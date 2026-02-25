@@ -2,10 +2,7 @@ package org.steelhawks;
 
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -13,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -29,7 +27,7 @@ public class RobotState extends VirtualSubsystem {
 
     private static final double movingVelocityThreshold = 0.5; // m/s
     private static final double poseBufferSizeSec = 2.0;
-    private static final double turretAngleBufferSizeSec = 2.0;
+    private static final double intakeExtensionBufferSizeSec = 2.0;
     private static final double objectMaxAgeSec = 1.0;
 
     public enum ShiftState {
@@ -67,8 +65,8 @@ public class RobotState extends VirtualSubsystem {
 
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
         TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
-    private final TimeInterpolatableBuffer<Rotation2d> turretAngleBuffer =
-        TimeInterpolatableBuffer.createBuffer(turretAngleBufferSizeSec);
+    private final TimeInterpolatableBuffer<Translation2d> intakeExtensionBuffer =
+        TimeInterpolatableBuffer.createBuffer(intakeExtensionBufferSizeSec);
 
     private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
     private Rotation2d gyroRotation = new Rotation2d();
@@ -278,7 +276,7 @@ public class RobotState extends VirtualSubsystem {
         // clear and reinit buffers
         poseBuffer.clear();
         poseBuffer.addSample(Timer.getFPGATimestamp(), pose);
-        turretAngleBuffer.clear();
+        intakeExtensionBuffer.clear();
         objectHistory.clear();
         Logger.recordOutput("RobotState/PoseReset", pose);
     }
@@ -319,8 +317,8 @@ public class RobotState extends VirtualSubsystem {
         Logger.recordOutput("RobotState/DetectedObjectCount", objects.size());
     }
 
-    public void addTurretAngle(Rotation2d angle, double timestamp) {
-        turretAngleBuffer.addSample(timestamp, angle);
+    public void addIntakeExtension(double distanceMeters, double timestamp) {
+        intakeExtensionBuffer.addSample(timestamp, new Translation2d(distanceMeters, 0.0));
     }
 
     @AutoLogOutput(key = "RobotState/PoseEstimation/PoseEstimation")
@@ -344,8 +342,8 @@ public class RobotState extends VirtualSubsystem {
     /**
      * Get the turret angle at a specific timestamp
      */
-    public Optional<Rotation2d> getTurretAngleAtTime(double timestamp) {
-        return turretAngleBuffer.getSample(timestamp);
+    public Optional<Translation2d> getIntakeExtensionAtTime(double timestamp) {
+        return intakeExtensionBuffer.getSample(timestamp);
     }
 
     public Optional<List<DetectedObject>> getObjectsAtTime(double timestamp) {

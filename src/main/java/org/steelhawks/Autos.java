@@ -12,6 +12,7 @@ import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.commands.DriveCommands;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -136,11 +137,18 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 startToOutpost.resetOdometry(),
-                startToOutpost.cmd(),
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                startToOutpost.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
                 Commands.waitSeconds(1.0),
-                outpostToTrench.cmd(),
+                outpostToTrench.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
                 Commands.waitSeconds(0.5),
-                trenchToClimb.cmd()
+                trenchToClimb.cmd(),
+                Commands.sequence(
+                RobotContainer.s_Flywheel.testfire(),
+                    Commands.waitSeconds(0.25)
+                ).repeatedly().withTimeout(4.0)
             )
         );
 

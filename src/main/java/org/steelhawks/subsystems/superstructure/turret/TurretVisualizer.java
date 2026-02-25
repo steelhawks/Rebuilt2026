@@ -1,0 +1,18 @@
+package org.steelhawks.subsystems.superstructure.turret;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import org.steelhawks.subsystems.superstructure.SuperstructureVisualizer;
+
+import java.util.function.Supplier;
+
+public class TurretVisualizer {
+
+    public TurretVisualizer(Supplier<Double> turretRad, Supplier<Pose2d> robotPose) {
+        SuperstructureVisualizer.getInstance().setTurretSupplier(turretRad);
+        SuperstructureVisualizer.getInstance().setRobotPoseSupplier(robotPose);
+    }
+
+    public void update() {
+        SuperstructureVisualizer.getInstance().update();
+    }
+}
