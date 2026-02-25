@@ -78,16 +78,16 @@ public class Indexer extends SubsystemBase {
         return Commands.runEnd(
             () -> io.runSpindexer(IndexerState.RUNNING.spindexerOutput),
             io::stopSpindexer,
-            this
-        ).onlyIf(this::shouldRun);
+            this)
+        .onlyIf(this::shouldRun);
     }
 
     public Command runFeeder() {
         return Commands.runEnd(
             () -> io.runFeeder(IndexerState.RUNNING.feederOutput),
             io::stopFeeder,
-            this
-        ).onlyIf(this::shouldRun);
+            this)
+        .onlyIf(this::shouldRun);
     }
 
     public Command feed() {
@@ -100,8 +100,8 @@ public class Indexer extends SubsystemBase {
                 io.stopSpindexer();
                 io.stopFeeder();
             },
-            this
-        ).onlyIf(this::shouldRun);
+            this)
+        .onlyIf(this::shouldRun);
     }
 
     public Command outtake() {
@@ -114,7 +114,7 @@ public class Indexer extends SubsystemBase {
                 io.stopSpindexer();
                 io.stopFeeder();
             },
-            this
-        ).onlyIf(this::shouldRun);
+            this)
+        .onlyIf(this::shouldRun);
     }
 }
