@@ -9,14 +9,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.Robot;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
-
-import java.util.Set;
 
 public class Intake extends SubsystemBase {
 
@@ -38,8 +37,10 @@ public class Intake extends SubsystemBase {
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
 
-    private static final LoggedTunableNumber currentHomingThres =
+    private static final LoggedTunableNumber currentHomingThreshold =
         new LoggedTunableNumber("Intake/CurrentHomingThreshold", 60.0);
+    private static final LoggedTunableNumber velocityStallingThreshold =
+        new LoggedTunableNumber("Intake/VelocityStallingThreshold", 0.03);
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -68,6 +69,13 @@ public class Intake extends SubsystemBase {
         io.setBrakeMode(brakeModeEnabled);
     }
 
+    @AutoLogOutput(key = "Intake/IsStalling")
+    private boolean isStalling() {
+        return homingDebouncer.calculate(
+            inputs.leftCurrentAmps > currentHomingThreshold.getAsDouble()
+                && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
@@ -81,7 +89,7 @@ public class Intake extends SubsystemBase {
         }
         if (!isHomed && Toggles.Intake.isEnabled.get()) {
             io.runRackOpenLoop(homingVolts, false);
-            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
+            isHomed = isStalling();
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
@@ -229,7 +237,7 @@ public class Intake extends SubsystemBase {
             setDesiredStateCommand(IntakeConstants.State.INTAKE),
             Commands.waitUntil(this::atGoal),
             setDesiredStateCommand(IntakeConstants.State.HOME),
-            Commands.waitUntil(this::atGoal))
+            Commands.waitUntil(() -> atGoal() || isStalling()))
         .repeatedly()
         .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
     }
