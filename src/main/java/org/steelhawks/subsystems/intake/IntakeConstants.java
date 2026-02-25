@@ -13,7 +13,7 @@ public class IntakeConstants {
     public static final double MASS_KG = 0.0;
 
     public static final double INTAKE_SPEED = 1.0;
-    public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(35.0);
+    public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(-19.0);
 
     public enum State {
         // TODO In meters, need to tune
