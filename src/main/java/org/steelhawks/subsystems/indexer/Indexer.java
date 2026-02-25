@@ -2,78 +2,121 @@ package org.steelhawks.subsystems.indexer;
 
 
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Indexer extends SubsystemBase {
 
-    private static final LoggedTunableNumber INDEXER_JAM_CURRENT =
-        new LoggedTunableNumber("Indexer/JamCurrent", 40.0); // TODO tune
-    private static final double WHEEL_RADIUS = Units.inchesToMeters(4.0);
+    private static final LoggedTunableNumber SPINDEXER_JAM_CURRENT =
+        new LoggedTunableNumber("Indexer/Spindexer/JamCurrent", 40.0); // TODO tune
+    private static final LoggedTunableNumber FEEDER_JAM_CURRENT =
+        new LoggedTunableNumber("Indexer/Feeder/JamCurrent", 40.0); // TODO tune
 
-	public enum IndexerState {
-		RUNNING(0.6, -1.0),
-		STOPPED(0.0, 0.0),
-		OUTTAKING(-0.6, 1.0);
+    private LoggedTunableNumber tuningSpindexerVolts;
+    private LoggedTunableNumber tuningFeederVolts;
 
-		final double spindexerOutput;
+    public enum IndexerState {
+        RUNNING(0.6, 1.0),
+        OUTTAKING(-0.6, -1.0);
+
+        final double spindexerOutput;
         final double feederOutput;
 
-		IndexerState(double spindexerOutput, double feederOutput) {
-			this.spindexerOutput = spindexerOutput;
+        IndexerState(double spindexerOutput, double feederOutput) {
+            this.spindexerOutput = spindexerOutput;
             this.feederOutput = feederOutput;
-		}
-	}
+        }
+    }
 
-	private IndexerState desiredState = IndexerState.STOPPED;
-	private final SpindexerIOInputsAutoLogged spindexerInputs = new SpindexerIOInputsAutoLogged();
+    private final SpindexerIOInputsAutoLogged spindexerInputs = new SpindexerIOInputsAutoLogged();
     private final FeederIOInputsAutoLogged feederInputs = new FeederIOInputsAutoLogged();
+    private final IndexerIO io;
 
-	private final IndexerIO io;
+    public Indexer(IndexerIO io) {
+        this.io = io;
+    }
 
-	public Indexer(IndexerIO io) {
-		this.io = io;
-	}
-
-	@Override
-	public void periodic() {
-		io.updateInputs(spindexerInputs, feederInputs);
-		Logger.processInputs("Indexer/Spindexer/Inputs", spindexerInputs);
+    @Override
+    public void periodic() {
+        io.updateInputs(spindexerInputs, feederInputs);
+        Logger.processInputs("Indexer/Spindexer/Inputs", spindexerInputs);
         Logger.processInputs("Indexer/Feeder/Inputs", feederInputs);
-		final boolean shouldRun =
-			spindexerInputs.connected &&
-            feederInputs.connected &&
-			DriverStation.isEnabled() &&
-			Toggles.Indexer.isSpindexerEnabled.getAsBoolean() &&
-            Toggles.Indexer.isFeederEnabled.getAsBoolean();
-		if (shouldRun) {
-			if (spindexerInputs.torqueCurrentAmps >= INDEXER_JAM_CURRENT.get()
-                || feederInputs.torqueCurrentAmps >= INDEXER_JAM_CURRENT.get()) {
-				setDesiredState(IndexerState.OUTTAKING);
-			} else {
-				setDesiredState(IndexerState.RUNNING);
-			}
-			io.runSpindexer(desiredState.spindexerOutput);
-            io.runFeeder(desiredState.feederOutput);
-		} else {
-			setDesiredState(IndexerState.STOPPED);
-			io.stopSpindexer();
-            io.stopFeeder();
-		}
-		Logger.recordOutput("Indexer/DesiredState", desiredState.toString());
-	}
 
-	private void setDesiredState(IndexerState state) {
-		desiredState = state;
-	}
+        if (Toggles.tuningMode.get()) {
+            if (Toggles.Indexer.toggleSpindexerVoltageOverride.get()) {
+                if (tuningSpindexerVolts == null) {
+                    tuningSpindexerVolts = new LoggedTunableNumber("Indexer/Spindexer/TuningVolts", 0.0);
+                }
+                io.runSpindexer(tuningSpindexerVolts.get());
+            }
+            if (Toggles.Indexer.toggleFeederVoltageOverride.get()) {
+                if (tuningFeederVolts == null) {
+                    tuningFeederVolts = new LoggedTunableNumber("Indexer/Feeder/TuningAmps", 0.0);
+                }
+                io.runFeeder(tuningFeederVolts.get());
+            }
+        }
+    }
 
-	public Command setDesiredStateCmd(IndexerState state) {
-		return Commands.runOnce(() -> setDesiredState(state), this);
-	}
+    @AutoLogOutput(key = "Indexer/ShouldRun")
+    private boolean shouldRun() {
+        return Toggles.Indexer.isFeederEnabled.get()
+            && Toggles.Indexer.isSpindexerEnabled.get()
+            && !Toggles.tuningMode.get();
+    }
+
+    @AutoLogOutput(key = "Indexer/Jammed")
+    public boolean isJammed() {
+        return spindexerInputs.torqueCurrentAmps >= SPINDEXER_JAM_CURRENT.get()
+            || feederInputs.torqueCurrentAmps >= FEEDER_JAM_CURRENT.get();
+    }
+
+    public Command runSpindexer() {
+        return Commands.runEnd(
+            () -> io.runSpindexer(IndexerState.RUNNING.spindexerOutput),
+            io::stopSpindexer,
+            this
+        ).onlyIf(this::shouldRun);
+    }
+
+    public Command runFeeder() {
+        return Commands.runEnd(
+            () -> io.runFeeder(IndexerState.RUNNING.feederOutput),
+            io::stopFeeder,
+            this
+        ).onlyIf(this::shouldRun);
+    }
+
+    public Command feed() {
+        return Commands.runEnd(
+            () -> {
+                io.runSpindexer(IndexerState.RUNNING.spindexerOutput);
+                io.runFeeder(IndexerState.RUNNING.feederOutput);
+            },
+            () -> {
+                io.stopSpindexer();
+                io.stopFeeder();
+            },
+            this
+        ).onlyIf(this::shouldRun);
+    }
+
+    public Command outtake() {
+        return Commands.runEnd(
+            () -> {
+                io.runSpindexer(IndexerState.OUTTAKING.spindexerOutput);
+                io.runFeeder(IndexerState.OUTTAKING.feederOutput);
+            },
+            () -> {
+                io.stopSpindexer();
+                io.stopFeeder();
+            },
+            this
+        ).onlyIf(this::shouldRun);
+    }
 }
