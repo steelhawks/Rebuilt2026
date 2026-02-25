@@ -500,7 +500,7 @@ public class RobotConfig {
 
         @Override
         public ObjectVision createObjectVision() {
-            return null; // Not available on AlphaBot
+            return null;
         }
 
         @Override

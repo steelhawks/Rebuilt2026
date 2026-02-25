@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
@@ -40,7 +41,7 @@ public class RobotContainer {
 
         s_Swerve = config.createSwerve();
         s_Vision = config.createVision().orElse(null);
-        s_Flywheel = new Flywheel(new FlywheelIOTalonFX(new RobotConfig.CANBus("")));
+        s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
         s_Hood = config.createHood().orElse(null);
 //        s_Intake = config.createIntake().orElse(null);
@@ -56,11 +57,17 @@ public class RobotContainer {
             () -> -driver.getLeftY(),
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
-        driver.x().onTrue(s_Swerve.zeroHeading());
+
         configureDriver();
     }
 
     private void configureDriver() {
+//        driver.x().onTrue(s_Swerve.zeroHeading());
+
+        driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+        driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+        driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
+
         driver.leftBumper()
             .whileTrue(Commands.runOnce(() -> {
                 RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);

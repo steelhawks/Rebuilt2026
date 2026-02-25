@@ -76,7 +76,9 @@ public class Intake extends SubsystemBase {
         }
         if (!isHomed && Toggles.Intake.isEnabled.get()) {
             io.runRackOpenLoop(homingVolts, false);
-            isHomed = homingDebouncer.calculate(inputs.leftCurrentAmps > currentHomingThres.getAsDouble());
+            isHomed = homingDebouncer.calculate(
+                inputs.leftCurrentAmps > currentHomingThres.getAsDouble()
+                    && inputs.rightCurrentAmps > currentHomingThres.getAsDouble());
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {
             if (!isZeroed) {

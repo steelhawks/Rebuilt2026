@@ -187,7 +187,11 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void setPosition(double meters) {
+<<<<<<< Updated upstream
         new Thread(() -> tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_RADIAN)));
+=======
+        new Thread(() -> tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION))).start();
+>>>>>>> Stashed changes
     }
 
     @Override
