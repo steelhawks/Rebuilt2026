@@ -5,7 +5,6 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import org.dyn4j.geometry.Vector2;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AprilTag;
@@ -16,24 +15,31 @@ public class FieldConstants {
         Translation2d startLine, Translation2d endLine) {
         Translation2d robotPoint = RobotState.getInstance().getEstimatedPose().getTranslation();
 
-        Vector2 lineVector =
-            new Vector2(endLine.getX() - startLine.getX(), endLine.getY() - startLine.getY());
-        Vector2 pointVector =
-            new Vector2(
+        Translation2d lineVector =
+            new Translation2d(endLine.getX() - startLine.getX(), endLine.getY() - startLine.getY());
+        Translation2d pointVector =
+            new Translation2d(
                 robotPoint.getX() - startLine.getX(), robotPoint.getY() - startLine.getY());
 
         double lineLengthSquared = lineVector.dot(lineVector);
         double dotProduct = pointVector.dot(lineVector);
+        double t = dotProduct / lineLengthSquared;
+        double lineLength = Math.sqrt(lineLengthSquared);
 
-        double t = dotProduct / lineLengthSquared; // projection of point onto line
-        double lineLength = startLine.getDistance(endLine);
-        double percentToIgnoreFromEachSide =
-            (RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2.0) / lineLength;
-
+        // Unit vector along the line
+        double ux = lineVector.getX() / lineLength;
+        double uy = lineVector.getY() / lineLength;
+        // The robot half-dimension that matters is the one perpendicular to the line.
+        // Project the robot's half-extents onto the perpendicular direction.
+        // perpendicular = (-uy, ux)
+        double halfX = RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2.0;
+        double halfY = RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2.0;
+        // The margin along the line is the parallel projection of the robot's half-extents
+        double parallelMargin = Math.abs(ux * halfX) + Math.abs(uy * halfY);
+        double percentToIgnoreFromEachSide = parallelMargin / lineLength;
         t = Math.max(percentToIgnoreFromEachSide, Math.min(1 - percentToIgnoreFromEachSide, t));
-
         return new Translation2d(
-            startLine.getX() + t * lineVector.x, startLine.getY() + t * lineVector.y);
+            startLine.getX() + t * lineVector.getX(), startLine.getY() + t * lineVector.getY());
     }
 
     public static AprilTag getAprilTag(int id) {

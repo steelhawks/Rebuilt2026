@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.Robot;
@@ -51,6 +52,11 @@ public class Intake extends SubsystemBase {
 
     public boolean atGoal() {
         return atGoal;
+    }
+
+    @AutoLogOutput(key = "Intake/IsTwisting")
+    public boolean isTwisting() {
+        return Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) < IntakeConstants.TWIST_COEFFICIENT.getAsDouble();
     }
 
     public double getPosition() {

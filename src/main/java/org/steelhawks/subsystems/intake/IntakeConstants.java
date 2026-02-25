@@ -41,6 +41,8 @@ public class IntakeConstants {
 
     public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", Constants.omega(0, 2));
     public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelMetersSecSq", Constants.omega(0, 5));
+
+    public static final LoggedTunableNumber TWIST_COEFFICIENT = new LoggedTunableNumber("Intake/TwistCoefficient", 0.1);
     public static final double TOLERANCE = 0.02;
 
     public static final double MAX_EXTENSION = Units.inchesToMeters(17.706);
