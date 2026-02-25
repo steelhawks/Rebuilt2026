@@ -2,7 +2,6 @@ package org.steelhawks;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.oldintake.OldIntake;
@@ -61,12 +60,8 @@ public class RobotContainer {
 
     private void configureDriver() {
         driver.leftBumper()
-            .whileTrue(Commands.runOnce(() -> {
-                RobotState.getInstance().setAimState(RobotState.ShootingState.SHOOTING);
-            }))
-            .onFalse(Commands.runOnce(() -> {
-                RobotState.getInstance().setAimState(RobotState.ShootingState.NOTHING);
-            }));
+            .whileTrue(ShootingCommands.shoot());
+
         driver.rightTrigger()
             .whileTrue(
                 s_Intake.runIntake());
