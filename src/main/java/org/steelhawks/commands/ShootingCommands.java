@@ -9,16 +9,18 @@ import org.steelhawks.RobotState.ShootingState;
 public class ShootingCommands {
 
     public static Command shoot() {
+
         return Commands.sequence(
             Commands.runOnce(() ->
                 RobotState.getInstance().setAimState(ShootingState.SHOOTING)),
-            Commands.parallel(
-                Commands.sequence(
-                    Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
-                    Commands.waitUntil(RobotContainer.s_Turret::atGoal),
-                    RobotContainer.s_Indexer.feed()
-                        .alongWith(RobotContainer.s_Intake.agitate())),
-                jamRecovery()))
+            Commands.sequence(
+                Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
+                Commands.waitUntil(RobotContainer.s_Turret::atGoal),
+                RobotContainer.s_Indexer.feed()
+                    .alongWith(RobotContainer.s_Intake.agitate())
+                    .until(RobotContainer.s_Indexer::isJammed),
+                jamRecovery())
+            .repeatedly())
             .finallyDo(() ->
                 RobotState.getInstance().setAimState(ShootingState.NOTHING));
     }
