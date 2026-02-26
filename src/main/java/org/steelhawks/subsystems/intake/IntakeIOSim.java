@@ -19,7 +19,7 @@ public class IntakeIOSim implements IntakeIO {
     private final DCMotorSim rightMotorSim;
     private final DCMotorSim intakeMotorSim;
 
-    private static final double RADIUS = IntakeConstants.METERS_PER_RADIAN / (2 * Math.PI);
+    private static final double RADIUS = IntakeConstants.METERS_PER_RADIAN;
     private double feedforwardCurrent = 0;
     private double goalPosition = 0;
 

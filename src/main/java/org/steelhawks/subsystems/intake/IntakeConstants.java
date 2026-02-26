@@ -7,9 +7,10 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
 
-    public static final double REDUCTION = (6.0 / 1.0) * (5.0 / 4.0);
+    public static final double REDUCTION = (7.0 / 1.0);
     public static final double PINION_RADIUS = Units.inchesToMeters(1.033922 / 2.0);
-    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS);
+    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
+    public static final double METERS_PER_RADIAN = PINION_RADIUS / REDUCTION;
     public static final double MASS_KG = 0.0;
 
     public static final double INTAKE_SPEED = 1.0;
@@ -19,7 +20,7 @@ public class IntakeConstants {
         // TODO In meters, need to tune
         RETRACTED(0.15),
         HOME(0.0),
-        INTAKE(0.3);
+        INTAKE(0.15);
 
         private final double positionMeters;
 
@@ -32,15 +33,15 @@ public class IntakeConstants {
         }
     }
 
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 25.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 5.0);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
     public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/kD", 0.0);
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 8.0);
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/kS", 0.0);
     public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", 0.0);
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/kA", 0.0);
 
-    public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", 0.4);
-    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", 0.8);
+    public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", 0.05);
+    public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", 0.08);
 
     public static final double TOLERANCE = 0.02;
 

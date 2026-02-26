@@ -44,8 +44,8 @@ public class RobotContainer {
         s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
         s_Hood = config.createHood().orElse(null);
-//        s_Intake = config.createIntake().orElse(null);
-        s_Intake = null; // CAREFUL W THE INTAKE, THE GEAR RATIO HAS BEEN CHANGED TO THE ACCURATE ONE SO SETPOINTS ARE ALL CHANGED!!!
+        s_Intake = config.createIntake().orElse(null);
+//        s_Intake = null; // CAREFUL W THE INTAKE, THE GEAR RATIO HAS BEEN CHANGED TO THE ACCURATE ONE SO SETPOINTS ARE ALL CHANGED!!!
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
 
