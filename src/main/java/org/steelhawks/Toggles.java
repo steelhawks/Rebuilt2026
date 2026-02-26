@@ -72,6 +72,10 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Indexer/Spindexer/IsEnabled", true);
         LoggedNetworkBoolean isFeederEnabled =
             new LoggedNetworkBoolean("Toggles/Indexer/Feeder/IsEnabled", true);
+        LoggedNetworkBoolean toggleSpindexerVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Indexer/Spindexer/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleFeederVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Indexer/Feeder/ToggleVoltageOverride", false);
     }
 
     interface Hood {
