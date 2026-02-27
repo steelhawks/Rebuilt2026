@@ -42,7 +42,7 @@ public final class Constants {
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.SIMBOT;
+    private static final RobotType ROBOT = RobotType.ALPHABOT;
 
     /**
      * The robot type.
@@ -101,7 +101,7 @@ public final class Constants {
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(0.0);
 
         public static final Transform3d ROBOT_TO_TURRET;
-        public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(45.0);
+        public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(80.0);
 
         public static final Rotation2d MIN_HOOD_ANGLE = Rotation2d.fromDegrees(30.0);
         public static final Rotation2d MAX_HOOD_ANGLE = Rotation2d.fromDegrees(70.0);

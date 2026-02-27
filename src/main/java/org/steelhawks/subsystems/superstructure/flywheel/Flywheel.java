@@ -189,7 +189,7 @@ public class Flywheel extends SubsystemBase {
 
     @AutoLogOutput(key = "Flywheel/ReadyToShoot")
     public boolean isReadyToShoot() {
-        return state == FlywheelState.RUNNING && nearTargetVelocity;
+        return nearTargetVelocity;
     }
 
     ///////////////////////

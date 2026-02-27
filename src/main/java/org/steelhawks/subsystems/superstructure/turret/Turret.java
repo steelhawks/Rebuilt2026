@@ -27,14 +27,14 @@ import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.omega(2.0, 0.2));
-    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.omega(0.0, 0.0));
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.omega(1000.0, 200.0)); // 1500
-    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.omega(0.0, 0.0));
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.omega(70.0, 7.0)); // 35
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.value(0.0, 2.0, 0.0, 0.0, 0.2));
+    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.value(0.0, 0.0, 0.0, 0.0, 0.0));
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.value(0.0, 1000.0, 0.0, 0.0, 200.0)); // 1500
+    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.value(0.0, 0.0, 0.0, 0.0, 0.0));
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.value(0.0, 70.0, 0.0, 0.0, 7.0)); // 35
 
     private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 5.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 20.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 

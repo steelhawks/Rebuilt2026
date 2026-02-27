@@ -27,8 +27,8 @@ public class IndexerIOTalonFX implements IndexerIO {
     private final StatusSignal<Current> feederTorqueCurrent;
     private final StatusSignal<Temperature> feederTemp;
 
-	private final int SPINDEXER_ID = 0;
-    private final int FEEDER_ID = 0;
+	private final int SPINDEXER_ID = 45;
+    private final int FEEDER_ID = 26;
 	private final TalonFX spindexerMotor;
     private final TalonFX feederMotor;
 	private final TalonFXConfiguration spindexerConfig;
@@ -44,14 +44,14 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexerConfig = new TalonFXConfiguration();
 		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-		spindexerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 		PhoenixUtil.tryUntilOk(5, () -> spindexerMotor.getConfigurator().apply(spindexerConfig));
 		PhoenixUtil.tryUntilOk(5, spindexerMotor::optimizeBusUtilization);
 
         feederConfig = new TalonFXConfiguration();
         feederConfig.Feedback.SensorToMechanismRatio = 1.0;
         feederConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        feederConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);
 

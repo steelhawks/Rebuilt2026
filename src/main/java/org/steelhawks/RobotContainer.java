@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
@@ -21,6 +22,7 @@ public class RobotContainer {
 
     private final RobotConfig config = RobotConfig.getConfig();
 
+    public static LEDMatrix s_Matrix = null;
     public static Swerve s_Swerve = null;
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
@@ -37,6 +39,8 @@ public class RobotContainer {
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
+
+        s_Matrix = config.createLEDMatrix().orElse(null);
 
         s_Swerve = config.createSwerve();
         s_Vision = config.createVision().orElse(null);
