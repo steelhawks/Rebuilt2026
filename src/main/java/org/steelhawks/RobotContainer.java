@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -61,25 +62,28 @@ public class RobotContainer {
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
 
+        CommandScheduler.getInstance().schedule(s_Matrix.scrollingTextCommand("2601", Color.WHITE, 5));
+
+
         configureDriver();
     }
 
     private void configureDriver() {
 //        driver.x().onTrue(s_Swerve.zeroHeading());
 
-        driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-        driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-        driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
-
-        driver.leftBumper()
-            .whileTrue(ShootingCommands.shoot());
-
-        driver.rightTrigger()
-            .whileTrue(
-                s_Intake.runIntake());
-
-        driver.leftTrigger()
-            .whileTrue(
-                s_Intake.outtakeIntake());
+//        driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+//        driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+//        driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
+//
+//        driver.leftBumper()
+//            .whileTrue(ShootingCommands.shoot());
+//
+//        driver.rightTrigger()
+//            .whileTrue(
+//                s_Intake.runIntake());
+//
+//        driver.leftTrigger()
+//            .whileTrue(
+//                s_Intake.outtakeIntake());
     }
 }

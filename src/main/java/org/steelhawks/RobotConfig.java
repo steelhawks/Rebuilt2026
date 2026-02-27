@@ -214,12 +214,12 @@ public class RobotConfig {
 
             case TEST_BOARD -> new Builder()
                 .withSwerve(false)
-                .withLEDMatrix(false)
+                .withLEDMatrix(true)
                 .withLEDStrip(false)
                 .withVision(false)
                 .withObjectVision(false)
-                .withFlywheel(true)
-                .withTurret(true)
+                .withFlywheel(false)
+                .withTurret(false)
                 .withHood(false)
                 .withOldIntake(false)
                 .withIntake(false)
@@ -673,7 +673,7 @@ public class RobotConfig {
 
         @Override
         public LEDMatrix createLEDMatrix() {
-            return new LEDMatrix(8, 32);
+            return new LEDMatrix(32, 8);
         }
 
         @Override
