@@ -92,13 +92,10 @@ public class LEDMatrix extends SubsystemBase {
         }
 
         if (layout == MatrixLayout.SERPENTINE) {
-            // Row major serpentine - rows alternate direction
-            // Even rows (0,2,4...) go left-to-right
-            // Odd rows (1,3,5...) go right-to-left
-            if (y % 2 == 0) {
-                return y * width + x;  // Left to right
+            if (x % 2 == 0) {
+                return (x * height) + y;
             } else {
-                return y * width + (width - 1 - x);  // Right to left
+                return (x * height) + (height - 1 - y);
             }
         } else {
             // Progressive pattern - all rows left-to-right

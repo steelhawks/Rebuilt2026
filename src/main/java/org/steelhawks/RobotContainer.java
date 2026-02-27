@@ -66,6 +66,8 @@ public class RobotContainer {
 
 
         configureDriver();
+
+        CommandScheduler.getInstance().schedule(s_Matrix.scrollingTextCommand("2601", Color.WHITE, 5));
     }
 
     private void configureDriver() {
