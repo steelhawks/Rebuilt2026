@@ -11,6 +11,7 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.Toggles;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -45,6 +46,10 @@ public class ShooterStructure {
 
         minFerryDistance = 0.0;
         maxFerryDistance = Double.MAX_VALUE;
+
+        shootingFlywheelVelocityMap.put(1.75, 14.8);
+        shootingFlywheelVelocityMap.put(2.12, 15.0);
+        shootingFlywheelVelocityMap.put(3.16, 18.8);
     }
 
     public static boolean isNoSolution(ProjectileData data) {
@@ -209,7 +214,7 @@ public class ShooterStructure {
             if (denom <= 0) {
                 return kNoSolution;
             }
-            double v0 = Math.sqrt(G * x * x / denom);
+            double v0 = Toggles.useLUT.get() ? shootingFlywheelVelocityMap.get(x) : Math.sqrt(G * x * x / denom);
             if (Double.isNaN(v0) || Double.isInfinite(v0)) {
                 return kNoSolution;
             }

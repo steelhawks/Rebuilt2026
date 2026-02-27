@@ -21,6 +21,9 @@ public interface Toggles {
     LoggedNetworkBoolean shooterTuningMode =
         new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
 
+    LoggedNetworkBoolean useLUT =
+        new LoggedNetworkBoolean("Toggles/LUT", false);
+
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =
             new LoggedNetworkBoolean("Toggles/Vision/VisionEnabled", true);
@@ -63,7 +66,7 @@ public interface Toggles {
 
     interface Intake {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", false);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Intake/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =

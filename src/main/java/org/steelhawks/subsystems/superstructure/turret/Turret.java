@@ -27,11 +27,11 @@ import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.omega(2.0, 0.2));
-    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.omega(0.0, 0.0));
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.omega(1000.0, 200.0)); // 1500
-    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.omega(0.0, 0.0));
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.omega(70.0, 7.0)); // 35
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", 2.0);
+    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", 0.0);
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", 1000.0); // 1500
+    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", 0.0);
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", 70.0); // 35
 
     private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
     private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 5.0);
@@ -282,44 +282,45 @@ public class Turret extends SubsystemBase {
             if (Toggles.shooterTuningMode.get()) {
                 RobotState.getInstance().setShooterMode(ShooterMode.TO_HUB);
             }
-            switch (RobotState.getInstance().getShooterMode()) {
-                case TO_HUB -> {
-                    var robot = getPose();
-                    var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-                    var predictedHub = predictInterceptPoint(hubCenter);
-                    var turretTranslation = new Pose3d(robot)
-                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
-                        .toPose2d()
-                        .getTranslation();
-                    var direction = predictedHub.toTranslation2d().minus(turretTranslation);
-                    double fieldRelativeAngle = direction.getAngle().getRadians();
-                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
-                    double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
-                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    var trajectory = createTrajectory(hubCenter, predictedHub.toTranslation2d());
-                    Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
-                }
-                case FERRY -> {
-                    var robot = getPose();
-                    var ferryGoal2d = AllianceFlip.apply(
-                        FieldConstants.getClosestPointOnLine(FieldConstants.Ferrying.START_LINE, FieldConstants.Ferrying.END_LINE));
-                    var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
-                    var predictedFerry = predictInterceptPoint(ferryGoal3d);
-                    var turretTranslation = new Pose3d(robot)
-                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
-                        .toPose2d()
-                        .getTranslation();
-                    var direction = predictedFerry.toTranslation2d().minus(turretTranslation);
-                    double fieldRelativeAngle = direction.getAngle().getRadians();
-                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
-                    double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
-                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    var trajectory = createTrajectory(ferryGoal3d, predictedFerry.toTranslation2d());
-                    Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
-                }
-            }
+//            switch (RobotState.getInstance().getShooterMode()) {
+//                case TO_HUB -> {
+//                    var robot = getPose();
+//                    var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+//                    var predictedHub = predictInterceptPoint(hubCenter);
+//                    var turretTranslation = new Pose3d(robot)
+//                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
+//                        .toPose2d()
+//                        .getTranslation();
+//                    var direction = predictedHub.toTranslation2d().minus(turretTranslation);
+//                    double fieldRelativeAngle = direction.getAngle().getRadians();
+//                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+//                    double turretRelativeAngle = MathUtil.angleModulus(
+//                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
+//                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+//                    var trajectory = createTrajectory(hubCenter, predictedHub.toTranslation2d());
+//                    Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+//                }
+//                case FERRY -> {
+//                    var robot = getPose();
+//                    var ferryGoal2d = AllianceFlip.apply(
+//                        FieldConstants.getClosestPointOnLine(FieldConstants.Ferrying.START_LINE, FieldConstants.Ferrying.END_LINE));
+//                    var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
+//                    var predictedFerry = predictInterceptPoint(ferryGoal3d);
+//                    var turretTranslation = new Pose3d(robot)
+//                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
+//                        .toPose2d()
+//                        .getTranslation();
+//                    var direction = predictedFerry.toTranslation2d().minus(turretTranslation);
+//                    double fieldRelativeAngle = direction.getAngle().getRadians();
+//                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+//                    double turretRelativeAngle = MathUtil.angleModulus(
+//                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
+//                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+//                    var trajectory = createTrajectory(ferryGoal3d, predictedFerry.toTranslation2d());
+//                    Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+//                }
+//            }
+            desiredRotation = Rotation2d.kPi;
             desiredRotation =
                 Rotation2d.fromRadians(
                     MathUtil.clamp(

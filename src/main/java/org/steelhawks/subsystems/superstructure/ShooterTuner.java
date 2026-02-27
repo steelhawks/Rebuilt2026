@@ -55,7 +55,7 @@ public class ShooterTuner extends VirtualSubsystem {
             double rps = ShooterStructure.linearToAngularVelocity(
                 manualFlywheelSpeed.get(), ShooterConstants.Flywheel.FLYWHEEL_RADIUS);
             RobotContainer.s_Flywheel.setTargetVelocityForced(rps);
-            RobotContainer.s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get()));
+//            RobotContainer.s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get()));
         }
         if (saveTrigger.get()) {
             saveTrigger.set(false); // auto reset

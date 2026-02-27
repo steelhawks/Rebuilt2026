@@ -35,6 +35,7 @@ import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.PhoenixUtil;
+import org.steelhawks.util.VirtualSubsystem;
 
 import java.lang.reflect.Field;
 
@@ -211,7 +212,7 @@ public class Robot extends LoggedRobot {
 
         PhoenixUtil.refreshAll();
         LoopTimeUtil.record("PhoenixUtil");
-//        VirtualSubsystem.periodicAll();
+        VirtualSubsystem.periodicAll();
         LoopTimeUtil.record("VirtualPeriodic");
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");

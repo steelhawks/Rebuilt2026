@@ -206,6 +206,7 @@ public class Flywheel extends SubsystemBase {
     }
 
     public void setTargetVelocityForced(double velocityRadPerSec) {
+        System.out.println("Working");
         sampledVoltage = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
