@@ -18,6 +18,12 @@ public interface Toggles {
     LoggedNetworkBoolean rateLimitSwerveEnabled =
         new LoggedNetworkBoolean("Toggles/RateLimitSwerveEnabled", false);
 
+    LoggedNetworkBoolean shooterTuningMode =
+        new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
+
+    LoggedNetworkBoolean useLUT =
+        new LoggedNetworkBoolean("Toggles/LUT", false);
+
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =
             new LoggedNetworkBoolean("Toggles/Vision/VisionEnabled", true);

@@ -10,6 +10,7 @@ import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
+import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
@@ -62,6 +63,8 @@ public class RobotContainer {
             () -> -driver.getRightX()));
 
         configureDriver();
+
+        ShooterTuner.getInstance();
     }
 
     private void configureDriver() {
