@@ -536,11 +536,11 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[4] = new boolean[]{true, true, true, false};
                     break;
                 case '2':
-                    pattern[0] = new boolean[]{true, true, true, false};
-                    pattern[1] = new boolean[]{false, false, false, true};
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
                     pattern[2] = new boolean[]{false, false, true, false};
-                    pattern[3] = new boolean[]{true, true, true, true};
-                    pattern[4] = new boolean[]{false, false, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{true, true, true, true};
                     break;
                 case '3':
                     pattern[0] = new boolean[]{true, true, true, false};
