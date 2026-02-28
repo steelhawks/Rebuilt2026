@@ -402,6 +402,13 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[3] = new boolean[]{false, true, false, false};
                     pattern[4] = new boolean[]{true, true, true, false};
                     break;
+                case 'J': //jqvyz23456789!
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, false, true, false};
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{true, false, true, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
                 case 'K':
                     pattern[0] = new boolean[]{true, false, false, true};
                     pattern[1] = new boolean[]{true, false, true, false};
@@ -444,6 +451,13 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[3] = new boolean[]{true, false, false, false};
                     pattern[4] = new boolean[]{true, false, false, false};
                     break;
+                case 'Q':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, false, true};
+                    pattern[3] = new boolean[]{true, false, true, true};
+                    pattern[4] = new boolean[]{false, true, true, true};
+                    break;
                 case 'R':
                     pattern[0] = new boolean[]{true, true, true, false};
                     pattern[1] = new boolean[]{true, false, false, true};
@@ -472,6 +486,13 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[3] = new boolean[]{true, false, false, true};
                     pattern[4] = new boolean[]{false, true, true, false};
                     break;
+                case 'V':
+                    pattern[0] = new boolean[]{true, false, true, false};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{true, false, true, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, false, false, false};
+                    break;
                 case 'W':
                     pattern[0] = new boolean[]{true, false, false, true};
                     pattern[1] = new boolean[]{true, false, false, true};
@@ -486,6 +507,20 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[3] = new boolean[]{false, true, true, false};
                     pattern[4] = new boolean[]{true, false, false, true};
                     break;
+                case 'Y':
+                    pattern[0] = new boolean[]{true, false, true, false};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case 'Z':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, false, false, true };
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{true, true, true, true};
+                    break;
                 case '0':
                     pattern[0] = new boolean[]{false, true, true, false};
                     pattern[1] = new boolean[]{true, false, false, true};
@@ -499,6 +534,69 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[2] = new boolean[]{false, true, false, false};
                     pattern[3] = new boolean[]{false, true, false, false};
                     pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case '2':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{false, false, false, true};
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{true, true, true, true};
+                    pattern[4] = new boolean[]{false, false, false, false};
+                    break;
+                case '3':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{false, false, false, true};
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case '4':
+                    pattern[0] = new boolean[]{true, false, true, false};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{false, false, true, false};
+                    pattern[4] = new boolean[]{false, false, true, false};
+                    break;
+                case '5':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, true, true, true};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case '6':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case '7':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, false, true, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case '8':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{false, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case '9':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{false, true, true, true};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{false, false, false, true};
+                    break;
+                case '!':
+                    pattern[0] = new boolean[]{true, false, false, false};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, false, false, false};
+                    pattern[3] = new boolean[]{false, false, false, false};
+                    pattern[4] = new boolean[]{true, false, false, false};
                     break;
                 case ' ':
                     // blank space

@@ -62,12 +62,8 @@ public class RobotContainer {
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
 
-        CommandScheduler.getInstance().schedule(s_Matrix.scrollingTextCommand("2601", Color.WHITE, 5));
-
-
+        CommandScheduler.getInstance().schedule(s_Matrix.scrollingTextCommand("ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789!", Color.WHITE, 5)); // scrolling text test
         configureDriver();
-
-        CommandScheduler.getInstance().schedule(s_Matrix.scrollingTextCommand("2601", Color.WHITE, 5));
     }
 
     private void configureDriver() {
