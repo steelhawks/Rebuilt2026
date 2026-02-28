@@ -149,7 +149,7 @@ public class Flywheel extends SubsystemBase {
                         sampledVoltage = calculateAverageSample();
                         state = FlywheelState.RUNNING;
                         Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
-                    } else if (RobotController.getFPGATime() - timeStartedSampling > (samplingTimeoutDuration.get() * 1e6)) {
+                    } else if (RobotController.getFPGATime() - timeStartedSampling > (Maths.secondsToMicroseconds(samplingTimeoutDuration.get()))) {
                         if (currentSampleIndex >= timeoutAvgMinSamples.get()) { // not good not terrible, calculate an average
                             sampledVoltage = calculateAverageSample();
                         } else {

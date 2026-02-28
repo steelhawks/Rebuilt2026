@@ -148,4 +148,12 @@ public class Maths {
     public static Translation3d fromTranslation2dWithZ(Pose2d pose, double z) {
         return fromTranslation2dWithZ(pose.getTranslation(), z);
     }
+
+    /**
+     * @param seconds Time in seconds
+     * @return Time in microseconds
+     */
+    public static double secondsToMicroseconds(double seconds) {
+        return seconds * 1e6;
+    }
 }
