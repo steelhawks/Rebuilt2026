@@ -98,7 +98,7 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-            if (Toggles.shooterTuningMode.get()) {
+            if (!Toggles.shooterTuningMode.get()) {
                 Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
                 switch (RobotState.getInstance().getAimState()) {
                     case NOTHING -> {
@@ -122,7 +122,7 @@ public class Flywheel extends SubsystemBase {
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
-                            setTargetVelocity(ShooterConstants.Flywheel.stationaryHoodVelocityFactor * rps);
+                            setTargetVelocity(stationaryHoodVelocityFactor * rps);
                         }
                     }
                 }

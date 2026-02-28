@@ -22,7 +22,7 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
 
     LoggedNetworkBoolean useLUT =
-        new LoggedNetworkBoolean("Toggles/LUT", false);
+        new LoggedNetworkBoolean("Toggles/LUT", true);
 
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =

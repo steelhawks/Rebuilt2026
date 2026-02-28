@@ -29,7 +29,7 @@ public class ShooterConstants {
             new LoggedTunableNumber("Flywheel/kV", 0.0090372 * 0.9); // 10% reduction from sysid value
 
         public static final LoggedTunableNumber velocityTolerance =
-            new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 20.0);
+            new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", 10.0);
         // the amount after which the sampling routine will time out
         public static final LoggedTunableNumber samplingTimeoutDuration =
             new LoggedTunableNumber("Flywheel/SamplingTimeoutDurationSeconds", 2.0);
@@ -39,7 +39,7 @@ public class ShooterConstants {
 
         public static final int sampleCounts = 50;
 
-        public static final double stationaryHoodVelocityFactor = 2.0;
+        public static final double stationaryHoodVelocityFactor = 1.1;
     }
 
     public static final class Hood {
