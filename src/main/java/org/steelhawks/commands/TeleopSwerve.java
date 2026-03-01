@@ -2,10 +2,7 @@ package org.steelhawks.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,7 +13,10 @@ import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.swerve.Swerve;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
+import org.steelhawks.util.geometry.Boundary;
+import org.steelhawks.util.geometry.RobotFootprint;
 
 import java.util.function.DoubleSupplier;
 
@@ -57,38 +57,50 @@ public class TeleopSwerve extends Command {
     private static DriveState currentDriveState = DriveState.NORMAL;
 
     @AutoLogOutput
-    private final Trigger shootingOnTheMove = new Trigger(
-        () -> RobotState.getInstance().getAimState().equals(RobotState.ShootingState.SHOOTING_MOVING));
+    private final Trigger sotmTrigger = new Trigger(
+        () -> RobotState.getInstance().getAimState()
+            .equals(RobotState.ShootingState.SHOOTING_MOVING));
     @AutoLogOutput
-    private final Trigger inTrenchTrigger = new Trigger(this::inTrenchZone).debounce(0.3);
+    private final Trigger inTrenchTrigger;
     @AutoLogOutput
-    private final Trigger inBumpTrigger = new Trigger(this::inBumpZone).debounce(0.3);
+    private final Trigger inBumpTrigger;
 
     // PID Controllers
     private final ProfiledPIDController trenchController;
     private final ProfiledPIDController bumpController;
     private final ProfiledPIDController angleController;
 
-    public boolean inTrenchZone() {
-        return false;
-    }
-
-    private boolean inBumpZone() {
-        return false;
-    }
-
     public TeleopSwerve(
-        Swerve swerve, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
+        RobotFootprint footprint, Swerve swerve, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
         this.s_Swerve = swerve;
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
         this.omegaSupplier = omegaSupplier;
 
-        shootingOnTheMove.onTrue(setDriveState(DriveState.LOCK_SOTM)
+        inTrenchTrigger = Boundary.asTrigger(
+            () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_LEFT_TRIGGER_BOX),
+                RobotState.getInstance()::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+        .or(Boundary.asTrigger(
+            () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_RIGHT_TRIGGER_BOX),
+                RobotState.getInstance()::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER))
+            .debounce(0.3)
+            .onTrue(setDriveState(DriveState.TRENCH_ALIGN));
+
+        inBumpTrigger = Boundary.asTrigger(
+            () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
+                RobotState.getInstance()::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+            .debounce(0.3)
+            .onTrue(setDriveState(DriveState.BUMP_ALIGN));
+
+        sotmTrigger.onTrue(setDriveState(DriveState.LOCK_SOTM)
             .alongWith(Commands.runOnce(() -> sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians())));
-        inTrenchTrigger.onTrue(setDriveState(DriveState.TRENCH_ALIGN));
-        inBumpTrigger.onTrue(setDriveState(DriveState.BUMP_ALIGN));
-        shootingOnTheMove.negate().and(inTrenchTrigger.negate()).and(inBumpTrigger.negate())
+        sotmTrigger.negate().and(inTrenchTrigger.negate()).and(inBumpTrigger.negate())
             .onTrue(setDriveState(DriveState.NORMAL));
 
         trenchController =
@@ -153,7 +165,6 @@ public class TeleopSwerve extends Command {
                 omega = angleController.calculate(currentRad, errorTo0 < errorToPi ? 0.0 : Math.PI);
             }
             case BUMP_ALIGN -> {
-                
                 double closestCornerAngle = Math.round(currentRad / (Math.PI / 4.0)) * (Math.PI / 4.0);
                 if ((Math.round(closestCornerAngle / (Math.PI / 4.0)) % 2) == 0) {
                     closestCornerAngle += Math.PI / 4.0;
