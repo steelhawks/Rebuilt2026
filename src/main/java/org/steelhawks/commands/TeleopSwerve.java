@@ -30,23 +30,23 @@ import static org.steelhawks.commands.DriveCommands.joystickLimiter;
 public class TeleopSwerve extends Command {
 
     private static final LoggedTunableNumber driveKp =
-        new LoggedTunableNumber("TeleopSwerve/DrivekP", 5.0);
+        new LoggedTunableNumber("TeleopSwerve/DrivekP", 1.0);
     private static final LoggedTunableNumber driveKd =
         new LoggedTunableNumber("TeleopSwerve/DrivekD", 0.1);
     private static final LoggedTunableNumber angleKp =
-        new LoggedTunableNumber("TeleopSwerve/AnglekP", 2.0);
+        new LoggedTunableNumber("TeleopSwerve/AnglekP", 0.5);
     private static final LoggedTunableNumber angleKd =
-        new LoggedTunableNumber("TeleopSwerve/AnglekD", 0.01);
+        new LoggedTunableNumber("TeleopSwerve/AnglekD", 0.0);
 
     private static final LoggedTunableNumber maxMetersPerSec =
-        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 3.0);
     private static final LoggedTunableNumber maxMetersPerSecSq =
-        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSecSq", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSecSq", 4.0);
 
     private static final LoggedTunableNumber maxRadiansPerSec =
-        new LoggedTunableNumber("TeleopSwerve/MaxRadiansPerSec", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/MaxRadiansPerSec", 15.0);
     private static final LoggedTunableNumber maxRadiansPerSecSq =
-        new LoggedTunableNumber("TeleopSwerve/MaxRadiansPerSecSq", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/MaxRadiansPerSecSq", 20.0);
 
     private final Swerve s_Swerve;
     private final DoubleSupplier xSupplier, ySupplier, omegaSupplier;
@@ -85,11 +85,13 @@ public class TeleopSwerve extends Command {
         this.omegaSupplier = omegaSupplier;
 
         inTrenchTrigger = Boundary.asTrigger(
+            "LeftTrench",
             () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_LEFT_TRIGGER_BOX),
                 RobotState.getInstance()::getEstimatedPose,
                 footprint,
                 Boundary.Mode.PERIMETER)
         .or(Boundary.asTrigger(
+            "RightTrench",
             () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_RIGHT_TRIGGER_BOX),
                 RobotState.getInstance()::getEstimatedPose,
                 footprint,
@@ -118,6 +120,7 @@ public class TeleopSwerve extends Command {
                 new TrapezoidProfile.Constraints(
                     maxMetersPerSec.getAsDouble(),
                     maxMetersPerSecSq.getAsDouble()));
+        trenchController.setTolerance(0.05);
         bumpController =
             new ProfiledPIDController(
                 driveKp.getAsDouble(),
@@ -126,6 +129,7 @@ public class TeleopSwerve extends Command {
                 new TrapezoidProfile.Constraints(
                     maxMetersPerSec.getAsDouble(),
                     maxMetersPerSecSq.getAsDouble()));
+        bumpController.setTolerance(0.05);
         angleController =
             new ProfiledPIDController(
                 angleKp.getAsDouble(),
@@ -134,6 +138,8 @@ public class TeleopSwerve extends Command {
                 new TrapezoidProfile.Constraints(
                     maxRadiansPerSec.getAsDouble(),
                     maxRadiansPerSecSq.getAsDouble()));
+        angleController.enableContinuousInput(-Math.PI, Math.PI);
+        angleController.setTolerance(0.05);
         addRequirements(s_Swerve);
     }
 
@@ -148,7 +154,9 @@ public class TeleopSwerve extends Command {
         ) {
             angleController.setPID(angleKp.getAsDouble(), 0.0, angleKd.getAsDouble());
         }
-
+        if (driveKp.hasChanged(hashCode()) || driveKd.hasChanged(hashCode())) {
+            trenchController.setPID(driveKp.getAsDouble(), 0.0, driveKd.getAsDouble());
+        }
         Translation2d linearVelocity =
             DriveCommands.getLinearVelocityFromJoysticks(
                 Toggles.rateLimitSwerveEnabled.get()
@@ -167,6 +175,7 @@ public class TeleopSwerve extends Command {
                     RobotState.getInstance().getEstimatedPose().getY() >= FieldConstants.FIELD_WIDTH / 2.0
                         ? FieldConstants.FIELD_WIDTH - (FieldConstants.Trench.TRENCH_WIDTH / 2.0)
                         : FieldConstants.Trench.TRENCH_WIDTH / 2.0;
+                Logger.recordOutput("TeleopSwerve/Trench/SetpointTranslation", middleOfTrenchClearanceY);
                 linearVelocity =
                     new Translation2d(
                         linearVelocity.getX(),
@@ -175,7 +184,10 @@ public class TeleopSwerve extends Command {
                             middleOfTrenchClearanceY));
                 double errorTo0 = Math.abs(MathUtil.angleModulus(currentRad - 0.0));
                 double errorToPi = Math.abs(MathUtil.angleModulus(currentRad - Math.PI));
-                omega = angleController.calculate(currentRad, errorTo0 < errorToPi ? 0.0 : Math.PI);
+                double setpoint = errorTo0 < errorToPi ? 0.0 : Math.PI;
+                Logger.recordOutput("TeleopSwerve/Trench/SetpointAngle", setpoint);
+                omega =
+                    MathUtil.applyDeadband(angleController.calculate(currentRad, setpoint), Constants.Deadbands.ANGLE_DEADBAND);
             }
             case BUMP_ALIGN -> {
                 double closestCornerAngle = Math.round(currentRad / (Math.PI / 4.0)) * (Math.PI / 4.0);

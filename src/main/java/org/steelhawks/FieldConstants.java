@@ -81,7 +81,7 @@ public class FieldConstants {
 
 
         // reference is from driver station blue alliance
-        public static final double EXTRUDE_OFFSET = Units.inchesToMeters(5.0);
+        public static final double EXTRUDE_OFFSET = Units.inchesToMeters(50.0);
         public static final Rectangle2d TRENCH_RIGHT_TRIGGER_BOX =
             new Rectangle2d(
                 new Translation2d(TRENCH_START_X - EXTRUDE_OFFSET, 0.0),

@@ -76,11 +76,26 @@ public class Boundary {
      * @param mode which activation mode to use
      */
     public static Trigger asTrigger(
+        String loggedName,
         Supplier<Rectangle2d> boundary,
         Supplier<Pose2d> poseSupplier,
         RobotFootprint footprint,
-        Mode mode) {
-        return new Boundary(boundary, poseSupplier, footprint).asTrigger(mode);
+        Mode mode
+    ) {
+        var bound = new Boundary(boundary, poseSupplier, footprint);
+        if (!loggedName.isBlank()) {
+            bound.log(loggedName);
+        }
+        return bound.asTrigger(mode);
+    }
+
+    public static Trigger asTrigger(
+        Supplier<Rectangle2d> boundary,
+        Supplier<Pose2d> poseSupplier,
+        RobotFootprint footprint,
+        Mode mode
+    ) {
+        return asTrigger("", boundary, poseSupplier, footprint, mode);
     }
 
     /**

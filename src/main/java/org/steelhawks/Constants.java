@@ -98,8 +98,8 @@ public final class Constants {
 
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
-        public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(0.0);
-        public static final double ROBOT_WIDTH_WITH_BUMPERS = Units.inchesToMeters(0.0);
+        public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(34.0);
+        public static final double ROBOT_WIDTH_WITH_BUMPERS = Units.inchesToMeters(34.0);
 
         public static final Transform3d ROBOT_TO_TURRET;
         public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(80.0);
@@ -129,6 +129,7 @@ public final class Constants {
 
     public static final class Deadbands {
         public static final double DRIVE_DEADBAND = 0.3;
+        public static final double ANGLE_DEADBAND = 0.03;
     }
 
     public static final class LEDConstants {
