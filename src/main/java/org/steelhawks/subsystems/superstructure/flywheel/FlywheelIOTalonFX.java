@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -31,15 +32,15 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     private final TalonFXConfiguration config;
     private final TalonFX leftMotor, rightMotor;
 
-    public FlywheelIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(ShooterConstants.Flywheel.LEFT_FLYWHEEL_ID, bus.bus);
+    public FlywheelIOTalonFX(RobotConfig.CANBus bus, SubsystemConstants.FlywheelConstants constants) {
+        leftMotor = new TalonFX(constants.leftMotorId(), bus.bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         config.Feedback.SensorToMechanismRatio = ShooterConstants.Flywheel.REDUCTION;
-        config.Slot0.kP = ShooterConstants.Flywheel.kP.getAsDouble();
-        config.Slot0.kI = ShooterConstants.Flywheel.kI.getAsDouble();
-        config.Slot0.kD = ShooterConstants.Flywheel.kD.getAsDouble();
+        config.Slot0.kP = constants.kP();
+        config.Slot0.kI = constants.kI();
+        config.Slot0.kD = constants.kD();
 
         position = leftMotor.getPosition();
         velocity = leftMotor.getVelocity();
@@ -48,7 +49,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         torqueCurrent = leftMotor.getTorqueCurrent();
         temp = leftMotor.getDeviceTemp();
 
-        rightMotor = new TalonFX(ShooterConstants.Flywheel.RIGHT_FLYWHEEL_ID, bus.bus);
+        rightMotor = new TalonFX(constants.rightMotorId(), bus.bus);
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);

@@ -53,8 +53,31 @@ public class Flywheel extends SubsystemBase {
     private boolean nearTargetVelocity = false;
     private double targetVelocityRadPerSec = 0.0;
 
-    public Flywheel(FlywheelIO io) {
+    private static LoggedTunableNumber kP;
+    private static LoggedTunableNumber kI;
+    private static LoggedTunableNumber kD;
+    private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber kV;
+
+    private static LoggedTunableNumber velocityTolerance;
+    private static LoggedTunableNumber samplingTimeoutDuration;
+    private static LoggedTunableNumber timeoutAvgMinSamples;
+    SubsystemConstants.FlywheelConstants constants;
+
+    public Flywheel(FlywheelIO io, SubsystemConstants.FlywheelConstants constants) {
         this.io = io;
+        this.constants = constants;
+        kP = new LoggedTunableNumber("Flywheel/kP", constants.kP());
+        kI = new LoggedTunableNumber("Flywheel/kI", constants.kI());
+        kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
+        kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
+        kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
+        velocityTolerance
+            = new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
+        samplingTimeoutDuration =
+            new LoggedTunableNumber("Flywheel/SamplingTimeoutDurationSeconds", constants.samplingTimeoutDuration());
+        timeoutAvgMinSamples =
+            new LoggedTunableNumber("Flywheel/TimeoutMinSamplesForAvgCalculation", constants.samplingTimeoutDuration());
         routine =
             new SysIdRoutine(
                 new SysIdRoutine.Config(
@@ -122,7 +145,7 @@ public class Flywheel extends SubsystemBase {
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
-                            setTargetVelocity(ShooterConstants.Flywheel.stationaryHoodVelocityFactor * rps);
+                            setTargetVelocity(constants.stationaryHoodVelocityFactor() * rps);
                         }
                     }
                 }

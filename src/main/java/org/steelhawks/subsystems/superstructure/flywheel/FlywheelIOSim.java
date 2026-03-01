@@ -4,8 +4,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 public class FlywheelIOSim implements FlywheelIO {
@@ -18,7 +18,7 @@ public class FlywheelIOSim implements FlywheelIO {
     private boolean useTorqueCurrent = false;
     private double feedforward = 0;
 
-    public FlywheelIOSim() {
+    public FlywheelIOSim(SubsystemConstants.FlywheelConstants constants) {
         leftMotorSim = new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44(1),
@@ -38,9 +38,9 @@ public class FlywheelIOSim implements FlywheelIO {
         );
 
         velocityController = new PIDController(
-            ShooterConstants.Flywheel.kP.get(),
-            ShooterConstants.Flywheel.kI.get(),
-            ShooterConstants.Flywheel.kD.get()
+            constants.kP(),
+            constants.kI(),
+            constants.kD()
         );
     }
 

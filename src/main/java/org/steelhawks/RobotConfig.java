@@ -492,7 +492,7 @@ public class RobotConfig {
 
         @Override
         public Flywheel createFlywheel(FlywheelConstants c) {
-            return new Flywheel(new FlywheelIOTalonFX(canivoreBus));
+            return new Flywheel(new FlywheelIOTalonFX(canivoreBus, c), c);
         }
 
         @Override
@@ -555,7 +555,7 @@ public class RobotConfig {
 
         @Override
         public Flywheel createFlywheel(FlywheelConstants c) {
-            return new Flywheel(new FlywheelIOTalonFX(rioBus));
+            return new Flywheel(new FlywheelIOTalonFX(rioBus, c), c);
         }
 
         @Override
@@ -743,7 +743,7 @@ public class RobotConfig {
 
         @Override
         public Flywheel createFlywheel(FlywheelConstants c) {
-            return new Flywheel(new FlywheelIOTalonFX(rioBus));
+            return new Flywheel(new FlywheelIOTalonFX(rioBus, c), c);
         }
 
         @Override
@@ -805,7 +805,7 @@ public class RobotConfig {
 
         @Override
         public Flywheel createFlywheel(FlywheelConstants c) {
-            return new Flywheel(new FlywheelIOSim());
+            return new Flywheel(new FlywheelIOSim(c), c);
         }
 
         @Override
@@ -865,7 +865,7 @@ public class RobotConfig {
 
         @Override
         public Flywheel createFlywheel(FlywheelConstants c) {
-            return new Flywheel(new FlywheelIO() {});
+            return new Flywheel(new FlywheelIO() {}, c);
         }
 
         @Override

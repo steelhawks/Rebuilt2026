@@ -10,16 +10,14 @@ public class SubsystemConstants {
     public record FlywheelConstants(
         int leftMotorId,
         int rightMotorId,
-        double flywheelRadius,
-        double reduction,
         double idleMultiplier,
         double kP, double kI, double kD, double kS, double kV,
+        double velocityToleranceRadPerSec,
         double samplingTimeoutDuration,
         double timeoutAvgMinSamples,
-        int sampleCounts,
         double stationaryHoodVelocityFactor
     ) {
-        public static final FlywheelConstants UNSET = new FlywheelConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static final FlywheelConstants UNSET = new FlywheelConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public record TurretConstants(
@@ -60,7 +58,16 @@ public class SubsystemConstants {
             1, 1
         );
 
-        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
+            2, 3,
+            0.5,
+            0.2, 0, 0,
+            0.42995, 0.0090372 * 0.9, // 10% reduction from sysid value
+            20,
+            2,
+            10,
+            2
+        );
 
         public static final TurretConstants TURRET = TurretConstants.UNSET;
     }
@@ -82,7 +89,16 @@ public class SubsystemConstants {
             1, 1
         );
 
-        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
+            2, 3,
+            0.5,
+            0.2, 0, 0,
+            0.42995, 0.0090372 * 0.9, // 10% reduction from sysid value
+            20,
+            2,
+            10,
+            2
+        );
 
         public static final TurretConstants TURRET = TurretConstants.UNSET;
 
