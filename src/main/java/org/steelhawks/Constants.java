@@ -99,6 +99,7 @@ public final class Constants {
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(0.0);
+        public static final double ROBOT_WIDTH_WITH_BUMPERS = Units.inchesToMeters(0.0);
 
         public static final Transform3d ROBOT_TO_TURRET;
         public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(80.0);
@@ -150,13 +151,13 @@ public final class Constants {
 
     @SuppressWarnings("ConstantConditions")
     public static final class AutonConstants {
-        public static final LoggedTunableNumber TRANSLATION_KP = new LoggedTunableNumber("Swerve/TranslationkP", Constants.omega(5.0, 5.0));
-        public static final LoggedTunableNumber TRANSLATION_KI = new LoggedTunableNumber("Swerve/TranslationkI", Constants.omega(0.0, 0.0));
-        public static final LoggedTunableNumber TRANSLATION_KD = new LoggedTunableNumber("Swerve/TranslationkD", Constants.omega(0.1, 0.1));
+        public static final LoggedTunableNumber TRANSLATION_KP = new LoggedTunableNumber("Swerve/TranslationkP", 5.0);
+        public static final LoggedTunableNumber TRANSLATION_KI = new LoggedTunableNumber("Swerve/TranslationkI", 0.0);
+        public static final LoggedTunableNumber TRANSLATION_KD = new LoggedTunableNumber("Swerve/TranslationkD", 0.1);
 
-        public static final LoggedTunableNumber ROTATION_KP = new LoggedTunableNumber("Swerve/RotationkP", Constants.omega(5.0, 5.0));
-        public static final LoggedTunableNumber ROTATION_KI = new LoggedTunableNumber("Swerve/RotationkI", Constants.omega(0.0, 0.0));
-        public static final LoggedTunableNumber ROTATION_KD = new LoggedTunableNumber("Swerve/RotationkD", Constants.omega(0.1, 0.1));
+        public static final LoggedTunableNumber ROTATION_KP = new LoggedTunableNumber("Swerve/RotationkP", 5.0);
+        public static final LoggedTunableNumber ROTATION_KI = new LoggedTunableNumber("Swerve/RotationkI", 0.0);
+        public static final LoggedTunableNumber ROTATION_KD = new LoggedTunableNumber("Swerve/RotationkD", 0.1);
 
         public static final LoggedTunableNumber ANGLE_KP = new LoggedTunableNumber("Swerve/AnglekP", Constants.omega(1.0, 2.5));
         public static final LoggedTunableNumber ANGLE_KI = new LoggedTunableNumber("Swerve/AnglekI", Constants.omega(0.0, 0.0));

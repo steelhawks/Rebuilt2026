@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 
 public class DriveCommands {
 
-    private static final SlewRateLimiter joystickLimiter = new SlewRateLimiter(0.8);
+    public static final SlewRateLimiter joystickLimiter = new SlewRateLimiter(0.8);
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
 
     private static final double FF_START_DELAY = 2.0; // Secs
@@ -49,7 +49,7 @@ public class DriveCommands {
 
     private DriveCommands() {}
 
-    private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
+    public static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
         double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), Deadbands.DRIVE_DEADBAND);
         Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
@@ -80,21 +80,17 @@ public class DriveCommands {
                                 : ySupplier.getAsDouble());
                     lastVelocity = linearVelocity;
                 } else if (RobotState.getInstance().getAimState() == ShootingState.SHOOTING_MOVING) {
-                    // constant velocity mode, just lock magnitude not direction
                     double x = xSupplier.getAsDouble();
                     double y = ySupplier.getAsDouble();
                     double magnitude = Math.hypot(x, y);
 
-                    if (magnitude < Deadbands.DRIVE_DEADBAND) {
-                        linearVelocity = new Translation2d();
-                    } else {
+                    if (magnitude >= Deadbands.DRIVE_DEADBAND) {
                         Rotation2d direction = new Rotation2d(Math.atan2(y, x));
-                        double constantMagnitude = 0.5; // 50% speed
                         linearVelocity = new Pose2d(new Translation2d(), direction)
-                            .transformBy(new Transform2d(constantMagnitude, 0.0, new Rotation2d()))
+                            .transformBy(new Transform2d(0.5, 0.0, new Rotation2d()))
                             .getTranslation();
+                        lastVelocity = linearVelocity;
                     }
-                    lastVelocity = linearVelocity;
                 }
                 double omega =
                     MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Deadbands.DRIVE_DEADBAND);
@@ -138,7 +134,7 @@ public class DriveCommands {
             Set.of(s_Swerve));
     }
 
-    private static void runVelocity(Translation2d linearVelocity, double omega) {
+    public static void runVelocity(Translation2d linearVelocity, double omega) {
         ChassisSpeeds speeds =
             new ChassisSpeeds(
                 linearVelocity.getX() * s_Swerve.getMaxLinearSpeedMetersPerSec() * s_Swerve.getSpeedMultiplier(),

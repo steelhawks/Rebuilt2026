@@ -1,0 +1,84 @@
+{
+ "name":"choreo_alpha",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"44.8 kg",
+   "val":44.8
+  },
+  "inertia":{
+   "exp":"3.55 kg m ^ 2",
+   "val":3.55
+  },
+  "gearing":{
+   "exp":"6.12",
+   "val":6.12
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"4800 RPM",
+   "val":502.6548245743669
+  },
+  "tmax":{
+   "exp":"1.25 N * m",
+   "val":1.25
+  },
+  "cof":{
+   "exp":"0.899",
+   "val":0.899
+  },
+  "bumper":{
+   "front":{
+    "exp":"16.75 in",
+    "val":0.42545
+   },
+   "side":{
+    "exp":"16.75 in",
+    "val":0.42545
+   },
+   "back":{
+    "exp":"16.75 in",
+    "val":0.42545
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"..\\..\\java\\org\\steelhawks",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}

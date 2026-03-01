@@ -24,89 +24,33 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj TrenchMiddleClimb = new ChoreoTraj(
-	    "TrenchMiddleClimb",
+    public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
+	    "FourMeterTest",
 	    OptionalInt.empty(),
-	    4.79452,
-	    new Pose2d(4.385, 0.599, Rotation2d.fromRadians(0.124)),
-	    new Pose2d(1.41, 2.854, Rotation2d.fromRadians(0))
+	    2.23045,
+	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
+	    new Pose2d(5, 0.537, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj TrenchMiddleClimb$0 = new ChoreoTraj(
-	    "TrenchMiddleClimb",
+	public static final ChoreoTraj CenterPath = new ChoreoTraj(
+	    "CenterPath",
+	    OptionalInt.empty(),
+	    4.79102,
+	    new Pose2d(3.539, 0.66, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(2.581, 0.784, Rotation2d.fromRadians(1.597))
+	);
+	public static final ChoreoTraj CenterPath$0 = new ChoreoTraj(
+	    "CenterPath",
 	    OptionalInt.of(0),
-	    1.00403,
-	    new Pose2d(4.385, 0.599, Rotation2d.fromRadians(0.124)),
-	    new Pose2d(7.543, 1.098, Rotation2d.fromRadians(1.613))
+	    2.23506,
+	    new Pose2d(3.539, 0.66, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(7.601, 2.828, Rotation2d.fromRadians(-3.088))
 	);
-	public static final ChoreoTraj TrenchMiddleClimb$1 = new ChoreoTraj(
-	    "TrenchMiddleClimb",
+	public static final ChoreoTraj CenterPath$1 = new ChoreoTraj(
+	    "CenterPath",
 	    OptionalInt.of(1),
-	    0.7527699999999999,
-	    new Pose2d(7.543, 1.098, Rotation2d.fromRadians(1.613)),
-	    new Pose2d(7.629, 2.594, Rotation2d.fromRadians(1.849))
-	);
-	public static final ChoreoTraj TrenchMiddleClimb$2 = new ChoreoTraj(
-	    "TrenchMiddleClimb",
-	    OptionalInt.of(2),
-	    1.8423800000000001,
-	    new Pose2d(7.629, 2.594, Rotation2d.fromRadians(1.849)),
-	    new Pose2d(2.719, 1.189, Rotation2d.fromRadians(1.12))
-	);
-	public static final ChoreoTraj TrenchMiddleClimb$3 = new ChoreoTraj(
-	    "TrenchMiddleClimb",
-	    OptionalInt.of(3),
-	    1.1953400000000003,
-	    new Pose2d(2.719, 1.189, Rotation2d.fromRadians(1.12)),
-	    new Pose2d(1.41, 2.854, Rotation2d.fromRadians(0))
-	);
-	public static final ChoreoTraj NewPath = new ChoreoTraj(
-	    "NewPath",
-	    OptionalInt.empty(),
-	    5.14092,
-	    new Pose2d(3.282, 2.355, Rotation2d.fromRadians(0)),
-	    new Pose2d(3.285, 2.376, Rotation2d.fromRadians(0))
-	);
-	public static final ChoreoTraj BumpMiddleDepot = new ChoreoTraj(
-	    "BumpMiddleDepot",
-	    OptionalInt.empty(),
-	    7.39634,
-	    new Pose2d(3.605, 5.511, Rotation2d.fromRadians(-0.947)),
-	    new Pose2d(2.774, 3.979, Rotation2d.fromRadians(3.142))
-	);
-	public static final ChoreoTraj FastDepotClimbAuto = new ChoreoTraj(
-	    "FastDepotClimbAuto",
-	    OptionalInt.empty(),
-	    4.01573,
-	    new Pose2d(3.581, 6.003, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(1.338, 2.875, Rotation2d.fromRadians(0))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.empty(),
-	    5.84683,
-	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto$0 = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.of(0),
-	    1.18891,
-	    new Pose2d(3.581, 0.684, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto$1 = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.of(1),
-	    2.0964,
-	    new Pose2d(0.419, 0.675, Rotation2d.fromRadians(3.142)),
-	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64))
-	);
-	public static final ChoreoTraj OutpostTrenchClimbAuto$2 = new ChoreoTraj(
-	    "OutpostTrenchClimbAuto",
-	    OptionalInt.of(2),
-	    2.56152,
-	    new Pose2d(0.725, 5.808, Rotation2d.fromRadians(2.64)),
-	    new Pose2d(1.312, 4.597, Rotation2d.fromRadians(3.142))
+	    2.55596,
+	    new Pose2d(7.601, 2.828, Rotation2d.fromRadians(-3.088)),
+	    new Pose2d(2.581, 0.784, Rotation2d.fromRadians(1.597))
 	);
 
     /**
@@ -114,18 +58,10 @@ public record ChoreoTraj(
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("TrenchMiddleClimb", TrenchMiddleClimb),
-		Map.entry("TrenchMiddleClimb$0", TrenchMiddleClimb$0),
-		Map.entry("TrenchMiddleClimb$1", TrenchMiddleClimb$1),
-		Map.entry("TrenchMiddleClimb$2", TrenchMiddleClimb$2),
-		Map.entry("TrenchMiddleClimb$3", TrenchMiddleClimb$3),
-		Map.entry("NewPath", NewPath),
-		Map.entry("BumpMiddleDepot", BumpMiddleDepot),
-		Map.entry("FastDepotClimbAuto", FastDepotClimbAuto),
-		Map.entry("OutpostTrenchClimbAuto", OutpostTrenchClimbAuto),
-		Map.entry("OutpostTrenchClimbAuto$0", OutpostTrenchClimbAuto$0),
-		Map.entry("OutpostTrenchClimbAuto$1", OutpostTrenchClimbAuto$1),
-		Map.entry("OutpostTrenchClimbAuto$2", OutpostTrenchClimbAuto$2)
+    	Map.entry("FourMeterTest", FourMeterTest),
+		Map.entry("CenterPath", CenterPath),
+		Map.entry("CenterPath$0", CenterPath$0),
+		Map.entry("CenterPath$1", CenterPath$1)
     );
 
     /**

@@ -121,7 +121,7 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-            if (Toggles.shooterTuningMode.get()) {
+            if (!Toggles.shooterTuningMode.get()) {
                 Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
                 switch (RobotState.getInstance().getAimState()) {
                     case NOTHING -> {
