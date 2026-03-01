@@ -5,15 +5,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Indexer extends SubsystemBase {
 
-    private static final LoggedTunableNumber SPINDEXER_JAM_CURRENT =
-        new LoggedTunableNumber("Indexer/Spindexer/JamCurrent", 40.0); // TODO tune
-    private static final LoggedTunableNumber FEEDER_JAM_CURRENT =
-        new LoggedTunableNumber("Indexer/Feeder/JamCurrent", 40.0); // TODO tune
+    private static  LoggedTunableNumber SPINDEXER_JAM_CURRENT;// TODO tune
+    private static LoggedTunableNumber FEEDER_JAM_CURRENT; // TODO tune
 
     private LoggedTunableNumber tuningSpindexerVolts;
     private LoggedTunableNumber tuningFeederVolts;
@@ -35,7 +34,11 @@ public class Indexer extends SubsystemBase {
     private final FeederIOInputsAutoLogged feederInputs = new FeederIOInputsAutoLogged();
     private final IndexerIO io;
 
-    public Indexer(IndexerIO io) {
+    public Indexer(IndexerIO io, SubsystemConstants.IndexerConstants constants) {
+        SPINDEXER_JAM_CURRENT =
+            new LoggedTunableNumber("Indexer/Spindexer/JamCurrent", constants.indexerJamCurrent());
+        FEEDER_JAM_CURRENT =
+            new LoggedTunableNumber("Indexer/Feeder/JamCurrent", constants.indexerJamCurrent());
         this.io = io;
     }
 

@@ -35,6 +35,7 @@ import org.steelhawks.SubsystemConstants.HoodConstants;
 import org.steelhawks.SubsystemConstants.TurretConstants;
 import org.steelhawks.SubsystemConstants.FlywheelConstants;
 import org.steelhawks.SubsystemConstants.IntakeConstants;
+import org.steelhawks.SubsystemConstants.IndexerConstants;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -61,6 +62,7 @@ public class RobotConfig {
     private final TurretConstants turretConstants;
     private final HoodConstants hoodConstants;
     private final IntakeConstants intakeConstants;
+    private final IndexerConstants indexerConstants;
 
     public record System(SubsystemBase subsystem, CANBus canBus) {}
 
@@ -81,6 +83,7 @@ public class RobotConfig {
         this.turretConstants = builder.turretConstants;
         this.hoodConstants = builder.hoodConstants;
         this.intakeConstants = builder.intakeConstants;
+        this.indexerConstants = builder.indexerConstants;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -150,7 +153,7 @@ public class RobotConfig {
         if (!hasIndexer) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createIndexer());
+        return Optional.ofNullable(factory.createIndexer(indexerConstants));
     }
     public Optional<Intake> createIntake() {
         if (!hasIntake) {
@@ -174,7 +177,7 @@ public class RobotConfig {
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
-                .withIndexer(true)
+                .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
@@ -186,10 +189,10 @@ public class RobotConfig {
                 .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
                 .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
-                .withHood(false)
+                .withHood(false, null)
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.AlphaBot.INTAKE)
-                .withIndexer(true)
+                .withIndexer(true, SubsystemConstants.AlphaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
                 .build();
@@ -199,12 +202,12 @@ public class RobotConfig {
                 .withLEDStrip(false)
                 .withVision(true)
                 .withObjectVision(false)
-                .withFlywheel(false)
-                .withTurret(false)
-                .withHood(false)
+                .withFlywheel(false, null)
+                .withTurret(false, null)
+                .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false)
-                .withIndexer(false)
+                .withIntake(false, null)
+                .withIndexer(false, null)
                 .withAutos(false)
                 .withFactory(new ChassisBotFactory())
                 .build();
@@ -214,12 +217,12 @@ public class RobotConfig {
                 .withLEDStrip(true)
                 .withVision(true)
                 .withObjectVision(false)
-                .withFlywheel(false)
-                .withTurret(false)
-                .withHood(false)
+                .withFlywheel(false, null)
+                .withTurret(false, null)
+                .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false)
-                .withIndexer(false)
+                .withIntake(false, null)
+                .withIndexer(false, null)
                 .withAutos(false)
                 .withFactory(new LastYearFactory())
                 .build();
@@ -230,12 +233,12 @@ public class RobotConfig {
                 .withLEDStrip(false)
                 .withVision(false)
                 .withObjectVision(false)
-                .withFlywheel(true)
-                .withTurret(true)
-                .withHood(false)
+                .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
+                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+                .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false)
-                .withIndexer(false)
+                .withIntake(false, null)
+                .withIndexer(false, null)
                 .withAutos(false)
                 .withFactory(new TestBoardFactory())
                 .build();
@@ -249,7 +252,7 @@ public class RobotConfig {
                 .withHood(true, SubsystemConstants.SimBot.HOOD)
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.SimBot.INTAKE)
-                .withIndexer(true)
+                .withIndexer(true, SubsystemConstants.SimBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
                 .build();
@@ -262,12 +265,12 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(false)
-                .withFlywheel(true)
-                .withTurret(true)
-                .withHood(true)
+                .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)
+                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
+                .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
-                .withIntake(true)
-                .withIndexer(true)
+                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+                .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -276,12 +279,12 @@ public class RobotConfig {
                 .withLEDMatrix(false)
                 .withVision(true)
                 .withObjectVision(true)
-                .withFlywheel(true)
-                .withTurret(true)
-                .withHood(false)
+                .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
+                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+                .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(true)
-                .withIndexer(true)
+                .withIntake(true, SubsystemConstants.AlphaBot.INTAKE)
+                .withIndexer(true, SubsystemConstants.AlphaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -291,12 +294,12 @@ public class RobotConfig {
                 .withLEDStrip(true)
                 .withVision(true)
                 .withObjectVision(true)
-                .withFlywheel(false)
-                .withTurret(false)
-                .withHood(false)
+                .withFlywheel(false, FlywheelConstants.UNSET)
+                .withTurret(false, TurretConstants.UNSET)
+                .withHood(false, HoodConstants.UNSET)
                 .withOldIntake(false)
-                .withIntake(true)
-                .withIndexer(true)
+                .withIntake(true, IntakeConstants.UNSET)
+                .withIndexer(true, IndexerConstants.UNSET)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
                 .build();
@@ -321,6 +324,7 @@ public class RobotConfig {
         private FlywheelConstants flywheelConstants;
         private HoodConstants hoodConstants;
         private IntakeConstants intakeConstants;
+        private IndexerConstants indexerConstants;
         private SubsystemFactory factory = null;
 
         public Builder withSwerve(boolean enabled) {
@@ -348,30 +352,15 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withFlywheel(boolean enabled) {
-            this.hasFlywheel = enabled;
-            return this;
-        }
-
         public Builder withFlywheel(boolean enabled, FlywheelConstants flywheelConstants) {
             this.hasFlywheel = enabled;
             this.flywheelConstants = flywheelConstants;
             return this;
         }
 
-        public Builder withTurret(boolean enabled) {
-            this.hasTurret = enabled;
-            return this;
-        }
-
         public Builder withTurret(boolean enabled, TurretConstants turretConstants) {
             this.hasTurret = enabled;
             this.turretConstants = turretConstants;
-            return this;
-        }
-
-        public Builder withHood(boolean enabled) {
-            this.hasHood = enabled;
             return this;
         }
 
@@ -386,19 +375,15 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withIntake(boolean enabled) {
-            this.hasIntake = enabled;
-            return this;
-        }
-
         public Builder withIntake(boolean enabled, IntakeConstants intakeConstants) {
             this.hasIntake = enabled;
             this.intakeConstants = intakeConstants;
             return this;
         }
 
-        public Builder withIndexer(boolean enabled) {
+        public Builder withIndexer(boolean enabled, IndexerConstants indexer) {
             this.hasIndexer = enabled;
+            this.indexerConstants = indexer;
             return this;
         }
 
@@ -425,6 +410,8 @@ public class RobotConfig {
                 throw new IllegalStateException("hasHood = true but no HoodConstants provided");
             if (hasTurret && turretConstants == null)
                 throw new IllegalStateException("hasTurret = true but no TurretConstants provided");
+            if (hasIndexer && indexerConstants == null)
+                throw new IllegalStateException("hasIndexer = true but no IndexerConstants provided.");
 
             return new RobotConfig(this);
         }
@@ -452,7 +439,7 @@ public class RobotConfig {
         Hood createHood(HoodConstants c);
         OldIntake createOldIntake();
         Intake createIntake(IntakeConstants c);
-        Indexer createIndexer();
+        Indexer createIndexer(IndexerConstants c);
     }
 
     // OmegaBot factory
@@ -516,7 +503,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIO() {}, c); }
     }
 
     // AlphaBot factory
@@ -579,7 +566,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return new Indexer(new IndexerIOTalonFX(rioBus)); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(rioBus, c), c); }
     }
 
     private static class ChassisBotFactory implements SubsystemFactory {
@@ -641,7 +628,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return null; }
+        public Indexer createIndexer(IndexerConstants c) { return null; }
     }
 
     private static class LastYearFactory implements SubsystemFactory {
@@ -703,7 +690,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return null; }
+        public Indexer createIndexer(IndexerConstants c) { return null; }
     }
 
     private static class TestBoardFactory implements SubsystemFactory {
@@ -767,7 +754,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return null; }
+        public Indexer createIndexer(IndexerConstants c) { return null; }
     }
 
     private static class SimBotFactory implements SubsystemFactory {
@@ -829,7 +816,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return new Indexer(new IndexerIOSim()); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOSim(), c); }
     }
 
     private static class ReplayFactory implements SubsystemFactory {
@@ -889,6 +876,6 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIO() {}, c); }
     }
 }

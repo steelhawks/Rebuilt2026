@@ -49,6 +49,13 @@ public class SubsystemConstants {
         public static final IntakeConstants UNSET = new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0);
     }
 
+    public record IndexerConstants(
+        int indexerId, int feederId,
+        double indexerJamCurrent, double feederJamCurrent
+    ) {
+        public static final IndexerConstants UNSET = new IndexerConstants(0, 0, 0, 0);
+    }
+
     public static final class AlphaBot {
         public static final IntakeConstants INTAKE = new IntakeConstants(
             60, 61, 62,
@@ -56,7 +63,7 @@ public class SubsystemConstants {
             5, 0, 0,
             0.05, 0.08,
             60, 0.003,
-            1, 1
+            0.6, 0.6
         );
 
         public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
@@ -78,6 +85,11 @@ public class SubsystemConstants {
             0.1,
             40
         );
+
+        public static final IndexerConstants INDEXER = new IndexerConstants(
+            45, 26,
+            40, 40
+        );
     }
 
     public static final class OmegaBot {
@@ -89,6 +101,7 @@ public class SubsystemConstants {
             50, 0, 5,
             3, 0, 0
         );
+        public static final IndexerConstants INDEXER = IndexerConstants.UNSET;
     }
 
     public static final class SimBot {
@@ -122,5 +135,10 @@ public class SubsystemConstants {
         );
 
         public static final HoodConstants HOOD = HoodConstants.UNSET;
+
+        public static final IndexerConstants INDEXER = new IndexerConstants(
+            45, 26,
+            40, 40
+        );
     }
 }

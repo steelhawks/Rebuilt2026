@@ -42,7 +42,6 @@ public class Turret extends SubsystemBase {
 
     private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
     private static final Rotation2d maxRotation = new Rotation2d(Constants.value(Math.PI, 2 * Math.PI) + (Math.PI / 60.0));
-    public static int motorId = 1;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();

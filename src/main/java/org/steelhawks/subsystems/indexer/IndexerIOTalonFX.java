@@ -9,6 +9,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 public class IndexerIOTalonFX implements IndexerIO {
@@ -27,8 +28,6 @@ public class IndexerIOTalonFX implements IndexerIO {
     private final StatusSignal<Current> feederTorqueCurrent;
     private final StatusSignal<Temperature> feederTemp;
 
-	private final int SPINDEXER_ID = 45;
-    private final int FEEDER_ID = 26;
 	private final TalonFX spindexerMotor;
     private final TalonFX feederMotor;
 	private final TalonFXConfiguration spindexerConfig;
@@ -37,9 +36,9 @@ public class IndexerIOTalonFX implements IndexerIO {
 	private final DutyCycleOut spindexerDutyCycleOut;
     private final DutyCycleOut feederDutyCycleOut;
 
-	public IndexerIOTalonFX(RobotConfig.CANBus canBus) {
-        spindexerMotor = new TalonFX(SPINDEXER_ID, canBus.bus);
-        feederMotor = new TalonFX(FEEDER_ID, canBus.bus);
+	public IndexerIOTalonFX(RobotConfig.CANBus canBus, SubsystemConstants.IndexerConstants constants) {
+        spindexerMotor = new TalonFX(constants.indexerId(), canBus.bus);
+        feederMotor = new TalonFX(constants.feederId(), canBus.bus);
 
 		spindexerConfig = new TalonFXConfiguration();
 		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
