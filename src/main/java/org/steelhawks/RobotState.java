@@ -59,6 +59,7 @@ public class RobotState extends VirtualSubsystem {
         NOTHING
     }
 
+    private ShootingState lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
     private ShooterMode currentShooterMode = ShooterMode.TO_HUB;
     private ShootingState shootingState = ShootingState.NOTHING;
     private ShiftState shiftState = ShiftState.AUTO;
@@ -120,6 +121,9 @@ public class RobotState extends VirtualSubsystem {
                 shootingState.name() + " -> " + state.name());
             shootingState = state;
             Logger.recordOutput("AimState/CurrentMode", state.name());
+            if (state != ShootingState.SHOOTING) {
+                lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
+            }
         }
     }
 
@@ -129,11 +133,15 @@ public class RobotState extends VirtualSubsystem {
         }
         double linearVelocity = Math.hypot(
             currentChassisSpeeds.vxMetersPerSecond,
-            currentChassisSpeeds.vyMetersPerSecond
-        );
-        boolean isMoving = linearVelocity > movingVelocityThreshold;
+            currentChassisSpeeds.vyMetersPerSecond);
         if (shootingState == ShootingState.SHOOTING) {
-            return isMoving ? ShootingState.SHOOTING_MOVING : ShootingState.SHOOTING_STATIONARY;
+            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
+                ? movingVelocityThreshold * 0.5
+                : movingVelocityThreshold;
+            lastDerivedShootingState = linearVelocity > threshold
+                ? ShootingState.SHOOTING_MOVING
+                : ShootingState.SHOOTING_STATIONARY;
+            return lastDerivedShootingState;
         }
         return shootingState;
     }
