@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -17,7 +18,10 @@ import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.swerve.Swerve;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
+import org.steelhawks.util.geometry.RobotFootprint;
+import org.steelhawks.util.geometry.Boundary;
 
 import java.util.function.DoubleSupplier;
 
@@ -60,47 +64,50 @@ public class TeleopSwerve extends Command {
     private static DriveState currentDriveState = DriveState.NORMAL;
 
     @AutoLogOutput
-    private final Trigger shootingOnTheMove = new Trigger(
-        () -> RobotState.getInstance().getAimState().equals(RobotState.ShootingState.SHOOTING_MOVING));
+    private final Trigger sotmTrigger = new Trigger(
+        () -> RobotState.getInstance().getAimState()
+            .equals(RobotState.ShootingState.SHOOTING_MOVING));
     @AutoLogOutput
-    private final Trigger inTrenchTrigger = new Trigger(this::inTrenchZone).debounce(0.3);
+    private final Trigger inTrenchTrigger;
     @AutoLogOutput
-    private final Trigger inBumpTrigger = new Trigger(this::inBumpZone).debounce(0.3);
+    private final Trigger inBumpTrigger;
 
     // PID Controllers
     private final ProfiledPIDController trenchController;
     private final ProfiledPIDController bumpController;
     private final ProfiledPIDController angleController;
 
-    public boolean inTrenchZone() {
-        return false;
-    }
-
-    private boolean inBumpZone() {
-        return false;
-    }
-
     public TeleopSwerve(
-        Swerve swerve, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
+        RobotFootprint footprint, Swerve swerve, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
         this.s_Swerve = swerve;
         this.xSupplier = xSupplier;
         this.ySupplier = ySupplier;
         this.omegaSupplier = omegaSupplier;
 
-        shootingOnTheMove.onTrue(setDriveState(DriveState.LOCK_SOTM)
-            .alongWith(Commands.runOnce(() -> {
-                sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians();
-                double x = xSupplier.getAsDouble();
-                double y = ySupplier.getAsDouble();
-                double magnitude = Math.hypot(x, y);
-                sotmSpeedSnapshotNormalized = MathUtil.clamp(magnitude, 0.0, 1.0);
-                sotmDirectionSnapshot = magnitude > Constants.Deadbands.DRIVE_DEADBAND
-                    ? new Rotation2d(Math.atan2(y, x))
-                    : new Rotation2d(sotmHeadingSnapshot); // fallback to robot heading if stick is near center
-            })));
-        inTrenchTrigger.onTrue(setDriveState(DriveState.TRENCH_ALIGN));
-        inBumpTrigger.onTrue(setDriveState(DriveState.BUMP_ALIGN));
-        shootingOnTheMove.negate().and(inTrenchTrigger.negate()).and(inBumpTrigger.negate())
+        inTrenchTrigger = Boundary.asTrigger(
+            () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_LEFT_TRIGGER_BOX),
+                RobotState.getInstance()::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+        .or(Boundary.asTrigger(
+            () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_RIGHT_TRIGGER_BOX),
+                RobotState.getInstance()::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER))
+            .debounce(0.3)
+            .onTrue(setDriveState(DriveState.TRENCH_ALIGN));
+
+        inBumpTrigger = Boundary.asTrigger(
+            () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
+                RobotState.getInstance()::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+            .debounce(0.3)
+            .onTrue(setDriveState(DriveState.BUMP_ALIGN));
+
+        sotmTrigger.onTrue(setDriveState(DriveState.LOCK_SOTM)
+            .alongWith(Commands.runOnce(() -> sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians())));
+        sotmTrigger.negate().and(inTrenchTrigger.negate()).and(inBumpTrigger.negate())
             .onTrue(setDriveState(DriveState.NORMAL));
 
         trenchController =

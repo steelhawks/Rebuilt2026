@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.steelhawks.FieldConstants;
 
+import static edu.wpi.first.units.Units.Meters;
+
 public class AllianceFlip {
 
     public static double applyX(double x) {
@@ -12,6 +14,17 @@ public class AllianceFlip {
 
     public static double applyY(double y) {
         return shouldFlip() ? FieldConstants.FIELD_WIDTH - y : y;
+    }
+
+    public static Rectangle2d apply(Rectangle2d rectangle) {
+        Translation2d center = apply(
+            new Translation2d(
+                rectangle.getCenter().getX(),
+                rectangle.getCenter().getY()));
+        return new Rectangle2d(
+            new Pose2d(center, apply(rectangle.getRotation())),
+                rectangle.getMeasureXWidth().in(Meters),
+                rectangle.getMeasureYWidth().in(Meters));
     }
 
     public static Translation2d apply(Translation2d translation) {

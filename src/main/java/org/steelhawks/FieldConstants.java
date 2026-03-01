@@ -77,6 +77,20 @@ public class FieldConstants {
 
         public static final double TRENCH_START_X = Units.inchesToMeters(182.11 - (TRENCH_WIDTH / 2.0));
         public static final double TRENCH_END_X = Units.inchesToMeters(182.11 + (TRENCH_WIDTH / 2.0));
+
+
+
+        // reference is from driver station blue alliance
+        public static final double EXTRUDE_OFFSET = Units.inchesToMeters(5.0);
+        public static final Rectangle2d TRENCH_RIGHT_TRIGGER_BOX =
+            new Rectangle2d(
+                new Translation2d(TRENCH_START_X - EXTRUDE_OFFSET, 0.0),
+                new Translation2d(TRENCH_END_X + EXTRUDE_OFFSET, TRENCH_LENGTH));
+
+        public static final Rectangle2d TRENCH_LEFT_TRIGGER_BOX =
+            new Rectangle2d(
+                new Translation2d(TRENCH_START_X - EXTRUDE_OFFSET, FIELD_WIDTH),
+                new Translation2d(TRENCH_END_X + EXTRUDE_OFFSET, FIELD_WIDTH - TRENCH_WIDTH));
     }
 
     public final static class Bump {

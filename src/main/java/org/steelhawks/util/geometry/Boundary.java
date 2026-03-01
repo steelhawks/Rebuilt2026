@@ -32,7 +32,7 @@ public class Boundary {
         PERIMETER
     }
 
-    private final Rectangle2d boundary;
+    private final Supplier<Rectangle2d> boundary;
     private final Supplier<Pose2d> poseSupplier;
     private final RobotFootprint footprint;
 
@@ -41,7 +41,7 @@ public class Boundary {
      * @param poseSupplier supplier of the robot's current field-frame {@link Pose2d}
      * @param footprint the robot's dynamic footprint geometry
      */
-    public Boundary(Rectangle2d boundary, Supplier<Pose2d> poseSupplier, RobotFootprint footprint) {
+    public Boundary(Supplier<Rectangle2d> boundary, Supplier<Pose2d> poseSupplier, RobotFootprint footprint) {
         this.boundary = boundary;
         this.poseSupplier = poseSupplier;
         this.footprint = footprint;
@@ -53,8 +53,8 @@ public class Boundary {
      */
     public BooleanSupplier isActive(Mode mode) {
         return switch (mode) {
-            case CENTER_ONLY -> () -> boundary.contains(poseSupplier.get().getTranslation());
-            case PERIMETER -> () -> footprint.getPoints(poseSupplier.get()).stream().anyMatch(boundary::contains);
+            case CENTER_ONLY -> () -> boundary.get().contains(poseSupplier.get().getTranslation());
+            case PERIMETER -> () -> footprint.getPoints(poseSupplier.get()).stream().anyMatch(boundary.get()::contains);
         };
     }
 
@@ -76,7 +76,7 @@ public class Boundary {
      * @param mode which activation mode to use
      */
     public static Trigger asTrigger(
-        Rectangle2d boundary,
+        Supplier<Rectangle2d> boundary,
         Supplier<Pose2d> poseSupplier,
         RobotFootprint footprint,
         Mode mode) {
@@ -100,14 +100,14 @@ public class Boundary {
         List<Translation2d> footprintPoints = footprint.getPoints(robotPose);
         Logger.recordOutput(key + "/footprint", footprintPoints.toArray(new Translation2d[0]));
 
-        Logger.recordOutput(key + "/centerActive", boundary.contains(robotPose.getTranslation()));
-        Logger.recordOutput(key + "/perimeterActive", footprintPoints.stream().anyMatch(boundary::contains));
+        Logger.recordOutput(key + "/centerActive", boundary.get().contains(robotPose.getTranslation()));
+        Logger.recordOutput(key + "/perimeterActive", footprintPoints.stream().anyMatch(boundary.get()::contains));
     }
 
     private Translation2d[] getBoundaryCorners() {
-        Translation2d center = boundary.getCenter().getTranslation();
-        double halfX = boundary.getMeasureXWidth().in(Meters) / 2.0;
-        double halfY = boundary.getMeasureYWidth().in(Meters) / 2.0;
+        Translation2d center = boundary.get().getCenter().getTranslation();
+        double halfX = boundary.get().getMeasureXWidth().in(Meters) / 2.0;
+        double halfY = boundary.get().getMeasureYWidth().in(Meters) / 2.0;
 
         return new Translation2d[]{
             new Translation2d(center.getX() - halfX, center.getY() - halfY),
