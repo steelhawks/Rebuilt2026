@@ -4,11 +4,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotConfig;
 import org.steelhawks.subsystems.swerve.Swerve;
 
 import static edu.wpi.first.units.Units.Inches;
@@ -27,7 +26,7 @@ public class IntakeIOSim implements IntakeIO {
     private final IntakeVisualizer visualizer;
     private boolean enablePid;
 
-    public IntakeIOSim() {
+    public IntakeIOSim(RobotConfig.IntakeConstants constants) {
         intakeSimulation = IntakeSimulation.OverTheBumperIntake(
             "Fuel",
             Swerve.getDriveSimulation(),
@@ -65,9 +64,9 @@ public class IntakeIOSim implements IntakeIO {
         );
 
         rackPidController = new PIDController(
-            IntakeConstants.kP.get(),
-            IntakeConstants.kI.get(),
-            IntakeConstants.kD.get()
+            constants.kP(),
+            constants.kI(),
+            constants.kD()
         );
         visualizer = new IntakeVisualizer(
             () -> leftMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN,

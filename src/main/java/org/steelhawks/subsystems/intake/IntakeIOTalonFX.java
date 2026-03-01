@@ -54,10 +54,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFX rightMotor;
     private final TalonFX intakeMotor;
 
-    public IntakeIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(IntakeConstants.LEFT_ID, bus.bus);
-        rightMotor = new TalonFX(IntakeConstants.RIGHT_ID, bus.bus);
-        intakeMotor = new TalonFX(IntakeConstants.INTAKE_ID, bus.bus);
+    public IntakeIOTalonFX(RobotConfig.CANBus bus, RobotConfig.IntakeConstants constants) {
+        leftMotor = new TalonFX(constants.leftId(), bus.bus);
+        rightMotor = new TalonFX(constants.rightId(), bus.bus);
+        intakeMotor = new TalonFX(constants.driveId(), bus.bus);
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         leftConfig = new TalonFXConfiguration();
@@ -65,9 +65,9 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         leftConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         leftConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        leftConfig.Slot0.kP = IntakeConstants.kP.getAsDouble();
-        leftConfig.Slot0.kI = IntakeConstants.kI.getAsDouble();
-        leftConfig.Slot0.kD = IntakeConstants.kD.getAsDouble();
+        leftConfig.Slot0.kP = constants.kP();
+        leftConfig.Slot0.kI = constants.kI();
+        leftConfig.Slot0.kD = constants.kD();
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
