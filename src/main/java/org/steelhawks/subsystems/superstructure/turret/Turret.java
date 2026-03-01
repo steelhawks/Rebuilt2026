@@ -15,6 +15,7 @@ import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.RobotState.ShooterMode;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.Maths;
