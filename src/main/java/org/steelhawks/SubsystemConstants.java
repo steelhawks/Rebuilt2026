@@ -1,6 +1,11 @@
 package org.steelhawks;
 
-
+/**
+ * This class contains constants that are selected by RobotConfig and passed to the relevant subsystem upon init.
+ * Note that these records mostly consist of tunable values. For physical constants, refer to the Constants class in the subsystem folder.
+ *
+ * @author Adam Aptowitz
+ */
 public class SubsystemConstants {
     public record FlywheelConstants(
         int leftMotorId,
@@ -41,9 +46,12 @@ public class SubsystemConstants {
         double currentHomingThreshold,
         double velocityStallingThreshold,
         double intakeSpeed, double outtakeSpeed
-    ) { }
+    ) {
+        public static final IntakeConstants UNSET = new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0);
+    }
+
     public static final class AlphaBot {
-        public static final IntakeConstants INTAKE_ALPHA = new IntakeConstants(
+        public static final IntakeConstants INTAKE = new IntakeConstants(
             60, 61, 62,
             0, 0, 0,
             5, 0, 0,
@@ -51,5 +59,33 @@ public class SubsystemConstants {
             60, 0.003,
             1, 1
         );
+
+        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+
+        public static final TurretConstants TURRET = TurretConstants.UNSET;
+    }
+
+    public static final class OmegaBot {
+        public static final IntakeConstants INTAKE = IntakeConstants.UNSET;
+        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final TurretConstants TURRET = TurretConstants.UNSET;
+        public static final HoodConstants HOOD = HoodConstants.UNSET;
+    }
+
+    public static final class SimBot {
+        public static final IntakeConstants INTAKE = new IntakeConstants(
+            60, 61, 62,
+            0, 0, 0,
+            5, 0, 0,
+            0.05, 0.08,
+            60, 0.003,
+            1, 1
+        );
+
+        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+
+        public static final TurretConstants TURRET = TurretConstants.UNSET;
+
+        public static final HoodConstants HOOD = HoodConstants.UNSET;
     }
 }
