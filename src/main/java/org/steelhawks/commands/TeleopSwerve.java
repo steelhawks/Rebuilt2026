@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
@@ -25,13 +26,13 @@ import static org.steelhawks.commands.DriveCommands.joystickLimiter;
 public class TeleopSwerve extends Command {
 
     private static final LoggedTunableNumber driveKp =
-        new LoggedTunableNumber("TeleopSwerve/DrivekP", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/DrivekP", 5.0);
     private static final LoggedTunableNumber driveKd =
-        new LoggedTunableNumber("TeleopSwerve/DrivekP", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/DrivekD", 0.1);
     private static final LoggedTunableNumber angleKp =
-        new LoggedTunableNumber("TeleopSwerve/AnglekP", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/AnglekP", 2.0);
     private static final LoggedTunableNumber angleKd =
-        new LoggedTunableNumber("TeleopSwerve/AnglekD", 0.0);
+        new LoggedTunableNumber("TeleopSwerve/AnglekD", 0.01);
 
     private static final LoggedTunableNumber maxMetersPerSec =
         new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 0.0);
@@ -46,6 +47,8 @@ public class TeleopSwerve extends Command {
     private final Swerve s_Swerve;
     private final DoubleSupplier xSupplier, ySupplier, omegaSupplier;
     private double sotmHeadingSnapshot = 0.0;
+    private double sotmSpeedSnapshotNormalized = 0.0;
+    private Rotation2d sotmDirectionSnapshot = new Rotation2d();
 
     public enum DriveState {
         NORMAL,
@@ -85,7 +88,16 @@ public class TeleopSwerve extends Command {
         this.omegaSupplier = omegaSupplier;
 
         shootingOnTheMove.onTrue(setDriveState(DriveState.LOCK_SOTM)
-            .alongWith(Commands.runOnce(() -> sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians())));
+            .alongWith(Commands.runOnce(() -> {
+                sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians();
+                double x = xSupplier.getAsDouble();
+                double y = ySupplier.getAsDouble();
+                double magnitude = Math.hypot(x, y);
+                sotmSpeedSnapshotNormalized = MathUtil.clamp(magnitude, 0.0, 1.0);
+                sotmDirectionSnapshot = magnitude > Constants.Deadbands.DRIVE_DEADBAND
+                    ? new Rotation2d(Math.atan2(y, x))
+                    : new Rotation2d(sotmHeadingSnapshot); // fallback to robot heading if stick is near center
+            })));
         inTrenchTrigger.onTrue(setDriveState(DriveState.TRENCH_ALIGN));
         inBumpTrigger.onTrue(setDriveState(DriveState.BUMP_ALIGN));
         shootingOnTheMove.negate().and(inTrenchTrigger.negate()).and(inBumpTrigger.negate())
@@ -124,6 +136,12 @@ public class TeleopSwerve extends Command {
 
     @Override
     public void execute() {
+        if (angleKp.hasChanged(hashCode())
+            || angleKd.hasChanged(hashCode())
+        ) {
+            angleController.setPID(angleKp.getAsDouble(), 0.0, angleKd.getAsDouble());
+        }
+
         Translation2d linearVelocity =
             DriveCommands.getLinearVelocityFromJoysticks(
                 Toggles.rateLimitSwerveEnabled.get()
@@ -153,7 +171,6 @@ public class TeleopSwerve extends Command {
                 omega = angleController.calculate(currentRad, errorTo0 < errorToPi ? 0.0 : Math.PI);
             }
             case BUMP_ALIGN -> {
-                
                 double closestCornerAngle = Math.round(currentRad / (Math.PI / 4.0)) * (Math.PI / 4.0);
                 if ((Math.round(closestCornerAngle / (Math.PI / 4.0)) % 2) == 0) {
                     closestCornerAngle += Math.PI / 4.0;
@@ -161,7 +178,6 @@ public class TeleopSwerve extends Command {
                 omega = angleController.calculate(currentRad, closestCornerAngle);
             }
             case LOCK_SOTM -> {
-                // constant velocity mode, just lock magnitude not direction
                 double x = xSupplier.getAsDouble();
                 double y = ySupplier.getAsDouble();
                 double magnitude = Math.hypot(x, y);
@@ -169,16 +185,20 @@ public class TeleopSwerve extends Command {
                 if (magnitude < Constants.Deadbands.DRIVE_DEADBAND) {
                     linearVelocity = new Translation2d();
                 } else {
+                    // Allow driver to steer and vary speed, but cap at the snapshotted speed
+                    // so predictInterceptPoint doesn't get a wildly different velocity
+                    double clampedMagnitude = Math.min(magnitude, sotmSpeedSnapshotNormalized);
                     Rotation2d direction = new Rotation2d(Math.atan2(y, x));
-                    double constantMagnitude = 0.5; // 50% speed
                     linearVelocity = new Pose2d(new Translation2d(), direction)
-                        .transformBy(new Transform2d(constantMagnitude, 0.0, new Rotation2d()))
+                        .transformBy(new Transform2d(clampedMagnitude, 0.0, new Rotation2d()))
                         .getTranslation();
                 }
-                // TODO if we dont get 360 or more degrees of rotation, we need to add a
-                //  closed loop function that calculates and coordinates w/ the turret to
-                //  move the robot to an angle that allows the turret to successfully aim and lock onto the hub.
                 omega = angleController.calculate(currentRad, sotmHeadingSnapshot);
+                var chassisSpeeds = s_Swerve.getChassisSpeeds();
+                double actualMagnitude = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+                Logger.recordOutput("TeleopSwerve/HeadingSnapshot", sotmHeadingSnapshot);
+                Logger.recordOutput("TeleopSwerve/SpeedSnapshotNormalized", sotmSpeedSnapshotNormalized);
+                Logger.recordOutput("TeleopSwerve/ActualChassisSpeedMagnitude", actualMagnitude);
             }
         }
         DriveCommands.runVelocity(linearVelocity, omega);
