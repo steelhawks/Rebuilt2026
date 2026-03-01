@@ -42,13 +42,14 @@ public class SubsystemConstants {
         double velocityStallingThreshold,
         double intakeSpeed, double outtakeSpeed
     ) { }
-
-    public static final IntakeConstants INTAKE_ALPHA = new IntakeConstants(
-        60, 61, 62,
-        0, 0, 0,
-        5, 0, 0,
-        0.05, 0.08,
-        60, 0.003,
-        1, 1
-    );
+    public static final class AlphaBot {
+        public static final IntakeConstants INTAKE_ALPHA = new IntakeConstants(
+            60, 61, 62,
+            0, 0, 0,
+            5, 0, 0,
+            0.05, 0.08,
+            60, 0.003,
+            1, 1
+        );
+    }
 }

@@ -31,7 +31,10 @@ import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
-import org.steelhawks.SubsystemConstants.*;
+import org.steelhawks.SubsystemConstants.HoodConstants;
+import org.steelhawks.SubsystemConstants.TurretConstants;
+import org.steelhawks.SubsystemConstants.FlywheelConstants;
+import org.steelhawks.SubsystemConstants.IntakeConstants;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -185,7 +188,7 @@ public class RobotConfig {
                 .withTurret(true)
                 .withHood(false)
                 .withOldIntake(false)
-                .withIntake(true, SubsystemConstants.INTAKE_ALPHA)
+                .withIntake(true, SubsystemConstants.AlphaBot.INTAKE_ALPHA)
                 .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new AlphaBotFactory())
@@ -245,7 +248,7 @@ public class RobotConfig {
                 .withTurret(true, TurretConstants.UNSET)
                 .withHood(true, HoodConstants.UNSET)
                 .withOldIntake(false)
-                .withIntake(true, SubsystemConstants.INTAKE_ALPHA)
+                .withIntake(true, SubsystemConstants.AlphaBot.INTAKE_ALPHA)
                 .withIndexer(true)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
