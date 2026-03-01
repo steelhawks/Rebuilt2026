@@ -39,7 +39,7 @@ public class ShooterConstants {
 
         public static final int sampleCounts = 50;
 
-        public static final double stationaryHoodVelocityFactor = 1.1;
+        public static final double stationaryHoodVelocityFactor = 1.0;
     }
 
     public static final class Hood {

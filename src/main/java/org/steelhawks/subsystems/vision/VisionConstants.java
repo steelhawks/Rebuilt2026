@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.vision;
 
+import edu.wpi.first.wpilibj.Filesystem;
 import org.dyn4j.geometry.Rotation;
 import org.steelhawks.RobotConfig;
 import org.steelhawks.RobotState;
@@ -20,14 +21,25 @@ import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIOPhoton;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionSim;
 import org.steelhawks.util.LoggedTunableNumber;
 
+import java.io.IOException;
+import java.nio.file.FileSystem;
+
 public class VisionConstants {
 
     public static LoggedTunableNumber baselineDropOdomFactor
         = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.1);
 
     // AprilTag layout
-    public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
-        AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static AprilTagFieldLayout APRIL_TAG_LAYOUT;
+
+    static {
+//        try {
+//            APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadFromResource("/home/lvuser/deploy/field_map.json");
+            APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+    }
 
     public static int[] ALL_ALLOWED_TAGS = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
@@ -293,18 +305,18 @@ public class VisionConstants {
 
     private static final CameraConfig[] ALPHA_CAMERA_CONFIG = {
         new CameraConfig(
-            "FrontLeft", // rename on photon client
+            "FrontRight",
             new Transform3d(
                 // 10.1 inches left from the center of robot
                 // 10.4 inches upwards from the center of robot
                 // 8.5 inches tall
                 // measured by hand may be inaccurate
-                Units.inchesToMeters(-10.1), // prev -9.7
-                Units.inchesToMeters(10.4), // prev 11.125
+                Units.inchesToMeters(10.1), // prev -9.7
+                Units.inchesToMeters(-10.4), // prev 11.125
                 Units.inchesToMeters(8.5), // prev 9
                 new Rotation3d(
                     Units.degreesToRadians(0),
-                    Units.degreesToRadians(15),
+                    Units.degreesToRadians(-15),
                     Units.degreesToRadians(0)
                 )
             ),
@@ -313,14 +325,14 @@ public class VisionConstants {
             CameraType.PHOTON
         ),
         new CameraConfig(
-            "FrontRight", // rename on photon client
+            "FrontLeft",
             new Transform3d(
                 Units.inchesToMeters(10.1),
                 Units.inchesToMeters(10.4), // prev 10.65
                 Units.inchesToMeters(8.5), // prev 9
                 new Rotation3d(
                     Units.degreesToRadians(0),
-                    Units.degreesToRadians(15),
+                    Units.degreesToRadians(-15),
                     Units.degreesToRadians(0)
                 )
             ),
