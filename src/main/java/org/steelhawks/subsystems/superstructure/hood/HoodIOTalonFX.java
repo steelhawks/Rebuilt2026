@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -43,9 +44,9 @@ public class HoodIOTalonFX implements HoodIO {
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final VoltageOut voltageOut;
 
-    public HoodIOTalonFX(RobotConfig.CANBus bus) {
-        hoodMotor = new TalonFX(ShooterConstants.Hood.MOTOR_ID, bus.bus);
-        cancoder = new CANcoder(ShooterConstants.Hood.CANCODER_ID);
+    public HoodIOTalonFX(RobotConfig.CANBus bus, SubsystemConstants.HoodConstants constants) {
+        hoodMotor = new TalonFX(constants.motorId(), bus.bus);
+        cancoder = new CANcoder(constants.cancoderId(), bus.bus);
 
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
@@ -56,9 +57,9 @@ public class HoodIOTalonFX implements HoodIO {
 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        motorConfig.Slot0.kP = ShooterConstants.Hood.kP.get();
-        motorConfig.Slot0.kI = ShooterConstants.Hood.kI.get();
-        motorConfig.Slot0.kD = ShooterConstants.Hood.kD.get();
+        motorConfig.Slot0.kP = constants.kP();
+        motorConfig.Slot0.kI = constants.kI();
+        motorConfig.Slot0.kD = constants.kD();
         motorConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Hood.REDUCTION;
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
 

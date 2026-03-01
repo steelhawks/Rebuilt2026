@@ -815,7 +815,7 @@ public class RobotConfig {
 
         @Override
         public Hood createHood(HoodConstants c) {
-            return new Hood(new HoodIOSim());
+            return new Hood(new HoodIOSim(c), c);
         }
 
         @Override
@@ -875,7 +875,7 @@ public class RobotConfig {
 
         @Override
         public Hood createHood(HoodConstants c) {
-            return new Hood(new HoodIO() {});
+            return new Hood(new HoodIO() {}, c);
         }
 
         @Override

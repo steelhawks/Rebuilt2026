@@ -43,8 +43,8 @@ public class ShooterConstants {
     }
 
     public static final class Hood {
-        public static final int MOTOR_ID = 0;
-        public static final int CANCODER_ID = 0;
+//        public static final int MOTOR_ID = 0;
+//        public static final int CANCODER_ID = 0;
         public static final double REDUCTION = 4.357 / 1.0; // or 3.357 i dont remmber
 
         public static final double M = Units.lbsToKilograms(0.0);
@@ -52,12 +52,12 @@ public class ShooterConstants {
         public static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
         public static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
 
-        public static final LoggedTunableNumber kP = new LoggedTunableNumber("Hood/kP", 50);
-        public static final LoggedTunableNumber kI = new LoggedTunableNumber("Hood/kI", 0);
-        public static final LoggedTunableNumber kD = new LoggedTunableNumber("Hood/kD", 5);
-        public static final LoggedTunableNumber kS = new LoggedTunableNumber("Hood/kS", 3);
+//        public static final LoggedTunableNumber kP = new LoggedTunableNumber("Hood/kP", 50);
+//        public static final LoggedTunableNumber kI = new LoggedTunableNumber("Hood/kI", 0);
+//        public static final LoggedTunableNumber kD = new LoggedTunableNumber("Hood/kD", 5);
+//        public static final LoggedTunableNumber kS = new LoggedTunableNumber("Hood/kS", 3);
         public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/kG", (M * G * R) / (kT * REDUCTION));
-        public static final LoggedTunableNumber kA = new LoggedTunableNumber("Hood/kA", 0);
+//        public static final LoggedTunableNumber kA = new LoggedTunableNumber("Hood/kA", 0);
 
         public static final Rotation2d MIN_ANGLE = Rotation2d.fromDegrees(30.0); // min angle is full extension
         public static final Rotation2d MAX_ANGLE = Rotation2d.fromDegrees(70.0); // max angle is home

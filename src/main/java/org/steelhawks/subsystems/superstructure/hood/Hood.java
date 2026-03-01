@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
@@ -28,8 +29,19 @@ public class Hood extends SubsystemBase {
     private boolean brakeModeEnabled = false;
     private boolean atGoal = false;
 
-    public Hood(HoodIO io) {
+    private static LoggedTunableNumber kP;
+    private static LoggedTunableNumber kI;
+    private static LoggedTunableNumber kD;
+    private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber kA;
+
+    public Hood(HoodIO io, SubsystemConstants.HoodConstants constants) {
         this.io = io;
+        kP = new LoggedTunableNumber("Hood/kP", constants.kP());
+        kI = new LoggedTunableNumber("Hood/kI", constants.kI());
+        kD = new LoggedTunableNumber("Hood/kD", constants.kD());
+        kS = new LoggedTunableNumber("Hood/kS", constants.kS());
+        kA = new LoggedTunableNumber("Hood/kA", constants.kA());
     }
 
     @Override
@@ -69,10 +81,10 @@ public class Hood extends SubsystemBase {
             LoggedTunableNumber.ifChanged(
                 this.hashCode(),
                 () -> io.setPID(
-                    ShooterConstants.Hood.kP.get(),
-                    ShooterConstants.Hood.kI.get(),
-                    ShooterConstants.Hood.kD.get()
-                ), ShooterConstants.Hood.kP, ShooterConstants.Hood.kI, ShooterConstants.Hood.kD
+                    kP.get(),
+                    kI.get(),
+                    kD.get()
+                ), kP, kI, kD
             );
         }
         if (shouldRun) {

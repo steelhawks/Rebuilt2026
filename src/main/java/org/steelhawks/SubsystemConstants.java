@@ -33,7 +33,7 @@ public class SubsystemConstants {
 
     public record HoodConstants(
         int motorId, int cancoderId,
-        double kP, double kI, double kD, double kS, double kG, double kV
+        double kP, double kI, double kD, double kS, double kG, double kA
     ) {
         public static final HoodConstants UNSET = new HoodConstants(0, 0, 0, 0, 0, 0, 0, 0);
     }
@@ -84,7 +84,11 @@ public class SubsystemConstants {
         public static final IntakeConstants INTAKE = IntakeConstants.UNSET;
         public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
         public static final TurretConstants TURRET = TurretConstants.UNSET;
-        public static final HoodConstants HOOD = HoodConstants.UNSET;
+        public static final HoodConstants HOOD = new HoodConstants(
+            0, 0,
+            50, 0, 5,
+            3, 0, 0
+        );
     }
 
     public static final class SimBot {
