@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
@@ -18,6 +19,7 @@ import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.util.geometry.RobotFootprint;
 
 public class RobotContainer {
 
@@ -34,6 +36,8 @@ public class RobotContainer {
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
+    public final RobotFootprint FOOTPRINT;
+
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
@@ -49,21 +53,28 @@ public class RobotContainer {
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
         s_Hood = config.createHood().orElse(null);
         s_Intake = config.createIntake().orElse(null);
-//        s_Intake = null; // CAREFUL W THE INTAKE, THE GEAR RATIO HAS BEEN CHANGED TO THE ACCURATE ONE SO SETPOINTS ARE ALL CHANGED!!!
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
 
+        FOOTPRINT =
+            new RobotFootprint(
+                RobotConstants.ROBOT_LENGTH_WITH_BUMPERS,
+                RobotConstants.ROBOT_WIDTH_WITH_BUMPERS)
+                .withExtension(new RobotFootprint.Extension(
+                    "Intake",
+                    Rotation2d.fromDegrees(0.0),
+                    s_Intake::getPosition));
         if (config.hasAutos) {
             Autos.init();
         }
         s_Swerve.setDefaultCommand(
-            DriveCommands.joystickDrive(
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX(),
-            () -> -driver.getRightX()));
-
+            new TeleopSwerve(
+                s_Swerve,
+                () -> -driver.getLeftY(),
+                () -> -driver.getLeftX(),
+                () -> -driver.getRightX()));
+        driver.x().onTrue(s_Swerve.zeroHeading());
         configureDriver();
-
         ShooterTuner.getInstance();
     }
 
@@ -86,6 +97,7 @@ public class RobotContainer {
 
         driver.leftTrigger()
             .whileTrue(
-                s_Intake.outtakeIntake());
+                TeleopSwerve.setDriveState(TeleopSwerve.DriveState.NORMAL)
+                    .alongWith(new VibrateController(driver).repeatedly()));
     }
 }
