@@ -497,7 +497,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(canivoreBus), poseSupplier, c);
+            return new Turret(new TurretIOTalonFX(canivoreBus, c), poseSupplier, c);
         }
 
         @Override
@@ -560,7 +560,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier, c);
+            return new Turret(new TurretIOTalonFX(rioBus, c), poseSupplier, c);
         }
 
         @Override
@@ -748,7 +748,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier, c);
+            return new Turret(new TurretIOTalonFX(rioBus, c), poseSupplier, c);
         }
 
         @Override
@@ -810,7 +810,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOSim(), poseSupplier, c);
+            return new Turret(new TurretIOSim(c), poseSupplier, c);
         }
 
         @Override

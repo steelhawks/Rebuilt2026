@@ -7,6 +7,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotState;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 
@@ -22,11 +23,11 @@ public class TurretIOSim implements TurretIO {
     private final DCMotorSim mMotor;
     private final TurretVisualizer turretVisualizer;
 
-    public TurretIOSim() {
+    public TurretIOSim(SubsystemConstants.TurretConstants constants) {
         mController = new PIDController(
-            Turret.kP.get(),
-            Turret.kI.get(),
-            Turret.kD.get());
+            constants.kP(),
+            constants.kI(),
+            constants.kD());
         mMotor = new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX60Foc(1),

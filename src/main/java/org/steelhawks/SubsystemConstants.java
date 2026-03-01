@@ -25,9 +25,10 @@ public class SubsystemConstants {
         double kP, double kI, double kD, double kS, double kA,
         double maxVelocityRadPerSec,
         double maxAccelerationRadPerSecSq,
-        double manualIncrement
+        double manualIncrement,
+        double currentHomingThreshold
     ) {
-        public static final TurretConstants UNSET = new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static final TurretConstants UNSET = new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public record HoodConstants(
@@ -69,7 +70,14 @@ public class SubsystemConstants {
             2
         );
 
-        public static final TurretConstants TURRET = TurretConstants.UNSET;
+        public static final TurretConstants TURRET = new TurretConstants(
+            1,
+            1000, 0, 70,
+            2, 0,
+            10, 20,
+            0.1,
+            40
+        );
     }
 
     public static final class OmegaBot {
@@ -100,7 +108,14 @@ public class SubsystemConstants {
             2
         );
 
-        public static final TurretConstants TURRET = TurretConstants.UNSET;
+        public static final TurretConstants TURRET = new TurretConstants(
+            1,
+            200, 0, 7,
+            0.2, 0,
+            10, 20,
+            0.1,
+            40
+        );
 
         public static final HoodConstants HOOD = HoodConstants.UNSET;
     }

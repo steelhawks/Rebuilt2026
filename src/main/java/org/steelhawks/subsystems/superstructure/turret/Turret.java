@@ -25,20 +25,18 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
+    public static LoggedTunableNumber kS;
+    public static LoggedTunableNumber kA;
+    public static LoggedTunableNumber kP;
+    public static LoggedTunableNumber kI;
+    public static LoggedTunableNumber kD; // 35
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.value(0.0, 2.0, 0.0, 0.0, 0.2));
-    public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.value(0.0, 0.0, 0.0, 0.0, 0.0));
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.value(0.0, 1000.0, 0.0, 0.0, 200.0)); // 1500
-    public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.value(0.0, 0.0, 0.0, 0.0, 0.0));
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.value(0.0, 70.0, 0.0, 0.0, 7.0)); // 35
-
-    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 20.0);
+    private static LoggedTunableNumber maxVelocityRadPerSec;
+    private static LoggedTunableNumber maxAccelerationRadPerSecSq;
+    private static LoggedTunableNumber manualIncrement;
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
-    private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 
-    private static final LoggedTunableNumber currentHomingThres =
-        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 40.0);
+    private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
 
     private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
@@ -68,6 +66,17 @@ public class Turret extends SubsystemBase {
     public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
         this.io = io;
+        kP = new LoggedTunableNumber("Turret/kP", constants.kP());
+        kI = new LoggedTunableNumber("Turret/kI", constants.kI());
+        kD = new LoggedTunableNumber("Turret/kD", constants.kD());
+        kS = new LoggedTunableNumber("Turret/kS", constants.kS());
+        kA = new LoggedTunableNumber("Turret/kA", constants.kA());
+        maxVelocityRadPerSec =
+            new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", constants.maxVelocityRadPerSec());
+        maxAccelerationRadPerSecSq =
+            new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", constants.maxAccelerationRadPerSecSq());
+        manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", constants.manualIncrement());
+        currentHomingThres = new LoggedTunableNumber("Turret/CurrentHomingThresholdAmps", constants.currentHomingThreshold());
         profile =
             new TrapezoidProfile(
                 new TrapezoidProfile.Constraints(
