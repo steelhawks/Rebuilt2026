@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
@@ -54,7 +55,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFX rightMotor;
     private final TalonFX intakeMotor;
 
-    public IntakeIOTalonFX(RobotConfig.CANBus bus, RobotConfig.IntakeConstants constants) {
+    public IntakeIOTalonFX(RobotConfig.CANBus bus, SubsystemConstants.IntakeConstants constants) {
         leftMotor = new TalonFX(constants.leftId(), bus.bus);
         rightMotor = new TalonFX(constants.rightId(), bus.bus);
         intakeMotor = new TalonFX(constants.driveId(), bus.bus);

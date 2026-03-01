@@ -15,7 +15,6 @@ import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.RobotState.ShooterMode;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.Maths;
@@ -66,7 +65,7 @@ public class Turret extends SubsystemBase {
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
 
-    public Turret(TurretIO io, Supplier<Pose2d> poseSupplier) {
+    public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
         this.io = io;
         profile =

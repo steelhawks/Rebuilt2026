@@ -31,6 +31,7 @@ import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.SubsystemConstants.*;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -240,9 +241,9 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
-                .withFlywheel(true)
-                .withTurret(true)
-                .withHood(true)
+                .withFlywheel(true, FlywheelConstants.UNSET)
+                .withTurret(true, TurretConstants.UNSET)
+                .withHood(true, HoodConstants.UNSET)
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.INTAKE_ALPHA)
                 .withIndexer(true)
@@ -346,19 +347,17 @@ public class RobotConfig {
 
         public Builder withFlywheel(boolean enabled) {
             this.hasFlywheel = enabled;
-            this.hoodConstants = SubsystemConstants.DEFAULT_HOOD;
             return this;
         }
 
-        public Builder withFlywheel(boolean enabled, HoodConstants hoodConstants) {
+        public Builder withFlywheel(boolean enabled, FlywheelConstants flywheelConstants) {
             this.hasFlywheel = enabled;
-            this.hoodConstants = hoodConstants;
+            this.flywheelConstants = flywheelConstants;
             return this;
         }
 
         public Builder withTurret(boolean enabled) {
             this.hasTurret = enabled;
-            this.turretConstants = SubsystemConstants.DEFAULT_TURRET;
             return this;
         }
 
@@ -370,7 +369,6 @@ public class RobotConfig {
 
         public Builder withHood(boolean enabled) {
             this.hasHood = enabled;
-            this.hoodConstants = SubsystemConstants.DEFAULT_HOOD;
             return this;
         }
 
@@ -387,7 +385,6 @@ public class RobotConfig {
 
         public Builder withIntake(boolean enabled) {
             this.hasIntake = enabled;
-            this.intakeConstants = SubsystemConstants.DEFAULT_INTAKE;
             return this;
         }
 
@@ -416,6 +413,16 @@ public class RobotConfig {
             if (factory == null) {
                 throw new IllegalStateException("Factory must be set");
             }
+
+            if (hasIntake && intakeConstants == null)
+                throw new IllegalStateException("hasIntake = true but no IntakeConstants provided");
+            if (hasFlywheel && flywheelConstants == null)
+                throw new IllegalStateException("hasFlywheel = true but no FlywheelConstants provided");
+            if (hasHood && hoodConstants == null)
+                throw new IllegalStateException("hasHood = true but no HoodConstants provided");
+            if (hasTurret && turretConstants == null)
+                throw new IllegalStateException("hasTurret = true but no TurretConstants provided");
+
             return new RobotConfig(this);
         }
     }
@@ -487,7 +494,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(canivoreBus), poseSupplier);
+            return new Turret(new TurretIOTalonFX(canivoreBus), poseSupplier, c);
         }
 
         @Override
@@ -550,7 +557,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier);
+            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier, c);
         }
 
         @Override
@@ -738,7 +745,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier);
+            return new Turret(new TurretIOTalonFX(rioBus), poseSupplier, c);
         }
 
         @Override
@@ -800,7 +807,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOSim(), poseSupplier);
+            return new Turret(new TurretIOSim(), poseSupplier, c);
         }
 
         @Override
@@ -860,7 +867,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIO() {}, poseSupplier);
+            return new Turret(new TurretIO() {}, poseSupplier, c);
         }
 
         @Override
@@ -880,86 +887,5 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
-    }
-
-    public record FlywheelConstants(
-       int leftMotorId,
-       int rightMotorId,
-       double flywheelRadius,
-       double reduction,
-       double idleMultiplier,
-       double kP, double kI, double kD, double kS, double kV,
-       double samplingTimeoutDuration,
-       double timeoutAvgMinSamples,
-       int sampleCounts,
-       double stationaryHoodVelocityFactor
-    ) {}
-
-    public record TurretConstants(
-        int turretId,
-        double kP, double kI, double kD, double kS, double kA,
-        double maxVelocityRadPerSec,
-        double maxAccelerationRadPerSecSq,
-        double manualIncrement
-    ) {}
-
-    public record HoodConstants(
-        int motorId, int cancoderId,
-        double kP, double kI, double kD, double kS, double kG, double kV
-    ) {}
-
-    public record IntakeConstants(
-        int leftId, int rightId, int driveId,
-        double kS, double kG, double kA, double kP, double kI, double kD,
-        double maxVelocityMetersPerSec, double maxAccelMetersPerSecSq,
-        double currentHomingThreshold,
-        double velocityStallingThreshold,
-        double intakeSpeed, double outtakeSpeed
-    ) {}
-
-    public static final class SubsystemConstants {
-        public static final FlywheelConstants DEFAULT_FLYWHEEL = new FlywheelConstants(
-            0, 0,
-            0.0,
-            0.0,
-            0.0,
-            0.0, 0.0, 0.0, 0.0, 0.0,
-            0.0,
-            0.0,
-            0,
-            0
-        );
-
-        public static final TurretConstants DEFAULT_TURRET = new TurretConstants(
-            0,
-            0.0, 0.0, 0.0, 0.0, 0.0,
-            0.0,
-            0.0,
-            0.0
-        );
-
-        public static final HoodConstants DEFAULT_HOOD = new HoodConstants(
-            0, 0,
-            0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0
-        );
-
-        public static final IntakeConstants DEFAULT_INTAKE = new IntakeConstants(
-            0, 0, 0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0,
-            0.0, 0.0,
-            0, 0
-        );
-
-        public static final IntakeConstants INTAKE_ALPHA = new IntakeConstants(
-            60, 61, 62,
-            0, 0, 0,
-            5, 0, 0,
-            0.05, 0.08,
-            60, 0.003,
-            1, 1
-        );
     }
 }

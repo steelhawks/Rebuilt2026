@@ -7,7 +7,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.steelhawks.Constants;
-import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 
 import static edu.wpi.first.units.Units.Inches;
@@ -26,7 +26,7 @@ public class IntakeIOSim implements IntakeIO {
     private final IntakeVisualizer visualizer;
     private boolean enablePid;
 
-    public IntakeIOSim(RobotConfig.IntakeConstants constants) {
+    public IntakeIOSim(SubsystemConstants.IntakeConstants constants) {
         intakeSimulation = IntakeSimulation.OverTheBumperIntake(
             "Fuel",
             Swerve.getDriveSimulation(),

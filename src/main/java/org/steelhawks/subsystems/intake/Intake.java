@@ -47,9 +47,9 @@ public class Intake extends SubsystemBase {
     private static LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC;
     private static LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ;
 
-    RobotConfig.IntakeConstants constants;
+    SubsystemConstants.IntakeConstants constants;
 
-    public Intake(IntakeIO io, RobotConfig.IntakeConstants constants) {
+    public Intake(IntakeIO io, SubsystemConstants.IntakeConstants constants) {
         this.io = io;
         this.constants = constants;
         currentHomingThreshold = new LoggedTunableNumber("Intake/CurrentHomingThreshold", constants.currentHomingThreshold());
