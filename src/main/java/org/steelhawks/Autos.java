@@ -12,6 +12,7 @@ import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.commands.DriveCommands;
+import org.steelhawks.commands.ShootingCommands;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -48,7 +49,9 @@ public final class Autos {
         /* ------------- Autons ------------- */
 
         autoChooser.addDefaultOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
-        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
+        autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName("FOUR_METER_TEST"));
+        autoChooser.addOption("Center Test", centerPathTest().cmd().withName("CENTER_METER_TEST"));
+//        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
         if (Toggles.tuningMode.get()) {
             /* ------------- Swerve SysId ------------- */
@@ -127,31 +130,61 @@ public final class Autos {
         return autoChooser.get();
     }
 
-    public static AutoRoutine outpostTrenchClimbAuto() {
-        AutoRoutine routine = factory.newRoutine("outpostTrenchClimbAuto");
+    public static AutoRoutine fourMeterTest() {
+        AutoRoutine routine = factory.newRoutine("4 Meter Test");
 
-        AutoTrajectory startToOutpost = ChoreoTraj.OutpostTrenchClimbAuto.segment(0).asAutoTraj(routine);
-        AutoTrajectory outpostToTrench = ChoreoTraj.OutpostTrenchClimbAuto.segment(1).asAutoTraj(routine);
-        AutoTrajectory trenchToClimb = ChoreoTraj.OutpostTrenchClimbAuto.segment(2).asAutoTraj(routine);
+        AutoTrajectory start = ChoreoTraj.FourMeterTest.asAutoTraj(routine);
 
         routine.active().onTrue(
-            Commands.sequence(
-                startToOutpost.resetOdometry(),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                startToOutpost.cmd()
-                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
-                Commands.waitSeconds(1.0),
-                outpostToTrench.cmd()
-                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
-                Commands.waitSeconds(0.5),
-                trenchToClimb.cmd(),
-                Commands.sequence(
-                RobotContainer.s_Flywheel.testfire(),
-                    Commands.waitSeconds(0.25)
-                ).repeatedly().withTimeout(4.0)
-            )
+            start.cmd()
         );
 
         return routine;
     }
+
+    public static AutoRoutine centerPathTest() {
+        AutoRoutine routine = factory.newRoutine("Center Path Test");
+
+        AutoTrajectory start = ChoreoTraj.CenterPath$0.asAutoTraj(routine);
+        AutoTrajectory back = ChoreoTraj.CenterPath$1.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                ShootingCommands.shoot().withTimeout(5.0),
+//                start.resetOdometry(),
+                start.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(5.0)),
+                back.cmd(),
+                ShootingCommands.shoot()));
+
+        return routine;
+    }
+
+//    public static AutoRoutine outpostTrenchClimbAuto() {
+//        AutoRoutine routine = factory.newRoutine("outpostTrenchClimbAuto");
+//
+//        AutoTrajectory startToOutpost = ChoreoTraj.OutpostTrenchClimbAuto.segment(0).asAutoTraj(routine);
+//        AutoTrajectory outpostToTrench = ChoreoTraj.OutpostTrenchClimbAuto.segment(1).asAutoTraj(routine);
+//        AutoTrajectory trenchToClimb = ChoreoTraj.OutpostTrenchClimbAuto.segment(2).asAutoTraj(routine);
+//
+//        routine.active().onTrue(
+//            Commands.sequence(
+//                startToOutpost.resetOdometry(),
+//                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+//                startToOutpost.cmd()
+//                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
+//                Commands.waitSeconds(1.0),
+//                outpostToTrench.cmd()
+//                    .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(2.0)),
+//                Commands.waitSeconds(0.5),
+//                trenchToClimb.cmd(),
+//                Commands.sequence(
+//                RobotContainer.s_Flywheel.testfire(),
+//                    Commands.waitSeconds(0.25)
+//                ).repeatedly().withTimeout(4.0)
+//            )
+//        );
+//
+//        return routine;
+//    }
 }
