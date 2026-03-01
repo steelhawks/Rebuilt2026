@@ -80,21 +80,17 @@ public class DriveCommands {
                                 : ySupplier.getAsDouble());
                     lastVelocity = linearVelocity;
                 } else if (RobotState.getInstance().getAimState() == ShootingState.SHOOTING_MOVING) {
-                    // constant velocity mode, just lock magnitude not direction
                     double x = xSupplier.getAsDouble();
                     double y = ySupplier.getAsDouble();
                     double magnitude = Math.hypot(x, y);
 
-                    if (magnitude < Deadbands.DRIVE_DEADBAND) {
-                        linearVelocity = new Translation2d();
-                    } else {
+                    if (magnitude >= Deadbands.DRIVE_DEADBAND) {
                         Rotation2d direction = new Rotation2d(Math.atan2(y, x));
-                        double constantMagnitude = 0.5; // 50% speed
                         linearVelocity = new Pose2d(new Translation2d(), direction)
-                            .transformBy(new Transform2d(constantMagnitude, 0.0, new Rotation2d()))
+                            .transformBy(new Transform2d(0.5, 0.0, new Rotation2d()))
                             .getTranslation();
+                        lastVelocity = linearVelocity;
                     }
-                    lastVelocity = linearVelocity;
                 }
                 double omega =
                     MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Deadbands.DRIVE_DEADBAND);
