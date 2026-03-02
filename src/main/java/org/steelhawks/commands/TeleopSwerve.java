@@ -73,7 +73,20 @@ public class TeleopSwerve extends Command {
     // PID Controllers
     private final ProfiledPIDController trenchController;
     private final ProfiledPIDController bumpController;
-    private final ProfiledPIDController angleController;
+    private static final ProfiledPIDController angleController;
+
+    static {
+        angleController =
+            new ProfiledPIDController(
+                angleKp.getAsDouble(),
+                0.0,
+                angleKd.getAsDouble(),
+                new TrapezoidProfile.Constraints(
+                    maxRadiansPerSec.getAsDouble(),
+                    maxRadiansPerSecSq.getAsDouble()));
+        angleController.enableContinuousInput(-Math.PI, Math.PI);
+        angleController.setTolerance(Math.PI / 60.0);
+    }
 
     public TeleopSwerve(
         RobotFootprint footprint, Swerve swerve, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
@@ -128,16 +141,6 @@ public class TeleopSwerve extends Command {
                     maxMetersPerSec.getAsDouble(),
                     maxMetersPerSecSq.getAsDouble()));
         bumpController.setTolerance(0.05);
-        angleController =
-            new ProfiledPIDController(
-                angleKp.getAsDouble(),
-                0.0,
-                angleKd.getAsDouble(),
-                new TrapezoidProfile.Constraints(
-                    maxRadiansPerSec.getAsDouble(),
-                    maxRadiansPerSecSq.getAsDouble()));
-        angleController.enableContinuousInput(-Math.PI, Math.PI);
-        angleController.setTolerance(0.05);
         addRequirements(s_Swerve);
     }
 
@@ -146,7 +149,11 @@ public class TeleopSwerve extends Command {
     }
 
     public static Command setDriveState(DriveState state) {
-        return Commands.runOnce(() -> currentDriveState = state);
+        return Commands.runOnce(() -> {
+            currentDriveState = state;
+            double currentRad = RobotState.getInstance().getRotation().getRadians();
+            angleController.reset(currentRad);
+        });
     }
 
     @Override
@@ -192,8 +199,7 @@ public class TeleopSwerve extends Command {
                 double errorToPi = Math.abs(MathUtil.angleModulus(currentRad - Math.PI));
                 double setpoint = errorTo0 < errorToPi ? 0.0 : Math.PI;
                 Logger.recordOutput("TeleopSwerve/Trench/SetpointAngle", setpoint);
-                omega =
-                    MathUtil.applyDeadband(angleController.calculate(currentRad, setpoint), Constants.Deadbands.ANGLE_DEADBAND);
+                omega = angleController.calculate(currentRad, setpoint);
             }
             case BUMP_ALIGN -> {
                 double closestCornerAngle = Math.round(currentRad / (Math.PI / 4.0)) * (Math.PI / 4.0);
@@ -226,7 +232,9 @@ public class TeleopSwerve extends Command {
                 Logger.recordOutput("TeleopSwerve/ActualChassisSpeedMagnitude", actualMagnitude);
             }
         }
-        DriveCommands.runVelocity(linearVelocity, omega);
+        DriveCommands.runVelocity(
+            linearVelocity,
+            MathUtil.applyDeadband(omega, Constants.Deadbands.ANGLE_DEADBAND));
     }
 
     @Override
