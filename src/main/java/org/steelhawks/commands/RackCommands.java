@@ -10,16 +10,16 @@ import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 public class RackCommands {
 
     /**
-     *@params intake
-     * @returns Command */
+     *@param intake
+     * @return Command */
     public Command retract(Intake intake) {
         return runOnce(intake::retract, intake).andThen(Commands.run(() -> {
         }, intake)).until(intake::atTargetPosition).withName("Retract Intake");
     }
 
     /**
-     *@params intake
-     * @returns Command */
+     *@param intake
+     * @return Command */
 
     public Command intakeGamePiece(Intake intake) {
         return runOnce(() -> {
@@ -27,7 +27,7 @@ public class RackCommands {
             intake.intake();
         }, intake)
                 .andThen(Commands.run(() -> {}, intake))
-                .finallyDo(() -> intake.stopRollers())
+                .finallyDo(intake::stopRollers)
                 .withName("Intake Game Piece");
     }
 }
