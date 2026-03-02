@@ -165,10 +165,10 @@ public final class Constants {
         public static final LoggedTunableNumber ANGLE_KD = new LoggedTunableNumber("Swerve/AnglekD", Constants.omega(0.0, 1.0));
 
         // Pathfinder
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = Constants.omega(5.0, 0.0);
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = Constants.omega(5.5, 0.0);
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Constants.omega(Units.degreesToRadians(540.0), 0.0);
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = Constants.omega(Units.degreesToRadians(920.0), 0.0);
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 5.0;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 5.5;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Units.degreesToRadians(540.0);
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = Units.degreesToRadians(920.0);
 
         public static final PathConstraints CONSTRAINTS = new PathConstraints(
                 MAX_VELOCITY_METERS_PER_SECOND,

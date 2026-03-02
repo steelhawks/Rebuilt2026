@@ -1,5 +1,3 @@
-
-
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.*;
