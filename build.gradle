@@ -161,9 +161,11 @@ tasks.register("replayWatch", JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-// repositories {
-//     mavenCentral()
-// }
+ repositories {
+     maven {
+         url "https://frcmaven.wpi.edu/release"
+     }
+ }
 // kotlin {
 //     jvmToolchain(17)
 // }
