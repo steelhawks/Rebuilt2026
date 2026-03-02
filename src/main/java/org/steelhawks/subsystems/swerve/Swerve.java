@@ -119,7 +119,9 @@ public class Swerve extends SubsystemBase {
             new ProfiledPIDController(AutonConstants.ROTATION_KP.getAsDouble(), AutonConstants.ROTATION_KI.getAsDouble(), AutonConstants.ROTATION_KD.getAsDouble(),
                 new TrapezoidProfile.Constraints(
                     AutonConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                    AutonConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED)));
+                    AutonConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED)))
+            .withLinearTolerance(0.05)
+            .withRotationalTolerance(Math.PI / 60.0);
     private final ProfiledPIDController mAlignController;
     private final Debouncer mAlignDebouncer;
     private final Debouncer collisionDebouncer;
@@ -418,6 +420,11 @@ public class Swerve extends SubsystemBase {
 
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
         CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+
+        Logger.recordOutput("Swerve/Auto/Setpoint", new Pose2d());
+        Logger.recordOutput("Swerve/Auto/Speeds", new ChassisSpeeds());
+        Logger.recordOutput("Swerve/Auto/PID", new ChassisSpeeds());
+        Logger.recordOutput("Swerve/Auto/Feedforward", new ChassisSpeeds());
     }
 
     public ProfiledPIDController getAlign() {
@@ -509,6 +516,10 @@ public class Swerve extends SubsystemBase {
         var nextSetpoint = new Pose2d(sample.x, sample.y, new Rotation2d(sample.heading));
         var speeds = autonController.getOutput(robot, nextSetpoint)
             .plus(new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
+        Logger.recordOutput("Swerve/Auto/Setpoint", nextSetpoint);
+        Logger.recordOutput("Swerve/Auto/Speeds", speeds);
+        Logger.recordOutput("Swerve/Auto/PID", speeds.minus(new ChassisSpeeds(sample.vx, sample.vy, sample.omega)));
+        Logger.recordOutput("Swerve/Auto/Feedforward", new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
         runVelocity(speeds);
     }
 

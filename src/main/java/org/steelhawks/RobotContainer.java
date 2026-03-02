@@ -98,7 +98,7 @@ public class RobotContainer {
 
         driver.leftTrigger()
             .whileTrue(
-                TeleopSwerve.setDriveState(TeleopSwerve.DriveState.NORMAL)
+                TeleopSwerve.overrideState()
                     .alongWith(new VibrateController(driver).repeatedly()));
     }
 }

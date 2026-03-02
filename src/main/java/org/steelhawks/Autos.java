@@ -50,6 +50,7 @@ public final class Autos {
 
         autoChooser.addDefaultOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
         autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName("FOUR_METER_TEST"));
+        autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName("FOUR_METER_SPIN_TEST"));
         autoChooser.addOption("Center Test", centerPathTest().cmd().withName("CENTER_METER_TEST"));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
@@ -134,6 +135,18 @@ public final class Autos {
         AutoRoutine routine = factory.newRoutine("4 Meter Test");
 
         AutoTrajectory start = ChoreoTraj.FourMeterTest.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            start.cmd()
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine fourMeterTestSpin() {
+        AutoRoutine routine = factory.newRoutine("4 Meter Spin Test");
+
+        AutoTrajectory start = ChoreoTraj.FourMeterSpinTest.asAutoTraj(routine);
 
         routine.active().onTrue(
             start.cmd()

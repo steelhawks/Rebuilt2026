@@ -8,15 +8,13 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.Constants;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.RobotState;
-import org.steelhawks.Toggles;
+import org.steelhawks.*;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -143,12 +141,20 @@ public class TeleopSwerve extends Command {
         addRequirements(s_Swerve);
     }
 
+    public static Command overrideState() {
+        return Commands.run(() -> currentDriveState = DriveState.NORMAL);
+    }
+
     public static Command setDriveState(DriveState state) {
         return Commands.runOnce(() -> currentDriveState = state);
     }
 
     @Override
     public void execute() {
+        if (DriverStation.isAutonomous()) {
+            s_Swerve.stopWithX();
+        };
+
         if (angleKp.hasChanged(hashCode())
             || angleKd.hasChanged(hashCode())
         ) {
