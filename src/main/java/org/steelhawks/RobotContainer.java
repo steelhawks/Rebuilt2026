@@ -35,8 +35,6 @@ public class RobotContainer {
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
-    public final RobotFootprint FOOTPRINT;
-
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
@@ -55,20 +53,12 @@ public class RobotContainer {
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
 
-        FOOTPRINT =
-            new RobotFootprint(
-                RobotConstants.ROBOT_LENGTH_WITH_BUMPERS,
-                RobotConstants.ROBOT_WIDTH_WITH_BUMPERS)
-                .withExtension(new RobotFootprint.Extension(
-                    "Intake",
-                    Rotation2d.fromDegrees(0.0),
-                    s_Intake::getPosition));
+
         if (config.hasAutos) {
             Autos.init();
         }
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
-                FOOTPRINT,
                 s_Swerve,
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),

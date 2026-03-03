@@ -10,20 +10,31 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;
 import org.steelhawks.util.VirtualSubsystem;
+import org.steelhawks.util.geometry.Boundary;
+import org.steelhawks.util.geometry.RobotFootprint;
 
 import java.util.*;
 
 public class RobotState extends VirtualSubsystem {
+
+    private final RobotFootprint footprint =
+        new RobotFootprint(
+            Constants.RobotConstants.ROBOT_LENGTH_WITH_BUMPERS,
+            Constants.RobotConstants.ROBOT_WIDTH_WITH_BUMPERS)
+                .withExtension(new RobotFootprint.Extension(
+                "Intake",
+                    Rotation2d.fromDegrees(0.0),
+                () -> RobotContainer.s_Intake == null ? 0.0 : RobotContainer.s_Intake.getPosition()));
 
     private static final double movingVelocityThreshold = 0.5; // m/s
     private static final double poseBufferSizeSec = 2.0;
@@ -58,6 +69,14 @@ public class RobotState extends VirtualSubsystem {
         SHOOTING, // used to signify that we are just shooting, the set function will automatically decide if we are sotm or stationary
         NOTHING
     }
+
+    // Triggers
+    @AutoLogOutput
+    private final Trigger sotmTrigger;
+    @AutoLogOutput
+    private final Trigger inTrenchTrigger;
+    @AutoLogOutput
+    private final Trigger inBumpTrigger;
 
     private ShootingState lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
     private ShooterMode currentShooterMode = ShooterMode.TO_HUB;
@@ -98,6 +117,52 @@ public class RobotState extends VirtualSubsystem {
 
     private final Timer timer = new Timer();
     private static RobotState instance;
+
+    private RobotState() {
+        this.objectHistory = new ArrayList<>();
+        this.currentDetectedObjects = new ArrayList<>();
+
+        sotmTrigger = new Trigger(
+            () -> getAimState().equals(ShootingState.SHOOTING_MOVING));
+        inTrenchTrigger =
+            Boundary.asTrigger(
+                "LeftTrench",
+                () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_LEFT_TRIGGER_BOX),
+                this::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+            .or(Boundary.asTrigger(
+                "RightTrench",
+                () -> AllianceFlip.apply(FieldConstants.Trench.TRENCH_RIGHT_TRIGGER_BOX),
+                this::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER))
+            .debounce(0.3);
+
+        inBumpTrigger =
+            Boundary.asTrigger(
+                () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
+                this::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+            .debounce(0.3);
+    }
+
+    public RobotFootprint getFootprint() {
+        return footprint;
+    }
+
+    public Trigger getTrenchTrigger() {
+        return inTrenchTrigger;
+    }
+
+    public Trigger getBumpTrigger() {
+        return inBumpTrigger;
+    }
+
+    public Trigger getSOTMTrigger() {
+        return sotmTrigger;
+    }
 
     public void updateChassisSpeeds(ChassisSpeeds speeds) {
         this.currentChassisSpeeds = speeds;
@@ -268,11 +333,6 @@ public class RobotState extends VirtualSubsystem {
      */
     public ShiftState getShiftState() {
         return shiftState;
-    }
-
-    private RobotState() {
-        this.objectHistory = new ArrayList<>();
-        this.currentDetectedObjects = new ArrayList<>();
     }
 
     public void resetPose(Pose2d pose, Rotation2d gyroAngle, SwerveModulePosition[] modulePositions) {
