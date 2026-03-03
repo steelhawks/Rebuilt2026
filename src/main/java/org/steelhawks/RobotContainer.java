@@ -73,7 +73,6 @@ public class RobotContainer {
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX()));
-        driver.x().onTrue(s_Swerve.zeroHeading());
         configureDriver();
         ShooterTuner.getInstance();
     }
