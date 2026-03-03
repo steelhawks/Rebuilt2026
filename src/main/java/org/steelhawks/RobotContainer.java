@@ -13,7 +13,6 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
-import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
@@ -80,7 +79,8 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-//        driver.x().onTrue(s_Swerve.zeroHeading());
+        driver.povLeft().onTrue(s_Swerve.zeroHeading())
+            .onTrue(new VibrateController(driver));
 
         driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
         driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));

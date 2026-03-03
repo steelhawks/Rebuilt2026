@@ -212,7 +212,6 @@ public class TeleopSwerve extends Command {
                 double x = xSupplier.getAsDouble();
                 double y = ySupplier.getAsDouble();
                 double magnitude = Math.hypot(x, y);
-
                 if (magnitude < Constants.Deadbands.DRIVE_DEADBAND) {
                     linearVelocity = new Translation2d();
                 } else {

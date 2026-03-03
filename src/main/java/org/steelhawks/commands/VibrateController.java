@@ -19,6 +19,9 @@ public class VibrateController extends Command {
     }
 
     public VibrateController(double intensity, double seconds, CommandGenericHID... controllers) {
+        if (controllers.length == 0) {
+            throw new IllegalArgumentException("At least one controller is required");
+        }
         this.controllers = controllers;
         this.intensity = intensity;
         this.seconds = seconds;
