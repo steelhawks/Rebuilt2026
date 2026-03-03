@@ -7,6 +7,21 @@ package org.steelhawks;
  * @author Adam Aptowitz
  */
 public class SubsystemConstants {
+    public record LUTConstants (
+        double minShootDistance, double maxShootDistance,
+        double minFerryDistance, double maxFerryDistance,
+        double[][] shootingTimeOfFlightMap,
+        double[][] shootingFlywheelVelocityMap,
+        double[][] shootingHoodAngleMap,
+        double[][] ferryTimeOfFlightMap,
+        double[][] ferryFlywheelVelocityMap,
+        double[][] ferryHoodAngleMap
+    ) {
+        public static final LUTConstants UNSET =
+            new LUTConstants(0.0,  Double.MAX_VALUE, 0.0, Double.MAX_VALUE, null, null, null, null, null, null);
+    }
+
+
     public record FlywheelConstants(
         int leftMotorId,
         int rightMotorId,
@@ -62,6 +77,21 @@ public class SubsystemConstants {
     }
 
     public static final class AlphaBot {
+        public static final LUTConstants LUT =
+            new LUTConstants(
+                0.0, Double.MAX_VALUE,
+                0.0, Double.MAX_VALUE,
+                null,
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                },
+                null,
+                null,
+                null,
+                null);
+
         public static final IntakeConstants INTAKE =
             new IntakeConstants(
                 60, 61, 62,
@@ -102,15 +132,11 @@ public class SubsystemConstants {
     }
 
     public static final class OmegaBot {
+        public static final LUTConstants LUT = LUTConstants.UNSET;
         public static final IntakeConstants INTAKE = IntakeConstants.UNSET;
         public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
         public static final TurretConstants TURRET = TurretConstants.UNSET;
-        public static final HoodConstants HOOD =
-            new HoodConstants(
-                0, 0,
-                50, 0, 5,
-                3, 0, 0
-            );
+        public static final HoodConstants HOOD = HoodConstants.UNSET;
         public static final IndexerConstants INDEXER = IndexerConstants.UNSET;
     }
 

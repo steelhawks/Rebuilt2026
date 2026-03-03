@@ -7,11 +7,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.RobotContainer;
-import org.steelhawks.RobotState;
-import org.steelhawks.Toggles;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -41,15 +38,47 @@ public class ShooterStructure {
     private static final double G = 9.81;
 
     static {
-        minShootDistance = 0.0;
-        maxShootDistance = Double.MAX_VALUE;
+        SubsystemConstants.LUTConstants c =
+            switch (Constants.getRobot()) {
+                case ALPHABOT -> SubsystemConstants.AlphaBot.LUT;
+                case OMEGABOT, SIMBOT -> SubsystemConstants.OmegaBot.LUT;
+                default -> SubsystemConstants.LUTConstants.UNSET;
+            };
+        minShootDistance = c.minShootDistance();
+        maxShootDistance = c.maxShootDistance();
 
-        minFerryDistance = 0.0;
-        maxFerryDistance = Double.MAX_VALUE;
-
-        shootingFlywheelVelocityMap.put(1.75, 14.8);
-        shootingFlywheelVelocityMap.put(2.12, 15.0);
-        shootingFlywheelVelocityMap.put(3.16, 18.8);
+        minFerryDistance = c.minFerryDistance();
+        maxFerryDistance = c.maxFerryDistance();
+         if (c.shootingTimeOfFlightMap() != null) {
+             for (double[] entry : c.shootingTimeOfFlightMap()) {
+                 shootingTimeOfFlightMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.shootingFlywheelVelocityMap() != null) {
+             for (double[] entry : c.shootingFlywheelVelocityMap()) {
+                 shootingFlywheelVelocityMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.shootingHoodAngleMap() != null) {
+             for (double[] entry : c.shootingHoodAngleMap()) {
+                 shootingHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
+             }
+         }
+         if (c.ferryTimeOfFlightMap() != null) {
+             for (double[] entry : c.ferryTimeOfFlightMap()) {
+                 ferryTimeOfFlightMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.ferryFlywheelVelocityMap() != null) {
+             for (double[] entry : c.ferryFlywheelVelocityMap()) {
+                 ferryFlywheelVelocityMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.ferryHoodAngleMap() != null) {
+             for (double[] entry : c.ferryHoodAngleMap()) {
+                 ferryHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
+             }
+         }
     }
 
     public static boolean isNoSolution(ProjectileData data) {
@@ -85,9 +114,23 @@ public class ShooterStructure {
 
     public static class Static {
 
+        public static ProjectileData calculateShot(Translation3d target, Translation3d predictedTarget) {
+            return calculateShot(target, predictedTarget, false);
+        }
+
         public static ProjectileData calculateShot(
-            Translation3d actualTarget, Translation3d predictedTarget) {
+            Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch
+        ) {
+            if (isFixedPitch) {
+                return calculateShotFixedPitch(actualTarget, predictedTarget);
+            }
             double x_dist = distanceToTarget(predictedTarget);
+            if (Toggles.useLUT.getAsBoolean()) {
+                return new ProjectileData(
+                    shootingFlywheelVelocityMap.get(x_dist),
+                    shootingHoodAngleMap.get(x_dist).getRadians(),
+                    predictedTarget);
+            }
             double y_dist = predictedTarget
                 .getMeasureZ()
                 .minus(RobotConstants.ROBOT_TO_TURRET.getMeasureZ()).in(Meters);
@@ -119,89 +162,13 @@ public class ShooterStructure {
         }
 
         /**
-         * Computes a ballistic solution by iterating angles from MIN to MAX hood angle,
-         * finding the lowest angle that:
-         *   1. Reaches the target
-         *   2. Clears the funnel rim by DISTANCE_ABOVE_FUNNEL_TO_CLEAR
-         * <p>
-         * All heights are measured from the field floor.
-         *
-         * @param actualTarget   The real hub target (used for funnel radius scaling).
-         * @param predictedTarget Used for shooting on the move: where we aim.
-         * @return ProjectileData with exit velocity, hood angle, and target. Returns kNoSolution if no valid angle found.
-         */
-//        public static ProjectileData calculateShot(
-//            Translation3d actualTarget, Translation3d predictedTarget
-//        ) {
-//            double x_dist = distanceToTarget(predictedTarget);
-//            double turretH = turretHeightAboveField();
-//            double y_dist = predictedTarget.getZ() - turretH;
-//            double r = FieldConstants.Hub.FUNNEL_RADIUS
-//                * x_dist / distanceToTarget(actualTarget);
-//            double xFunnel = x_dist - r;
-//            double requiredHeight = (FieldConstants.Hub.FUNNEL_HEIGHT
-//                + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR)
-//                - turretH;
-//
-//            double bestTheta = -1;
-//            double bestV0 = -1;
-//
-//            for (double theta = RobotConstants.MIN_HOOD_ANGLE.getRadians();
-//                 theta <= RobotConstants.MAX_HOOD_ANGLE.getRadians();
-//                 theta += RobotConstants.ANGLE_INCREMENT
-//            ) {
-//                double cosTheta = Math.cos(theta);
-//                double tanTheta = Math.tan(theta);
-//                double denom = 2 * cosTheta * cosTheta * (x_dist * tanTheta - y_dist);
-//                if (denom <= 0) continue;
-//
-//                double v0 = Math.sqrt(G * x_dist * x_dist / denom);
-//                if (Double.isNaN(v0) || Double.isInfinite(v0)) continue;
-//                double yAtFunnel = xFunnel * tanTheta
-//                    - (G * xFunnel * xFunnel) / (2.0 * v0 * v0 * cosTheta * cosTheta);
-//
-//                if (yAtFunnel >= requiredHeight) {
-//                    bestTheta = theta;
-//                    bestV0 = v0;
-//                    break;
-//                }
-//            }
-//
-//            if (bestTheta < 0) {
-//                if (Toggles.debugMode.get()) {
-//                    Logger.recordOutput("Turret/Debug/NoSolution", true);
-//                    Logger.recordOutput("Turret/Debug/x_dist", x_dist);
-//                    Logger.recordOutput("Turret/Debug/y_dist", y_dist);
-//                    Logger.recordOutput("Turret/Debug/requiredHeight", requiredHeight);
-//                    Logger.recordOutput("Turret/Debug/xFunnel", xFunnel);
-//                }
-//                return kNoSolution;
-//            }
-//
-//            if (Toggles.debugMode.get()) {
-//                double cosB = Math.cos(bestTheta);
-//                double yAtFunnelFinal = xFunnel * Math.tan(bestTheta)
-//                    - (G * xFunnel * xFunnel) / (2.0 * bestV0 * bestV0 * cosB * cosB);
-//                Logger.recordOutput("Turret/Debug/x_dist", x_dist);
-//                Logger.recordOutput("Turret/Debug/y_dist", y_dist);
-//                Logger.recordOutput("Turret/Debug/xFunnel", xFunnel);
-//                Logger.recordOutput("Turret/Debug/requiredHeight", requiredHeight);
-//                Logger.recordOutput("Turret/Debug/yAtFunnel", yAtFunnelFinal);
-//                Logger.recordOutput("Turret/Debug/funnelClearance", yAtFunnelFinal - requiredHeight);
-//                Logger.recordOutput("Turret/Debug/bestTheta", Math.toDegrees(bestTheta));
-//                Logger.recordOutput("Turret/Debug/bestV0", bestV0);
-//            }
-//            return new ProjectileData(bestV0, bestTheta, predictedTarget);
-//        }
-
-        /**
          * Computes a ballistic launch solution for a shooter with a fixed pitch angle.
          *
          * @param actualTarget   The real hub target.
          * @param predictedTarget Used for shooting on the move.
          * @return ProjectileData, or kNoSolution if the fixed angle cannot clear the funnel or reach the target.
          */
-        public static ProjectileData calculateShotFixedPitch(
+        private static ProjectileData calculateShotFixedPitch(
             Translation3d actualTarget, Translation3d predictedTarget
         ) {
             final double theta = RobotConstants.FIXED_SHOOTER_ANGLE;
@@ -275,9 +242,7 @@ public class ShooterStructure {
             ProjectileData solution = kNoSolution;
 
             for (int i = 0; i < MAX_ITERATIONS; i++) {
-                solution = isFixedPitch
-                    ? Static.calculateShotFixedPitch(actualTarget, predictedTarget)
-                    : Static.calculateShot(actualTarget, predictedTarget);
+                solution = Static.calculateShot(actualTarget, predictedTarget, isFixedPitch);
 
 //                 Fixed: properly check kNoSolution instead of null
                 if (isNoSolution(solution)) {

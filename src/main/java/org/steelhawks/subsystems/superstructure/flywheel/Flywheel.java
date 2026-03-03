@@ -15,6 +15,7 @@ import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
@@ -125,8 +126,8 @@ public class Flywheel extends SubsystemBase {
                 Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
                 switch (RobotState.getInstance().getAimState()) {
                     case NOTHING -> {
-                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                        double mps = ShooterStructure.Static.calculateShot(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(rps * IDLE_MULTIPLIER);
@@ -134,15 +135,15 @@ public class Flywheel extends SubsystemBase {
                     }
                     case SHOOTING_MOVING -> {
                         double mps = ShooterStructure.Moving.calculateMovingShot(
-                            FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
+                            FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(rps);
                         }
                     }
                     case SHOOTING_STATIONARY -> {
-                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                        double mps = ShooterStructure.Static.calculateShot(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(constants.stationaryHoodVelocityFactor() * rps);
