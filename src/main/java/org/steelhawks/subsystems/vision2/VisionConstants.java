@@ -26,7 +26,6 @@ public class VisionConstants {
     public static final int APRILTAG_PIPELINE = 0;
     public static final int RETROREFLECTIVE_PIPELINE = 1;
 
-    public static final String Hello = "This works";
 
 
 }
