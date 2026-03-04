@@ -7,6 +7,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
+import org.steelhawks.Constants;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.VirtualSubsystem;
 
 import java.util.ArrayList;
@@ -22,6 +24,14 @@ public class ShooterTuner extends VirtualSubsystem {
         }
         return instance;
     }
+
+    private static final double FLYWHEEL_RADIUS =
+        switch (Constants.getRobot()) {
+            case SIMBOT -> SubsystemConstants.SimBot.FLYWHEEL.flywheelRadius();
+            case ALPHABOT -> SubsystemConstants.AlphaBot.FLYWHEEL.flywheelRadius();
+            case OMEGABOT -> SubsystemConstants.OmegaBot.FLYWHEEL.flywheelRadius();
+            default -> 0;
+        };
 
     private ShooterTuner() {
         manualHoodAngleDeg = new LoggedNetworkNumber("ShooterTuner/Input/HoodAngleDeg", 25.0);
@@ -53,7 +63,7 @@ public class ShooterTuner extends VirtualSubsystem {
         // run testing
         if (Toggles.shooterTuningMode.get()) {
             double rps = ShooterStructure.linearToAngularVelocity(
-                manualFlywheelSpeed.get(), ShooterConstants.Flywheel.FLYWHEEL_RADIUS);
+                manualFlywheelSpeed.get(), FLYWHEEL_RADIUS);
             RobotContainer.s_Flywheel.setTargetVelocityForced(rps);
 //            RobotContainer.s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get()));
         }

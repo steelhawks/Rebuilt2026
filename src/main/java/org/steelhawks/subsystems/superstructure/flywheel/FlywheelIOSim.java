@@ -23,7 +23,7 @@ public class FlywheelIOSim implements FlywheelIO {
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44(1),
                 0.001,
-                1.0 / 2.0
+                constants.reduction()
             ),
             DCMotor.getKrakenX44(1)
         );
@@ -32,7 +32,7 @@ public class FlywheelIOSim implements FlywheelIO {
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44(1),
                 0.001,
-                1.0 / 2.0
+                constants.reduction()
             ),
             DCMotor.getKrakenX44(1)
         );

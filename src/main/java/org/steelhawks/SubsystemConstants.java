@@ -1,10 +1,10 @@
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 
 /**
  * This class contains constants that are selected by RobotConfig and passed to the relevant subsystem upon init.
- * Note that these records mostly consist of tunable values. For physical constants, refer to the Constants class in the subsystem folder.
  *
  * @author Adam Aptowitz
  */
@@ -32,10 +32,12 @@ public class SubsystemConstants {
         double velocityToleranceRadPerSec,
         double samplingTimeoutDuration,
         double timeoutAvgMinSamples,
-        double stationaryHoodVelocityFactor
+        double stationaryHoodVelocityFactor,
+        double flywheelRadius,
+        double reduction
     ) {
         public static final FlywheelConstants UNSET =
-            new FlywheelConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            new FlywheelConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public record TurretConstants(
@@ -116,7 +118,9 @@ public class SubsystemConstants {
                 20,
                 2,
                 10,
-                2
+                2,
+                Units.inchesToMeters(2),
+                1.0 / 2.0
             );
 
         public static final TurretConstants TURRET =
@@ -142,7 +146,18 @@ public class SubsystemConstants {
     public static final class OmegaBot {
         public static final LUTConstants LUT = LUTConstants.UNSET;
         public static final IntakeConstants INTAKE = IntakeConstants.UNSET;
-        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
+            0,
+            0, 0, 0,
+            0, 0,
+            0, 0,
+            0,
+            2,
+            10,
+            2,
+            Units.inchesToMeters(20),
+            0
+        );
         public static final TurretConstants TURRET = new TurretConstants(
             0,
             0, 0, 0,
@@ -178,7 +193,9 @@ public class SubsystemConstants {
                 20,
                 2,
                 10,
-                2
+                2,
+                Units.inchesToMeters(2),
+                1.0 / 2.0
             );
 
         public static final TurretConstants TURRET =
