@@ -165,7 +165,7 @@ public class SubsystemConstants {
             2,
             10,
             2,
-            Units.inchesToMeters(20),
+            Units.inchesToMeters(2.0),
             0
         );
         public static final TurretConstants TURRET = new TurretConstants(
@@ -187,7 +187,7 @@ public class SubsystemConstants {
         private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
         private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
         private static final double HOOD_REDUCTION = 4.357 / 1.0;
-        private static final  Rotation2d minAngle = Rotation2d.fromDegrees(40);
+        private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
 
         public static final HoodConstants HOOD = new HoodConstants(
             0, 0,
@@ -250,7 +250,7 @@ public class SubsystemConstants {
         private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
         private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
         private static final double HOOD_REDUCTION = 4.357 / 1.0;
-        private static final  Rotation2d minAngle = Rotation2d.fromDegrees(40);
+        private static final  Rotation2d minAngle = Rotation2d.fromDegrees(40.0);
 
         public static final HoodConstants HOOD = new HoodConstants(
             0, 0,
@@ -260,8 +260,8 @@ public class SubsystemConstants {
             0,
             HOOD_REDUCTION,
             // min angle is full extension, max angle is home
-            minAngle, Rotation2d.fromDegrees(80),
-            Rotation2d.fromRotations(0).plus(minAngle),
+            minAngle, Rotation2d.fromDegrees(80.0),
+            Rotation2d.fromRotations(0.0).plus(minAngle),
             0.02
         );
 
