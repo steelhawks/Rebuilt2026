@@ -73,7 +73,7 @@ public class Indexer extends SubsystemBase {
 
     @AutoLogOutput(key = "Indexer/Jammed")
     public boolean isJammed() {
-        return spindexerInputs.torqueCurrentAmps >= SPINDEXER_JAM_CURRENT.get()
+        return spindexerInputs.motor1TorqueCurrentAmps >= SPINDEXER_JAM_CURRENT.get()
             || feederInputs.torqueCurrentAmps >= FEEDER_JAM_CURRENT.get();
     }
 
