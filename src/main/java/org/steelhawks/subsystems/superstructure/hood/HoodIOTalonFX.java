@@ -16,7 +16,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
 import org.steelhawks.SubsystemConstants;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
@@ -60,11 +59,11 @@ public class HoodIOTalonFX implements HoodIO {
         motorConfig.Slot0.kP = constants.kP();
         motorConfig.Slot0.kI = constants.kI();
         motorConfig.Slot0.kD = constants.kD();
-        motorConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Hood.REDUCTION;
+        motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
 
         cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        cancoderConfig.MagnetSensor.MagnetOffset = ShooterConstants.Hood.MAG_OFFSET.getRotations();
+        cancoderConfig.MagnetSensor.MagnetOffset = constants.magOffset().getRotations();
         tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         position = hoodMotor.getPosition();

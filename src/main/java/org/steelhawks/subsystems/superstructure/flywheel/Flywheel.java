@@ -18,7 +18,6 @@ import org.steelhawks.*;
 import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;

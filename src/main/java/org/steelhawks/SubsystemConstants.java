@@ -1,7 +1,10 @@
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+
+import java.util.OptionalInt;
 
 /**
  * This class contains constants that are selected by RobotConfig and passed to the relevant subsystem upon init.
@@ -57,10 +60,15 @@ public class SubsystemConstants {
 
     public record HoodConstants(
         int motorId, int cancoderId,
-        double kP, double kI, double kD, double kS, double kG, double kA
+        double kP, double kI, double kD,
+        double kS, double kG, double kA,
+        double reduction,
+        Rotation2d minAngle, Rotation2d maxAngle,
+        Rotation2d magOffset,
+        double tolerance
     ) {
         public static final HoodConstants UNSET =
-            new HoodConstants(0, 0, 0, 0, 0, 0, 0, 0);
+            new HoodConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d() , new Rotation2d(), 0);
     }
 
     public record IntakeConstants(
@@ -76,11 +84,12 @@ public class SubsystemConstants {
     }
 
     public record IndexerConstants(
-        int indexerId, int feederId,
-        double indexerJamCurrent, double feederJamCurrent
+        int spindexerMotor1Id, int feederId,
+        double indexerJamCurrent, double feederJamCurrent,
+        OptionalInt spindexerMotor2Id
     ) {
         public static final IndexerConstants UNSET =
-            new IndexerConstants(0, 0, 0, 0);
+            new IndexerConstants(0, 0, 0, 0, OptionalInt.empty());
     }
 
     public static final class AlphaBot {
@@ -139,7 +148,8 @@ public class SubsystemConstants {
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
                 45, 26,
-                40, 40
+                40, 40,
+                OptionalInt.empty()
             );
     }
 
@@ -169,7 +179,29 @@ public class SubsystemConstants {
             new Rotation2d(0 - (Math.PI / 60)),
             new Rotation2d((2 * Math.PI) + (Math.PI / 60))
         );
-        public static final HoodConstants HOOD = HoodConstants.UNSET;
+
+        // hood constants
+        // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
+        private static final double M = Units.lbsToKilograms(0.0);
+        private static final double G = 9.81;
+        private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
+        private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
+        private static final double HOOD_REDUCTION = 4.357 / 1.0;
+        private static final  Rotation2d minAngle = Rotation2d.fromDegrees(40);
+
+        public static final HoodConstants HOOD = new HoodConstants(
+            0, 0,
+            0, 0, 0,
+            0,
+            (M * G * R) / (kT * HOOD_REDUCTION),
+            0,
+            HOOD_REDUCTION,
+            // min angle is full extension, max angle is home
+            minAngle, Rotation2d.fromDegrees(80),
+            Rotation2d.fromRotations(0).plus(minAngle),
+            0.02
+        );
+
         public static final IndexerConstants INDEXER = IndexerConstants.UNSET;
     }
 
@@ -211,12 +243,33 @@ public class SubsystemConstants {
                 new Rotation2d(Math.PI + (Math.PI / 60))
             );
 
-        public static final HoodConstants HOOD = HoodConstants.UNSET;
+        // hood constants
+        // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
+        private static final double M = Units.lbsToKilograms(0.0);
+        private static final double G = 9.81;
+        private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
+        private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
+        private static final double HOOD_REDUCTION = 4.357 / 1.0;
+        private static final  Rotation2d minAngle = Rotation2d.fromDegrees(40);
+
+        public static final HoodConstants HOOD = new HoodConstants(
+            0, 0,
+            0, 0, 0,
+            0,
+            (M * G * R) / (kT * HOOD_REDUCTION),
+            0,
+            HOOD_REDUCTION,
+            // min angle is full extension, max angle is home
+            minAngle, Rotation2d.fromDegrees(80),
+            Rotation2d.fromRotations(0).plus(minAngle),
+            0.02
+        );
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
                 45, 26,
-                40, 40
+                40, 40,
+                OptionalInt.empty()
             );
     }
 }

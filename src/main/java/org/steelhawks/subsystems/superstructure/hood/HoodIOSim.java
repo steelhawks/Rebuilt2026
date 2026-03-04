@@ -8,7 +8,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
 import org.steelhawks.SubsystemConstants;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 public class HoodIOSim implements HoodIO {
 
@@ -30,10 +29,10 @@ public class HoodIOSim implements HoodIO {
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44Foc(1),
                 0.001,
-                ShooterConstants.Hood.REDUCTION),
+                constants.reduction()),
             DCMotor.getKrakenX44Foc(1));
         visualizer = new HoodVisualizer(hoodMotor::getAngularPositionRad);
-        hoodMotor.setAngle(ShooterConstants.Hood.MAX_ANGLE.getRadians());
+        hoodMotor.setAngle(constants.maxAngle().getRadians());
     }
 
     private double currentToVolts(double current) {

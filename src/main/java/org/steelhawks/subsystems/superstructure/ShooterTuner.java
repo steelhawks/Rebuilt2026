@@ -25,6 +25,7 @@ public class ShooterTuner extends VirtualSubsystem {
         return instance;
     }
 
+    // TODO: find a better way to get the appropriate constants into classes like this
     private static final double FLYWHEEL_RADIUS =
         switch (Constants.getRobot()) {
             case SIMBOT -> SubsystemConstants.SimBot.FLYWHEEL.flywheelRadius();

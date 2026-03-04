@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotState;
 import org.steelhawks.SubsystemConstants;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 
 public class TurretIOSim implements TurretIO {

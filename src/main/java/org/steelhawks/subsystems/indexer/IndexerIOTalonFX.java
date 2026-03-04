@@ -37,7 +37,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     private final DutyCycleOut feederDutyCycleOut;
 
 	public IndexerIOTalonFX(RobotConfig.CANBus canBus, SubsystemConstants.IndexerConstants constants) {
-        spindexerMotor = new TalonFX(constants.indexerId(), canBus.bus);
+        spindexerMotor = new TalonFX(constants.spindexerMotor1Id(), canBus.bus);
         feederMotor = new TalonFX(constants.feederId(), canBus.bus);
 
 		spindexerConfig = new TalonFXConfiguration();

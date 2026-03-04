@@ -6,7 +6,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
 import org.steelhawks.SubsystemConstants;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
 public class FlywheelIOSim implements FlywheelIO {
     private DCMotorSim leftMotorSim;

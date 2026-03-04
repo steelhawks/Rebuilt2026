@@ -12,7 +12,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
 import org.steelhawks.SubsystemConstants;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 public class TurretIOTalonFX implements TurretIO {
