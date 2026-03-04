@@ -40,8 +40,8 @@ public class Turret extends SubsystemBase {
     private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
 
-    private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
-    private static final Rotation2d maxRotation = new Rotation2d(Constants.value(Math.PI, 2 * Math.PI) + (Math.PI / 60.0));
+    // private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
+    // private static final Rotation2d maxRotation = new Rotation2d(Constants.value(Math.PI, 2 * Math.PI) + (Math.PI / 60.0));
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
@@ -62,10 +62,12 @@ public class Turret extends SubsystemBase {
     private boolean isHomed = false;
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
+    private SubsystemConstants.TurretConstants constants;
 
     public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
         this.io = io;
+        this.constants = constants;
         kP = new LoggedTunableNumber("Turret/kP", constants.kP());
         kI = new LoggedTunableNumber("Turret/kI", constants.kI());
         kD = new LoggedTunableNumber("Turret/kD", constants.kD());
@@ -113,8 +115,8 @@ public class Turret extends SubsystemBase {
             targetAngle - 2 * Math.PI
         };
         for (double candidate : candidates) {
-            if (candidate >= minRotation.getRadians() &&
-                candidate <= maxRotation.getRadians()) {
+            if (candidate >= constants.minRotation().getRadians() &&
+                candidate <= constants.maxRotation().getRadians()) {
                 double moveDistance = Math.abs(candidate - currentAngle);
                 if (moveDistance < smallestMove) {
                     smallestMove = moveDistance;
@@ -125,8 +127,8 @@ public class Turret extends SubsystemBase {
         // target in blind spot
         if (smallestMove == Double.POSITIVE_INFINITY) {
             bestAngle = MathUtil.clamp(targetAngle,
-                minRotation.getRadians(),
-                maxRotation.getRadians());
+                constants.minRotation().getRadians(),
+                constants.maxRotation().getRadians());
         }
         return Rotation2d.fromRadians(bestAngle);
     }
@@ -233,8 +235,8 @@ public class Turret extends SubsystemBase {
                 && Toggles.Turret.isEnabled.get()
                 && !Toggles.Turret.toggleVoltageOverride.get()
                 && !Toggles.Turret.toggleCurrentOverride.get()
-                && (getPosition().getRadians() <= maxRotation.getRadians()
-                    && getPosition().getRadians() >= minRotation.getRadians());
+                && (getPosition().getRadians() <= constants.maxRotation().getRadians()
+                    && getPosition().getRadians() >= constants.minRotation().getRadians());
         Logger.recordOutput("Turret/ShouldRun", shouldRun);
         if (DriverStation.isDisabled()) {
             setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
@@ -282,8 +284,8 @@ public class Turret extends SubsystemBase {
             manualGoalRad =
                 MathUtil.clamp(
                     manualGoalRad + delta,
-                    minRotation.getRadians(),
-                    maxRotation.getRadians());
+                    constants.minRotation().getRadians(),
+                    constants.maxRotation().getRadians());
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
@@ -331,18 +333,18 @@ public class Turret extends SubsystemBase {
             desiredRotation =
                 Rotation2d.fromRadians(
                     MathUtil.clamp(
-                        desiredRotation.getRadians(), minRotation.getRadians(), maxRotation.getRadians()));
+                        desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
             goal = new TrapezoidProfile.State(desiredRotation.getRadians(), 0.0);
             double previousVelocity = setpoint.velocity;
             setpoint =
                 profile
                     .calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
-            if (setpoint.position < minRotation.getRadians()
-                || setpoint.position > maxRotation.getRadians()
+            if (setpoint.position < constants.minRotation().getRadians()
+                || setpoint.position > constants.maxRotation().getRadians()
             ) {
                 setpoint =
                     new TrapezoidProfile.State(
-                        MathUtil.clamp(setpoint.position, minRotation.getRadians(), maxRotation.getRadians()),
+                        MathUtil.clamp(setpoint.position, constants.minRotation().getRadians(), constants.maxRotation().getRadians()),
                         0.0);
             }
             atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble());
@@ -380,7 +382,7 @@ public class Turret extends SubsystemBase {
                 () -> desiredRotation =
                         Rotation2d.fromRadians(
                             MathUtil.clamp(
-                                rotation.getRadians(), minRotation.getRadians(), maxRotation.getRadians())), this),
+                                rotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians())), this),
                 Commands.none(),
                 () -> RobotState.getInstance().getShooterMode().equals(ShooterMode.MANUAL))
             .withName("Set Desired State");

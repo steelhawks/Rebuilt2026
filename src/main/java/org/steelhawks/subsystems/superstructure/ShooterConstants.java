@@ -33,9 +33,9 @@ public class ShooterConstants {
     }
 
     public static final class Turret {
-        public static final double MOTOR_REDUCTION =
-            Constants.value(0.0, 200.0 / 20.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0));
-        public static final double ENCODER_REDUCTION = (16.0 / 96.0) * (28.0 / 16.0) * (64.0 / 16.0);
-        public static final double CURRENT_LIMIT = 45.0;
+//        public static final double MOTOR_REDUCTION =
+//            Constants.value(0.0, 200.0 / 20.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0));
+//        public static final double ENCODER_REDUCTION = (16.0 / 96.0) * (28.0 / 16.0) * (64.0 / 16.0);
+//        public static final double CURRENT_LIMIT = 45.0;
     }
 }

@@ -1,5 +1,7 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 /**
  * This class contains constants that are selected by RobotConfig and passed to the relevant subsystem upon init.
  * Note that these records mostly consist of tunable values. For physical constants, refer to the Constants class in the subsystem folder.
@@ -42,10 +44,13 @@ public class SubsystemConstants {
         double maxVelocityRadPerSec,
         double maxAccelerationRadPerSecSq,
         double manualIncrement,
-        double currentHomingThreshold
+        double currentHomingThreshold,
+        double motorReduction,
+        Rotation2d minRotation,
+        Rotation2d maxRotation
     ) {
         public static final TurretConstants UNSET =
-            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d());
     }
 
     public record HoodConstants(
@@ -121,7 +126,10 @@ public class SubsystemConstants {
                 2, 0,
                 10, 20,
                 0.1,
-                40
+                40,
+                (200.0 / 20.0),
+                new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
+                new Rotation2d(Math.PI + (Math.PI / 60))
             );
 
         public static final IndexerConstants INDEXER =
@@ -135,7 +143,17 @@ public class SubsystemConstants {
         public static final LUTConstants LUT = LUTConstants.UNSET;
         public static final IntakeConstants INTAKE = IntakeConstants.UNSET;
         public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
-        public static final TurretConstants TURRET = TurretConstants.UNSET;
+        public static final TurretConstants TURRET = new TurretConstants(
+            0,
+            0, 0, 0,
+            0, 0,
+            0, 0,
+            0.1,
+            0,
+            (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0),
+            new Rotation2d(0 - (Math.PI / 60)),
+            new Rotation2d((2 * Math.PI) + (Math.PI / 60))
+        );
         public static final HoodConstants HOOD = HoodConstants.UNSET;
         public static final IndexerConstants INDEXER = IndexerConstants.UNSET;
     }
@@ -170,7 +188,10 @@ public class SubsystemConstants {
                 0.2, 0,
                 10, 20,
                 0.1,
-                40
+                40,
+                (200.0 / 20.0),
+                new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
+                new Rotation2d(Math.PI + (Math.PI / 60))
             );
 
         public static final HoodConstants HOOD = HoodConstants.UNSET;

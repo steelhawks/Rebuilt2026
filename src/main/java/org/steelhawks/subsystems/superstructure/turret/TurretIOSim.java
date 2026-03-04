@@ -33,7 +33,7 @@ public class TurretIOSim implements TurretIO {
                 DCMotor.getKrakenX60Foc(1),
                 0.001, // complete bs how do u do this
             // my guess is the torque divided by angular accel but idk
-                ShooterConstants.Turret.MOTOR_REDUCTION),
+                constants.motorReduction()),
             DCMotor.getKrakenX60Foc(1));
         turretVisualizer = new TurretVisualizer(
             mMotor::getAngularPositionRad,
