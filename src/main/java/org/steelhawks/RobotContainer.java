@@ -64,7 +64,8 @@ public class RobotContainer {
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX()));
         configureDriver();
-        ShooterTuner.getInstance();
+        Toggles.configureOverrides();
+//        ShooterTuner.getInstance();
     }
 
     private void configureDriver() {

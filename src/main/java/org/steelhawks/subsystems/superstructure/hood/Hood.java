@@ -108,6 +108,10 @@ public class Hood extends SubsystemBase {
         setpoint = Rotation2d.fromDegrees(inputs.goal);
     }
 
+    public Command zeroHood() {
+        return Commands.runOnce(() -> {}, this);
+    }
+
     public Command setDesiredPositionCommand(Rotation2d position) {
         return Commands.runOnce(() -> setDesiredPosition(position));
     }

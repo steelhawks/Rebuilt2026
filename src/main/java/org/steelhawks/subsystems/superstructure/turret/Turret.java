@@ -372,6 +372,13 @@ public class Turret extends SubsystemBase {
         return inputs.positionRad;
     }
 
+    public Command zeroTurret() {
+        return Commands.runOnce(() -> {
+            isHomed = false;
+            isZeroed = false;
+        }, this);
+    }
+
     public Command setDesiredRotation(Rotation2d rotation) {
         return Commands.either(
             Commands.runOnce(

@@ -1,5 +1,8 @@
 package org.steelhawks;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
 
@@ -7,6 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface Toggles {
+
+    static void configureOverrides() {
+        bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
+        bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
+    }
+
+    private static void bindMomentary(String key, Command command) {
+        var toggle = new LoggedNetworkBoolean(key, false);
+        new Trigger(toggle::get)
+            .onTrue(command.andThen(Commands.runOnce(() -> toggle.set(false))));
+    }
 
     LoggedNetworkBoolean debugMode =
         new LoggedNetworkBoolean("Toggles/DebugMode", false);
