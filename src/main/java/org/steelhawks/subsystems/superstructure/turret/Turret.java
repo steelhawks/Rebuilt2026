@@ -48,7 +48,7 @@ public class Turret extends SubsystemBase {
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
-    private Supplier<Pose2d> poseSupplier;
+    private final Supplier<Pose2d> poseSupplier;
     private TrapezoidProfile profile;
     private final TurretIO io;
 
@@ -203,6 +203,9 @@ public class Turret extends SubsystemBase {
             Logger.recordOutput("Turret/IsHomed", true);
             io.setPosition(0);
             isZeroed = true;
+            // sync setpoint to new position immediately, so turret doesnt violently snap like we've been seeing
+            setpoint = new TrapezoidProfile.State(Math.PI, 0.0);
+            desiredRotation = Rotation2d.fromRadians(Math.PI);
             Logger.recordOutput("Turret/Zeroed", true);
         }
         if (!isHomed && Toggles.Turret.isEnabled.get()) {
@@ -214,6 +217,9 @@ public class Turret extends SubsystemBase {
                 io.setPosition(Math.PI);
                 io.stop();
                 isZeroed = true;
+                // sync setpoint to new position immediately, so turret doesnt violently snap like we've been seeing
+                setpoint = new TrapezoidProfile.State(Math.PI, 0.0);
+                desiredRotation = Rotation2d.fromRadians(Math.PI);
                 Logger.recordOutput("Turret/Zeroed", true);
             }
         }
