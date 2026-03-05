@@ -61,7 +61,7 @@ public class RobotContainer {
             () -> -driver.getLeftY(),
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
-        s_Matrix.setDefaultCommand(new LEDDefaultCommand(s_Matrix));
+        s_Matrix.setDefaultCommand(new LEDDefaultCommand(s_Matrix).ignoringDisable(true));
 
         configureDriver();
     }
