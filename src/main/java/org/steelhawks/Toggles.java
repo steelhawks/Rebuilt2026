@@ -12,8 +12,10 @@ import java.util.Map;
 public interface Toggles {
 
     static void configureOverrides() {
-        bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
-        bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
+        if (RobotConfig.getConfig().hasTurret)
+            bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
+        if (RobotConfig.getConfig().hasHood)
+            bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
     }
 
     private static void bindMomentary(String key, Command command) {

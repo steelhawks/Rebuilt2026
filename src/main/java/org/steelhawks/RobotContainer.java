@@ -72,19 +72,25 @@ public class RobotContainer {
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
 
-        driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-        driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-        driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
+        if (config.hasIntake) {
+            driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+            driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+            driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
 
-        driver.leftBumper()
-            .whileTrue(ShootingCommands.shoot());
+            driver.rightTrigger()
+                .whileTrue(
+                    s_Intake.runIntake());
+        }
 
-        driver.rightBumper()
-            .whileTrue(s_Indexer.outtake());
+        if (config.hasIntake && config.hasIndexer && config.hasIntake) {
+            driver.leftBumper()
+                .whileTrue(ShootingCommands.shoot());
+        }
 
-        driver.rightTrigger()
-            .whileTrue(
-                s_Intake.runIntake());
+        if (config.hasIndexer) {
+            driver.rightBumper()
+                .whileTrue(s_Indexer.outtake());
+        }
 
         driver.leftTrigger()
             .whileTrue(

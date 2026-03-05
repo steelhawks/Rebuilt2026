@@ -155,15 +155,15 @@ public class RobotConfig {
         return switch (Constants.getRobot()) {
             case OMEGABOT -> new Builder()
                 .withLEDMatrix(true)
-                .withVision(true)
-                .withObjectVision(true)
-                .withFlywheel(true)
-                .withTurret(true)
-                .withHood(true)
+                .withVision(false)
+                .withObjectVision(false)
+                .withFlywheel(false)
+                .withTurret(false)
+                .withHood(false)
                 .withOldIntake(false)
-                .withIntake(true)
-                .withIndexer(true)
-                .withAutos(true)
+                .withIntake(false)
+                .withIndexer(false)
+                .withAutos(false)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
@@ -407,17 +407,18 @@ public class RobotConfig {
 
     // OmegaBot factory
     private static class OmegaBotFactory implements SubsystemFactory {
-        private final CANBus canivoreBus = new CANBus("canivore");
+        private final CANBus drivetrainBus = new CANBus("NoImJacobivore");
+        private final CANBus turretBus = new CANBus("Farhanivore");
         private final CANBus rioBus = new CANBus("");
 
         @Override
         public Swerve createSwerve() {
             return new Swerve(
-                new GyroIOPigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, canivoreBus),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft, canivoreBus),
-                new ModuleIOTalonFX(TunerConstants.FrontRight, canivoreBus),
-                new ModuleIOTalonFX(TunerConstants.BackLeft, canivoreBus),
-                new ModuleIOTalonFX(TunerConstants.BackRight, canivoreBus));
+                new GyroIOPigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, drivetrainBus),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft, drivetrainBus),
+                new ModuleIOTalonFX(TunerConstants.FrontRight, drivetrainBus),
+                new ModuleIOTalonFX(TunerConstants.BackLeft, drivetrainBus),
+                new ModuleIOTalonFX(TunerConstants.BackRight, drivetrainBus));
         }
 
         @Override
@@ -442,12 +443,12 @@ public class RobotConfig {
 
         @Override
         public Flywheel createFlywheel() {
-            return new Flywheel(new FlywheelIOTalonFX(canivoreBus));
+            return new Flywheel(new FlywheelIOTalonFX(drivetrainBus));
         }
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier) {
-            return new Turret(new TurretIOTalonFX(canivoreBus), poseSupplier);
+            return new Turret(new TurretIOTalonFX(drivetrainBus), poseSupplier);
         }
 
         @Override
