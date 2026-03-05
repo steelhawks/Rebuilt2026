@@ -45,7 +45,6 @@ public class TeleopSwerve extends Command {
     private static Double trenchSetpointSnapshot = null;
     private double sotmHeadingSnapshot = 0.0;
     private double sotmSpeedSnapshotNormalized = 0.0;
-    private Rotation2d sotmDirectionSnapshot = new Rotation2d();
 
     public enum DriveState {
         NORMAL,
@@ -85,8 +84,15 @@ public class TeleopSwerve extends Command {
             .onTrue(setDriveState(DriveState.TRENCH_ALIGN));
         RobotState.getInstance().getBumpTrigger()
             .onTrue(setDriveState(DriveState.BUMP_ALIGN));
-        RobotState.getInstance().getSOTMTrigger().onTrue(setDriveState(DriveState.LOCK_SOTM)
-            .alongWith(Commands.runOnce(() -> sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians())));
+        RobotState.getInstance().getSOTMTrigger().onTrue(
+            setDriveState(DriveState.LOCK_SOTM)
+                .alongWith(Commands.runOnce(() -> {
+                    sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians();
+                    var chassisSpeeds = s_Swerve.getChassisSpeeds();
+                    sotmSpeedSnapshotNormalized = Math.max(0.3, Math.hypot(
+                        chassisSpeeds.vxMetersPerSecond,
+                        chassisSpeeds.vyMetersPerSecond) / s_Swerve.getMaxLinearSpeedMetersPerSec());
+                })));
         RobotState.getInstance().getSOTMTrigger().negate().and(RobotState.getInstance().getTrenchTrigger().negate()).and(RobotState.getInstance().getBumpTrigger().negate())
             .onTrue(setDriveState(DriveState.NORMAL));
 
