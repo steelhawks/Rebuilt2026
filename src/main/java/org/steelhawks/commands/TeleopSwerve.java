@@ -42,7 +42,8 @@ public class TeleopSwerve extends Command {
 
     private final Swerve s_Swerve;
     private final DoubleSupplier xSupplier, ySupplier, omegaSupplier;
-    private static Double trenchSetpointSnapshot = null;
+    private static Double trenchAngleSetpointSnapshot = null;
+    private static Double bumpAngleSetpointSnapshot = null;
     private double sotmHeadingSnapshot = 0.0;
     private double sotmSpeedSnapshotNormalized = 0.0;
 
@@ -124,7 +125,8 @@ public class TeleopSwerve extends Command {
     public static Command setDriveState(DriveState state) {
         return Commands.runOnce(() -> {
             currentDriveState = state;
-            trenchSetpointSnapshot = null;
+            trenchAngleSetpointSnapshot = null;
+            bumpAngleSetpointSnapshot = null;
             double currentRad = RobotState.getInstance().getRotation().getRadians();
             angleController.reset(currentRad);
         });
@@ -169,20 +171,23 @@ public class TeleopSwerve extends Command {
                         trenchController.calculate(
                             RobotState.getInstance().getEstimatedPose().getY(),
                             middleOfTrenchClearanceY));
-                if (trenchSetpointSnapshot == null) {
+                if (trenchAngleSetpointSnapshot == null) {
                     double errorTo0 = Math.abs(MathUtil.angleModulus(currentRad - 0.0));
                     double errorToPi = Math.abs(MathUtil.angleModulus(currentRad - Math.PI));
-                    trenchSetpointSnapshot = errorTo0 < errorToPi ? 0.0 : Math.PI;
+                    trenchAngleSetpointSnapshot = errorTo0 < errorToPi ? 0.0 : Math.PI;
                 }
-                Logger.recordOutput("TeleopSwerve/Trench/SetpointAngle", trenchSetpointSnapshot);
-                omega = angleController.calculate(currentRad, trenchSetpointSnapshot);
+                Logger.recordOutput("TeleopSwerve/Trench/SetpointAngle", trenchAngleSetpointSnapshot);
+                omega = angleController.calculate(currentRad, trenchAngleSetpointSnapshot);
             }
             case BUMP_ALIGN -> {
-                double closestCornerAngle = Math.round(currentRad / (Math.PI / 4.0)) * (Math.PI / 4.0);
-                if ((Math.round(closestCornerAngle / (Math.PI / 4.0)) % 2) == 0) {
-                    closestCornerAngle += Math.PI / 4.0;
+                if (bumpAngleSetpointSnapshot == null) {
+                    double closestCornerAngle = Math.round(currentRad / (Math.PI / 4.0)) * (Math.PI / 4.0);
+                    if ((Math.round(closestCornerAngle / (Math.PI / 4.0)) % 2) == 0) {
+                        closestCornerAngle += Math.PI / 4.0;
+                    }
+                    bumpAngleSetpointSnapshot = closestCornerAngle;
                 }
-                omega = angleController.calculate(currentRad, closestCornerAngle);
+                omega = angleController.calculate(currentRad, bumpAngleSetpointSnapshot);
             }
             case LOCK_SOTM -> {
                 double x = xSupplier.getAsDouble();
