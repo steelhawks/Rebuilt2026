@@ -82,7 +82,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 
 		if (constants.spindexerMotor2Id().isPresent()) {
 			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus.bus);
-			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Aligned));
 			PhoenixUtil.tryUntilOk(5, spindexerMotor2::optimizeBusUtilization);
 
 			spindexer2Position = spindexerMotor2.getPosition();
