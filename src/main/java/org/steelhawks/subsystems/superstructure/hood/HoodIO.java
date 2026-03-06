@@ -13,7 +13,7 @@ public interface HoodIO {
         public Rotation2d motorPositionDeg = Rotation2d.fromDegrees(0.0);
         public double motorVelocityDegPerSec = 0.0;
         public double appliedVolts = 0.0;
-        public double currentAmps = 0.0;
+        public double supplyCurrentAmps = 0.0;
         public double torqueCurrentAmps = 0.0;
         public double tempCelsius = 0.0;
 

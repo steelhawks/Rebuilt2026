@@ -13,7 +13,7 @@ public interface OldIntakeIO {
 		public Rotation2d leftPositionRad = new Rotation2d();
 		public double leftVelocityRadPerSec = 0.0;
 		public double leftAppliedVolts = 0.0;
-		public double leftCurrentAmps = 0.0;
+		public double leftSupplyCurrentAmps = 0.0;
 		public double leftTorqueCurrentAmps = 0.0;
 		public double leftTempCelsius = 0.0;
 
@@ -21,7 +21,7 @@ public interface OldIntakeIO {
         public Rotation2d rightPositionRad = new Rotation2d();
         public double rightVelocityRadPerSec = 0.0;
         public double rightAppliedVolts = 0.0;
-        public double rightCurrentAmps = 0.0;
+        public double rightSupplyCurrentAmps = 0.0;
         public double rightTorqueCurrentAmps = 0.0;
         public double rightTempCelsius = 0.0;
 
@@ -29,7 +29,7 @@ public interface OldIntakeIO {
         public Rotation2d intakePositionRad = new Rotation2d();
         public double intakeVelocityRadPerSec = 0.0;
         public double intakeAppliedVolts = 0.0;
-        public double intakeCurrentAmps = 0.0;
+        public double intakeSupplyCurrentAmps = 0.0;
         public double intakeTorqueCurrentAmps = 0.0;
         public double intakeTempCelsius = 0.0;
 

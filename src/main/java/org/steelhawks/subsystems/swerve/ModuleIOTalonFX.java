@@ -151,7 +151,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             PhoenixOdometryThread.getInstance().registerSignal(driveTalon.getPosition());
         driveVelocity = driveTalon.getVelocity();
         driveAppliedVolts = driveTalon.getMotorVoltage();
-        driveCurrent = driveTalon.getStatorCurrent();
+        driveCurrent = driveTalon.getSupplyCurrent();
         driveTemp = driveTalon.getDeviceTemp();
 
         // Create turn status signals
@@ -161,7 +161,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(turnTalon.getPosition());
         turnVelocity = turnTalon.getVelocity();
         turnAppliedVolts = turnTalon.getMotorVoltage();
-        turnCurrent = turnTalon.getStatorCurrent();
+        turnCurrent = turnTalon.getSupplyCurrent();
         turnTemp = turnTalon.getDeviceTemp();
 
         // Configure periodic frames

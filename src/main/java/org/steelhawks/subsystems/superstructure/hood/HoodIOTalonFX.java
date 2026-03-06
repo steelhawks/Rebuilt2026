@@ -28,7 +28,7 @@ public class HoodIOTalonFX implements HoodIO {
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
     private final StatusSignal<Voltage> appliedVolts;
-    private final StatusSignal<Current> statorCurrent;
+    private final StatusSignal<Current> supplyCurrent;
     private final StatusSignal<Current> torqueCurrent;
     private final StatusSignal<Temperature> deviceTemp;
 
@@ -69,7 +69,7 @@ public class HoodIOTalonFX implements HoodIO {
         position = hoodMotor.getPosition();
         velocity = hoodMotor.getVelocity();
         appliedVolts = hoodMotor.getMotorVoltage();
-        statorCurrent = hoodMotor.getStatorCurrent();
+        supplyCurrent = hoodMotor.getSupplyCurrent();
         torqueCurrent = hoodMotor.getTorqueCurrent();
         deviceTemp = hoodMotor.getDeviceTemp();
 
@@ -87,18 +87,18 @@ public class HoodIOTalonFX implements HoodIO {
 
         PhoenixUtil.registerSignals(
             bus.bus.isNetworkFD(),
-            position, velocity, appliedVolts, statorCurrent, torqueCurrent, deviceTemp);
+            position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp);
         tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(hoodMotor, cancoder));
     }
 
     @Override
     public void updateInputs(HoodIOInputs inputs) {
         inputs.motorConnected =
-            BaseStatusSignal.isAllGood(position, velocity, appliedVolts, statorCurrent, torqueCurrent, deviceTemp);
+            BaseStatusSignal.isAllGood(position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp);
         inputs.motorPositionDeg = Rotation2d.fromRotations(position.getValueAsDouble());
         inputs.motorVelocityDegPerSec = Units.rotationsToDegrees(velocity.getValueAsDouble());
         inputs.appliedVolts = appliedVolts.getValueAsDouble();
-        inputs.currentAmps = statorCurrent.getValueAsDouble();
+        inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
         inputs.tempCelsius = deviceTemp.getValueAsDouble();
 

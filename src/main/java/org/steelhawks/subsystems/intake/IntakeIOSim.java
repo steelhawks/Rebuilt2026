@@ -4,8 +4,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.steelhawks.Constants;
@@ -86,7 +84,7 @@ public class IntakeIOSim implements IntakeIO {
         inputs.leftPositionMeters = leftMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN;
         inputs.leftVelocityMetersPerSec = leftMotorSim.getAngularVelocityRadPerSec() * IntakeConstants.METERS_PER_RADIAN;
         inputs.leftAppliedVolts = leftMotorSim.getInputVoltage();
-        inputs.leftCurrentAmps = leftMotorSim.getCurrentDrawAmps();
+        inputs.leftSupplyCurrentAmps = leftMotorSim.getCurrentDrawAmps();
         inputs.leftTorqueCurrentAmps = leftMotorSim.getCurrentDrawAmps();
         inputs.leftTempCelsius = leftMotorSim.getCurrentDrawAmps() * 0.1;
 
@@ -94,7 +92,7 @@ public class IntakeIOSim implements IntakeIO {
         inputs.rightPositionMeters = rightMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN;
         inputs.rightVelocityMetersPerSec = rightMotorSim.getAngularVelocityRadPerSec() * IntakeConstants.METERS_PER_RADIAN;
         inputs.rightAppliedVolts = rightMotorSim.getInputVoltage();
-        inputs.rightCurrentAmps = rightMotorSim.getCurrentDrawAmps();
+        inputs.rightSupplyCurrentAmps = rightMotorSim.getCurrentDrawAmps();
         inputs.rightTorqueCurrentAmps = rightMotorSim.getCurrentDrawAmps();
         inputs.rightTempCelsius = rightMotorSim.getCurrentDrawAmps() * 0.1;
 
@@ -102,7 +100,7 @@ public class IntakeIOSim implements IntakeIO {
         inputs.intakePositionRad = new Rotation2d(intakeMotorSim.getAngularPositionRad());
         inputs.intakeVelocityRadPerSec = intakeMotorSim.getAngularVelocityRadPerSec();
         inputs.intakeAppliedVolts = intakeMotorSim.getInputVoltage();
-        inputs.intakeCurrentAmps = intakeMotorSim.getCurrentDrawAmps();
+        inputs.intakeSupplyCurrentAmps = intakeMotorSim.getCurrentDrawAmps();
         inputs.intakeTorqueCurrentAmps = intakeMotorSim.getCurrentDrawAmps();
         inputs.intakeTempCelsius = intakeMotorSim.getCurrentDrawAmps() * 0.1;
 

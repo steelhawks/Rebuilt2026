@@ -14,7 +14,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig;
 import org.steelhawks.RobotConfig.CANBus;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -94,21 +93,21 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         leftPosition = leftMotor.getPosition();
         leftVelocity = leftMotor.getVelocity();
         leftVoltage = leftMotor.getMotorVoltage();
-        leftCurrent = leftMotor.getStatorCurrent();
+        leftCurrent = leftMotor.getSupplyCurrent();
         leftTorqueCurrent = leftMotor.getTorqueCurrent();
         leftTemp = leftMotor.getDeviceTemp();
 
         rightPosition = leftMotor.getPosition();
         rightVelocity = leftMotor.getVelocity();
         rightVoltage = leftMotor.getMotorVoltage();
-        rightCurrent = leftMotor.getStatorCurrent();
+        rightCurrent = leftMotor.getSupplyCurrent();
         rightTorqueCurrent = leftMotor.getTorqueCurrent();
         rightTemp = leftMotor.getDeviceTemp();
 
         intakePosition = leftMotor.getPosition();
         intakeVelocity = leftMotor.getVelocity();
         intakeVoltage = leftMotor.getMotorVoltage();
-        intakeCurrent = leftMotor.getStatorCurrent();
+        intakeCurrent = leftMotor.getSupplyCurrent();
         intakeTorqueCurrent = leftMotor.getTorqueCurrent();
         intakeTemp = leftMotor.getDeviceTemp();
 
@@ -185,7 +184,7 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         inputs.leftPositionRad = Rotation2d.fromRotations(leftPosition.getValueAsDouble());
         inputs.leftVelocityRadPerSec = leftVelocity.getValueAsDouble();
         inputs.leftAppliedVolts = leftVelocity.getValueAsDouble();
-        inputs.leftCurrentAmps = leftCurrent.getValueAsDouble();
+        inputs.leftSupplyCurrentAmps = leftCurrent.getValueAsDouble();
         inputs.leftTorqueCurrentAmps = leftTorqueCurrent.getValueAsDouble();
         inputs.leftTempCelsius = leftTemp.getValueAsDouble();
 
@@ -193,14 +192,14 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         inputs.rightPositionRad = Rotation2d.fromRotations(rightPosition.getValueAsDouble());
         inputs.rightVelocityRadPerSec = rightVelocity.getValueAsDouble();
         inputs.rightAppliedVolts = rightVoltage.getValueAsDouble();
-        inputs.rightCurrentAmps = rightCurrent.getValueAsDouble();
+        inputs.rightSupplyCurrentAmps = rightCurrent.getValueAsDouble();
         inputs.rightTorqueCurrentAmps = rightTorqueCurrent.getValueAsDouble();
 
         inputs.intakeConnected = BaseStatusSignal.isAllGood(intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         inputs.intakePositionRad = Rotation2d.fromRotations(intakePosition.getValueAsDouble());
         inputs.intakeVelocityRadPerSec = intakeVelocity.getValueAsDouble();
         inputs.intakeAppliedVolts = intakeVoltage.getValueAsDouble();
-        inputs.intakeCurrentAmps = intakeCurrent.getValueAsDouble();
+        inputs.intakeSupplyCurrentAmps = intakeCurrent.getValueAsDouble();
         inputs.intakeTorqueCurrentAmps = intakeTorqueCurrent.getValueAsDouble();
         inputs.intakeTempCelsius = intakeTemp.getValueAsDouble();
 

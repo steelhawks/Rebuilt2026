@@ -79,21 +79,21 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftPosition = leftMotor.getPosition();
         leftVelocity = leftMotor.getVelocity();
         leftVoltage = leftMotor.getMotorVoltage();
-        leftCurrent = leftMotor.getStatorCurrent();
+        leftCurrent = leftMotor.getSupplyCurrent();
         leftTorqueCurrent = leftMotor.getTorqueCurrent();
         leftTemp = leftMotor.getDeviceTemp();
 
         rightPosition = rightMotor.getPosition();
         rightVelocity = rightMotor.getVelocity();
         rightVoltage = rightMotor.getMotorVoltage();
-        rightCurrent = rightMotor.getStatorCurrent();
+        rightCurrent = rightMotor.getSupplyCurrent();
         rightTorqueCurrent = rightMotor.getTorqueCurrent();
         rightTemp = rightMotor.getDeviceTemp();
 
         intakePosition = intakeMotor.getPosition();
         intakeVelocity = intakeMotor.getVelocity();
         intakeVoltage = intakeMotor.getMotorVoltage();
-        intakeCurrent = intakeMotor.getStatorCurrent();
+        intakeCurrent = intakeMotor.getSupplyCurrent();
         intakeTorqueCurrent = intakeMotor.getTorqueCurrent();
         intakeTemp = intakeMotor.getDeviceTemp();
 
@@ -123,7 +123,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.leftPositionMeters = leftPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
         inputs.leftVelocityMetersPerSec = leftVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
         inputs.leftAppliedVolts = leftVoltage.getValueAsDouble();
-        inputs.leftCurrentAmps = leftCurrent.getValueAsDouble();
+        inputs.leftSupplyCurrentAmps = leftCurrent.getValueAsDouble();
         inputs.leftTorqueCurrentAmps = leftTorqueCurrent.getValueAsDouble();
         inputs.leftTempCelsius = leftTemp.getValueAsDouble();
 
@@ -132,7 +132,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.rightPositionMeters = rightPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
         inputs.rightVelocityMetersPerSec = rightVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
         inputs.rightAppliedVolts = rightVoltage.getValueAsDouble();
-        inputs.rightCurrentAmps = rightCurrent.getValueAsDouble();
+        inputs.rightSupplyCurrentAmps = rightCurrent.getValueAsDouble();
         inputs.rightTorqueCurrentAmps = rightTorqueCurrent.getValueAsDouble();
         inputs.rightTempCelsius = rightTemp.getValueAsDouble();
 
@@ -141,7 +141,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.intakePositionRad = Rotation2d.fromRotations(intakePosition.getValueAsDouble());
         inputs.intakeVelocityRadPerSec = Units.rotationsToRadians(intakeVelocity.getValueAsDouble());
         inputs.intakeAppliedVolts = intakeVoltage.getValueAsDouble();
-        inputs.intakeCurrentAmps = intakeCurrent.getValueAsDouble();
+        inputs.intakeSupplyCurrentAmps = intakeCurrent.getValueAsDouble();
         inputs.intakeTorqueCurrentAmps = intakeTorqueCurrent.getValueAsDouble();
         inputs.intakeTempCelsius = intakeTemp.getValueAsDouble();
     }

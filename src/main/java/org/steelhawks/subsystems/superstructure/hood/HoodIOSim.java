@@ -50,7 +50,7 @@ public class HoodIOSim implements HoodIO {
         inputs.motorPositionDeg = new Rotation2d(hoodMotor.getAngularPositionRad());
         inputs.motorVelocityDegPerSec = hoodMotor.getAngularVelocityRadPerSec();
         inputs.appliedVolts = hoodMotor.getInputVoltage();
-        inputs.currentAmps = hoodMotor.getCurrentDrawAmps();
+        inputs.supplyCurrentAmps = hoodMotor.getCurrentDrawAmps();
         inputs.torqueCurrentAmps = hoodMotor.getTorqueNewtonMeters() / DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
         inputs.tempCelsius = hoodMotor.getCurrentDrawAmps() * 0.1;
 

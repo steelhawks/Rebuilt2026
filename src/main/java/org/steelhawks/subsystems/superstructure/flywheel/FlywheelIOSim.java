@@ -4,7 +4,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 
@@ -53,9 +52,9 @@ public class FlywheelIOSim implements FlywheelIO {
         inputs.positionRad = leftMotorSim.getAngularPositionRad();
         inputs.velocityRadPerSec = leftMotorSim.getAngularVelocityRadPerSec();
         inputs.appliedVolts = leftMotorSim.getInputVoltage();
-        inputs.currentAmps = leftMotorSim.getCurrentDrawAmps();
+        inputs.supplyCurrentAmps = leftMotorSim.getCurrentDrawAmps();
         inputs.torqueCurrentAmps = leftMotorSim.getTorqueNewtonMeters() / DCMotor.getKrakenX44(1).KtNMPerAmp;
-        inputs.tempCelsius = inputs.currentAmps * 0.1;
+        inputs.tempCelsius = inputs.supplyCurrentAmps * 0.1;
 
         if (enablePid) {
             double volts = 0;

@@ -58,14 +58,14 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexerPosition = spindexerMotor.getPosition();
         spindexerVelocity = spindexerMotor.getVelocity();
 		spindexerVoltage = spindexerMotor.getMotorVoltage();
-		spindexerCurrent = spindexerMotor.getStatorCurrent();
+		spindexerCurrent = spindexerMotor.getSupplyCurrent();
 		spindexerTorqueCurrent = spindexerMotor.getTorqueCurrent();
 		spindexerTemp = spindexerMotor.getDeviceTemp();
 
         feederPosition = feederMotor.getPosition();
         feederVelocity = feederMotor.getVelocity();
         feederVoltage = feederMotor.getMotorVoltage();
-        feederCurrent = feederMotor.getStatorCurrent();
+        feederCurrent = feederMotor.getSupplyCurrent();
         feederTorqueCurrent = feederMotor.getTorqueCurrent();
         feederTemp = feederMotor.getDeviceTemp();
 
@@ -103,7 +103,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexerInputs.positionRad = spindexerPosition.getValueAsDouble();
 		spindexerInputs.velocityRadPerSec = spindexerVelocity.getValueAsDouble();
 		spindexerInputs.appliedVolts = spindexerVoltage.getValueAsDouble();
-		spindexerInputs.currentAmps = spindexerCurrent.getValueAsDouble();
+		spindexerInputs.supplyCurrentAmps = spindexerCurrent.getValueAsDouble();
 		spindexerInputs.torqueCurrentAmps = spindexerTorqueCurrent.getValueAsDouble();
 		spindexerInputs.tempCelsius = spindexerTemp.getValueAsDouble();
 

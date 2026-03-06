@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase {
     @AutoLogOutput(key = "Intake/IsStalling")
     private boolean isStalling() {
         return homingDebouncer.calculate(
-            inputs.leftCurrentAmps > currentHomingThreshold.getAsDouble()
+            inputs.leftSupplyCurrentAmps > currentHomingThreshold.getAsDouble()
                 && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
     }
 

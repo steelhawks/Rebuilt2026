@@ -210,7 +210,7 @@ public class Turret extends SubsystemBase {
         }
         if (!isHomed && Toggles.Turret.isEnabled.get()) {
             io.runPercentOutput(homingVolts);
-            isHomed = homingDebouncer.calculate(inputs.currentAmps > currentHomingThres.getAsDouble());
+            isHomed = homingDebouncer.calculate(inputs.supplyCurrentAmps > currentHomingThres.getAsDouble());
             Logger.recordOutput("Turret/IsHomed", isHomed);
         } else {
             if (!isZeroed) {

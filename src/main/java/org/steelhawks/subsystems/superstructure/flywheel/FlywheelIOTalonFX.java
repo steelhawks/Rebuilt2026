@@ -44,7 +44,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         position = leftMotor.getPosition();
         velocity = leftMotor.getVelocity();
         voltage = leftMotor.getMotorVoltage();
-        current = leftMotor.getStatorCurrent();
+        current = leftMotor.getSupplyCurrent();
         torqueCurrent = leftMotor.getTorqueCurrent();
         temp = leftMotor.getDeviceTemp();
 
@@ -70,7 +70,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());
         inputs.velocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
         inputs.appliedVolts = voltage.getValueAsDouble();
-        inputs.currentAmps = current.getValueAsDouble();
+        inputs.supplyCurrentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
         inputs.tempCelsius = temp.getValueAsDouble();
     }

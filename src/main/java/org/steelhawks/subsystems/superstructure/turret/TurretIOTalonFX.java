@@ -48,7 +48,7 @@ public class TurretIOTalonFX implements TurretIO {
         position = motor.getPosition();
         velocity = motor.getVelocity();
         voltage = motor.getMotorVoltage();
-        current = motor.getStatorCurrent();
+        current = motor.getSupplyCurrent();
         torqueCurrent = motor.getTorqueCurrent();
         temp = motor.getDeviceTemp();
 
@@ -71,7 +71,7 @@ public class TurretIOTalonFX implements TurretIO {
         inputs.positionRad = Rotation2d.fromRotations(position.getValueAsDouble());
         inputs.velocityRadPerSec = Rotation2d.fromRotations(velocity.getValueAsDouble());
         inputs.appliedVolts = voltage.getValueAsDouble();
-        inputs.currentAmps = current.getValueAsDouble();
+        inputs.supplyCurrentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
         inputs.tempCelsius = temp.getValueAsDouble();
     }
