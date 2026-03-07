@@ -1,10 +1,12 @@
 package org.steelhawks.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +33,7 @@ public class PhoenixOdometryThread extends Thread {
     private final List<Queue<Double>> genericQueues = new ArrayList<>();
     private final List<Queue<Double>> timestampQueues = new ArrayList<>();
 
-    private static final boolean isCANFD =
-        Constants.getCANBus().isNetworkFD();
+    private static Boolean isCANFD;
     private static PhoenixOdometryThread instance = null;
 
     public static PhoenixOdometryThread getInstance() {
@@ -49,9 +50,17 @@ public class PhoenixOdometryThread extends Thread {
 
     @Override
     public void start() {
-        if (timestampQueues.size() > 0) {
+        if (isCANFD == null) {
+            throw new RuntimeException("You must call start(CANbus bus) to instatiate the CANbus for this util to work properly.");
+        }
+        if (!timestampQueues.isEmpty()) {
             super.start();
         }
+    }
+
+    public void start(CANBus bus) {
+        isCANFD = bus.isNetworkFD();
+        start();
     }
 
     /**
@@ -112,12 +121,12 @@ public class PhoenixOdometryThread extends Thread {
             signalsLock.lock();
             try {
                 if (isCANFD && phoenixSignals.length > 0) {
-                    BaseStatusSignal.waitForAll(2.0 / Swerve.ODOMETRY_FREQUENCY, phoenixSignals);
+                    BaseStatusSignal.waitForAll(2.0 / RobotContainer.s_Swerve.ODOMETRY_FREQUENCY, phoenixSignals);
                 } else {
                     // "waitForAll" does not support blocking on multiple signals with a bus
                     // that is not CAN FD, regardless of Pro licensing. No reasoning for this
                     // behavior is provided by the documentation.
-                    Thread.sleep((long) (1000.0 / Swerve.ODOMETRY_FREQUENCY));
+                    Thread.sleep((long) (1000.0 / RobotContainer.s_Swerve.ODOMETRY_FREQUENCY));
                     if (phoenixSignals.length > 0) BaseStatusSignal.refreshAll(phoenixSignals);
                 }
             } catch (InterruptedException e) {

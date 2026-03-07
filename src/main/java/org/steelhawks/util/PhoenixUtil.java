@@ -2,9 +2,9 @@ package org.steelhawks.util;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import org.ironmaple.simulation.SimulatedArena;
+import org.steelhawks.RobotConfig;
 
 import java.util.function.Supplier;
 
@@ -12,38 +12,13 @@ import static edu.wpi.first.units.Units.Seconds;
 
 public final class PhoenixUtil {
 
-    private static double lastStateChangeTime = Timer.getFPGATimestamp();
-    private static boolean lastSwitchState = false;
-
     /** Signals for synchronized refresh. */
-    private static BaseStatusSignal[] canivoreSignals = new BaseStatusSignal[0];
+    private static BaseStatusSignal[] drivetrainCanivoreSignals = new BaseStatusSignal[0];
+    private static BaseStatusSignal[] turretCanivoreSignals = new BaseStatusSignal[0];
     private static BaseStatusSignal[] rioSignals = new BaseStatusSignal[0];
 
     private PhoenixUtil() {
         throw new InstantiationError("PhoenixUtil is a utility class and cannot be instantiated.");
-    }
-
-//    static {
-//        new PhoenixUtil();
-//    }
-
-    /**
-     * Attempts to check if a DigitalInput is connected by checking if the state has changed.
-     *
-     * @param timeoutSecs the time in seconds to wait for a state change before assuming the DigitalInput is disconnected
-     * @param mLimitSwitch the DigitalInput to check
-     */
-    public static boolean digitalInputAlive(int timeoutSecs, DigitalInput mLimitSwitch) {
-        boolean currentState = mLimitSwitch.get();
-        boolean changed = (currentState != lastSwitchState);
-
-        if (changed) {
-            lastSwitchState = currentState;
-            lastStateChangeTime = Timer.getFPGATimestamp();
-        }
-
-        // if no change assume disconnected
-        return changed || (Timer.getFPGATimestamp() - lastStateChangeTime < timeoutSecs);
     }
 
     /**
@@ -70,13 +45,19 @@ public final class PhoenixUtil {
         return odometryTimeStamps;
     }
 
-    /** Registers a set of signals for synchronized refresh. */
-    public static void registerSignals(boolean canivore, BaseStatusSignal... signals) {
-        if (canivore) {
-            BaseStatusSignal[] newSignals = new BaseStatusSignal[canivoreSignals.length + signals.length];
-            System.arraycopy(canivoreSignals, 0, newSignals, 0, canivoreSignals.length);
-            System.arraycopy(signals, 0, newSignals, canivoreSignals.length, signals.length);
-            canivoreSignals = newSignals;
+    public static void registerSignals(RobotConfig.CANBusList bus, BaseStatusSignal... signals) {
+        if (bus.bus.isNetworkFD()) {
+            var selectedBusSignals = bus.bus.equals(RobotConfig.CANBusList.kDrivetrainBus)
+                ? drivetrainCanivoreSignals
+                : turretCanivoreSignals;
+            BaseStatusSignal[] newSignals = new BaseStatusSignal[selectedBusSignals.length + signals.length];
+            System.arraycopy(selectedBusSignals, 0, newSignals, 0, selectedBusSignals.length);
+            System.arraycopy(signals, 0, newSignals, selectedBusSignals.length, signals.length);
+            if (bus.bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
+                drivetrainCanivoreSignals = newSignals;
+            } else {
+                turretCanivoreSignals = newSignals;
+            }
         } else {
             BaseStatusSignal[] newSignals = new BaseStatusSignal[rioSignals.length + signals.length];
             System.arraycopy(rioSignals, 0, newSignals, 0, rioSignals.length);
@@ -85,10 +66,25 @@ public final class PhoenixUtil {
         }
     }
 
+    /** Registers a set of signals for synchronized refresh. */
+    public static void registerSignals(boolean canivore, BaseStatusSignal... signals) {
+        if (canivore) {
+            BaseStatusSignal[] newSignals = new BaseStatusSignal[drivetrainCanivoreSignals.length + signals.length];
+            System.arraycopy(drivetrainCanivoreSignals, 0, newSignals, 0, drivetrainCanivoreSignals.length);
+            System.arraycopy(signals, 0, newSignals, drivetrainCanivoreSignals.length, signals.length);
+            drivetrainCanivoreSignals = newSignals;
+        } else {
+
+        }
+    }
+
     /** Refresh all registered signals. */
     public static void refreshAll() {
-        if (canivoreSignals.length > 0) {
-            BaseStatusSignal.refreshAll(canivoreSignals);
+        if (drivetrainCanivoreSignals.length > 0) {
+            BaseStatusSignal.refreshAll(drivetrainCanivoreSignals);
+        }
+        if (turretCanivoreSignals.length > 0) {
+            BaseStatusSignal.refreshAll(turretCanivoreSignals);
         }
         if (rioSignals.length > 0) {
             BaseStatusSignal.refreshAll(rioSignals);

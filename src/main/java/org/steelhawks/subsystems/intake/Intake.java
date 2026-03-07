@@ -36,11 +36,14 @@ public class Intake extends SubsystemBase {
     private boolean isZeroed = false;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
+    private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising); // TODO: tune
 
     private static final LoggedTunableNumber currentHomingThreshold =
         new LoggedTunableNumber("Intake/CurrentHomingThreshold", 60.0);
     private static final LoggedTunableNumber velocityStallingThreshold =
         new LoggedTunableNumber("Intake/VelocityStallingThreshold", 0.03);
+    private static final LoggedTunableNumber positionTwistingThreshold =
+        new LoggedTunableNumber("Intake/PositionTwistingThreshold", 0.05); // TODO: tune
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -76,6 +79,13 @@ public class Intake extends SubsystemBase {
                 && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
     }
 
+    @AutoLogOutput(key = "Intake/IsTwisting")
+    private boolean isTwisting() {
+        return twistingDebouncer.calculate(
+            Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble()
+        );
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
@@ -98,6 +108,9 @@ public class Intake extends SubsystemBase {
                 isZeroed = true;
                 Logger.recordOutput("Intake/Zeroed", true);
             }
+        }
+        if (isTwisting()) {
+            isHomed = false;
         }
         final boolean shouldRun =
             DriverStation.isEnabled()

@@ -43,7 +43,7 @@ public class HoodIOTalonFX implements HoodIO {
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final VoltageOut voltageOut;
 
-    public HoodIOTalonFX(RobotConfig.CANBus bus) {
+    public HoodIOTalonFX(RobotConfig.CANBusList bus) {
         hoodMotor = new TalonFX(ShooterConstants.Hood.MOTOR_ID, bus.bus);
         cancoder = new CANcoder(ShooterConstants.Hood.CANCODER_ID);
 

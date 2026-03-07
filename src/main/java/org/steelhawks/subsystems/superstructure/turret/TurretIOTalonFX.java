@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
@@ -32,8 +33,8 @@ public class TurretIOTalonFX implements TurretIO {
     private final TalonFXConfiguration config;
     private final TalonFX motor;
 
-    public TurretIOTalonFX(RobotConfig.CANBus bus) {
-        motor = new TalonFX(Turret.motorId, bus.bus);
+    public TurretIOTalonFX(CANBus bus) {
+        motor = new TalonFX(Turret.motorId, bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -61,7 +62,7 @@ public class TurretIOTalonFX implements TurretIO {
         BaseStatusSignal.setUpdateFrequencyForAll(
             100, position, velocity, voltage, current, torqueCurrent, temp);
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus.isNetworkFD(),
             position, velocity, voltage, current, torqueCurrent, temp);
     }
 

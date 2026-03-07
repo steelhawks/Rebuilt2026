@@ -4,12 +4,14 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import org.steelhawks.Constants;
+import org.steelhawks.RobotContainer;
 
 import java.util.Queue;
 
 public class GyroIONavX implements GyroIO {
 
-    private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, (byte) Swerve.ODOMETRY_FREQUENCY);
+    private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, (byte) RobotContainer.s_Swerve.ODOMETRY_FREQUENCY);
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
 
