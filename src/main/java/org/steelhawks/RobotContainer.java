@@ -1,7 +1,13 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -34,8 +40,13 @@ public class RobotContainer {
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
+    public static LEDCommands LEDCommands;
+
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+
+    private Trigger runTechnicianScreen;
+    private Trigger runRainbowLEDs;
 
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
@@ -53,6 +64,8 @@ public class RobotContainer {
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
 
+//        LEDCommands = new LEDCommands(s_Matrix);
+
         if (config.hasAutos) {
             Autos.init();
         }
@@ -61,15 +74,22 @@ public class RobotContainer {
             () -> -driver.getLeftY(),
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
-        s_Matrix.setDefaultCommand(new LEDDefaultCommand(s_Matrix).ignoringDisable(true));
+
+        runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled()).debounce(10)
+            .whileTrue(s_Matrix.fireCommand(2, 2))
+            .onFalse(s_Matrix.clearCommand());
+
+        runRainbowLEDs = new Trigger(() -> !Robot.isFirstRun() && DriverStation.isDisabled())
+            .whileTrue(s_Matrix.rainbowWaveCommand(5))
+            .onFalse(s_Matrix.clearCommand());
 
         configureDriver();
     }
 
     private void configureDriver() {
 
-        driver.leftBumper().onTrue(s_Matrix.fireCommand(2, 2));
-        driver.rightBumper().onTrue(s_Matrix.clearCommand());
+//        driver.leftBumper().onTrue(s_Matrix.fireCommand(2, 2));
+//        driver.rightBumper().onTrue(s_Matrix.clearCommand());
 //
 //        driver.x().onTrue(s_Swerve.zeroHeading());
 

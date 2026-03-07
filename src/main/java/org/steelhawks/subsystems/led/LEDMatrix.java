@@ -601,6 +601,10 @@ public class LEDMatrix extends SubsystemBase {
                 case ' ':
                     // blank space
                     break;
+                case ':':
+                    pattern[1][1] = true;
+                    pattern[3][1] = true;
+                    break;
                 default:
                     // Unknown character, show a small dot
                     pattern[2][1] = true;
