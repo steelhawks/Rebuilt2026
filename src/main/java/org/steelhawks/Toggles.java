@@ -114,5 +114,9 @@ public interface Toggles {
     interface Climb {
         LoggedNetworkBoolean isEnabled =
             new LoggedNetworkBoolean("Toggles/Climb/IsEnabled", true);
+        LoggedNetworkBoolean toggleVoltageOverride =
+            new LoggedNetworkBoolean("Toggles/Climb/ToggleVoltageOverride");
+        LoggedNetworkBoolean toggleCurrentOverride =
+            new LoggedNetworkBoolean("Toggles/Climb/ToggleCurrentOverride");
     }
 }

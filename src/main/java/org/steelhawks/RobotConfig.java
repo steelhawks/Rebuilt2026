@@ -4,6 +4,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.climb.Climb;
+import org.steelhawks.subsystems.climb.ClimbIOSim;
+import org.steelhawks.subsystems.climb.ClimbIOTalonFX;
 import org.steelhawks.subsystems.indexer.IndexerIO;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
@@ -50,6 +53,7 @@ public class RobotConfig {
     public final boolean hasOldIntake;
     public final boolean hasIntake;
     public final boolean hasIndexer;
+    public final boolean hasClimb;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -69,6 +73,7 @@ public class RobotConfig {
         this.hasOldIntake = builder.hasOldIntake;
         this.hasIntake = builder.hasIntake;
         this.hasIndexer = builder.hasIndexer;
+        this.hasClimb = builder.hasClimb;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -147,6 +152,14 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createIntake());
     }
 
+    public Optional<Climb> createClimb() {
+        if (!hasClimb) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(factory.createClimb());
+    }
+
     public static RobotConfig getConfig() {
         if (Constants.getMode() == Mode.REPLAY) {
             return getReplayConfig();
@@ -164,6 +177,7 @@ public class RobotConfig {
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
+                .withClimb(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
@@ -179,6 +193,7 @@ public class RobotConfig {
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
+                .withClimb(false)
                 .withFactory(new AlphaBotFactory())
                 .build();
 
@@ -194,6 +209,7 @@ public class RobotConfig {
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
+                .withClimb(false)
                 .withFactory(new ChassisBotFactory())
                 .build();
 
@@ -209,6 +225,7 @@ public class RobotConfig {
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
+                .withClimb(false)
                 .withFactory(new LastYearFactory())
                 .build();
 
@@ -225,6 +242,7 @@ public class RobotConfig {
                 .withIntake(false)
                 .withIndexer(false)
                 .withAutos(false)
+                .withClimb(false)
                 .withFactory(new TestBoardFactory())
                 .build();
 
@@ -239,6 +257,7 @@ public class RobotConfig {
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
+                .withClimb(true)
                 .withFactory(new SimBotFactory())
                 .build();
         };
@@ -257,6 +276,7 @@ public class RobotConfig {
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
+                .withClimb(false)
                 .withFactory(new ReplayFactory())
                 .build();
 
@@ -271,6 +291,7 @@ public class RobotConfig {
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
+                .withClimb(false)
                 .withFactory(new ReplayFactory())
                 .build();
 
@@ -286,6 +307,7 @@ public class RobotConfig {
                 .withIntake(true)
                 .withIndexer(true)
                 .withAutos(true)
+                .withClimb(false)
                 .withFactory(new ReplayFactory())
                 .build();
         };
@@ -305,6 +327,7 @@ public class RobotConfig {
         private boolean hasIntake = false;
         private boolean hasIndexer = false;
         private boolean hasAutos = false;
+        private boolean hasClimb = false;
         private SubsystemFactory factory = null;
 
         public Builder withSwerve(boolean enabled) {
@@ -367,6 +390,11 @@ public class RobotConfig {
             return this;
         }
 
+        public Builder withClimb(boolean enabled) {
+            this.hasClimb = enabled;
+            return this;
+        }
+
         public Builder withFactory(SubsystemFactory factory) {
             this.factory = factory;
             return this;
@@ -403,6 +431,7 @@ public class RobotConfig {
         OldIntake createOldIntake();
         Intake createIntake();
         Indexer createIndexer();
+        Climb createClimb();
     }
 
     // OmegaBot factory
@@ -468,6 +497,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
+
+        @Override
+        public Climb createClimb() {
+            return new Climb(new ClimbIOTalonFX(rioBus));
+        }
     }
 
     // AlphaBot factory
@@ -531,6 +565,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return new Indexer(new IndexerIOTalonFX(rioBus)); }
+
+        @Override
+        public Climb createClimb() {
+            return null;
+        }
     }
 
     private static class ChassisBotFactory implements SubsystemFactory {
@@ -593,6 +632,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return null; }
+
+        @Override
+        public Climb createClimb() {
+            return null;
+        }
     }
 
     private static class LastYearFactory implements SubsystemFactory {
@@ -655,6 +699,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return null; }
+
+        @Override
+        public Climb createClimb() {
+            return null;
+        }
     }
 
     private static class TestBoardFactory implements SubsystemFactory {
@@ -719,6 +768,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return null; }
+
+        @Override
+        public Climb createClimb() {
+            return null;
+        }
     }
 
     private static class SimBotFactory implements SubsystemFactory {
@@ -781,6 +835,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return new Indexer(new IndexerIOSim()); }
+
+        @Override
+        public Climb createClimb() {
+            return new Climb(new ClimbIOSim());
+        }
     }
 
     private static class ReplayFactory implements SubsystemFactory {
@@ -841,5 +900,10 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer() { return new Indexer(new IndexerIO() {}); }
+
+        @Override
+        public Climb createClimb() {
+            return new Climb(new ClimbIOSim());
+        }
     }
 }

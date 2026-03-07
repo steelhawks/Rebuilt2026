@@ -47,6 +47,7 @@ public class ClimbIOTalonFX implements ClimbIO {
         config.Slot0.kI = ClimbConstants.kI.get();
         config.Slot0.kD = ClimbConstants.kD.get();
         config.Slot0.kV = ClimbConstants.kV.get();
+        config.Slot0.kA = ClimbConstants.kA.get();
         config.Feedback.SensorToMechanismRatio = ClimbConstants.REDUCTION;
 
         config.MotionMagic.MotionMagicCruiseVelocity = ClimbConstants.MOTIONMAGIC_EXPO_CRUISE_VELOCITY.get();
@@ -130,19 +131,15 @@ public class ClimbIOTalonFX implements ClimbIO {
     }
 
     @Override
-    public void setPID(double kP, double kI, double kD) {
+    public void setPIDFF(double kP, double kI, double kD, double kV, double kA, double cruiseVelocity) {
         config.Slot0.kP = kP;
         config.Slot0.kI = kI;
         config.Slot0.kD = kD;
-        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
-    }
-
-    @Override
-    public void setFF(double kA, double kV) {
-        config.Slot0.kA = kA;
         config.Slot0.kV = kV;
-        config.MotionMagic.MotionMagicExpo_kA = kA;
+        config.Slot0.kA = kA;
         config.MotionMagic.MotionMagicExpo_kV = kV;
+        config.MotionMagic.MotionMagicExpo_kA = kA;
+        config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocity;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
     }
 

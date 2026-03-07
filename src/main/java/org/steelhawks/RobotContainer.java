@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
+import org.steelhawks.subsystems.climb.Climb;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -34,6 +35,7 @@ public class RobotContainer {
     public static Intake s_Intake = null;
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
+    public static Climb s_Climb = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -52,6 +54,7 @@ public class RobotContainer {
         s_Intake = config.createIntake().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
+        s_Climb = config.createClimb().orElse(null);
 
 
         if (config.hasAutos) {

@@ -20,7 +20,7 @@ public class ClimbConstants {
 
     public static final LoggedTunableNumber MOTIONMAGIC_EXPO_CRUISE_VELOCITY = new LoggedTunableNumber("Climb/CruiseVelocityRadPerSec", 0);
 
-    public static final double REDUCTION = 1.0 / 1.0;
+    public static final double REDUCTION = 23.0 / 1.0;
 
     public enum ClimbState {
         RETRACTED(0),
@@ -35,5 +35,6 @@ public class ClimbConstants {
         }
     }
 
-    public static final double HOMING_VOLTS = -0.1;
+    public static final double HOMING_VOLTS = 0;
+    public static final double TOLERANCE = 0.1;
 }

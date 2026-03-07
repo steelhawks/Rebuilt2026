@@ -26,9 +26,7 @@ public interface ClimbIO {
 
     default void runPercentOut(double output) {}
 
-    default void setPID(double kP, double kI, double kD) {}
-
-    default void setFF(double kA, double kV) {}
+    default void setPIDFF(double kP, double kI, double kD, double kV, double kA, double cruiseVelocity) {}
 
     default void setPosition(double position) {}
 
