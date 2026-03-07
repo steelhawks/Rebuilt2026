@@ -56,13 +56,13 @@ public class Hood extends SubsystemBase {
         if (Toggles.tuningMode.get()) {
             if (Toggles.Hood.voltageOverride.get()) {
                 if (tuningVolts == null) {
-                    tuningVolts = new LoggedTunableNumber("Intake/TuningVolts", 0);
+                    tuningVolts = new LoggedTunableNumber("Hood/TuningVolts", 0);
                 }
                 io.runOpenLoop(tuningVolts.get(), false);
             }
             if (Toggles.Hood.currentOverride.get()) {
                 if (tuningAmps == null) {
-                    tuningAmps = new LoggedTunableNumber("Intake/TuningAmps", 0);
+                    tuningAmps = new LoggedTunableNumber("Hood/TuningAmps", 0);
                 }
                 io.runOpenLoop(tuningAmps.get(), true);
             }
