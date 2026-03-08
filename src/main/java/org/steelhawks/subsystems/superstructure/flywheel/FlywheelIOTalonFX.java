@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure.flywheel;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
@@ -31,8 +32,8 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     private final TalonFXConfiguration config;
     private final TalonFX leftMotor, rightMotor;
 
-    public FlywheelIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(ShooterConstants.Flywheel.LEFT_FLYWHEEL_ID, bus.bus);
+    public FlywheelIOTalonFX(CANBus bus) {
+        leftMotor = new TalonFX(ShooterConstants.Flywheel.LEFT_FLYWHEEL_ID, bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -48,7 +49,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         torqueCurrent = leftMotor.getTorqueCurrent();
         temp = leftMotor.getDeviceTemp();
 
-        rightMotor = new TalonFX(ShooterConstants.Flywheel.RIGHT_FLYWHEEL_ID, bus.bus);
+        rightMotor = new TalonFX(ShooterConstants.Flywheel.RIGHT_FLYWHEEL_ID, bus);
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);
@@ -60,7 +61,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         BaseStatusSignal.setUpdateFrequencyForAll(
             100, position, velocity);
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             position, velocity, voltage, current, torqueCurrent, temp);
     }
 

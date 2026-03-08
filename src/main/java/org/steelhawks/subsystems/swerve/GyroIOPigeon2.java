@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -10,7 +11,8 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.RobotConfig.CANBus;
+import org.steelhawks.RobotConfig.CANBusList;
+import org.steelhawks.RobotContainer;
 import org.steelhawks.util.PhoenixUtil;
 
 import java.util.Queue;
@@ -28,7 +30,7 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<AngularVelocity> yawVelocity;
 
     public GyroIOPigeon2(int pigeon2Id, CANBus canBus) {
-        pigeon = new Pigeon2(pigeon2Id, canBus.bus);
+        pigeon = new Pigeon2(pigeon2Id, canBus);
 
         roll = pigeon.getRoll();
         pitch = pigeon.getPitch();
@@ -51,7 +53,7 @@ public class GyroIOPigeon2 implements GyroIO {
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(pigeon.getYaw());
 
         PhoenixUtil.registerSignals(
-            canBus.bus.isNetworkFD(),
+            canBus,
             roll, pitch, yaw, accelerationX, accelerationY, yawVelocity);
     }
 

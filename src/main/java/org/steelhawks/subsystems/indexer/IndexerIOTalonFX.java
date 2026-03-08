@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.indexer;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -8,7 +9,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig;
 import org.steelhawks.util.PhoenixUtil;
 
 public class IndexerIOTalonFX implements IndexerIO {
@@ -37,9 +37,9 @@ public class IndexerIOTalonFX implements IndexerIO {
 	private final DutyCycleOut spindexerDutyCycleOut;
     private final DutyCycleOut feederDutyCycleOut;
 
-	public IndexerIOTalonFX(RobotConfig.CANBus canBus) {
-        spindexerMotor = new TalonFX(SPINDEXER_ID, canBus.bus);
-        feederMotor = new TalonFX(FEEDER_ID, canBus.bus);
+	public IndexerIOTalonFX(CANBus bus) {
+        spindexerMotor = new TalonFX(SPINDEXER_ID, bus);
+        feederMotor = new TalonFX(FEEDER_ID, bus);
 
 		spindexerConfig = new TalonFXConfiguration();
 		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
@@ -81,7 +81,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 			feederVoltage,
 			feederCurrent,
 			feederTorqueCurrent);
-		PhoenixUtil.registerSignals(canBus.bus.isNetworkFD(),
+		PhoenixUtil.registerSignals(bus,
             spindexerPosition,
             spindexerVelocity,
             spindexerVoltage,

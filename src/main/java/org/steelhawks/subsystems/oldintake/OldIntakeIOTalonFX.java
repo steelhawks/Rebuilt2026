@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.oldintake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,7 +15,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig.CANBus;
+import org.steelhawks.RobotConfig.CANBusList;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
@@ -63,10 +64,10 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
     private final CANcoder encoder;
 
     public OldIntakeIOTalonFX(CANBus bus) {
-        leftMotor = new TalonFX(OldIntakeConstants.LEFT_MOTOR_ID, bus.bus);
-        rightMotor = new TalonFX(OldIntakeConstants.RIGHT_MOTOR_ID, bus.bus);
-        intakeMotor = new TalonFX(OldIntakeConstants.INTAKE_MOTOR_ID, bus.bus);
-        encoder = new CANcoder(OldIntakeConstants.ENCODER_ID, bus.bus);
+        leftMotor = new TalonFX(OldIntakeConstants.LEFT_MOTOR_ID, bus);
+        rightMotor = new TalonFX(OldIntakeConstants.RIGHT_MOTOR_ID, bus);
+        intakeMotor = new TalonFX(OldIntakeConstants.INTAKE_MOTOR_ID, bus);
+        encoder = new CANcoder(OldIntakeConstants.ENCODER_ID, bus);
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
@@ -153,7 +154,7 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         );
 
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             leftPosition,
             leftVelocity,
             leftVoltage,

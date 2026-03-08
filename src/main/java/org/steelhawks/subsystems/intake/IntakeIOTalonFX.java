@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
@@ -54,10 +55,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFX rightMotor;
     private final TalonFX intakeMotor;
 
-    public IntakeIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(IntakeConstants.LEFT_ID, bus.bus);
-        rightMotor = new TalonFX(IntakeConstants.RIGHT_ID, bus.bus);
-        intakeMotor = new TalonFX(IntakeConstants.INTAKE_ID, bus.bus);
+    public IntakeIOTalonFX(CANBus bus) {
+        leftMotor = new TalonFX(IntakeConstants.LEFT_ID, bus);
+        rightMotor = new TalonFX(IntakeConstants.RIGHT_ID, bus);
+        intakeMotor = new TalonFX(IntakeConstants.INTAKE_ID, bus);
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         leftConfig = new TalonFXConfiguration();
@@ -109,7 +110,7 @@ public class IntakeIOTalonFX implements IntakeIO {
             rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp

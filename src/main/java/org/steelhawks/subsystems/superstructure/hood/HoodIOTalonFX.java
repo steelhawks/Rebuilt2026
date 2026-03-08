@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -43,8 +44,8 @@ public class HoodIOTalonFX implements HoodIO {
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final VoltageOut voltageOut;
 
-    public HoodIOTalonFX(RobotConfig.CANBus bus) {
-        hoodMotor = new TalonFX(ShooterConstants.Hood.MOTOR_ID, bus.bus);
+    public HoodIOTalonFX(CANBus bus) {
+        hoodMotor = new TalonFX(ShooterConstants.Hood.MOTOR_ID, bus);
         cancoder = new CANcoder(ShooterConstants.Hood.CANCODER_ID);
 
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
@@ -86,7 +87,7 @@ public class HoodIOTalonFX implements HoodIO {
             cancoderVoltage);
 
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp);
         tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(hoodMotor, cancoder));
     }

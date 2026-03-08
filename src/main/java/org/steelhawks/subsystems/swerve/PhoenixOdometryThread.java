@@ -1,10 +1,12 @@
 package org.steelhawks.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +33,7 @@ public class PhoenixOdometryThread extends Thread {
     private final List<Queue<Double>> genericQueues = new ArrayList<>();
     private final List<Queue<Double>> timestampQueues = new ArrayList<>();
 
-    private static final boolean isCANFD =
-        Constants.getCANBus().isNetworkFD();
+    private static Boolean isCANFD;
     private static PhoenixOdometryThread instance = null;
 
     public static PhoenixOdometryThread getInstance() {
@@ -49,9 +50,17 @@ public class PhoenixOdometryThread extends Thread {
 
     @Override
     public void start() {
-        if (timestampQueues.size() > 0) {
+        if (isCANFD == null) {
+            throw new RuntimeException("You must call start(CANbus bus) to instatiate the CANbus for this util to work properly.");
+        }
+        if (!timestampQueues.isEmpty()) {
             super.start();
         }
+    }
+
+    public void start(CANBus bus) {
+        isCANFD = bus.isNetworkFD();
+        start();
     }
 
     /**

@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.swerve;
 import static org.steelhawks.util.PhoenixUtil.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -19,10 +20,9 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.Constants;
 import org.steelhawks.RobotConfig;
+import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
-import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 import java.util.Queue;
@@ -79,12 +79,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     public ModuleIOTalonFX(
         SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
             constants,
-        RobotConfig.CANBus bus
+        CANBus bus
     ) {
         this.constants = constants;
-        driveTalon = new TalonFX(constants.DriveMotorId, bus.bus);
-        turnTalon = new TalonFX(constants.SteerMotorId, bus.bus);
-        cancoder = new CANcoder(constants.EncoderId, bus.bus);
+        driveTalon = new TalonFX(constants.DriveMotorId, bus);
+        turnTalon = new TalonFX(constants.SteerMotorId, bus);
+        cancoder = new CANcoder(constants.EncoderId, bus);
 
         // Configure drive motor
         var driveConfig = constants.DriveMotorInitialConfigs;
@@ -166,7 +166,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         // Configure periodic frames
         BaseStatusSignal.setUpdateFrequencyForAll(
-            Swerve.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+            RobotContainer.s_Swerve.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0,
             driveVelocity,
@@ -181,7 +181,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             turnTemp);
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon, cancoder);
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             driveVelocity,
             driveAppliedVolts,
             driveCurrent,
