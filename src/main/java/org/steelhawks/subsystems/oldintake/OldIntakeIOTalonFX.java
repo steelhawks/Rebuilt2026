@@ -154,7 +154,7 @@ public class OldIntakeIOTalonFX implements OldIntakeIO {
         );
 
         PhoenixUtil.registerSignals(
-            bus.isNetworkFD(),
+            bus,
             leftPosition,
             leftVelocity,
             leftVoltage,

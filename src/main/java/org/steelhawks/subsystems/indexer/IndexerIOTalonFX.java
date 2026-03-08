@@ -81,7 +81,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 			feederVoltage,
 			feederCurrent,
 			feederTorqueCurrent);
-		PhoenixUtil.registerSignals(bus.isNetworkFD(),
+		PhoenixUtil.registerSignals(bus,
             spindexerPosition,
             spindexerVelocity,
             spindexerVoltage,

@@ -1,6 +1,7 @@
 package org.steelhawks.util;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import edu.wpi.first.wpilibj.Timer;
 import org.ironmaple.simulation.SimulatedArena;
@@ -45,15 +46,15 @@ public final class PhoenixUtil {
         return odometryTimeStamps;
     }
 
-    public static void registerSignals(RobotConfig.CANBusList bus, BaseStatusSignal... signals) {
-        if (bus.bus.isNetworkFD()) {
-            var selectedBusSignals = bus.bus.equals(RobotConfig.CANBusList.kDrivetrainBus)
+    public static void registerSignals(CANBus bus, BaseStatusSignal... signals) {
+        if (bus.isNetworkFD()) {
+            var selectedBusSignals = bus.equals(RobotConfig.CANBusList.kDrivetrainBus)
                 ? drivetrainCanivoreSignals
                 : turretCanivoreSignals;
             BaseStatusSignal[] newSignals = new BaseStatusSignal[selectedBusSignals.length + signals.length];
             System.arraycopy(selectedBusSignals, 0, newSignals, 0, selectedBusSignals.length);
             System.arraycopy(signals, 0, newSignals, selectedBusSignals.length, signals.length);
-            if (bus.bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
+            if (bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
                 drivetrainCanivoreSignals = newSignals;
             } else {
                 turretCanivoreSignals = newSignals;
@@ -63,18 +64,6 @@ public final class PhoenixUtil {
             System.arraycopy(rioSignals, 0, newSignals, 0, rioSignals.length);
             System.arraycopy(signals, 0, newSignals, rioSignals.length, signals.length);
             rioSignals = newSignals;
-        }
-    }
-
-    /** Registers a set of signals for synchronized refresh. */
-    public static void registerSignals(boolean canivore, BaseStatusSignal... signals) {
-        if (canivore) {
-            BaseStatusSignal[] newSignals = new BaseStatusSignal[drivetrainCanivoreSignals.length + signals.length];
-            System.arraycopy(drivetrainCanivoreSignals, 0, newSignals, 0, drivetrainCanivoreSignals.length);
-            System.arraycopy(signals, 0, newSignals, drivetrainCanivoreSignals.length, signals.length);
-            drivetrainCanivoreSignals = newSignals;
-        } else {
-
         }
     }
 
@@ -90,10 +79,4 @@ public final class PhoenixUtil {
             BaseStatusSignal.refreshAll(rioSignals);
         }
     }
-
-//    @Override
-//    public void periodic() {
-//        refreshAll();
-//        LoopTimeUtil.record("PhoenixUtil");
-//    }
 }

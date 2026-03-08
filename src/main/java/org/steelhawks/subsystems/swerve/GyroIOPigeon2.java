@@ -43,7 +43,7 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.getConfigurator().setYaw(0.0);
         roll.setUpdateFrequency(50.0);
         pitch.setUpdateFrequency(50.0);
-        yaw.setUpdateFrequency(RobotContainer.s_Swerve.ODOMETRY_FREQUENCY);
+        yaw.setUpdateFrequency(Swerve.ODOMETRY_FREQUENCY);
 
         yawVelocity.setUpdateFrequency(50.0);
         accelerationX.setUpdateFrequency(50.0);
@@ -53,7 +53,7 @@ public class GyroIOPigeon2 implements GyroIO {
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(pigeon.getYaw());
 
         PhoenixUtil.registerSignals(
-            canBus.bus.isNetworkFD(),
+            canBus,
             roll, pitch, yaw, accelerationX, accelerationY, yawVelocity);
     }
 

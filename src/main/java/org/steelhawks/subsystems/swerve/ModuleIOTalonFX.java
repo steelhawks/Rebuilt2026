@@ -181,7 +181,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             turnTemp);
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon, cancoder);
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             driveVelocity,
             driveAppliedVolts,
             driveCurrent,

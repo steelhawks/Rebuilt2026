@@ -11,7 +11,7 @@ import java.util.Queue;
 
 public class GyroIONavX implements GyroIO {
 
-    private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, (byte) RobotContainer.s_Swerve.ODOMETRY_FREQUENCY);
+    private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, (byte) Swerve.ODOMETRY_FREQUENCY);
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
 

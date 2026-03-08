@@ -63,7 +63,7 @@ public class Swerve extends SubsystemBase {
     private boolean isPathfinding = false;
     private boolean requestSlowMode = false;
 
-    public final double ODOMETRY_FREQUENCY;
+    public static final double ODOMETRY_FREQUENCY;
     public static final double DRIVE_BASE_RADIUS;
 
     // PathPlanner config constants
@@ -134,6 +134,7 @@ public class Swerve extends SubsystemBase {
     private final RobotState robotState = RobotState.getInstance();
 
     static {
+        ODOMETRY_FREQUENCY = Constants.getRobot().equals(RobotType.OMEGABOT) ? 250.0 : 100.0;
         switch (Constants.getRobot()) {
             case ALPHABOT -> {
                 DRIVE_BASE_RADIUS =
@@ -348,8 +349,6 @@ public class Swerve extends SubsystemBase {
                 case CHASSIS -> TunerConstantsChassis.BackRight;
                 case LAST_YEAR -> TunerConstantsLastYear.BackRight;
             });
-
-        ODOMETRY_FREQUENCY = bus.isNetworkFD() ? 250.0 : 100.0;
         PhoenixOdometryThread.getInstance().start(bus);
 
         // Configure AutoBuilder to use RobotState

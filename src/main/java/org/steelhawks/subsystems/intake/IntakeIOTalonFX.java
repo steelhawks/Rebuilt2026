@@ -110,7 +110,7 @@ public class IntakeIOTalonFX implements IntakeIO {
             rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         PhoenixUtil.registerSignals(
-            bus.isNetworkFD(),
+            bus,
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp

@@ -177,9 +177,9 @@ public class RobotConfig {
                 .withTurret(true)
                 .withHood(false)
                 .withOldIntake(false)
-                .withIntake(true)
+                .withIntake(false)
                 .withIndexer(true)
-                .withAutos(true)
+                .withAutos(false)
                 .withFactory(new AlphaBotFactory())
                 .build();
 
@@ -516,12 +516,14 @@ public class RobotConfig {
 
         @Override
         public OldIntake createOldIntake() {
-            return new OldIntake(new OldIntakeIOTalonFX(CANBusList.kRioBus));
+//            return new OldIntake(new OldIntakeIOTalonFX(CANBusList.kRioBus));
+            return null;
         }
 
         @Override
         public Intake createIntake() {
-            return new Intake(new IntakeIOTalonFX(CANBusList.kRioBus));
+//            return new Intake(new IntakeIOTalonFX(CANBusList.kRioBus));
+            return null;
         }
 
         @Override
