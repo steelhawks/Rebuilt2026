@@ -33,6 +33,7 @@ import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
+import org.steelhawks.util.Faults;
 import org.steelhawks.util.LoopTimeUtil;
 import org.steelhawks.util.PhoenixUtil;
 import org.steelhawks.util.VirtualSubsystem;
@@ -221,6 +222,8 @@ public class Robot extends LoggedRobot {
             visualizeFieldConstants();
         }
         LoopTimeUtil.record("RobotPeriodic");
+        Faults.getInstance().update();
+        LoopTimeUtil.record("FaultRegister");
 
         if ((Constants.getMode() == Mode.SIM)
             || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
