@@ -3,6 +3,7 @@ package org.steelhawks.util;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import org.ironmaple.simulation.SimulatedArena;
 import org.steelhawks.RobotConfig;
@@ -56,8 +57,11 @@ public final class PhoenixUtil {
             System.arraycopy(signals, 0, newSignals, selectedBusSignals.length, signals.length);
             if (bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
                 drivetrainCanivoreSignals = newSignals;
-            } else {
+            } else if (bus.equals(RobotConfig.CANBusList.kTurretBus)) {
                 turretCanivoreSignals = newSignals;
+            } else {
+                DriverStation.reportWarning("Unknown CANivore bus: " + bus.getName(), false);
+                throw new RuntimeException("Unknown CANivore bus: " + bus.getName());
             }
         } else {
             BaseStatusSignal[] newSignals = new BaseStatusSignal[rioSignals.length + signals.length];
