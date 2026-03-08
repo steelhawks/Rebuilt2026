@@ -3,6 +3,7 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -96,5 +97,12 @@ public class RobotContainer {
             .whileTrue(
                 TeleopSwerve.overrideState()
                     .alongWith(new VibrateController(driver).repeatedly()));
+
+        driver.rightTrigger().onTrue(
+            Commands.run(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.MANUAL)));
+        driver.x().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
+        driver.y().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2)));
+        driver.a().onTrue(s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2)));
+        driver.b().onTrue(s_Turret.setDesiredRotation(new Rotation2d(0)));
     }
 }

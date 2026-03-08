@@ -27,26 +27,26 @@ import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
 
-    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.value(0.0, 2.0, 0.0, 0.0, 0.2));
+    public static final LoggedTunableNumber kS = new LoggedTunableNumber("Turret/kS", Constants.value(0.0, 3.0, 0.0, 0.0, 0.2));
     public static final LoggedTunableNumber kA = new LoggedTunableNumber("Turret/kA", Constants.value(0.0, 0.0, 0.0, 0.0, 0.0));
-    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.value(0.0, 1000.0, 0.0, 0.0, 200.0)); // 1500
+    public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret/kP", Constants.value(0.0, 1100.0, 0.0, 0.0, 200.0)); // 1500
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret/kI", Constants.value(0.0, 0.0, 0.0, 0.0, 0.0));
-    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.value(0.0, 70.0, 0.0, 0.0, 7.0)); // 35
+    public static final LoggedTunableNumber kD = new LoggedTunableNumber("Turret/kD", Constants.value(0.0, 90.0, 0.0, 0.0, 7.0)); // 35
 
-    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 10.0);
-    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 20.0);
+    private static final LoggedTunableNumber maxVelocityRadPerSec = new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", 15.0);
+    private static final LoggedTunableNumber maxAccelerationRadPerSecSq = new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", 25.0);
     private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
     private static final LoggedTunableNumber manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", 0.1);
 
     private static final LoggedTunableNumber currentHomingThres =
-        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 40.0);
-    private static final double homingVolts = 0.1;
+        new LoggedTunableNumber("Turret/CurrentHomingThreshold", 5);
+    private static final double homingVolts = -0.1;
 
     private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
     private static final Rotation2d maxRotation = new Rotation2d(Constants.value(Math.PI, 2 * Math.PI) + (Math.PI / 60.0));
     public static int motorId = 1;
 
-    private final Debouncer homingDebouncer = new Debouncer(0.25, DebounceType.kRising);
+    private final Debouncer homingDebouncer = new Debouncer(0.15, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
     private final Supplier<Pose2d> poseSupplier;
     private TrapezoidProfile profile;
@@ -214,7 +214,7 @@ public class Turret extends SubsystemBase {
             Logger.recordOutput("Turret/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
-                io.setPosition(Math.PI);
+                io.setPosition(-Math.PI / 2);
                 io.stop();
                 isZeroed = true;
                 // sync setpoint to new position immediately, so turret doesnt violently snap like we've been seeing
