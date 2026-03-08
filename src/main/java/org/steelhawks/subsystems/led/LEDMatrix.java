@@ -22,6 +22,20 @@ public class LEDMatrix extends SubsystemBase {
     private Animation currentAnimation;
     private int animationFrame = 0;
 
+    private String trackedText = null;
+
+    public void updateText(String text) {
+        if (trackedText == null || !trackedText.equals(text)) {
+            trackedText = text;
+            if (currentAnimation instanceof ScrollingText scrollingT) {
+                scrollingT.setText(text);
+            }
+            if (currentAnimation instanceof StaticText staticT) {
+                staticT.setText(text);
+            }
+        }
+    }
+
     public enum MatrixLayout {
         SERPENTINE,  // Zigzag pattern (our LEDs use this)
         PROGRESSIVE  // All rows go same direction
@@ -285,7 +299,7 @@ public class LEDMatrix extends SubsystemBase {
      * Scrolling text (simplified - displays characters as 5x7 bitmaps)
      */
     public static class ScrollingText extends Animation {
-        private final String text;
+        private String text;
         private final Color color;
         private final int speed;
         private int offset = 0;
@@ -320,6 +334,15 @@ public class LEDMatrix extends SubsystemBase {
                     drawChar(matrix, text.charAt(i), charX, charY, color);
                 }
             }
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String newText) {
+            this.text = newText.toUpperCase();
+            this.offset = 0; // reset scroll when text changes
         }
 
         private void drawChar(LEDMatrix matrix, char c, int x, int y, Color color) {
@@ -491,7 +514,335 @@ public class LEDMatrix extends SubsystemBase {
                     pattern[1] = new boolean[]{true, false, true, false};
                     pattern[2] = new boolean[]{true, false, true, false};
                     pattern[3] = new boolean[]{false, true, false, false};
-                    pattern[4] = new boolean[]{false, false, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case 'W':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, false, false, true};
+                    pattern[3] = new boolean[]{true, true, true, true};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'X':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{false, true, true, false};
+                    pattern[2] = new boolean[]{false, true, true, false};
+                    pattern[3] = new boolean[]{false, true, true, false};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'Y':
+                    pattern[0] = new boolean[]{true, false, true, false};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case 'Z':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, false, false, true };
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{true, true, true, true};
+                    break;
+                case '0':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, false, false, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case '1':
+                    pattern[0] = new boolean[]{false, true, false, false};
+                    pattern[1] = new boolean[]{true, true, false, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case '2':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{true, true, true, true};
+                    break;
+                case '3':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{false, false, false, true};
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case '4':
+                    pattern[0] = new boolean[]{true, false, true, false};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{false, false, true, false};
+                    pattern[4] = new boolean[]{false, false, true, false};
+                    break;
+                case '5':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, true, true, true};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case '6':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case '7':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, false, true, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case '8':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{false, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case '9':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{false, true, true, true};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{false, false, false, true};
+                    break;
+                case '!':
+                    pattern[0] = new boolean[]{true, false, false, false};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, false, false, false};
+                    pattern[3] = new boolean[]{false, false, false, false};
+                    pattern[4] = new boolean[]{true, false, false, false};
+                    break;
+                case ' ':
+                    // blank space
+                    break;
+                case ':':
+                    pattern[1][1] = true;
+                    pattern[3][1] = true;
+                    break;
+                default:
+                    // Unknown character, show a small dot
+                    pattern[2][1] = true;
+                    break;
+            }
+
+            return pattern;
+        }
+    }
+
+    public static class StaticText extends Animation {
+        private String text;
+        private final Color color;
+        private int offset = 0;
+        private static final int CHAR_WIDTH = 4;
+        private static final int CHAR_SPACING = 1;
+
+        public StaticText(String text, Color color) {
+            this.text = text.toUpperCase();
+            this.color = color;
+        }
+
+        @Override
+        public void render(LEDMatrix matrix) {
+            matrix.clear();
+
+            for (int i = 0; i < text.length(); i++) {
+                int charX = (matrix.width / 2) - ((text.length() * CHAR_WIDTH + (text.length() - 1) * CHAR_SPACING) / 2) + (i * (CHAR_WIDTH + CHAR_SPACING));
+                int charY = (matrix.height - 5) / 2;
+                drawChar(matrix, text.charAt(i), charX, charY, color);
+
+                if (charX > -CHAR_WIDTH && charX < matrix.width) {
+                    drawChar(matrix, text.charAt(i), charX, charY, color);
+                }
+            }
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String newText) {
+            this.text = newText.toUpperCase();
+        }
+
+        private void drawChar(LEDMatrix matrix, char c, int x, int y, Color color) {
+            boolean[][] pattern = getCharPattern(c);
+
+            for (int dy = 0; dy < 5; dy++) {
+                for (int dx = 0; dx < CHAR_WIDTH; dx++) {
+                    if (pattern[dy][dx]) {
+                        matrix.setPixel(x + dx, y + dy, color);
+                    }
+                }
+            }
+        }
+
+        private boolean[][] getCharPattern(char c) {
+            // 5 rows x 4 columns for each character
+            boolean[][] pattern = new boolean[5][4];
+
+            switch (c) {
+                case 'A':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, true, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'B':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case 'C':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, false, false, false};
+                    pattern[3] = new boolean[]{true, false, false, false};
+                    pattern[4] = new boolean[]{false, true, true, true};
+                    break;
+                case 'D':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, false, false, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case 'E':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, false};
+                    pattern[4] = new boolean[]{true, true, true, true};
+                    break;
+                case 'F':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, false};
+                    pattern[4] = new boolean[]{true, false, false, false};
+                    break;
+                case 'G':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, false, true, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, true};
+                    break;
+                case 'H':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, true, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'I':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{false, true, false, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case 'J': //jqvyz23456789!
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, false, true, false};
+                    pattern[2] = new boolean[]{false, false, true, false};
+                    pattern[3] = new boolean[]{true, false, true, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case 'K':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{true, true, false, false};
+                    pattern[3] = new boolean[]{true, false, true, false};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'L':
+                    pattern[0] = new boolean[]{true, false, false, false};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{true, false, false, false};
+                    pattern[3] = new boolean[]{true, false, false, false};
+                    pattern[4] = new boolean[]{true, true, true, true};
+                    break;
+                case 'M':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{true, true, true, true};
+                    pattern[2] = new boolean[]{true, false, false, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'N':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{true, true, false, true};
+                    pattern[2] = new boolean[]{true, false, true, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'O':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, false, false, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case 'P':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, false, false};
+                    pattern[4] = new boolean[]{true, false, false, false};
+                    break;
+                case 'Q':
+                    pattern[0] = new boolean[]{false, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, false, true};
+                    pattern[3] = new boolean[]{true, false, true, true};
+                    pattern[4] = new boolean[]{false, true, true, true};
+                    break;
+                case 'R':
+                    pattern[0] = new boolean[]{true, true, true, false};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, true, true, false};
+                    pattern[3] = new boolean[]{true, false, true, false};
+                    pattern[4] = new boolean[]{true, false, false, true};
+                    break;
+                case 'S':
+                    pattern[0] = new boolean[]{false, true, true, true};
+                    pattern[1] = new boolean[]{true, false, false, false};
+                    pattern[2] = new boolean[]{false, true, true, false};
+                    pattern[3] = new boolean[]{false, false, false, true};
+                    pattern[4] = new boolean[]{true, true, true, false};
+                    break;
+                case 'T':
+                    pattern[0] = new boolean[]{true, true, true, true};
+                    pattern[1] = new boolean[]{false, true, false, false};
+                    pattern[2] = new boolean[]{false, true, false, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
+                    break;
+                case 'U':
+                    pattern[0] = new boolean[]{true, false, false, true};
+                    pattern[1] = new boolean[]{true, false, false, true};
+                    pattern[2] = new boolean[]{true, false, false, true};
+                    pattern[3] = new boolean[]{true, false, false, true};
+                    pattern[4] = new boolean[]{false, true, true, false};
+                    break;
+                case 'V':
+                    pattern[0] = new boolean[]{true, false, true, false};
+                    pattern[1] = new boolean[]{true, false, true, false};
+                    pattern[2] = new boolean[]{true, false, true, false};
+                    pattern[3] = new boolean[]{false, true, false, false};
+                    pattern[4] = new boolean[]{false, true, false, false};
                     break;
                 case 'W':
                     pattern[0] = new boolean[]{true, false, false, true};
@@ -784,8 +1135,17 @@ public class LEDMatrix extends SubsystemBase {
             .ignoringDisable(true);
     }
 
+    public Command seizureCommand() {
+        return rainbowWaveCommand(30);
+    }
+
     public Command scrollingTextCommand(String text, Color color, int speed) {
-        return Commands.runOnce(() -> playAnimation(new ScrollingText(text, color, speed)))
+        return Commands.runOnce(() -> playAnimation(new ScrollingText(text, color, speed)), this)
+            .ignoringDisable(true);
+    }
+
+    public Command staticTextCommand(String text, Color color) {
+        return Commands.runOnce(() -> playAnimation(new StaticText(text, color)))
             .ignoringDisable(true);
     }
 
@@ -840,13 +1200,19 @@ public class LEDMatrix extends SubsystemBase {
 
     public Command clearCommand() {
         return Commands.runOnce(() -> {
-            clear();
-            show();
             currentAnimation = null;
-        }, this)
+            for (int i = 0; i < 5; i++) {
+                clear();
+            }
+            show();
+        }, this).finallyDo(this::clear)
             .ignoringDisable(true);
     }
 
+
+    public Animation getCurrentAnimation() {
+        return currentAnimation;
+    }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
 }

@@ -1,16 +1,10 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import org.littletonrobotics.junction.Logger;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
@@ -18,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
-import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
@@ -64,7 +57,7 @@ public class RobotContainer {
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
 
-//        LEDCommands = new LEDCommands(s_Matrix);
+        LEDCommands = new LEDCommands(driver.leftTrigger());
 
         if (config.hasAutos) {
             Autos.init();
@@ -75,14 +68,7 @@ public class RobotContainer {
             () -> -driver.getLeftX(),
             () -> -driver.getRightX()));
 
-        runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled()).debounce(10)
-            .whileTrue(s_Matrix.fireCommand(2, 2))
-            .onFalse(s_Matrix.clearCommand());
-
-        runRainbowLEDs = new Trigger(() -> !Robot.isFirstRun() && DriverStation.isDisabled())
-            .whileTrue(s_Matrix.rainbowWaveCommand(5))
-            .onFalse(s_Matrix.clearCommand());
-
+        Autos.testingBoard();
         configureDriver();
     }
 
@@ -107,5 +93,9 @@ public class RobotContainer {
 //        driver.leftTrigger()
 //            .whileTrue(
 //                s_Intake.outtakeIntake());
+
+        driver.rightBumper()
+            .whileTrue(s_Matrix.staticTextCommand("Hello", Color.WHITE))
+            .onFalse(s_Matrix.clearCommand());
     }
 }

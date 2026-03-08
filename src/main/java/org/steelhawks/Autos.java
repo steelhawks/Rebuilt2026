@@ -44,6 +44,11 @@ public final class Autos {
         MULTIPLE
     }
 
+    public static void testingBoard() {
+        autoChooser.addOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
+        autoChooser.addOption("Jacob", Commands.none().withName("JACOB"));
+    }
+
     public static void init() {
         /* ------------- Autons ------------- */
 

@@ -4,54 +4,105 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import org.steelhawks.Robot;
-import org.steelhawks.RobotContainer;
+import org.steelhawks.*;
 import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 
 public class LEDCommands {
 
-    private final LEDMatrix s_Matrix;
+    private static final LEDMatrix s_Matrix = RobotContainer.s_Matrix;
     private final LEDTriggers triggers;
 
-    public LEDCommands(LEDMatrix s_Matrix) {
-        this.s_Matrix = s_Matrix;
-        triggers = new LEDTriggers();
+    public LEDCommands(Trigger toggleMatchData) {
+        s_Matrix.clearCommand();
+        triggers = new LEDTriggers(toggleMatchData);
     }
 
-    public Command requestMatchDataScreen() {
-        return Commands.run(() -> {
-            System.out.println("RUNNING MATCH LED SCREEN");
-        }, s_Matrix).finallyDo(s_Matrix::clear);
-    }
-
-    public Command runTechnicianScreen() {
-        return Commands.run(() ->
-            s_Matrix.scrollingTextCommand(
-                "Selected Auton: ",
+    public static Command requestMatchDataScreen() {
+        return Commands.runOnce(() ->
+            s_Matrix.playAnimation(new LEDMatrix.ScrollingText(
+                "",
                 Color.WHITE,
-                5
-            ), s_Matrix).finallyDo(s_Matrix::clear);
+                1)
+                ), s_Matrix
+            ).andThen(
+            Commands.run(() -> {
+                String current = RobotState.getInstance().isOurHubActive() ? "Hub Active" : "Hub Inactive";
+                s_Matrix.updateText(current);
+            })
+            ).ignoringDisable(true);
     }
 
-    public Command runRainbowLEDs() {
-        return Commands.run(() ->
-            s_Matrix.rainbowWaveCommand(5
-            ), s_Matrix).finallyDo(s_Matrix::clear);
+    public static Command runTechnicianScreen() {
+        return Commands.runOnce(() ->
+            s_Matrix.playAnimation(new LEDMatrix.ScrollingText(
+                "No Auton Selected",
+                Color.WHITE,
+                1)
+            ), s_Matrix
+        ).andThen(
+            Commands.run(() -> {
+                String current = Autos.getAuto() == null
+                    ? "No Auton Selected"
+                    : "Auton Selected: " + Autos.getAuto().getName();
+                s_Matrix.updateText(current);
+            })
+        ).ignoringDisable(true);
+    }
+
+    public static Command displayTimeLeftInShift() {
+        return Commands.runOnce(() ->
+            s_Matrix.playAnimation(new LEDMatrix.StaticText(
+            "",
+            Color.WHITE)), s_Matrix)
+        .andThen(
+            Commands.run(() -> {
+                int currentOnesNum = (int) RobotState.getInstance().timeLeftInShift();
+                String currentOnes = String.valueOf(currentOnesNum);
+                int currentDecimalsNum = (int) ((RobotState.getInstance().timeLeftInShift() - (int) RobotState.getInstance().timeLeftInShift()) * 100);
+                String currentDecimals = String.valueOf(currentDecimalsNum);
+                if (currentDecimalsNum < 10) {
+                    currentDecimals = "0" + currentDecimalsNum;
+                }
+                String current = String.format(currentOnes + ":" + currentDecimals);
+                s_Matrix.updateText(current);
+            }))
+        .ignoringDisable(true);
     }
 
     private static class LEDTriggers {
 
         private Trigger runTechnicianScreen;
         private Trigger runRainbowLEDs;
+        private Trigger warn10Seconds;
 
-        public LEDTriggers() {
+        private Trigger isTeleop;
 
-//            runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled()).debounce(10)
-//                .whileTrue(runTechnicianScreen());
-//
-//            runRainbowLEDs = new Trigger(() -> !Robot.isFirstRun() && DriverStation.isDisabled())
-//                .whileTrue(runRainbowLEDs());
+        private LEDTriggers(Trigger toggleMatchData) {
+
+            runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled()).debounce(10)
+                .whileTrue(runTechnicianScreen())
+                .onFalse(s_Matrix.clearCommand());
+
+            runRainbowLEDs = new Trigger(() -> !Robot.isFirstRun() && DriverStation.isDisabled())
+                .whileTrue(s_Matrix.rainbowWaveCommand(10))
+                .onFalse(s_Matrix.clearCommand());
+
+            warn10Seconds = new Trigger(() -> RobotState.getInstance().isShift() && RobotState.getInstance().timeLeftInShift() < 10.0)
+                .whileTrue(displayTimeLeftInShift())
+                .onFalse(s_Matrix.clearCommand());
+
+            toggleMatchData
+                .whileTrue(requestMatchDataScreen())
+                .onFalse(s_Matrix.clearCommand());
+
+            isTeleop = new Trigger(() -> Robot.getState().equals(Robot.RobotState.TELEOP))
+                    .and(runTechnicianScreen.negate())
+                    .and(runRainbowLEDs.negate())
+                    .and(warn10Seconds.negate())
+                    .and(toggleMatchData.negate())
+                .whileTrue(s_Matrix.fireCommand(5, 2));
+
         }
     }
 }
