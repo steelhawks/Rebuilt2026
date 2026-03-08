@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,7 +33,7 @@ public class Flywheel extends SubsystemBase {
     private final double[] voltageSamples = new double[sampleCounts];
     private double sampledVoltage = 0.0;
     private int currentSampleIndex = 0;
-    private long timeStartedSampling = 0;
+    private double timeStartedSampling = 0;
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
         new Debouncer(0.3, DebounceType.kBoth);
@@ -136,7 +137,7 @@ public class Flywheel extends SubsystemBase {
                     if (nearTargetVelocity) {
                         state = FlywheelState.SAMPLING;
                         currentSampleIndex = 0;
-                        timeStartedSampling = RobotController.getFPGATime();
+                        timeStartedSampling = Timer.getFPGATimestamp();
                     }
                 }
                 case SAMPLING -> {
@@ -149,7 +150,7 @@ public class Flywheel extends SubsystemBase {
                         sampledVoltage = calculateAverageSample();
                         state = FlywheelState.RUNNING;
                         Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
-                    } else if (RobotController.getFPGATime() - timeStartedSampling > (Maths.secondsToMicroseconds(samplingTimeoutDuration.get()))) {
+                    } else if (Timer.getFPGATimestamp() - timeStartedSampling > samplingTimeoutDuration.get()) {
                         if (currentSampleIndex >= timeoutAvgMinSamples.get()) { // not good not terrible, calculate an average
                             sampledVoltage = calculateAverageSample();
                         } else {
