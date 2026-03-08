@@ -14,6 +14,7 @@ public interface TurretIO {
         public double supplyCurrentAmps = 0.0;
         public double torqueCurrentAmps = 0.0;
         public double tempCelsius = 0.0;
+        public double[] timestamps = new double[0];
     }
 
     default void updateInputs(TurretIOInputs inputs) {}

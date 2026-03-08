@@ -14,6 +14,8 @@ import edu.wpi.first.units.measure.*;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.util.PhoenixUtil;
 
+import java.util.Queue;
+
 public class TurretIOTalonFX implements TurretIO {
 
     private final StatusSignal<Angle> position;
@@ -22,6 +24,8 @@ public class TurretIOTalonFX implements TurretIO {
     private final StatusSignal<Current> current;
     private final StatusSignal<Current> torqueCurrent;
     private final StatusSignal<Temperature> temp;
+
+    private final Queue<Double> timestampQueue;
 
     private final PositionVoltage positionVoltage;
     private final PositionTorqueCurrentFOC positionTorqueCurrentFOC;
@@ -45,12 +49,12 @@ public class TurretIOTalonFX implements TurretIO {
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
-        position = motor.getPosition();
-        velocity = motor.getVelocity();
-        voltage = motor.getMotorVoltage();
-        current = motor.getSupplyCurrent();
-        torqueCurrent = motor.getTorqueCurrent();
-        temp = motor.getDeviceTemp();
+        position = motor.getPosition(false);
+        velocity = motor.getVelocity(false);
+        voltage = motor.getMotorVoltage(false);
+        current = motor.getSupplyCurrent(false);
+        torqueCurrent = motor.getTorqueCurrent(false);
+        temp = motor.getDeviceTemp(false);
 
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withSlot(0);
         positionVoltage = new PositionVoltage(0.0).withSlot(1);
@@ -60,9 +64,11 @@ public class TurretIOTalonFX implements TurretIO {
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             100, position, velocity, voltage, current, torqueCurrent, temp);
-        PhoenixUtil.registerSignals(
+        PhoenixUtil.registerTimesyncedSignals(
             bus,
             position, velocity, voltage, current, torqueCurrent, temp);
+        timestampQueue = TurretSyncThread.getInstance().makeTimestampQueue();
+        TurretSyncThread.getInstance().start();
     }
 
     @Override
@@ -74,6 +80,11 @@ public class TurretIOTalonFX implements TurretIO {
         inputs.supplyCurrentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
         inputs.tempCelsius = temp.getValueAsDouble();
+
+        inputs.timestamps = timestampQueue.stream()
+            .mapToDouble(Double::doubleValue)
+            .toArray();
+        timestampQueue.clear();
     }
 
     @Override

@@ -51,7 +51,7 @@ public class PhoenixOdometryThread extends Thread {
     @Override
     public void start() {
         if (isCANFD == null) {
-            throw new RuntimeException("You must call start(CANbus bus) to instatiate the CANbus for this util to work properly.");
+            throw new RuntimeException("You must call start(CANbus bus) to instantiate the CANbus for this util to work properly.");
         }
         if (!timestampQueues.isEmpty()) {
             super.start();

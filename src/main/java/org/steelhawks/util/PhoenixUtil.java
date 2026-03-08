@@ -19,6 +19,10 @@ public final class PhoenixUtil {
     private static BaseStatusSignal[] turretCanivoreSignals = new BaseStatusSignal[0];
     private static BaseStatusSignal[] rioSignals = new BaseStatusSignal[0];
 
+    /** Signals for Phoenix Pro Timesync */
+    private static final double TURRET_TIMESYNC_TIMEOUT_S = 1.0 / 100.0;
+    private static BaseStatusSignal[] turretTimesyncSignals = new BaseStatusSignal[0];
+
     private PhoenixUtil() {
         throw new InstantiationError("PhoenixUtil is a utility class and cannot be instantiated.");
     }
@@ -81,6 +85,40 @@ public final class PhoenixUtil {
         }
         if (rioSignals.length > 0) {
             BaseStatusSignal.refreshAll(rioSignals);
+        }
+    }
+
+    /**
+     * Register signals for timesync via waitForAll.
+     */
+    public static void registerTimesyncedSignals(CANBus bus, BaseStatusSignal... signals) {
+        if (!bus.isNetworkFD()) {
+            DriverStation.reportWarning("RIO bus does not support timesync, registering as normal signals.", false);
+            registerSignals(bus, signals);
+            return;
+        }
+        if (bus.equals(RobotConfig.CANBusList.kTurretBus)) {
+            BaseStatusSignal[] newSignals = new BaseStatusSignal[turretTimesyncSignals.length + signals.length];
+            System.arraycopy(turretTimesyncSignals, 0, newSignals, 0, turretTimesyncSignals.length);
+            System.arraycopy(signals, 0, newSignals, turretTimesyncSignals.length, signals.length);
+            turretTimesyncSignals = newSignals;
+        } else {
+            DriverStation.reportWarning("Unknown CANivore bus: " + bus.getName(), false);
+            throw new RuntimeException("Unknown CANivore bus: " + bus.getName());
+        }
+    }
+
+    /**
+     * Block until all timesync signals arrive with a synchronized timestamp.
+     */
+    public static void waitForAll(CANBus bus, double timeout) {
+       if (bus.equals(RobotConfig.CANBusList.kTurretBus)) {
+            if (turretTimesyncSignals.length > 0) {
+                BaseStatusSignal.waitForAll(timeout, turretTimesyncSignals);
+            }
+        } else {
+            DriverStation.reportWarning("Unknown CANivore bus: " + bus.getName(), false);
+            throw new RuntimeException("Unknown CANivore bus: " + bus.getName());
         }
     }
 }
