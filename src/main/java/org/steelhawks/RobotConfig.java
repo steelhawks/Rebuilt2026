@@ -25,6 +25,7 @@ import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.hood.HoodIO;
 import org.steelhawks.subsystems.superstructure.hood.HoodIOSim;
+import org.steelhawks.subsystems.superstructure.hood.HoodIOTalonFX;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.superstructure.turret.TurretIO;
 import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
@@ -454,7 +455,7 @@ public class RobotConfig {
 
         @Override
         public LEDMatrix createLEDMatrix() {
-            return null;
+            return new LEDMatrix();
         }
 
         @Override
@@ -464,27 +465,27 @@ public class RobotConfig {
 
         @Override
         public Vision createVision() {
-            return null;
+            return new Vision();
         }
 
         @Override
         public ObjectVision createObjectVision() {
-            return null;
+            return new ObjectVision();
         }
 
         @Override
         public Flywheel createFlywheel(FlywheelConstants c) {
-            return null;
+            return new Flywheel(new FlywheelIOTalonFX(CANBusList.kTurretBus, c), c);
         }
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return null;
+            return new Turret(new TurretIOTalonFX(CANBusList.kTurretBus, c), poseSupplier, c);
         }
 
         @Override
         public Hood createHood(HoodConstants c) {
-            return null;
+            return new Hood(new HoodIOTalonFX(CANBusList.kTurretBus, c), c);
         }
 
         @Override
@@ -494,11 +495,11 @@ public class RobotConfig {
 
         @Override
         public Intake createIntake(IntakeConstants c) {
-            return null;
+            return new Intake(new IntakeIOTalonFX(CANBusList.kRioBus, c), c);
         }
 
         @Override
-        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIO() {}, c); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(CANBusList.kTurretBus, c), c); }
     }
 
     // AlphaBot factory
