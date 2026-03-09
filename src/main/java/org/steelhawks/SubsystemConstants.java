@@ -137,11 +137,11 @@ public class SubsystemConstants {
         public static final TurretConstants TURRET =
             new TurretConstants(
                 1,
-                1000, 0, 70,
-                2, 0,
+                1100, 0, 90,
+                3.0, 0,
                 10, 20,
                 0.1,
-                40,
+                5,
                 (200.0 / 20.0),
                 new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
                 new Rotation2d(Math.PI + (Math.PI / 60))
