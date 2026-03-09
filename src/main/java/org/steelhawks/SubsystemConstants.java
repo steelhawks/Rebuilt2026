@@ -72,7 +72,7 @@ public class SubsystemConstants {
     }
 
     public record IntakeConstants(
-        int leftId, int rightId, int driveId,
+        int leftId, int rightId, int intakeId,
         double kS, double kG, double kA, double kP, double kI, double kD,
         double maxVelocityMetersPerSec, double maxAccelMetersPerSecSq,
         double currentHomingThreshold,
@@ -157,31 +157,18 @@ public class SubsystemConstants {
 
     public static final class OmegaBot {
         public static final LUTConstants LUT = LUTConstants.UNSET;
-        public static final IntakeConstants INTAKE = IntakeConstants.UNSET;
-        public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
-            0,
-            0, 0, 0,
-            0, 0,
-            0, 0,
-            0,
-            2,
-            10,
-            2,
-            Units.inchesToMeters(2.0),
-            0
-        );
-        public static final TurretConstants TURRET = new TurretConstants(
-            0,
-            0, 0, 0,
-            0, 0,
-            0, 0,
-            0.1,
-            0,
-            (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0),
-            new Rotation2d(0 - (Math.PI / 60)),
-            new Rotation2d((2 * Math.PI) + (Math.PI / 60))
-        );
-
+        public static final IntakeConstants INTAKE =
+            new IntakeConstants(
+                1, 2, 3,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0,
+                20.0, 0.5,
+                1.0, -1.0,
+                0.8
+            );
+        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final TurretConstants TURRET = TurretConstants.UNSET;
         // hood constants
         // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
         private static final double M = Units.lbsToKilograms(0.0);
@@ -191,20 +178,11 @@ public class SubsystemConstants {
         private static final double HOOD_REDUCTION = 4.357 / 1.0;
         private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
 
-        public static final HoodConstants HOOD = new HoodConstants(
-            0, 0,
-            0, 0, 0,
-            0,
-            (M * G * R) / (kT * HOOD_REDUCTION),
-            0,
-            HOOD_REDUCTION,
-            // min angle is full extension, max angle is home
-            minAngle, Rotation2d.fromDegrees(80),
-            Rotation2d.fromRotations(0).plus(minAngle),
-            0.02
-        );
+        public static final HoodConstants HOOD = HoodConstants.UNSET;
 
-        public static final IndexerConstants INDEXER = IndexerConstants.UNSET;
+        public static final IndexerConstants INDEXER =
+            new IndexerConstants(
+                1, 3, 10.0, 10.0, OptionalInt.of(2));
     }
 
     public static final class SimBot {

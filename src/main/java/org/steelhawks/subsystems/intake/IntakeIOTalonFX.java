@@ -13,7 +13,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -59,7 +58,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     public IntakeIOTalonFX(CANBus bus, SubsystemConstants.IntakeConstants constants) {
         leftMotor = new TalonFX(constants.leftId(), bus);
         rightMotor = new TalonFX(constants.rightId(), bus);
-        intakeMotor = new TalonFX(constants.driveId(), bus);
+        intakeMotor = new TalonFX(constants.intakeId(), bus);
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         leftConfig = new TalonFXConfiguration();
