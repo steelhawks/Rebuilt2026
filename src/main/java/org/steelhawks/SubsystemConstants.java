@@ -52,10 +52,11 @@ public class SubsystemConstants {
         double currentHomingThreshold,
         double motorReduction,
         Rotation2d minRotation,
-        Rotation2d maxRotation
+        Rotation2d maxRotation,
+        double statorCurrentLimitAmps
     ) {
         public static final TurretConstants UNSET =
-            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d());
+            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d(), 0);
     }
 
     public record HoodConstants(
@@ -78,10 +79,11 @@ public class SubsystemConstants {
         double currentHomingThreshold,
         double velocityStallingThreshold,
         double intakeSpeed, double outtakeSpeed,
-        double positionTwistingThreshold
+        double positionTwistingThreshold,
+        double rackStatorCurrentLimit
     ) {
         public static final IntakeConstants UNSET =
-            new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0);
+            new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public record IndexerConstants(
@@ -117,8 +119,9 @@ public class SubsystemConstants {
                 0.05, 0.08,
                 60, 0.03,
                 0.6, 0.6,
-                0.05
-            );
+                0.05,
+                30
+                );
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
@@ -144,7 +147,8 @@ public class SubsystemConstants {
                 5,
                 (200.0 / 20.0),
                 new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
-                new Rotation2d(Math.PI + (Math.PI / 60))
+                new Rotation2d(Math.PI + (Math.PI / 60)),
+                30
             );
 
         public static final IndexerConstants INDEXER =
@@ -165,7 +169,8 @@ public class SubsystemConstants {
                 0.0, 0.0,
                 20.0, 0.5,
                 1.0, -1.0,
-                0.8
+                0.8,
+                30
             );
         public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
         public static final TurretConstants TURRET = TurretConstants.UNSET;
@@ -194,7 +199,8 @@ public class SubsystemConstants {
                 0.05, 0.08,
                 60, 0.03,
                 1, 1,
-                0.05
+                0.05,
+                0 // not used for sim
             );
 
         public static final FlywheelConstants FLYWHEEL =
@@ -221,7 +227,8 @@ public class SubsystemConstants {
                 40,
                 (200.0 / 20.0),
                 new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
-                new Rotation2d(Math.PI + (Math.PI / 60))
+                new Rotation2d(Math.PI + (Math.PI / 60)),
+                0 // not used for sim
             );
 
         // hood constants

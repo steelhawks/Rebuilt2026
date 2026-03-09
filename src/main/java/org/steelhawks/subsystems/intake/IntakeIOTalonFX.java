@@ -49,6 +49,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final DutyCycleOut intakeDutyCycleOut;
 
     private final TalonFXConfiguration leftConfig;
+    private final TalonFXConfiguration rightConfig;
     private final TalonFXConfiguration intakeConfig;
 
     private final TalonFX leftMotor;
@@ -60,7 +61,12 @@ public class IntakeIOTalonFX implements IntakeIO {
         rightMotor = new TalonFX(constants.rightId(), bus);
         intakeMotor = new TalonFX(constants.intakeId(), bus);
 
+        rightConfig = new TalonFXConfiguration();
+        rightConfig.CurrentLimits.StatorCurrentLimit = constants.rackStatorCurrentLimit();
+        rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+
         leftConfig = new TalonFXConfiguration();
         intakeConfig = new TalonFXConfiguration();
 
@@ -70,6 +76,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Slot0.kI = constants.kI();
         leftConfig.Slot0.kD = constants.kD();
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
+        leftConfig.CurrentLimits.StatorCurrentLimit = constants.rackStatorCurrentLimit();
+        leftConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
