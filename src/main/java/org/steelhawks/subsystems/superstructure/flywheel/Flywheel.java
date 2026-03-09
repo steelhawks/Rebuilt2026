@@ -19,6 +19,7 @@ import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
+import org.steelhawks.util.DriverWarnings;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -110,16 +111,32 @@ public class Flywheel extends SubsystemBase {
                         }
                     }
                     case SHOOTING_MOVING -> {
-                        double mps = ShooterStructure.Moving.calculateMovingShot(
-                            FieldConstants.Hub.HUB_CENTER_3D, true).exitVelocity();
+                        ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShotFixedPitch(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
+                        if (ShooterStructure.isNoSolution(solution)) {
+                            if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
+                                DriverWarnings.tooCloseAlert.triggerLapsing(3);
+                            } else if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_FAR) {
+                                DriverWarnings.tooFarAlert.triggerLapsing(3);
+                            }
+                        }
+                        double mps = solution.exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(rps);
                         }
                     }
                     case SHOOTING_STATIONARY -> {
-                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
+                        ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShotFixedPitch(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
+                        if (ShooterStructure.isNoSolution(solution)) {
+                            if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
+                                DriverWarnings.tooCloseAlert.triggerLapsing(3);
+                            } else if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_FAR) {
+                                DriverWarnings.tooFarAlert.triggerLapsing(3);
+                            }
+                        }
+                        double mps = solution.exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(stationaryHoodVelocityFactor * rps);

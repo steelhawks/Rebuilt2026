@@ -18,11 +18,13 @@ import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.util.DriverWarnings;
 import org.steelhawks.util.geometry.RobotFootprint;
 
 public class RobotContainer {
 
     private final RobotConfig config = RobotConfig.getConfig();
+    public static DriverWarnings warnings = DriverWarnings.getInstance();
 
     public static LEDMatrix s_Matrix = null;
     public static Swerve s_Swerve = null;

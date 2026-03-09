@@ -36,13 +36,20 @@ public class ShooterStructure {
     private static final double minFerryDistance;
     private static final double maxFerryDistance;
 
-    public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
-    public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
+    public enum NoSolutionReason {
+        NONE,
+        TOO_CLOSE,
+        TOO_FAR
+    }
+    public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target, NoSolutionReason reason) {}
+    public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d(), NoSolutionReason.NONE);
+    public static final ProjectileData kTooFar = new ProjectileData(Double.NaN, Double.NaN, new Translation3d(), NoSolutionReason.TOO_FAR);
+    public static final ProjectileData kTooClose = new ProjectileData(Double.NaN, Double.NaN, new Translation3d(), NoSolutionReason.TOO_CLOSE);
     private static final double G = 9.81;
 
     static {
-        minShootDistance = 0.0;
-        maxShootDistance = Double.MAX_VALUE;
+        minShootDistance = 2;
+        maxShootDistance = 20;
 
         minFerryDistance = 0.0;
         maxFerryDistance = Double.MAX_VALUE;
@@ -115,7 +122,8 @@ public class ShooterStructure {
             return new ProjectileData(
                 v0,
                 theta,
-                predictedTarget);
+                predictedTarget,
+                NoSolutionReason.NONE);
         }
 
         /**
@@ -133,6 +141,14 @@ public class ShooterStructure {
             double tanTheta = Math.tan(theta);
             double turretH = turretHeightAboveField();
             double x = distanceToTarget(predictedTarget);
+
+            if (x < minShootDistance) {
+                return kTooClose;
+            }
+            if (x > maxShootDistance) {
+                return kTooFar;
+            }
+
             double y = predictedTarget.getZ() - turretH;
             double denom = 2 * cosTheta * cosTheta * (x * tanTheta - y);
             if (denom <= 0) {
@@ -152,7 +168,7 @@ public class ShooterStructure {
             if (yAtFunnel < requiredHeight) {
                 return kNoSolution;
             }
-            return new ProjectileData(v0, theta, predictedTarget);
+            return new ProjectileData(v0, theta, predictedTarget, NoSolutionReason.NONE);
         }
     }
 
