@@ -20,6 +20,10 @@ public class DriverWarnings extends VirtualSubsystem {
             autoDisableTime = -1;
         }
 
+        /**
+         * Set the state of the alert
+         * @param active Enable or disable the alert
+         */
         public void set(boolean active) {
             if (active != this.active) {
                 this.active = active;
@@ -27,6 +31,12 @@ public class DriverWarnings extends VirtualSubsystem {
             }
         }
 
+        /**
+         * Enables this alert for a set amount of time, and then disables it automatically once this time has passes.
+         *
+         * You must run tick() periodically for this to work
+         * @param autoDisableTime How long the alert should be active for, in seconds
+         */
         public void triggerLapsing(double autoDisableTime) {
             lastTriggeredAt = Timer.getFPGATimestamp();
             this.autoDisableTime = autoDisableTime;
@@ -35,6 +45,9 @@ public class DriverWarnings extends VirtualSubsystem {
             }
         }
 
+        /**
+         * Run this method periodically to use the auto disable timer
+         */
         public void tick() {
             if (autoDisableTime != -1 && lastTriggeredAt != -1 && active) {
                 if (Timer.getFPGATimestamp() - lastTriggeredAt > autoDisableTime) {
@@ -46,8 +59,9 @@ public class DriverWarnings extends VirtualSubsystem {
         }
     }
 
-    public static final MomentaryAlert tooFarAlert = new MomentaryAlert("Too far from Hub!", Alert.AlertType.kWarning);
-    public static final MomentaryAlert tooCloseAlert = new MomentaryAlert("Too close to Hub!", Alert.AlertType.kWarning);
+    public final MomentaryAlert tooFarAlert = new MomentaryAlert("Too far from Hub!", Alert.AlertType.kWarning);
+    public final MomentaryAlert tooCloseAlert = new MomentaryAlert("Too close to Hub!", Alert.AlertType.kWarning);
+    public final MomentaryAlert noSolutionAlert = new MomentaryAlert("Can't shoot! No solution", Alert.AlertType.kWarning);
 
     @Override
     public void periodic() {

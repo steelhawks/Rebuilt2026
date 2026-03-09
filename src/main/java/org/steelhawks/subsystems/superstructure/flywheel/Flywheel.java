@@ -114,10 +114,13 @@ public class Flywheel extends SubsystemBase {
                         ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShotFixedPitch(
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
                         if (ShooterStructure.isNoSolution(solution)) {
+                            // short lived alerts if moving
                             if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
-                                DriverWarnings.tooCloseAlert.triggerLapsing(3);
+                                RobotContainer.warnings.tooCloseAlert.triggerLapsing(1);
                             } else if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_FAR) {
-                                DriverWarnings.tooFarAlert.triggerLapsing(3);
+                                RobotContainer.warnings.tooFarAlert.triggerLapsing(1);
+                            } else {
+                                RobotContainer.warnings.noSolutionAlert.triggerLapsing(1);
                             }
                         }
                         double mps = solution.exitVelocity();
@@ -131,9 +134,11 @@ public class Flywheel extends SubsystemBase {
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
                         if (ShooterStructure.isNoSolution(solution)) {
                             if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
-                                DriverWarnings.tooCloseAlert.triggerLapsing(3);
+                                RobotContainer.warnings.tooCloseAlert.triggerLapsing(3);
                             } else if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_FAR) {
-                                DriverWarnings.tooFarAlert.triggerLapsing(3);
+                                RobotContainer.warnings.tooFarAlert.triggerLapsing(3);
+                            } else {
+                                RobotContainer.warnings.noSolutionAlert.triggerLapsing(3);
                             }
                         }
                         double mps = solution.exitVelocity();
