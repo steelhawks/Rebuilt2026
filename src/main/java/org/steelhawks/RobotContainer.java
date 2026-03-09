@@ -60,7 +60,6 @@ public class RobotContainer {
         }
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
-                FOOTPRINT,
                 s_Swerve,
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),

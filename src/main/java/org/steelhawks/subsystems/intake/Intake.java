@@ -35,18 +35,9 @@ public class Intake extends SubsystemBase {
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
     private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising); // TODO: tune
 
-    private static final LoggedTunableNumber currentHomingThreshold =
-        new LoggedTunableNumber("Intake/CurrentHomingThreshold", 60.0);
-    private static final LoggedTunableNumber velocityStallingThreshold =
-        new LoggedTunableNumber("Intake/VelocityStallingThreshold", 0.03);
-    private static final LoggedTunableNumber positionTwistingThreshold =
-        new LoggedTunableNumber("Intake/PositionTwistingThreshold", 0.05); // TODO: tune
-//    private static final LoggedTunableNumber currentHomingThreshold =
-//        new LoggedTunableNumber("Intake/CurrentHomingThreshold", 60.0);
-//    private static final LoggedTunableNumber velocityStallingThreshold =
-//        new LoggedTunableNumber("Intake/VelocityStallingThreshold", 0.03);
     private static LoggedTunableNumber currentHomingThreshold;
     private static LoggedTunableNumber velocityStallingThreshold;
+    private static LoggedTunableNumber positionTwistingThreshold;
     private static LoggedTunableNumber kP;
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
@@ -61,6 +52,7 @@ public class Intake extends SubsystemBase {
         this.constants = constants;
         currentHomingThreshold = new LoggedTunableNumber("Intake/CurrentHomingThreshold", constants.currentHomingThreshold());
         velocityStallingThreshold = new LoggedTunableNumber("Intake/VelocityStallingThreshold", constants.velocityStallingThreshold());
+        positionTwistingThreshold = new LoggedTunableNumber("Intake/PositionTwistingThreshold", constants.positionTwistingThreshold());
         kS = new LoggedTunableNumber("Intake/kS", constants.kS());
         kP = new LoggedTunableNumber("Intake/kP", constants.kP());
         kI = new LoggedTunableNumber("Intake/kI", constants.kI());

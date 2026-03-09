@@ -11,8 +11,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
-import org.steelhawks.RobotConfig;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -34,8 +32,8 @@ public class TurretIOTalonFX implements TurretIO {
     private final TalonFXConfiguration config;
     private final TalonFX motor;
 
-    public TurretIOTalonFX(RobotConfig.CANBus bus, SubsystemConstants.TurretConstants constants) {
-        motor = new TalonFX(constants.turretId(), bus.bus);
+    public TurretIOTalonFX(CANBus bus, SubsystemConstants.TurretConstants constants) {
+        motor = new TalonFX(constants.turretId(), bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;

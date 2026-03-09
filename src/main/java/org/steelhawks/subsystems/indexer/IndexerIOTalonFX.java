@@ -49,8 +49,8 @@ public class IndexerIOTalonFX implements IndexerIO {
 	private StatusSignal<Temperature> spindexer2Temperature = null;
 
 	public IndexerIOTalonFX(CANBus canBus, SubsystemConstants.IndexerConstants constants) {
-        spindexerMotor = new TalonFX(constants.spindexerMotor1Id(), canBus.bus);
-        feederMotor = new TalonFX(constants.feederId(), canBus.bus);
+        spindexerMotor = new TalonFX(constants.spindexerMotor1Id(), canBus);
+        feederMotor = new TalonFX(constants.feederId(), canBus);
 
 		spindexerConfig = new TalonFXConfiguration();
 		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
@@ -81,7 +81,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederTemp = feederMotor.getDeviceTemp();
 
 		if (constants.spindexerMotor2Id().isPresent()) {
-			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus.bus);
+			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus);
 			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Aligned));
 			PhoenixUtil.tryUntilOk(5, spindexerMotor2::optimizeBusUtilization);
 
@@ -101,7 +101,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 			);
 
 			PhoenixUtil.registerSignals(
-				canBus.bus.isNetworkFD(),
+				canBus,
 				spindexer2Position,
 				spindexer2Velocity,
 				spindexer2Voltage,
@@ -123,7 +123,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 			feederVoltage,
 			feederCurrent,
 			feederTorqueCurrent);
-		PhoenixUtil.registerSignals(canBus.isNetworkFD(),
+		PhoenixUtil.registerSignals(canBus,
 			spindexer1Position,
 			spindexer1Velocity,
 			spindexer1Voltage,

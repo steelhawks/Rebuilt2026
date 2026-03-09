@@ -77,10 +77,11 @@ public class SubsystemConstants {
         double maxVelocityMetersPerSec, double maxAccelMetersPerSecSq,
         double currentHomingThreshold,
         double velocityStallingThreshold,
-        double intakeSpeed, double outtakeSpeed
+        double intakeSpeed, double outtakeSpeed,
+        double positionTwistingThreshold
     ) {
         public static final IntakeConstants UNSET =
-            new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0);
+            new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public record IndexerConstants(
@@ -114,8 +115,9 @@ public class SubsystemConstants {
                 0, 0, 0,
                 5, 0, 0,
                 0.05, 0.08,
-                60, 0.003,
-                0.6, 0.6
+                60, 0.03,
+                0.6, 0.6,
+                0.05
             );
 
         public static final FlywheelConstants FLYWHEEL =
@@ -212,8 +214,9 @@ public class SubsystemConstants {
                 0, 0, 0,
                 5, 0, 0,
                 0.05, 0.08,
-                60, 0.003,
-                1, 1
+                60, 0.03,
+                1, 1,
+                0.05
             );
 
         public static final FlywheelConstants FLYWHEEL =

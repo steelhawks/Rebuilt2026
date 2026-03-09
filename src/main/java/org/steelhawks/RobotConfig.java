@@ -541,7 +541,7 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(rioBus, c), poseSupplier, c);
+            return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
         }
 
         @Override
