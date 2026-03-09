@@ -5,7 +5,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
+import org.steelhawks.SubsystemConstants;
 
 public class FlywheelIOSim implements FlywheelIO {
     private DCMotorSim leftMotorSim;
@@ -17,12 +17,12 @@ public class FlywheelIOSim implements FlywheelIO {
     private boolean useTorqueCurrent = false;
     private double feedforward = 0;
 
-    public FlywheelIOSim() {
+    public FlywheelIOSim(SubsystemConstants.FlywheelConstants constants) {
         leftMotorSim = new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44(1),
                 0.001,
-                1.0 / 2.0
+                constants.reduction()
             ),
             DCMotor.getKrakenX44(1)
         );
@@ -31,15 +31,15 @@ public class FlywheelIOSim implements FlywheelIO {
             LinearSystemId.createDCMotorSystem(
                 DCMotor.getKrakenX44(1),
                 0.001,
-                1.0 / 2.0
+                constants.reduction()
             ),
             DCMotor.getKrakenX44(1)
         );
 
         velocityController = new PIDController(
-            ShooterConstants.Flywheel.kP.get(),
-            ShooterConstants.Flywheel.kI.get(),
-            ShooterConstants.Flywheel.kD.get()
+            constants.kP(),
+            constants.kI(),
+            constants.kD()
         );
     }
 

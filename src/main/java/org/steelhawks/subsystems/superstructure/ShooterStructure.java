@@ -7,11 +7,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.RobotContainer;
-import org.steelhawks.RobotState;
-import org.steelhawks.Toggles;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -41,15 +38,47 @@ public class ShooterStructure {
     private static final double G = 9.81;
 
     static {
-        minShootDistance = 0.0;
-        maxShootDistance = Double.MAX_VALUE;
+        SubsystemConstants.LUTConstants c =
+            switch (Constants.getRobot()) {
+                case ALPHABOT -> SubsystemConstants.AlphaBot.LUT;
+                case OMEGABOT, SIMBOT -> SubsystemConstants.OmegaBot.LUT;
+                default -> SubsystemConstants.LUTConstants.UNSET;
+            };
+        minShootDistance = c.minShootDistance();
+        maxShootDistance = c.maxShootDistance();
 
-        minFerryDistance = 0.0;
-        maxFerryDistance = Double.MAX_VALUE;
-
-        shootingFlywheelVelocityMap.put(1.75, 14.8);
-        shootingFlywheelVelocityMap.put(2.12, 15.0);
-        shootingFlywheelVelocityMap.put(3.16, 18.8);
+        minFerryDistance = c.minFerryDistance();
+        maxFerryDistance = c.maxFerryDistance();
+         if (c.shootingTimeOfFlightMap() != null) {
+             for (double[] entry : c.shootingTimeOfFlightMap()) {
+                 shootingTimeOfFlightMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.shootingFlywheelVelocityMap() != null) {
+             for (double[] entry : c.shootingFlywheelVelocityMap()) {
+                 shootingFlywheelVelocityMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.shootingHoodAngleMap() != null) {
+             for (double[] entry : c.shootingHoodAngleMap()) {
+                 shootingHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
+             }
+         }
+         if (c.ferryTimeOfFlightMap() != null) {
+             for (double[] entry : c.ferryTimeOfFlightMap()) {
+                 ferryTimeOfFlightMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.ferryFlywheelVelocityMap() != null) {
+             for (double[] entry : c.ferryFlywheelVelocityMap()) {
+                 ferryFlywheelVelocityMap.put(entry[0], entry[1]);
+             }
+         }
+         if (c.ferryHoodAngleMap() != null) {
+             for (double[] entry : c.ferryHoodAngleMap()) {
+                 ferryHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
+             }
+         }
     }
 
     public static boolean isNoSolution(ProjectileData data) {
@@ -85,9 +114,23 @@ public class ShooterStructure {
 
     public static class Static {
 
+        public static ProjectileData calculateShot(Translation3d target, Translation3d predictedTarget) {
+            return calculateShot(target, predictedTarget, false);
+        }
+
         public static ProjectileData calculateShot(
-            Translation3d actualTarget, Translation3d predictedTarget) {
+            Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch
+        ) {
+            if (isFixedPitch) {
+                return calculateShotFixedPitch(actualTarget, predictedTarget);
+            }
             double x_dist = distanceToTarget(predictedTarget);
+            if (Toggles.useLUT.getAsBoolean()) {
+                return new ProjectileData(
+                    shootingFlywheelVelocityMap.get(x_dist),
+                    shootingHoodAngleMap.get(x_dist).getRadians(),
+                    predictedTarget);
+            }
             double y_dist = predictedTarget
                 .getMeasureZ()
                 .minus(RobotConstants.ROBOT_TO_TURRET.getMeasureZ()).in(Meters);
@@ -125,7 +168,7 @@ public class ShooterStructure {
          * @param predictedTarget Used for shooting on the move.
          * @return ProjectileData, or kNoSolution if the fixed angle cannot clear the funnel or reach the target.
          */
-        public static ProjectileData calculateShotFixedPitch(
+        private static ProjectileData calculateShotFixedPitch(
             Translation3d actualTarget, Translation3d predictedTarget
         ) {
             final double theta = RobotConstants.FIXED_SHOOTER_ANGLE;
@@ -199,9 +242,7 @@ public class ShooterStructure {
             ProjectileData solution = kNoSolution;
 
             for (int i = 0; i < MAX_ITERATIONS; i++) {
-                solution = isFixedPitch
-                    ? Static.calculateShotFixedPitch(actualTarget, predictedTarget)
-                    : Static.calculateShot(actualTarget, predictedTarget);
+                solution = Static.calculateShot(actualTarget, predictedTarget, isFixedPitch);
 
 //                 Fixed: properly check kNoSolution instead of null
                 if (isNoSolution(solution)) {

@@ -11,10 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.Constants;
-import org.steelhawks.Robot;
-import org.steelhawks.RobotContainer;
-import org.steelhawks.Toggles;
+import org.steelhawks.*;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Intake extends SubsystemBase {
@@ -44,14 +41,37 @@ public class Intake extends SubsystemBase {
         new LoggedTunableNumber("Intake/VelocityStallingThreshold", 0.03);
     private static final LoggedTunableNumber positionTwistingThreshold =
         new LoggedTunableNumber("Intake/PositionTwistingThreshold", 0.05); // TODO: tune
+//    private static final LoggedTunableNumber currentHomingThreshold =
+//        new LoggedTunableNumber("Intake/CurrentHomingThreshold", 60.0);
+//    private static final LoggedTunableNumber velocityStallingThreshold =
+//        new LoggedTunableNumber("Intake/VelocityStallingThreshold", 0.03);
+    private static LoggedTunableNumber currentHomingThreshold;
+    private static LoggedTunableNumber velocityStallingThreshold;
+    private static LoggedTunableNumber kP;
+    private static LoggedTunableNumber kI;
+    private static LoggedTunableNumber kD;
+    private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC;
+    private static LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ;
 
-    public Intake(IntakeIO io) {
+    SubsystemConstants.IntakeConstants constants;
+
+    public Intake(IntakeIO io, SubsystemConstants.IntakeConstants constants) {
         this.io = io;
+        this.constants = constants;
+        currentHomingThreshold = new LoggedTunableNumber("Intake/CurrentHomingThreshold", constants.currentHomingThreshold());
+        velocityStallingThreshold = new LoggedTunableNumber("Intake/VelocityStallingThreshold", constants.velocityStallingThreshold());
+        kS = new LoggedTunableNumber("Intake/kS", constants.kS());
+        kP = new LoggedTunableNumber("Intake/kP", constants.kP());
+        kI = new LoggedTunableNumber("Intake/kI", constants.kI());
+        kD = new LoggedTunableNumber("Intake/kD", constants.kD());
+        MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadPerSecSq", constants.maxAccelMetersPerSecSq());
+        MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityRadPerSec", constants.maxVelocityMetersPerSec());
         profile =
             new TrapezoidProfile(
                 new TrapezoidProfile.Constraints(
-                    IntakeConstants.MAX_VELOCITY_RAD_PER_SEC.get(),
-                    IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.get()));
+                    MAX_VELOCITY_RAD_PER_SEC.get(),
+                    MAX_ACCEL_RAD_PER_SEC_SQ.get()));
     }
 
     public boolean atGoal() {
@@ -147,18 +167,18 @@ public class Intake extends SubsystemBase {
             }
             LoggedTunableNumber.ifChanged(this.hashCode(), () -> {
                 io.setRackPID(
-                    IntakeConstants.kP.get(),
-                    IntakeConstants.kI.get(),
-                    IntakeConstants.kD.get());
-            }, IntakeConstants.kP, IntakeConstants.kI, IntakeConstants.kD);
-            if (IntakeConstants.MAX_VELOCITY_RAD_PER_SEC.hasChanged(hashCode())
-                || IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.hasChanged(hashCode())
+                    kP.get(),
+                    kI.get(),
+                    kD.get());
+            }, kP, kI, kD);
+            if (MAX_VELOCITY_RAD_PER_SEC.hasChanged(hashCode())
+                || MAX_ACCEL_RAD_PER_SEC_SQ.hasChanged(hashCode())
             ) {
                 profile =
                     new TrapezoidProfile(
                         new TrapezoidProfile.Constraints(
-                            IntakeConstants.MAX_VELOCITY_RAD_PER_SEC.get(),
-                            IntakeConstants.MAX_ACCEL_RAD_PER_SEC_SQ.get()));
+                            MAX_VELOCITY_RAD_PER_SEC.get(),
+                            MAX_ACCEL_RAD_PER_SEC_SQ.get()));
             }
         }
         if (shouldRun) {
@@ -204,7 +224,7 @@ public class Intake extends SubsystemBase {
                 double motorTorque = torqueAtPinion / gearRatio;
                 double kT = DCMotor.getKrakenX44Foc(2).KtNMPerAmp;
                 double feedforwardCurrent = motorTorque / kT;
-                double staticFriction = IntakeConstants.kS.get() * Math.signum(setpoint.velocity);
+                double staticFriction = kS.get() * Math.signum(setpoint.velocity);
                 io.runRackPosition(
                     setpoint.position,
                     staticFriction);
@@ -237,12 +257,12 @@ public class Intake extends SubsystemBase {
 
     public Command runIntake() {
         return Commands.run(
-            () -> io.runIntake(IntakeConstants.INTAKE_SPEED), this).finallyDo(io::stopIntake);
+            () -> io.runIntake(constants.intakeSpeed()), this).finallyDo(io::stopIntake);
     }
 
     public Command outtakeIntake() {
         return Commands.run(
-            () -> io.runIntake(-IntakeConstants.INTAKE_SPEED), this).finallyDo(io::stopIntake);
+            () -> io.runIntake(-constants.intakeSpeed()), this).finallyDo(io::stopIntake);
     }
 
     public Command agitate() {

@@ -5,20 +5,23 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 public class IndexerIOTalonFX implements IndexerIO {
 
-	private final StatusSignal<Angle> spindexerPosition;
-	private final StatusSignal<AngularVelocity> spindexerVelocity;
-	private final StatusSignal<Voltage> spindexerVoltage;
-	private final StatusSignal<Current> spindexerCurrent;
-	private final StatusSignal<Current> spindexerTorqueCurrent;
-	private final StatusSignal<Temperature> spindexerTemp;
+	private final StatusSignal<Angle> spindexer1Position;
+	private final StatusSignal<AngularVelocity> spindexer1Velocity;
+	private final StatusSignal<Voltage> spindexer1Voltage;
+	private final StatusSignal<Current> spindexer1Current;
+	private final StatusSignal<Current> spindexer1TorqueCurrent;
+	private final StatusSignal<Temperature> spindexer1Temp;
 
     private final StatusSignal<Angle> feederPosition;
     private final StatusSignal<AngularVelocity> feederVelocity;
@@ -27,8 +30,6 @@ public class IndexerIOTalonFX implements IndexerIO {
     private final StatusSignal<Current> feederTorqueCurrent;
     private final StatusSignal<Temperature> feederTemp;
 
-	private final int SPINDEXER_ID = 45;
-    private final int FEEDER_ID = 26;
 	private final TalonFX spindexerMotor;
     private final TalonFX feederMotor;
 	private final TalonFXConfiguration spindexerConfig;
@@ -37,9 +38,19 @@ public class IndexerIOTalonFX implements IndexerIO {
 	private final DutyCycleOut spindexerDutyCycleOut;
     private final DutyCycleOut feederDutyCycleOut;
 
-	public IndexerIOTalonFX(CANBus bus) {
-        spindexerMotor = new TalonFX(SPINDEXER_ID, bus);
-        feederMotor = new TalonFX(FEEDER_ID, bus);
+	// optional spindexer motor
+	// these are explicitly null if an motor id isn't present for the 2nd motor in the constants record, please null check before accessing
+	private TalonFX spindexerMotor2 = null;
+	private StatusSignal<Angle> spindexer2Position = null;
+	private StatusSignal<AngularVelocity> spindexer2Velocity = null;
+	private StatusSignal<Voltage> spindexer2Voltage = null;
+	private StatusSignal<Current> spindexer2Current = null;
+	private StatusSignal<Current> spindexer2TorqueCurrent = null;
+	private StatusSignal<Temperature> spindexer2Temperature = null;
+
+	public IndexerIOTalonFX(CANBus canBus, SubsystemConstants.IndexerConstants constants) {
+        spindexerMotor = new TalonFX(constants.spindexerMotor1Id(), canBus.bus);
+        feederMotor = new TalonFX(constants.feederId(), canBus.bus);
 
 		spindexerConfig = new TalonFXConfiguration();
 		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
@@ -55,12 +66,12 @@ public class IndexerIOTalonFX implements IndexerIO {
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);
 
-		spindexerPosition = spindexerMotor.getPosition();
-        spindexerVelocity = spindexerMotor.getVelocity();
-		spindexerVoltage = spindexerMotor.getMotorVoltage();
-		spindexerCurrent = spindexerMotor.getSupplyCurrent();
-		spindexerTorqueCurrent = spindexerMotor.getTorqueCurrent();
-		spindexerTemp = spindexerMotor.getDeviceTemp();
+		spindexer1Position = spindexerMotor.getPosition();
+        spindexer1Velocity = spindexerMotor.getVelocity();
+		spindexer1Voltage = spindexerMotor.getMotorVoltage();
+		spindexer1Current = spindexerMotor.getStatorCurrent();
+		spindexer1TorqueCurrent = spindexerMotor.getTorqueCurrent();
+		spindexer1Temp = spindexerMotor.getDeviceTemp();
 
         feederPosition = feederMotor.getPosition();
         feederVelocity = feederMotor.getVelocity();
@@ -69,25 +80,56 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederTorqueCurrent = feederMotor.getTorqueCurrent();
         feederTemp = feederMotor.getDeviceTemp();
 
+		if (constants.spindexerMotor2Id().isPresent()) {
+			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus.bus);
+			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+			PhoenixUtil.tryUntilOk(5, spindexerMotor2::optimizeBusUtilization);
+
+			spindexer2Position = spindexerMotor2.getPosition();
+			spindexer2Velocity = spindexerMotor2.getVelocity();
+			spindexer2Voltage = spindexerMotor2.getMotorVoltage();
+			spindexer2Current = spindexerMotor2.getStatorCurrent();
+			spindexer2TorqueCurrent = spindexerMotor2.getTorqueCurrent();
+			spindexer2Temperature = spindexerMotor2.getDeviceTemp();
+
+			BaseStatusSignal.setUpdateFrequencyForAll(
+				50,
+				spindexer2Velocity,
+				spindexer2Voltage,
+				spindexer2Current,
+				spindexer2TorqueCurrent
+			);
+
+			PhoenixUtil.registerSignals(
+				canBus.bus.isNetworkFD(),
+				spindexer2Position,
+				spindexer2Velocity,
+				spindexer2Voltage,
+				spindexer2Current,
+				spindexer2TorqueCurrent,
+				spindexer2Temperature
+			);
+		}
+
 		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
 		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
 		BaseStatusSignal.setUpdateFrequencyForAll(
 		50,
-			spindexerVelocity,
-            spindexerVoltage,
-            spindexerCurrent,
-            spindexerTorqueCurrent,
+			spindexer1Velocity,
+			spindexer1Voltage,
+			spindexer1Current,
+			spindexer1TorqueCurrent,
 			feederVelocity,
 			feederVoltage,
 			feederCurrent,
 			feederTorqueCurrent);
-		PhoenixUtil.registerSignals(bus,
-            spindexerPosition,
-            spindexerVelocity,
-            spindexerVoltage,
-            spindexerCurrent,
-            spindexerTorqueCurrent,
-            spindexerTemp,
+		PhoenixUtil.registerSignals(canBus.isNetworkFD(),
+			spindexer1Position,
+			spindexer1Velocity,
+			spindexer1Voltage,
+			spindexer1Current,
+			spindexer1TorqueCurrent,
+			spindexer1Temp,
 			feederPosition,
 			feederVelocity,
 			feederVoltage,
@@ -98,14 +140,14 @@ public class IndexerIOTalonFX implements IndexerIO {
 
 	@Override
 	public void updateInputs(SpindexerIOInputs spindexerInputs, FeederIOInputs feederInputs) {
-		spindexerInputs.connected = BaseStatusSignal.isAllGood(
-            spindexerPosition, spindexerVelocity, spindexerVoltage, spindexerCurrent, spindexerTorqueCurrent, spindexerTemp);
-		spindexerInputs.positionRad = spindexerPosition.getValueAsDouble();
-		spindexerInputs.velocityRadPerSec = spindexerVelocity.getValueAsDouble();
-		spindexerInputs.appliedVolts = spindexerVoltage.getValueAsDouble();
-		spindexerInputs.supplyCurrentAmps = spindexerCurrent.getValueAsDouble();
-		spindexerInputs.torqueCurrentAmps = spindexerTorqueCurrent.getValueAsDouble();
-		spindexerInputs.tempCelsius = spindexerTemp.getValueAsDouble();
+		spindexerInputs.motor1Connected = BaseStatusSignal.isAllGood(
+			spindexer1Position, spindexer1Velocity, spindexer1Voltage, spindexer1Current, spindexer1TorqueCurrent, spindexer1Temp);
+		spindexerInputs.motor1PositionRad = spindexer1Position.getValueAsDouble();
+		spindexerInputs.motor1VelocityRadPerSec = spindexer1Velocity.getValueAsDouble();
+		spindexerInputs.motor1AppliedVolts = spindexer1Voltage.getValueAsDouble();
+		spindexerInputs.motor1CurrentAmps = spindexer1Current.getValueAsDouble();
+		spindexerInputs.motor1TorqueCurrentAmps = spindexer1TorqueCurrent.getValueAsDouble();
+		spindexerInputs.motor1TempCelsius = spindexer1Temp.getValueAsDouble();
 
         feederInputs.connected = BaseStatusSignal.isAllGood(
             feederPosition, feederVelocity, feederVoltage, feederCurrent, feederTorqueCurrent, feederTemp);
@@ -115,6 +157,19 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederInputs.currentAmps = feederCurrent.getValueAsDouble();
         feederInputs.torqueCurrentAmps = feederTorqueCurrent.getValueAsDouble();
         feederInputs.tempCelsius = feederTemp.getValueAsDouble();
+
+		if (spindexerMotor2 != null) {
+			spindexerInputs.motor2Connected = BaseStatusSignal.isAllGood(
+				spindexer2Position, spindexer2Velocity, spindexer2Voltage, spindexer2Current, spindexer2TorqueCurrent, spindexer2Temperature);
+			spindexerInputs.motor2PositionRad = spindexer2Position.getValueAsDouble();
+			spindexerInputs.motor2VelocityRadPerSec = spindexer2Velocity.getValueAsDouble();
+			spindexerInputs.motor2AppliedVolts = spindexer2Voltage.getValueAsDouble();
+			spindexerInputs.motor2CurrentAmps = spindexer2Current.getValueAsDouble();
+			spindexerInputs.motor2TorqueCurrentAmps = spindexer2TorqueCurrent.getValueAsDouble();
+			spindexerInputs.motor2TempCelsius = spindexer2Temperature.getValueAsDouble();
+		} else {
+			spindexerInputs.motor2Connected = false;
+		}
 	}
 
 	@Override

@@ -12,6 +12,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.subsystems.superstructure.ShooterConstants;
+import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 public class TurretIOTalonFX implements TurretIO {
@@ -32,15 +34,15 @@ public class TurretIOTalonFX implements TurretIO {
     private final TalonFXConfiguration config;
     private final TalonFX motor;
 
-    public TurretIOTalonFX(CANBus bus) {
-        motor = new TalonFX(Turret.motorId, bus);
+    public TurretIOTalonFX(RobotConfig.CANBus bus, SubsystemConstants.TurretConstants constants) {
+        motor = new TalonFX(constants.turretId(), bus.bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        config.Slot0.kP = Turret.kP.getAsDouble();
-        config.Slot0.kI = Turret.kI.getAsDouble();
-        config.Slot0.kD = Turret.kD.getAsDouble();
-        config.Feedback.SensorToMechanismRatio = ShooterConstants.Turret.MOTOR_REDUCTION;
+        config.Slot0.kP = constants.kP();
+        config.Slot0.kI = constants.kI();
+        config.Slot0.kD = constants.kD();
+        config.Feedback.SensorToMechanismRatio = constants.motorReduction();
         config.ClosedLoopGeneral.ContinuousWrap = false;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
