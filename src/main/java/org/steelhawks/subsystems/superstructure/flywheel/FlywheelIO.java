@@ -19,6 +19,8 @@ public interface FlywheelIO {
 
     default void runFlywheel(double setpoint, double feedforward, boolean isTorqueCurrent) {}
 
+    default void runProfiledFlywheel(double setpoint, double feedforward, boolean isTorqueCurrent) {}
+
     default void runFlywheelOpenLoop(double output, boolean isTorqueCurrent) {}
 
     default void setPID(double kP, double kI, double kD) {}

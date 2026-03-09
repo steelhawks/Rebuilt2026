@@ -41,6 +41,11 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.Slot0.kP = constants.kP();
         config.Slot0.kI = constants.kI();
         config.Slot0.kD = constants.kD();
+        config.Slot0.kS = constants.kS();
+        config.Slot0.kV = constants.kV();
+        config.Slot0.kA = constants.kA();
+        config.MotionMagic.MotionMagicAcceleration = constants.motionMagicAccel();
+        config.MotionMagic.MotionMagicJerk = constants.motionMagicJerk();
 
         position = leftMotor.getPosition();
         velocity = leftMotor.getVelocity();
@@ -85,6 +90,20 @@ public class FlywheelIOTalonFX implements FlywheelIO {
                     .withFeedForward(feedforward)
                 : velocityVoltage.withVelocity(setpoint)
                     .withFeedForward(feedforward)
+        );
+    }
+
+    @Override
+    public void runProfiledFlywheel(double setpoint, double feedforward, boolean isTorqueCurrent) {
+        setpoint = Units.radiansToRotations(setpoint);
+        MotionMagicVelocityTorqueCurrentFOC requestTorqueCurrent = new MotionMagicVelocityTorqueCurrentFOC(0);
+        MotionMagicVelocityVoltage requestVoltage = new MotionMagicVelocityVoltage(0);
+        leftMotor.setControl(
+            isTorqueCurrent
+            ? requestTorqueCurrent.withVelocity(setpoint)
+                .withFeedForward(feedforward)
+            : requestVoltage.withVelocity(setpoint)
+                .withFeedForward(feedforward)
         );
     }
 

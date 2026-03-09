@@ -31,7 +31,8 @@ public class SubsystemConstants {
         int leftMotorId,
         int rightMotorId,
         double idleMultiplier,
-        double kP, double kI, double kD, double kS, double kV,
+        double kP, double kI, double kD, double kS, double kV, double kA,
+        double motionMagicAccel, double motionMagicJerk,
         double velocityToleranceRadPerSec,
         double samplingTimeoutDuration,
         double timeoutAvgMinSamples,
@@ -40,7 +41,7 @@ public class SubsystemConstants {
         double reduction
     ) {
         public static final FlywheelConstants UNSET =
-            new FlywheelConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            new FlywheelConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0);
     }
 
     public record TurretConstants(
@@ -125,7 +126,8 @@ public class SubsystemConstants {
                 2, 3,
                 0.5,
                 0.2, 0, 0,
-                0.42995, 0.0090372 * 0.9, // 10% reduction from sysid value
+                0.42995, 0.0090372 * 0.9, 0,
+                0, 0,// 10% reduction from sysid value
                 20,
                 2,
                 10,
@@ -202,7 +204,8 @@ public class SubsystemConstants {
                 2, 3,
                 0.5,
                 0.2, 0, 0,
-                0.42995, 0.0090372 * 0.9, // 10% reduction from sysid value
+                0.42995, 0.0090372 * 0.9, 0,
+                0, 0,// 10% reduction from sysid value
                 20,
                 2,
                 10,

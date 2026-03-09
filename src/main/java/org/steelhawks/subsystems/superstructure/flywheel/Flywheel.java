@@ -5,7 +5,6 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -28,8 +27,8 @@ import java.util.Set;
 import static edu.wpi.first.units.Units.*;
 public class Flywheel extends SubsystemBase {
 
-    private final double[] voltageSamples = new double[sampleCounts];
-    private double sampledVoltage = 0.0;
+    private final double[] ampSamples = new double[sampleCounts];
+    private double sampledAmps = 0.0;
     private int currentSampleIndex = 0;
     private double timeStartedSampling = 0;
     private final SysIdRoutine routine;
@@ -57,6 +56,7 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
     private static LoggedTunableNumber kV;
+    private static LoggedTunableNumber kA;
 
     private static LoggedTunableNumber velocityTolerance;
     private static LoggedTunableNumber samplingTimeoutDuration;
@@ -72,6 +72,7 @@ public class Flywheel extends SubsystemBase {
         kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
+        kA = new LoggedTunableNumber("Flywheel/kA", constants.kA());
         velocityTolerance
             = new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         samplingTimeoutDuration =
@@ -150,12 +151,12 @@ public class Flywheel extends SubsystemBase {
                     }
                 }
             }
-            double feedforward = ((sampledVoltage != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
-                ? sampledVoltage
+            double feedforward = ((sampledAmps != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
+                ? sampledAmps
                 : kS.get() + kV.get() * targetVelocityRadPerSec;
             switch (state) {
                 case RAMP_UP -> {
-                    io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                    io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
                     if (nearTargetVelocity) {
                         state = FlywheelState.SAMPLING;
                         currentSampleIndex = 0;
@@ -163,51 +164,51 @@ public class Flywheel extends SubsystemBase {
                     }
                 }
                 case SAMPLING -> {
-                    io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                    io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
                     if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
-                        voltageSamples[currentSampleIndex] = inputs.appliedVolts;
+                        ampSamples[currentSampleIndex] = inputs.torqueCurrentAmps;
                         currentSampleIndex++;
                     }
                     if (currentSampleIndex >= sampleCounts) {
-                        sampledVoltage = calculateAverageSample();
+                        sampledAmps = calculateAverageSample();
                         state = FlywheelState.RUNNING;
-                        Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
+                        Logger.recordOutput("Flywheel/SampledCurrent", sampledAmps);
                     } else if (Timer.getFPGATimestamp() - timeStartedSampling > samplingTimeoutDuration.get()) {
                         if (currentSampleIndex >= timeoutAvgMinSamples.get()) { // not good not terrible, calculate an average
-                            sampledVoltage = calculateAverageSample();
+                            sampledAmps = calculateAverageSample();
                         } else {
-                            sampledVoltage = 0.0; // calculate the FF voltage using the equation above instead of using the sampled value
+                            sampledAmps = 0.0; // calculate the FF voltage using the equation above instead of using the sampled value
                         }
 
                         state = FlywheelState.RUNNING;
-                        Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
+                        Logger.recordOutput("Flywheel/SampledCurrent", sampledAmps);
                     }
                 }
                 case RUNNING -> {
                     if (nearTargetVelocity) {
-                        io.runFlywheelOpenLoop(feedforward, false);
+                        io.runFlywheelOpenLoop(feedforward, true);
                     } else {
                         // recover velocity if needed
-                        io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+                        io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
                     }
                 }
             }
         } else {
             state = FlywheelState.RAMP_UP;
-            sampledVoltage = 0.0;
+            sampledAmps = 0.0;
             currentSampleIndex = 0;
             Logger.recordOutput("Flywheel/Feedforward", 0.0);
         }
         Logger.recordOutput("Flywheel/State", state.toString());
         Logger.recordOutput("Flywheel/TargetVelocity", targetVelocityRadPerSec);
-        Logger.recordOutput("Flywheel/AdaptiveFeedforward", sampledVoltage != 0.0);
+        Logger.recordOutput("Flywheel/AdaptiveFeedforward", sampledAmps != 0.0);
     }
 
     private double calculateAverageSample() {
         if (currentSampleIndex == 0) return 0.0;
         double sum = 0.0;
         for (int i = 0; i < currentSampleIndex; i++) {
-            sum += voltageSamples[i];
+            sum += ampSamples[i];
         }
         return sum / currentSampleIndex;
     }
@@ -223,14 +224,14 @@ public class Flywheel extends SubsystemBase {
 
     public void setTargetVelocity(double velocityRadPerSec) {
         if (Toggles.shooterTuningMode.get()) return;
-        sampledVoltage = 0.0;
+        sampledAmps = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
     }
 
     public void setTargetVelocityForced(double velocityRadPerSec) {
         System.out.println("Working");
-        sampledVoltage = 0.0;
+        sampledAmps = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
     }
