@@ -162,7 +162,7 @@ public class RobotConfig {
                 .withTurret(false)
                 .withHood(false)
                 .withOldIntake(false)
-                .withIntake(false)
+                .withIntake(true)
                 .withIndexer(false)
                 .withAutos(false)
                 .withFactory(new OmegaBotFactory())
@@ -457,7 +457,7 @@ public class RobotConfig {
 
         @Override
         public Intake createIntake() {
-            return null;
+            return new Intake(new IntakeIOTalonFX(new CANBus("rio")));
         }
 
         @Override
