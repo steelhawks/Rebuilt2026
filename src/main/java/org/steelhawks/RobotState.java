@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;
@@ -115,7 +114,6 @@ public class RobotState extends VirtualSubsystem {
     private final LatchedBoolean autoStarted = new LatchedBoolean();
     private Alliance initialActiveHub = null;
     private Alliance activeHub = null;
-    private ShooterStructure.ProjectileData lastSolution = ShooterStructure.kNoSolution;
 
     private final Timer timer = new Timer();
     private static RobotState instance;
@@ -462,14 +460,6 @@ public class RobotState extends VirtualSubsystem {
                 return distance <= radiusMeters;
             })
             .toList();
-    }
-
-    public void setLastSolution(ShooterStructure.ProjectileData solution) {
-        this.lastSolution = solution;
-    }
-
-    public ShooterStructure.ProjectileData getSolution() {
-        return lastSolution;
     }
 
     private record TimestampedObjectList(double timestamp, List<DetectedObject> objects) {}

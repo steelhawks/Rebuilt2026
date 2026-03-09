@@ -102,10 +102,8 @@ public class Flywheel extends SubsystemBase {
                 Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
                 switch (RobotState.getInstance().getAimState()) {
                     case NOTHING -> {
-                        var t = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
-                        RobotState.getInstance().setLastSolution(t);
-                        double mps = t.exitVelocity();
+                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(rps * IDLE_MULTIPLIER);

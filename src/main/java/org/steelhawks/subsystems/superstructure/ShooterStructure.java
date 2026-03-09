@@ -6,14 +6,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
-import edu.wpi.first.wpilibj.Alert;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
-import org.steelhawks.util.Faults;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -37,11 +35,6 @@ public class ShooterStructure {
     private static final double maxShootDistance;
     private static final double minFerryDistance;
     private static final double maxFerryDistance;
-    private static ProjectileData lastSolution;
-
-    static {
-        Faults.getInstance().registerFault("SHOT_IMPOSSIBLE", "Shot is impossible", Alert.AlertType.kWarning, Faults.ClearBehavior.IMMEDIATE, () -> isNoSolution(RobotState.getInstance().getSolution()));
-    }
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
