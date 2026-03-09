@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.steelhawks.Constants;
+import org.steelhawks.SubsystemConstants;
 
 import java.util.function.Supplier;
 
@@ -27,6 +28,9 @@ public class SuperstructureVisualizer {
     private Supplier<Double> turretRad = () -> 0.0;
     private Supplier<Double> hoodRad = () -> 0.0;
     private Supplier<Pose2d> robotPoseSupplier = Pose2d::new;
+
+    // TODO: find a better way to get the appropriate constants into classes like this
+    private static final Rotation2d hoodMaxAngle = SubsystemConstants.SimBot.HOOD.maxAngle();
 
     private static final double TURRET_X = Constants.RobotConstants.ROBOT_TO_TURRET.getX();
     private static final double TURRET_Y = Constants.RobotConstants.ROBOT_TO_TURRET.getY();
@@ -84,7 +88,7 @@ public class SuperstructureVisualizer {
                 new Rotation3d(0.0, 0.0, turret + Math.PI)),
             new Pose3d(
                 Constants.RobotConstants.ROBOT_TO_TURRET.getTranslation().plus(HOOD_PIVOT),
-                new Rotation3d(0.0, -(ShooterConstants.Hood.MAX_ANGLE.getRadians() - hood), turret + Math.PI))
+                new Rotation3d(0.0, -(hoodMaxAngle.getRadians() - hood), turret + Math.PI))
         });
     }
 }
