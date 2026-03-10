@@ -25,5 +25,7 @@ public interface FlywheelIO {
 
     default void setPID(double kP, double kI, double kD) {}
 
+    default void setProfile(double accel, double jerk) {}
+
     default void stop() {}
 }

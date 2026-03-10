@@ -125,6 +125,13 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     }
 
     @Override
+    public void setProfile(double accel, double jerk) {
+        config.MotionMagic.MotionMagicAcceleration = accel;
+        config.MotionMagic.MotionMagicJerk = jerk;
+        PhoenixUtil.tryUntilOk(5, () -> leftMotor.getConfigurator().apply(config));
+    }
+
+    @Override
     public void stop() {
         leftMotor.stopMotor();
     }

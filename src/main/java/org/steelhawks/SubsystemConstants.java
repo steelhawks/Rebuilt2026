@@ -125,8 +125,8 @@ public class SubsystemConstants {
             new FlywheelConstants(
                 2, 3,
                 0.5,
-                0.2, 0, 0,
-                0.42995, 0.0090372 * 0.9, 0,
+                0, 0, 0,
+                0, 0, 0,
                 0, 0,// 10% reduction from sysid value
                 20,
                 2,

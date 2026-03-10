@@ -58,6 +58,9 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kV;
     private static LoggedTunableNumber kA;
 
+    private static LoggedTunableNumber motionMagicAccel;
+    private static LoggedTunableNumber motionMagicJerk;
+
     private static LoggedTunableNumber velocityTolerance;
     private static LoggedTunableNumber samplingTimeoutDuration;
     private static LoggedTunableNumber timeoutAvgMinSamples;
@@ -73,6 +76,10 @@ public class Flywheel extends SubsystemBase {
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
         kA = new LoggedTunableNumber("Flywheel/kA", constants.kA());
+        motionMagicAccel =
+            new LoggedTunableNumber("Flywheel/MotionMagicAccel", constants.motionMagicAccel());
+        motionMagicJerk =
+            new LoggedTunableNumber("Flywheel/MotionMagicJerk", constants.motionMagicJerk());
         velocityTolerance
             = new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         samplingTimeoutDuration =
@@ -120,6 +127,9 @@ public class Flywheel extends SubsystemBase {
             LoggedTunableNumber.ifChanged(this.hashCode(), () -> {
                 io.setPID(kP.get(), kI.get(), kD.get());
             }, kP, kI, kD);
+            LoggedTunableNumber.ifChanged(this.hashCode(), () -> {
+                io.setProfile(motionMagicAccel.get(), motionMagicJerk.get());
+            }, motionMagicAccel, motionMagicJerk);
         }
         if (shouldRun) {
             if (!Toggles.shooterTuningMode.get()) {

@@ -83,7 +83,7 @@ public class RobotContainer {
                     s_Intake.runIntake());
         }
 
-        if (config.hasIntake && config.hasIndexer && config.hasIntake) {
+        if (config.hasIntake && config.hasIndexer && config.hasFlywheel) {
             driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
         }
@@ -105,6 +105,10 @@ public class RobotContainer {
             driver.y().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2)));
             driver.a().onTrue(s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2)));
             driver.b().onTrue(s_Turret.setDesiredRotation(new Rotation2d(0)));
+        }
+
+        if (config.hasFlywheel) {
+            driver.leftBumper().whileTrue(s_Flywheel.shooting());
         }
     }
 }
