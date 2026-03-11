@@ -127,7 +127,7 @@ public class SubsystemConstants {
                 0.5,
                 0, 0, 0,
                 0, 0, 0,
-                0, 0,// 10% reduction from sysid value
+                10, 0,// 10% reduction from sysid value
                 20,
                 2,
                 10,

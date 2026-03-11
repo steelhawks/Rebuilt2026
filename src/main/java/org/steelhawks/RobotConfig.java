@@ -185,6 +185,7 @@ public class RobotConfig {
                 .build();
 
             case ALPHABOT -> new Builder()
+                .withSwerve(false)
                 .withLEDMatrix(false)
                 .withLEDStrip(false)
                 .withVision(false)
@@ -508,11 +509,20 @@ public class RobotConfig {
         public Swerve createSwerve() {
             return new Swerve(
                 CANBusList.kRioBus,
-                new GyroIOPigeon2(TunerConstantsAlpha.DrivetrainConstants.Pigeon2Id, CANBusList.kRioBus),
-                new ModuleIOTalonFX(TunerConstantsAlpha.FrontLeft, CANBusList.kRioBus),
-                new ModuleIOTalonFX(TunerConstantsAlpha.FrontRight, CANBusList.kRioBus),
-                new ModuleIOTalonFX(TunerConstantsAlpha.BackLeft, CANBusList.kRioBus),
-                new ModuleIOTalonFX(TunerConstantsAlpha.BackRight, CANBusList.kRioBus));
+                new GyroIOSim(Objects.requireNonNull(
+                Swerve.getDriveSimulation(), "Drive simulation not initialized")
+                    .getGyroSimulation()),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[0]),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[1]),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[2]),
+                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[3]));
+//            return new Swerve(
+//                CANBusList.kRioBus,
+//                new GyroIOPigeon2(TunerConstantsAlpha.DrivetrainConstants.Pigeon2Id, CANBusList.kRioBus),
+//                new ModuleIOTalonFX(TunerConstantsAlpha.FrontLeft, CANBusList.kRioBus),
+//                new ModuleIOTalonFX(TunerConstantsAlpha.FrontRight, CANBusList.kRioBus),
+//                new ModuleIOTalonFX(TunerConstantsAlpha.BackLeft, CANBusList.kRioBus),
+//                new ModuleIOTalonFX(TunerConstantsAlpha.BackRight, CANBusList.kRioBus));
         }
 
         @Override
