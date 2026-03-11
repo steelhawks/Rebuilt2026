@@ -22,6 +22,7 @@ public class LEDMatrix extends SubsystemBase {
     private Animation currentAnimation = null;
     private Animation overlayAnimation = null;
     private int animationFrame = 0;
+    private double brightness = 1.0;
 
     private String trackedText = null;
 
@@ -35,6 +36,10 @@ public class LEDMatrix extends SubsystemBase {
                 staticT.setText(text);
             }
         }
+    }
+
+    public void setBrightness(double brightness) {
+        this.brightness = Math.max(0.0, Math.min(1.0, brightness));
     }
 
     public enum MatrixLayout {
@@ -123,7 +128,10 @@ public class LEDMatrix extends SubsystemBase {
     public void setPixel(int x, int y, Color color) {
         int index = getPixelIndex(x, y);
         if (index >= 0) {
-            ledBuffer.setRGB(index, color.r, color.g, color.b);
+            ledBuffer.setRGB(index,
+                (int)(color.r * brightness),
+                (int)(color.g * brightness),
+                (int)(color.b * brightness));
         }
     }
 
@@ -973,11 +981,13 @@ public class LEDMatrix extends SubsystemBase {
 
     public Command solidColorCommand(Color color) {
         return Commands.runOnce(() -> playAnimation(new SolidColor(color)), this)
+            .beforeStarting(() -> this.setBrightness(1.0))
             .ignoringDisable(true);
     }
 
     public Command rainbowWaveCommand(int speed) {
         return Commands.runOnce(() -> playAnimation(new RainbowWave(speed)), this)
+            .beforeStarting(() -> this.setBrightness(1.0))
             .ignoringDisable(true);
     }
 
