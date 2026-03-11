@@ -112,7 +112,6 @@ public class LEDMatrix extends SubsystemBase {
                 return (x * height) + (height - 1 - y);
             }
         } else {
-            // Progressive pattern - all rows left-to-right
             return y * width + x;
         }
     }
