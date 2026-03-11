@@ -281,6 +281,11 @@ public class Flywheel extends SubsystemBase {
         .finallyDo(io::stop);
     }
 
+    public Command setTargetVelocityForcedCmd(double velocityRadPerSec) {
+        return Commands.runOnce(() -> setTargetVelocityForced(velocityRadPerSec), this)
+        .finallyDo(io::stop);
+    }
+
     public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {
         return Commands.runOnce(() -> Toggles.Flywheel.isEnabled.set(false)).andThen(routine.quasistatic(direction))
             .onlyIf(Toggles.tuningMode::get);
