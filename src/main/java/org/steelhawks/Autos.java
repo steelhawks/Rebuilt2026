@@ -45,14 +45,19 @@ public final class Autos {
         MULTIPLE
     }
 
+    public static void testingBoard() {
+        autoChooser.addOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
+        autoChooser.addOption("Jacob", Commands.none().withName("JACOB"));
+    }
+
     public static void init() {
         /* ------------- Autons ------------- */
 
-        autoChooser.addDefaultOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
         autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName("FOUR_METER_TEST"));
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName("FOUR_METER_SPIN_TEST"));
         autoChooser.addOption("Center Test", centerPathTest().cmd().withName("CENTER_METER_TEST"));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
+        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
         if (Toggles.tuningMode.get()) {
             /* ------------- Swerve SysId ------------- */

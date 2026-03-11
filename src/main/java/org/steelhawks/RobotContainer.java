@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -44,7 +43,6 @@ public class RobotContainer {
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
 
         s_Matrix = config.createLEDMatrix().orElse(null);
-
         s_Swerve = config.createSwerve();
         s_Vision = config.createVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
