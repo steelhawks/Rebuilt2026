@@ -455,7 +455,7 @@ public class RobotConfig {
 
         @Override
         public LEDMatrix createLEDMatrix() {
-            return new LEDMatrix();
+            return new LEDMatrix(32, 8);
         }
 
         @Override

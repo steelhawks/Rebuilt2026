@@ -57,7 +57,7 @@ public final class Autos {
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName("FOUR_METER_SPIN_TEST"));
         autoChooser.addOption("Center Test", centerPathTest().cmd().withName("CENTER_METER_TEST"));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
-        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
+//        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
         if (Toggles.tuningMode.get()) {
             /* ------------- Swerve SysId ------------- */

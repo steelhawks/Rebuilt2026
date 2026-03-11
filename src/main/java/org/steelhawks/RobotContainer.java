@@ -64,6 +64,8 @@ public class RobotContainer {
                 () -> -driver.getRightX()));
         configureDriver();
         Toggles.configureOverrides();
+        LEDCommands.configureTriggers(driver.leftTrigger());
+        Autos.testingBoard();
 //        ShooterTuner.getInstance();
     }
 
@@ -72,9 +74,9 @@ public class RobotContainer {
             .onTrue(new VibrateController(driver));
 
         if (config.hasIntake) {
-            driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-            driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-            driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
+//            driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+//            driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+//            driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
 
             driver.rightTrigger()
                 .whileTrue(
