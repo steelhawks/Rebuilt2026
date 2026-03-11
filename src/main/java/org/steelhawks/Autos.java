@@ -52,7 +52,6 @@ public final class Autos {
     public static void init() {
         /* ------------- Autons ------------- */
 
-        autoChooser.addDefaultOption("Nothing", Commands.none().withName("NOTHING_AUTO"));
         autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
         if (Toggles.tuningMode.get()) {

@@ -9,7 +9,7 @@ import org.steelhawks.subsystems.led.anim.PacMan;
 
 /**
  * LED Matrix subsystem for controlling 2D LED arrays with animations
- * Supports 16x16 matrix (256 LEDs) in serpentine/zigzag layout
+ * Optimized for 32x8 matrix (256 LEDs) in serpentine/zigzag layout
  */
 public class LEDMatrix extends SubsystemBase {
 
@@ -19,7 +19,8 @@ public class LEDMatrix extends SubsystemBase {
     private final int height;
     private final MatrixLayout layout;
 
-    private Animation currentAnimation;
+    private Animation currentAnimation = null;
+    private Animation overlayAnimation = null;
     private int animationFrame = 0;
 
     private String trackedText = null;
@@ -211,13 +212,30 @@ public class LEDMatrix extends SubsystemBase {
         animation.reset();
     }
 
+
+
+    public void playOverlay(Animation animation) {
+        this.overlayAnimation = animation;
+        animation.reset();
+    }
+
+    public void clearOverlay() {
+        this.overlayAnimation = null;
+    }
+
+    public Animation getOverlayAnimation() { return overlayAnimation; }
+
     @Override
     public void periodic() {
         if (currentAnimation != null) {
             currentAnimation.render(this);
             currentAnimation.tick();
-            show();
         }
+        if (overlayAnimation != null) {
+            overlayAnimation.render(this);
+            overlayAnimation.tick();
+        }
+        show();
     }
 
     private static boolean[][] getCharPattern(char c) {
@@ -582,51 +600,66 @@ public class LEDMatrix extends SubsystemBase {
         private final Color color;
         private final int speed;
         private int offset = 0;
+        private final int startX;
+        private final int regionWidth; // -1 = full matrix width
         private static final int CHAR_WIDTH = 4;
         private static final int CHAR_SPACING = 1;
 
+        /** Full-width scrolling text */
         public ScrollingText(String text, Color color, int speed) {
             this.text = text.toUpperCase();
             this.color = color;
             this.speed = speed;
+            this.startX = 0;
+            this.regionWidth = -1;
+        }
+
+        /** Constrained to a region of the matrix */
+        public ScrollingText(String text, Color color, int speed, int startX, int regionWidth) {
+            this.text = text.toUpperCase();
+            this.color = color;
+            this.speed = speed;
+            this.startX = startX;
+            this.regionWidth = regionWidth;
         }
 
         @Override
         public void render(LEDMatrix matrix) {
-            matrix.clear();
+            int effWidth = regionWidth > 0 ? regionWidth : matrix.width;
+            int effStart = startX;
+
+            // clear our region
+            for (int x = effStart; x < effStart + effWidth; x++) {
+                for (int y = 0; y < matrix.height; y++) {
+                    matrix.setPixel(x, y, Color.BLACK);
+                }
+            }
 
             if (frameCount % speed == 0) {
                 offset++;
-                // Reset when text has scrolled completely off screen
-                if (offset > text.length() * (CHAR_WIDTH + CHAR_SPACING) + matrix.width) {
+                if (offset > text.length() * (CHAR_WIDTH + CHAR_SPACING) + effWidth) {
                     offset = 0;
                 }
             }
 
-            // Draw each character
+            int charY = (matrix.height - 5) / 2;
             for (int i = 0; i < text.length(); i++) {
-                int charX = matrix.width - offset + i * (CHAR_WIDTH + CHAR_SPACING);
-                int charY = (matrix.height - 5) / 2; // Center vertically (5 is char height)
-
-                // Only draw if character is visible on screen
-                if (charX > -CHAR_WIDTH && charX < matrix.width) {
+                int charX = effStart + effWidth - offset + i * (CHAR_WIDTH + CHAR_SPACING);
+                if (charX > effStart - CHAR_WIDTH && charX < effStart + effWidth) {
                     drawChar(matrix, text.charAt(i), charX, charY, color);
                 }
             }
         }
 
-        public String getText() {
-            return text;
-        }
+        public String getText() { return text; }
 
         public void setText(String newText) {
             this.text = newText.toUpperCase();
-            this.offset = 0; // reset scroll when text changes
+            this.offset = 0;
         }
 
         private void drawChar(LEDMatrix matrix, char c, int x, int y, Color color) {
             boolean[][] pattern = getCharPattern(c);
-
             for (int dy = 0; dy < 5; dy++) {
                 for (int dx = 0; dx < CHAR_WIDTH; dx++) {
                     if (pattern[dy][dx]) {
@@ -682,6 +715,100 @@ public class LEDMatrix extends SubsystemBase {
                     }
                 }
             }
+        }
+    }
+
+    public static class DirectionalArrow extends Animation {
+        public enum Direction { LEFT, RIGHT, UP, DOWN, NONE }
+
+        private final Direction direction;
+        private double oscillateInterval;
+        private double lastToggle = 0;
+        private boolean isOn = true;
+        private final Color color;
+        private final int startX;
+        private final int regionWidth;
+
+        public DirectionalArrow(Direction direction, double oscillateInterval, Color color, int startX, int regionWidth) {
+            this.direction = direction;
+            this.oscillateInterval = oscillateInterval;
+            this.color = color;
+            this.startX = startX;
+            this.regionWidth = regionWidth;
+        }
+
+        public void setOscillateInterval(double interval) {
+            this.oscillateInterval = interval;
+        }
+
+        public Direction getDirection() { return direction; }
+
+        @Override
+        public void render(LEDMatrix matrix) {
+            double now = edu.wpi.first.wpilibj.Timer.getFPGATimestamp();
+            if (now - lastToggle > oscillateInterval) {
+                lastToggle = now;
+                isOn = !isOn;
+            }
+            for (int x = startX; x < startX + regionWidth; x++) {
+                for (int y = 0; y < matrix.getHeight(); y++) {
+                    matrix.setPixel(x, y, Color.BLACK);
+                }
+            }
+
+            if (!isOn || direction == Direction.NONE) return;
+
+            int cx = startX + regionWidth / 2;
+            int cy = matrix.getHeight() / 2;
+
+            switch (direction) {
+                case RIGHT -> {
+                    matrix.setPixel(cx - 1, cy - 3, color);
+                    matrix.setPixel(cx, cy - 2, color);
+                    matrix.setPixel(cx + 1, cy - 1, color);
+                    matrix.setPixel(cx + 2, cy, color);
+                    matrix.setPixel(cx + 1, cy + 1, color);
+                    matrix.setPixel(cx, cy + 2, color);
+                    matrix.setPixel(cx - 1, cy + 3, color);
+                }
+                case LEFT -> {
+                    //
+                    matrix.setPixel(cx + 1, cy - 3, color);
+                    matrix.setPixel(cx, cy - 2, color);
+                    matrix.setPixel(cx - 1, cy - 1, color);
+                    matrix.setPixel(cx - 2, cy, color);
+                    matrix.setPixel(cx - 1, cy + 1, color);
+                    matrix.setPixel(cx, cy + 2, color);
+                    matrix.setPixel(cx + 1, cy + 3, color);
+                }
+                case UP -> {
+                    // ^
+                    matrix.setPixel(cx, cy - 2, color);
+                    matrix.setPixel(cx - 1, cy - 1, color);
+                    matrix.setPixel(cx + 1, cy - 1, color);
+                    matrix.setPixel(cx - 2, cy, color);
+                    matrix.setPixel(cx + 2, cy, color);
+                    matrix.setPixel(cx - 3, cy + 1, color);
+                    matrix.setPixel(cx + 3, cy + 1, color);
+                }
+                case DOWN -> {
+                    // v
+                    matrix.setPixel(cx, cy + 2, color);
+                    matrix.setPixel(cx - 1, cy + 1, color);
+                    matrix.setPixel(cx + 1, cy + 1, color);
+                    matrix.setPixel(cx - 2, cy, color);
+                    matrix.setPixel(cx + 2, cy, color);
+                    matrix.setPixel(cx - 3, cy - 1, color);
+                    matrix.setPixel(cx + 3, cy - 1, color);
+                }
+            }
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
+            lastToggle = 0;
+            isOn = true;
         }
     }
 
@@ -920,6 +1047,7 @@ public class LEDMatrix extends SubsystemBase {
     public Command clearCommand() {
         return Commands.runOnce(() -> {
             currentAnimation = null;
+            overlayAnimation = null;
             clear();
             show();
         }, this).finallyDo(() -> {
