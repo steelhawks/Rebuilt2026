@@ -108,7 +108,7 @@ public class RobotContainer {
         }
 
         if (config.hasFlywheel) {
-            driver.leftBumper().whileTrue(s_Flywheel.shooting());
+            driver.leftBumper().whileTrue(s_Flywheel.setTargetVelocityCmd(100));
         }
     }
 }

@@ -163,7 +163,7 @@ public class Flywheel extends SubsystemBase {
             }
             double feedforward = ((sampledAmps != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
                 ? sampledAmps
-                : kS.get() + kV.get() * targetVelocityRadPerSec;
+                : kS.get() + kA.get() * constants.motionMagicAccel();
             switch (state) {
                 case RAMP_UP -> {
                     io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
@@ -174,7 +174,7 @@ public class Flywheel extends SubsystemBase {
                     }
                 }
                 case SAMPLING -> {
-                    io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
+                    io.runProfiledFlywheel(targetVelocityRadPerSec, kS.get(), true);
                     if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
                         ampSamples[currentSampleIndex] = inputs.torqueCurrentAmps;
                         currentSampleIndex++;
@@ -233,7 +233,7 @@ public class Flywheel extends SubsystemBase {
     ///////////////////////
 
     public void setTargetVelocity(double velocityRadPerSec) {
-        if (Toggles.shooterTuningMode.get()) return;
+//        if (Toggles.shooterTuningMode.get()) return;
         sampledAmps = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
