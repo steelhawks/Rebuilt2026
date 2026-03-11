@@ -23,9 +23,6 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.DriverWarnings;
-import org.steelhawks.util.geometry.RobotFootprint;
-
-import java.awt.*;
 
 public class RobotContainer {
 
@@ -55,7 +52,6 @@ public class RobotContainer {
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
 
         s_Matrix = config.createLEDMatrix().orElse(null);
-
         s_Swerve = config.createSwerve();
         s_Vision = config.createVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
@@ -82,6 +78,8 @@ public class RobotContainer {
                 () -> -driver.getRightX()));
         configureDriver();
         Toggles.configureOverrides();
+        LEDCommands.configureTriggers(driver.leftTrigger());
+        Autos.testingBoard();
 //        ShooterTuner.getInstance();
     }
 
@@ -90,9 +88,9 @@ public class RobotContainer {
             .onTrue(new VibrateController(driver));
 
         if (config.hasIntake) {
-            driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-            driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-            driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
+//            driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+//            driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+//            driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
 
             driver.rightTrigger()
                 .whileTrue(
@@ -113,6 +111,15 @@ public class RobotContainer {
             .whileTrue(
                 TeleopSwerve.overrideState()
                     .alongWith(new VibrateController(driver).repeatedly()));
+
+        if (config.hasTurret) {
+            driver.rightTrigger().onTrue(
+                Commands.run(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.MANUAL)));
+            driver.x().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
+            driver.y().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2)));
+            driver.a().onTrue(s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2)));
+            driver.b().onTrue(s_Turret.setDesiredRotation(new Rotation2d(0)));
+        }
     }
 
     private void configureWarningTriggers() {

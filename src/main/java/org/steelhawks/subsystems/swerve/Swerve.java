@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.swerve;
 import static edu.wpi.first.units.Units.*;
 
 import choreo.trajectory.SwerveSample;
+import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -62,8 +63,7 @@ public class Swerve extends SubsystemBase {
     private boolean isPathfinding = false;
     private boolean requestSlowMode = false;
 
-    public static final double ODOMETRY_FREQUENCY =
-        Constants.getCANBus().isNetworkFD() ? 250.0 : 100.0;
+    public static final double ODOMETRY_FREQUENCY;
     public static final double DRIVE_BASE_RADIUS;
 
     // PathPlanner config constants
@@ -134,6 +134,7 @@ public class Swerve extends SubsystemBase {
     private final RobotState robotState = RobotState.getInstance();
 
     static {
+        ODOMETRY_FREQUENCY = Constants.getRobot().equals(RobotType.OMEGABOT) ? 250.0 : 100.0;
         switch (Constants.getRobot()) {
             case ALPHABOT -> {
                 DRIVE_BASE_RADIUS =
@@ -300,6 +301,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Swerve(
+        CANBus bus,
         GyroIO gyroIO,
         ModuleIO flModuleIO,
         ModuleIO frModuleIO,
@@ -347,8 +349,7 @@ public class Swerve extends SubsystemBase {
                 case CHASSIS -> TunerConstantsChassis.BackRight;
                 case LAST_YEAR -> TunerConstantsLastYear.BackRight;
             });
-
-        PhoenixOdometryThread.getInstance().start();
+        PhoenixOdometryThread.getInstance().start(bus);
 
         // Configure AutoBuilder to use RobotState
         AutoBuilder.configure(

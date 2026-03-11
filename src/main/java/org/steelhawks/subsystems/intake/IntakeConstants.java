@@ -13,7 +13,7 @@ public class IntakeConstants {
     public static final double METERS_PER_RADIAN = PINION_RADIUS / REDUCTION;
     public static final double MASS_KG = 0.0;
 
-    public static final double INTAKE_SPEED = 0.6;
+    public static final double INTAKE_SPEED = 1.0;
     public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(-19.0);
 
     public enum State {
@@ -50,7 +50,7 @@ public class IntakeConstants {
 //    0.144461m
     public static final double MIN_EXTENSION = 0.0;
 
-    public static final int LEFT_ID = 60;
-    public static final int RIGHT_ID = 61;
-    public static final int INTAKE_ID = 62;
+    public static final int LEFT_ID = 1;
+    public static final int RIGHT_ID = 2;
+    public static final int INTAKE_ID = 3;
 }

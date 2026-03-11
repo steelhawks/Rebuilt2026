@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
@@ -12,7 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
@@ -54,10 +55,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final TalonFX rightMotor;
     private final TalonFX intakeMotor;
 
-    public IntakeIOTalonFX(RobotConfig.CANBus bus) {
-        leftMotor = new TalonFX(IntakeConstants.LEFT_ID, bus.bus);
-        rightMotor = new TalonFX(IntakeConstants.RIGHT_ID, bus.bus);
-        intakeMotor = new TalonFX(IntakeConstants.INTAKE_ID, bus.bus);
+    public IntakeIOTalonFX(CANBus bus, SubsystemConstants.IntakeConstants constants) {
+        leftMotor = new TalonFX(constants.leftId(), bus);
+        rightMotor = new TalonFX(constants.rightId(), bus);
+        intakeMotor = new TalonFX(constants.intakeId(), bus);
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         leftConfig = new TalonFXConfiguration();
@@ -65,9 +66,9 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         leftConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         leftConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        leftConfig.Slot0.kP = IntakeConstants.kP.getAsDouble();
-        leftConfig.Slot0.kI = IntakeConstants.kI.getAsDouble();
-        leftConfig.Slot0.kD = IntakeConstants.kD.getAsDouble();
+        leftConfig.Slot0.kP = constants.kP();
+        leftConfig.Slot0.kI = constants.kI();
+        leftConfig.Slot0.kD = constants.kD();
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
@@ -109,7 +110,7 @@ public class IntakeIOTalonFX implements IntakeIO {
             rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp

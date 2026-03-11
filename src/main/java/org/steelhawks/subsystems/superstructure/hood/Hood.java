@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -24,12 +24,28 @@ public class Hood extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
-    private Rotation2d setpoint = ShooterConstants.Hood.MAX_ANGLE;
+    private Rotation2d setpoint;
     private boolean brakeModeEnabled = false;
     private boolean atGoal = false;
+    private final SubsystemConstants.HoodConstants constants;
 
-    public Hood(HoodIO io) {
+    private static LoggedTunableNumber kP;
+    private static LoggedTunableNumber kI;
+    private static LoggedTunableNumber kD;
+    private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber kA;
+    private static LoggedTunableNumber kG;
+
+    public Hood(HoodIO io, SubsystemConstants.HoodConstants constants) {
         this.io = io;
+        this.constants = constants;
+        setpoint = constants.maxAngle();
+        kP = new LoggedTunableNumber("Hood/kP", constants.kP());
+        kI = new LoggedTunableNumber("Hood/kI", constants.kI());
+        kD = new LoggedTunableNumber("Hood/kD", constants.kD());
+        kS = new LoggedTunableNumber("Hood/kS", constants.kS());
+        kA = new LoggedTunableNumber("Hood/kA", constants.kA());
+        kG = new LoggedTunableNumber("Hood/kG", constants.kG());
     }
 
     @Override
@@ -42,8 +58,8 @@ public class Hood extends SubsystemBase {
             && Toggles.Hood.isEnabled.get()
             && !Toggles.Hood.voltageOverride.get()
             && !Toggles.Hood.currentOverride.get()
-            && (getPositionDeg() >= ShooterConstants.Hood.MIN_ANGLE.getDegrees())
-            && (getPositionDeg() <= ShooterConstants.Hood.MAX_ANGLE.getDegrees());
+            && (getPositionDeg() >= constants.minAngle().getDegrees())
+            && (getPositionDeg() <= constants.maxAngle().getDegrees());
         Logger.recordOutput("Hood/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
@@ -69,10 +85,10 @@ public class Hood extends SubsystemBase {
             LoggedTunableNumber.ifChanged(
                 this.hashCode(),
                 () -> io.setPID(
-                    ShooterConstants.Hood.kP.get(),
-                    ShooterConstants.Hood.kI.get(),
-                    ShooterConstants.Hood.kD.get()
-                ), ShooterConstants.Hood.kP, ShooterConstants.Hood.kI, ShooterConstants.Hood.kD
+                    kP.get(),
+                    kI.get(),
+                    kD.get()
+                ), kP, kI, kD
             );
         }
         if (shouldRun) {
@@ -80,10 +96,10 @@ public class Hood extends SubsystemBase {
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                 setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
             }
-            atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), ShooterConstants.Hood.TOLERANCE);
+            atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
                 setpoint,
-                ShooterConstants.Hood.kG.get());
+                kG.get());
         }
     }
 
@@ -95,16 +111,16 @@ public class Hood extends SubsystemBase {
         if (Toggles.shooterTuningMode.get()) return;
         inputs.goal = MathUtil.clamp(
             position.getDegrees(),
-            ShooterConstants.Hood.MIN_ANGLE.getDegrees(),
-            ShooterConstants.Hood.MAX_ANGLE.getDegrees());
+            constants.minAngle().getDegrees(),
+            constants.maxAngle().getDegrees());
         setpoint = Rotation2d.fromDegrees(inputs.goal);
     }
 
     public void setDesiredPositionForced(Rotation2d position) {
         inputs.goal = MathUtil.clamp(
             position.getDegrees(),
-            ShooterConstants.Hood.MIN_ANGLE.getDegrees(),
-            ShooterConstants.Hood.MAX_ANGLE.getDegrees());
+            constants.minAngle().getDegrees(),
+            constants.maxAngle().getDegrees());
         setpoint = Rotation2d.fromDegrees(inputs.goal);
     }
 

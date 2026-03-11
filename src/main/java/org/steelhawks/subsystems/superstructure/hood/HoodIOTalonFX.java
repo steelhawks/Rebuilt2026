@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,7 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.RobotConfig;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
+import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
@@ -43,9 +44,9 @@ public class HoodIOTalonFX implements HoodIO {
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final VoltageOut voltageOut;
 
-    public HoodIOTalonFX(RobotConfig.CANBus bus) {
-        hoodMotor = new TalonFX(ShooterConstants.Hood.MOTOR_ID, bus.bus);
-        cancoder = new CANcoder(ShooterConstants.Hood.CANCODER_ID);
+    public HoodIOTalonFX(CANBus bus, SubsystemConstants.HoodConstants constants) {
+        hoodMotor = new TalonFX(constants.motorId(), bus);
+        cancoder = new CANcoder(constants.cancoderId(), bus);
 
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
@@ -56,14 +57,14 @@ public class HoodIOTalonFX implements HoodIO {
 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        motorConfig.Slot0.kP = ShooterConstants.Hood.kP.get();
-        motorConfig.Slot0.kI = ShooterConstants.Hood.kI.get();
-        motorConfig.Slot0.kD = ShooterConstants.Hood.kD.get();
-        motorConfig.Feedback.SensorToMechanismRatio = ShooterConstants.Hood.REDUCTION;
+        motorConfig.Slot0.kP = constants.kP();
+        motorConfig.Slot0.kI = constants.kI();
+        motorConfig.Slot0.kD = constants.kD();
+        motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
 
         cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        cancoderConfig.MagnetSensor.MagnetOffset = ShooterConstants.Hood.MAG_OFFSET.getRotations();
+        cancoderConfig.MagnetSensor.MagnetOffset = constants.magOffset().getRotations();
         tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         position = hoodMotor.getPosition();
@@ -86,7 +87,7 @@ public class HoodIOTalonFX implements HoodIO {
             cancoderVoltage);
 
         PhoenixUtil.registerSignals(
-            bus.bus.isNetworkFD(),
+            bus,
             position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp);
         tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(hoodMotor, cancoder));
     }

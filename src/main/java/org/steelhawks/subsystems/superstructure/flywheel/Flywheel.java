@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,9 +16,9 @@ import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.superstructure.ShooterConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.DriverWarnings;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -26,14 +27,12 @@ import org.steelhawks.util.Maths;
 import java.util.Set;
 
 import static edu.wpi.first.units.Units.*;
-import static org.steelhawks.subsystems.superstructure.ShooterConstants.Flywheel.*;
-
 public class Flywheel extends SubsystemBase {
 
     private final double[] voltageSamples = new double[sampleCounts];
     private double sampledVoltage = 0.0;
     private int currentSampleIndex = 0;
-    private long timeStartedSampling = 0;
+    private double timeStartedSampling = 0;
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
         new Debouncer(0.3, DebounceType.kBoth);
@@ -54,8 +53,32 @@ public class Flywheel extends SubsystemBase {
     private boolean nearTargetVelocity = false;
     private double targetVelocityRadPerSec = 0.0;
 
-    public Flywheel(FlywheelIO io) {
+    private static LoggedTunableNumber kP;
+    private static LoggedTunableNumber kI;
+    private static LoggedTunableNumber kD;
+    private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber kV;
+
+    private static LoggedTunableNumber velocityTolerance;
+    private static LoggedTunableNumber samplingTimeoutDuration;
+    private static LoggedTunableNumber timeoutAvgMinSamples;
+    public static final int sampleCounts = 50;
+    SubsystemConstants.FlywheelConstants constants;
+
+    public Flywheel(FlywheelIO io, SubsystemConstants.FlywheelConstants constants) {
         this.io = io;
+        this.constants = constants;
+        kP = new LoggedTunableNumber("Flywheel/kP", constants.kP());
+        kI = new LoggedTunableNumber("Flywheel/kI", constants.kI());
+        kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
+        kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
+        kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
+        velocityTolerance
+            = new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
+        samplingTimeoutDuration =
+            new LoggedTunableNumber("Flywheel/SamplingTimeoutDurationSeconds", constants.samplingTimeoutDuration());
+        timeoutAvgMinSamples =
+            new LoggedTunableNumber("Flywheel/TimeoutMinSamplesForAvgCalculation", constants.samplingTimeoutDuration());
         routine =
             new SysIdRoutine(
                 new SysIdRoutine.Config(
@@ -103,16 +126,18 @@ public class Flywheel extends SubsystemBase {
                 Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
                 switch (RobotState.getInstance().getAimState()) {
                     case NOTHING -> {
-                        double mps = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D).exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                        double mps = ShooterStructure.Static.calculateShot(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (rps != targetVelocityRadPerSec) {
-                            setTargetVelocity(rps * IDLE_MULTIPLIER);
+                            setTargetVelocity(rps * constants.idleMultiplier());
                         }
                     }
                     case SHOOTING_MOVING -> {
-                        ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
+                        ShooterStructure.ProjectileData solution = ShooterStructure.Moving.calculateMovingShot(
+                            FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT));
+                        double mps = solution.exitVelocity();
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (ShooterStructure.isNoSolution(solution)) {
                             // short lived alerts if moving
                             if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
@@ -123,15 +148,13 @@ public class Flywheel extends SubsystemBase {
                                 RobotContainer.warnings.noSolutionAlert.triggerLapsing(1);
                             }
                         }
-                        double mps = solution.exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(rps);
                         }
                     }
                     case SHOOTING_STATIONARY -> {
-                        ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShotFixedPitch(
-                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D);
+                        ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShot(
+                            FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT));
                         if (ShooterStructure.isNoSolution(solution)) {
                             if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
                                 RobotContainer.warnings.tooCloseAlert.triggerLapsing(3);
@@ -142,9 +165,9 @@ public class Flywheel extends SubsystemBase {
                             }
                         }
                         double mps = solution.exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(mps, FLYWHEEL_RADIUS);
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (rps != targetVelocityRadPerSec) {
-                            setTargetVelocity(stationaryHoodVelocityFactor * rps);
+                            setTargetVelocity(constants.stationaryHoodVelocityFactor() * rps);
                         }
                     }
                 }
@@ -158,7 +181,7 @@ public class Flywheel extends SubsystemBase {
                     if (nearTargetVelocity) {
                         state = FlywheelState.SAMPLING;
                         currentSampleIndex = 0;
-                        timeStartedSampling = RobotController.getFPGATime();
+                        timeStartedSampling = Timer.getFPGATimestamp();
                     }
                 }
                 case SAMPLING -> {
@@ -171,7 +194,7 @@ public class Flywheel extends SubsystemBase {
                         sampledVoltage = calculateAverageSample();
                         state = FlywheelState.RUNNING;
                         Logger.recordOutput("Flywheel/SampledVoltage", sampledVoltage);
-                    } else if (RobotController.getFPGATime() - timeStartedSampling > (Maths.secondsToMicroseconds(samplingTimeoutDuration.get()))) {
+                    } else if (Timer.getFPGATimestamp() - timeStartedSampling > samplingTimeoutDuration.get()) {
                         if (currentSampleIndex >= timeoutAvgMinSamples.get()) { // not good not terrible, calculate an average
                             sampledVoltage = calculateAverageSample();
                         } else {

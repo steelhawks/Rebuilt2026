@@ -89,13 +89,6 @@ public final class Constants {
         return ROBOT_TYPE;
     }
 
-    public static CANBus getCANBus() {
-        return switch (getRobot()) {
-            case OMEGABOT, LAST_YEAR, SIMBOT -> new CANBus("canivore");
-            case ALPHABOT, CHASSIS, TEST_BOARD -> new CANBus("");
-        };
-    }
-
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(34.0);
