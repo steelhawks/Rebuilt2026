@@ -8,6 +8,9 @@ import org.steelhawks.*;
 import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 
+import static org.steelhawks.Robot.RobotState.AUTON;
+import static org.steelhawks.Robot.RobotState.TELEOP;
+
 public class LEDCommands {
 
     private static final LEDMatrix s_Matrix = RobotContainer.s_Matrix;
@@ -70,13 +73,29 @@ public class LEDCommands {
         .ignoringDisable(true);
     }
 
+    public static Command runSteelHawks() {
+        return Commands.sequence(
+            Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText(
+                "", Color.WHITE)), s_Matrix),
+            Commands.run(() -> s_Matrix.updateText("STEEL")).withTimeout(2.0),
+            s_Matrix.clearCommand(),
+            Commands.waitSeconds(1.0),
+            Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText(
+                "", Color.WHITE)), s_Matrix),
+            Commands.run(() -> s_Matrix.updateText("HAWKS")).withTimeout(2.0),
+            Commands.waitSeconds(1.0))
+        .repeatedly()
+        .ignoringDisable(true);
+    }
+
     private static class LEDTriggers {
 
-        private Trigger runTechnicianScreen;
-        private Trigger runRainbowLEDs;
-        private Trigger warn10Seconds;
+        private final Trigger runTechnicianScreen;
+        private final Trigger runRainbowLEDs;
+        private final Trigger warn10Seconds;
 
-        private Trigger isTeleop;
+        private final Trigger isAuton;
+        private final Trigger isTeleop;
 
         private LEDTriggers(Trigger toggleMatchData) {
 
@@ -96,7 +115,11 @@ public class LEDCommands {
                 .whileTrue(requestMatchDataScreen())
                 .onFalse(s_Matrix.clearCommand());
 
-            isTeleop = new Trigger(() -> Robot.getState().equals(Robot.RobotState.TELEOP))
+            isAuton = new Trigger(() -> Robot.getState().equals(AUTON))
+                .whileTrue(
+                    runSteelHawks());
+
+            isTeleop = new Trigger(() -> Robot.getState().equals(TELEOP))
                     .and(runTechnicianScreen.negate())
                     .and(runRainbowLEDs.negate())
                     .and(warn10Seconds.negate())
