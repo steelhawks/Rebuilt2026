@@ -124,7 +124,7 @@ public class RobotConfig {
     }
 
     public Optional<Flywheel> createFlywheel() {
-        if (!hasTurret) {
+        if (!hasFlywheel) {
             return Optional.empty();
         }
         return Optional.ofNullable(factory.createFlywheel(flywheelConstants));
@@ -138,7 +138,7 @@ public class RobotConfig {
     }
 
     public Optional<Hood> createHood() {
-        if (!hasTurret) {
+        if (!hasHood) {
             return Optional.empty();
         }
         return Optional.ofNullable(factory.createHood(hoodConstants));
@@ -191,7 +191,7 @@ public class RobotConfig {
                 .withVision(false)
                 .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+                .withTurret(false, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
                 .withIntake(false, SubsystemConstants.AlphaBot.INTAKE)
@@ -516,6 +516,7 @@ public class RobotConfig {
                 new ModuleIOSim(Swerve.getDriveSimulation().getModules()[1]),
                 new ModuleIOSim(Swerve.getDriveSimulation().getModules()[2]),
                 new ModuleIOSim(Swerve.getDriveSimulation().getModules()[3]));
+
 //            return new Swerve(
 //                CANBusList.kRioBus,
 //                new GyroIOPigeon2(TunerConstantsAlpha.DrivetrainConstants.Pigeon2Id, CANBusList.kRioBus),
@@ -552,7 +553,8 @@ public class RobotConfig {
 
         @Override
         public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
+            // return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
+            return null;
         }
 
         @Override

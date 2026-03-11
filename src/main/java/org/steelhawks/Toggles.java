@@ -35,7 +35,7 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/RateLimitSwerveEnabled", false);
 
     LoggedNetworkBoolean shooterTuningMode =
-        new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
+        new LoggedNetworkBoolean("Toggles/ShooterTuningMode", true);
 
     LoggedNetworkBoolean useLUT =
         new LoggedNetworkBoolean("Toggles/LUT", true);

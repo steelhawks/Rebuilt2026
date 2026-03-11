@@ -27,13 +27,13 @@ import java.util.Set;
 import static edu.wpi.first.units.Units.*;
 public class Flywheel extends SubsystemBase {
 
-    private final double[] ampSamples = new double[sampleCounts];
-    private double sampledAmps = 0.0;
+    private final double[] voltSamples = new double[sampleCounts];
+    private double sampledVolts = 0.0;
     private int currentSampleIndex = 0;
     private double timeStartedSampling = 0;
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
-        new Debouncer(0.3, DebounceType.kBoth);
+        new Debouncer(0.3, DebounceType.kRising);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -161,12 +161,12 @@ public class Flywheel extends SubsystemBase {
                     }
                 }
             }
-            double feedforward = ((sampledAmps != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
-                ? sampledAmps
-                : kS.get() + kA.get() * constants.motionMagicAccel();
+            double feedforward = ((sampledVolts != 0.0) && Toggles.Flywheel.toggleAdaptiveFeedforward.get())
+                ? sampledVolts
+                : kS.get();
             switch (state) {
                 case RAMP_UP -> {
-                    io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
+                    io.runFlywheel(targetVelocityRadPerSec, 0.0, true);
                     if (nearTargetVelocity) {
                         state = FlywheelState.SAMPLING;
                         currentSampleIndex = 0;
@@ -174,51 +174,47 @@ public class Flywheel extends SubsystemBase {
                     }
                 }
                 case SAMPLING -> {
-                    io.runProfiledFlywheel(targetVelocityRadPerSec, kS.get(), true);
+                    io.runFlywheel(targetVelocityRadPerSec, 0.0, true);
                     if (nearTargetVelocity && currentSampleIndex < sampleCounts) {
-                        ampSamples[currentSampleIndex] = inputs.torqueCurrentAmps;
+                        voltSamples[currentSampleIndex] = inputs.appliedVolts;
                         currentSampleIndex++;
                     }
                     if (currentSampleIndex >= sampleCounts) {
-                        sampledAmps = calculateAverageSample();
+                        sampledVolts = calculateAverageSample();
                         state = FlywheelState.RUNNING;
-                        Logger.recordOutput("Flywheel/SampledCurrent", sampledAmps);
+                        Logger.recordOutput("Flywheel/SampledVolts", sampledVolts);
                     } else if (Timer.getFPGATimestamp() - timeStartedSampling > samplingTimeoutDuration.get()) {
                         if (currentSampleIndex >= timeoutAvgMinSamples.get()) { // not good not terrible, calculate an average
-                            sampledAmps = calculateAverageSample();
+                            sampledVolts = calculateAverageSample();
                         } else {
-                            sampledAmps = 0.0; // calculate the FF voltage using the equation above instead of using the sampled value
+                            sampledVolts = 0.0; // calculate the FF voltage using the equation above instead of using the sampled value
                         }
 
                         state = FlywheelState.RUNNING;
-                        Logger.recordOutput("Flywheel/SampledCurrent", sampledAmps);
+                        Logger.recordOutput("Flywheel/SampledVolts", sampledVolts);
+                        Logger.recordOutput("Flywheel/TimedOut", true);
                     }
                 }
                 case RUNNING -> {
-                    if (nearTargetVelocity) {
-                        io.runFlywheelOpenLoop(feedforward, true);
-                    } else {
-                        // recover velocity if needed
-                        io.runProfiledFlywheel(targetVelocityRadPerSec, feedforward, true);
-                    }
+                    io.runFlywheelOpenLoop(feedforward, false);
                 }
             }
         } else {
             state = FlywheelState.RAMP_UP;
-            sampledAmps = 0.0;
+            sampledVolts = 0.0;
             currentSampleIndex = 0;
             Logger.recordOutput("Flywheel/Feedforward", 0.0);
         }
         Logger.recordOutput("Flywheel/State", state.toString());
         Logger.recordOutput("Flywheel/TargetVelocity", targetVelocityRadPerSec);
-        Logger.recordOutput("Flywheel/AdaptiveFeedforward", sampledAmps != 0.0);
+        Logger.recordOutput("Flywheel/AdaptiveFeedforward", sampledVolts != 0.0);
     }
 
     private double calculateAverageSample() {
         if (currentSampleIndex == 0) return 0.0;
         double sum = 0.0;
         for (int i = 0; i < currentSampleIndex; i++) {
-            sum += ampSamples[i];
+            sum += voltSamples[i];
         }
         return sum / currentSampleIndex;
     }
@@ -233,15 +229,14 @@ public class Flywheel extends SubsystemBase {
     ///////////////////////
 
     public void setTargetVelocity(double velocityRadPerSec) {
-//        if (Toggles.shooterTuningMode.get()) return;
-        sampledAmps = 0.0;
+        if (Toggles.shooterTuningMode.get()) return;
+        sampledVolts = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
     }
 
     public void setTargetVelocityForced(double velocityRadPerSec) {
-        System.out.println("Working");
-        sampledAmps = 0.0;
+        sampledVolts = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
     }
@@ -289,6 +284,11 @@ public class Flywheel extends SubsystemBase {
 
     public Command setTargetVelocityCmd(double velocityRadPerSec) {
         return Commands.runOnce(() -> setTargetVelocity(velocityRadPerSec), this)
+        .finallyDo(io::stop);
+    }
+
+    public Command setTargetVelocityForcedCmd(double velocityRadPerSec) {
+        return Commands.runOnce(() -> setTargetVelocityForced(velocityRadPerSec), this)
         .finallyDo(io::stop);
     }
 

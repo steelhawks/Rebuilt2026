@@ -58,7 +58,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);
-        velocityTorqueCurrentFOC = new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(1);
+        velocityTorqueCurrentFOC = new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
         voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
 
