@@ -3,11 +3,13 @@ package org.steelhawks.commands;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.*;
 import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.anim.AnimationLibrary;
+import org.steelhawks.util.DriverWarnings;
 
 import static org.steelhawks.Robot.RobotState.AUTON;
 import static org.steelhawks.Robot.RobotState.TELEOP;
@@ -15,6 +17,7 @@ import static org.steelhawks.Robot.RobotState.TELEOP;
 public class LEDCommands {
 
     private static final LEDMatrix s_Matrix = RobotContainer.s_Matrix;
+    private static final DriverWarnings warnings = DriverWarnings.getInstance();
     private LEDCommands() {}
 
     public static void configureTriggers(Trigger toggleMatchData) {
@@ -172,9 +175,33 @@ public class LEDCommands {
         .ignoringDisable(true);
     }
 
+    public static Command tooFarCommand() {
+        return Commands.sequence(
+            s_Matrix.flashCommand(Color.RED, 0.1, 1),
+            s_Matrix.staticTextCommand("TOO FAR", Color.RED),
+            new WaitCommand(3),
+            s_Matrix.clearCommand()
+        );
+    }
+
+    public static Command tooCloseCommand() {
+        return Commands.sequence(
+            s_Matrix.flashCommand(Color.YELLOW, 0.1, 1),
+            s_Matrix.staticTextCommand("TOO CLOSE", Color.YELLOW),
+            new WaitCommand(3),
+            s_Matrix.clearCommand()
+        );
+    }
+
     private static class LEDTriggers {
 
         private LEDTriggers(Trigger toggleMatchData) {
+            Trigger tooCloseTrigger = warnings.tooCloseAlert.asTrigger()
+                .onTrue(tooCloseCommand());
+
+            Trigger tooFarTrigger = warnings.tooFarAlert.asTrigger()
+                .onTrue(tooFarCommand());
+
             Trigger runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled()).debounce(1)
                 .whileTrue(runTechnicianWizard())
                 .onFalse(s_Matrix.clearCommand());
@@ -201,6 +228,8 @@ public class LEDCommands {
                     .and(runRainbowLEDs.negate())
                     .and(warn10Seconds.negate())
                     .and(toggleMatchData.negate())
+                    .and(tooCloseTrigger.negate())
+                    .and(tooFarTrigger.negate())
                 .whileTrue(s_Matrix.fireCommand(15, 20));
         }
     }

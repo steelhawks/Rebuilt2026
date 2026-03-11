@@ -96,7 +96,7 @@ public class SubsystemConstants {
     public static final class AlphaBot {
         public static final LUTConstants LUT =
             new LUTConstants(
-                0.0, Double.MAX_VALUE,
+                2, 20,
                 0.0, Double.MAX_VALUE,
                 null,
                 new double[][]{

@@ -132,6 +132,13 @@ public class ShooterStructure {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
             double x_dist = distanceToTarget(predictedTarget);
+
+            if (x_dist > maxShootDistance) {
+                return kTooFar;
+            } else if (x_dist < minShootDistance) {
+                return kTooClose;
+            }
+
             if (Toggles.useLUT.getAsBoolean()) {
                 return new ProjectileData(
                     shootingFlywheelVelocityMap.get(x_dist),
@@ -263,7 +270,7 @@ public class ShooterStructure {
 //                 Fixed: properly check kNoSolution instead of null
                 if (isNoSolution(solution)) {
                     Logger.recordOutput("Shooter/Moving/ShotImpossible", true);
-                    return kNoSolution;
+                    return solution;
                 }
 
                 double distance = distanceToTarget(predictedTarget);

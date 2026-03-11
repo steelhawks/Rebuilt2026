@@ -40,10 +40,6 @@ public class RobotContainer {
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
-    private static Trigger tooFarTrigger;
-    private static Trigger tooCloseTrigger;
-    private static Trigger noSolutionTrigger;
-
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
@@ -64,10 +60,6 @@ public class RobotContainer {
 
         if (config.hasAutos) {
             Autos.init();
-        }
-
-        if (config.hasLEDMatrix) {
-            configureWarningTriggers();
         }
 
         s_Swerve.setDefaultCommand(
@@ -120,29 +112,5 @@ public class RobotContainer {
             driver.a().onTrue(s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2)));
             driver.b().onTrue(s_Turret.setDesiredRotation(new Rotation2d(0)));
         }
-    }
-
-    private void configureWarningTriggers() {
-        tooFarTrigger = warnings.tooFarAlert.asTrigger()
-            .onTrue(Commands.sequence(
-                Commands.parallel(
-                    s_Matrix.flashCommand(Color.RED, 0.1, 1),
-                    new VibrateController(1, 1, driver)
-                ),
-                s_Matrix.scrollingTextCommand("TOO FAR", Color.RED, 5),
-                new WaitCommand(4),
-                s_Matrix.clearCommand()
-            ));
-
-        tooCloseTrigger = warnings.tooCloseAlert.asTrigger()
-            .onTrue(Commands.sequence(
-                Commands.parallel(
-                    s_Matrix.flashCommand(Color.YELLOW, 0.1, 1),
-                    new VibrateController(0.5, 1, driver)
-                ),
-                s_Matrix.scrollingTextCommand("TOO CLOSE", Color.YELLOW, 5),
-                new WaitCommand(5),
-                s_Matrix.clearCommand()
-            ));
     }
 }

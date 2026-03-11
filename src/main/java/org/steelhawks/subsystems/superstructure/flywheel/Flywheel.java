@@ -136,18 +136,15 @@ public class Flywheel extends SubsystemBase {
                     case SHOOTING_MOVING -> {
                         ShooterStructure.ProjectileData solution = ShooterStructure.Moving.calculateMovingShot(
                             FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT));
-                        double mps = solution.exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (ShooterStructure.isNoSolution(solution)) {
-                            // short lived alerts if moving
-                            if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
-                                RobotContainer.warnings.tooCloseAlert.triggerLapsing(1);
-                            } else if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_FAR) {
-                                RobotContainer.warnings.tooFarAlert.triggerLapsing(1);
-                            } else {
-                                RobotContainer.warnings.noSolutionAlert.triggerLapsing(1);
+                            switch (solution.reason()) {
+                                case TOO_FAR -> RobotContainer.warnings.tooFarAlert.triggerLapsing(3);
+                                case TOO_CLOSE -> RobotContainer.warnings.tooCloseAlert.triggerLapsing(3);
+                                case NONE -> RobotContainer.warnings.noSolutionAlert.triggerLapsing(3);
                             }
                         }
+                        double mps = solution.exitVelocity();
+                        double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (rps != targetVelocityRadPerSec) {
                             setTargetVelocity(rps);
                         }
@@ -156,12 +153,10 @@ public class Flywheel extends SubsystemBase {
                         ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShot(
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT));
                         if (ShooterStructure.isNoSolution(solution)) {
-                            if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_CLOSE) {
-                                RobotContainer.warnings.tooCloseAlert.triggerLapsing(3);
-                            } else if (solution.reason() == ShooterStructure.NoSolutionReason.TOO_FAR) {
-                                RobotContainer.warnings.tooFarAlert.triggerLapsing(3);
-                            } else {
-                                RobotContainer.warnings.noSolutionAlert.triggerLapsing(3);
+                            switch (solution.reason()) {
+                                case TOO_FAR -> RobotContainer.warnings.tooFarAlert.triggerLapsing(3);
+                                case TOO_CLOSE -> RobotContainer.warnings.tooCloseAlert.triggerLapsing(3);
+                                case NONE -> RobotContainer.warnings.noSolutionAlert.triggerLapsing(3);
                             }
                         }
                         double mps = solution.exitVelocity();
