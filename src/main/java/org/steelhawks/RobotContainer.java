@@ -3,9 +3,13 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -20,6 +24,8 @@ import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.DriverWarnings;
 import org.steelhawks.util.geometry.RobotFootprint;
+
+import java.awt.*;
 
 public class RobotContainer {
 
@@ -36,6 +42,10 @@ public class RobotContainer {
     public static Intake s_Intake = null;
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
+
+    private static Trigger tooFarTrigger;
+    private static Trigger tooCloseTrigger;
+    private static Trigger noSolutionTrigger;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -59,6 +69,11 @@ public class RobotContainer {
         if (config.hasAutos) {
             Autos.init();
         }
+
+        if (config.hasLEDMatrix) {
+            configureWarningTriggers();
+        }
+
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve,
@@ -98,5 +113,29 @@ public class RobotContainer {
             .whileTrue(
                 TeleopSwerve.overrideState()
                     .alongWith(new VibrateController(driver).repeatedly()));
+    }
+
+    private void configureWarningTriggers() {
+        tooFarTrigger = warnings.tooFarAlert.asTrigger()
+            .onTrue(Commands.sequence(
+                Commands.parallel(
+                    s_Matrix.flashCommand(Color.RED, 0.1, 1),
+                    new VibrateController(1, 1, driver)
+                ),
+                s_Matrix.scrollingTextCommand("TOO FAR", Color.RED, 5),
+                new WaitCommand(4),
+                s_Matrix.clearCommand()
+            ));
+
+        tooCloseTrigger = warnings.tooCloseAlert.asTrigger()
+            .onTrue(Commands.sequence(
+                Commands.parallel(
+                    s_Matrix.flashCommand(Color.YELLOW, 0.1, 1),
+                    new VibrateController(0.5, 1, driver)
+                ),
+                s_Matrix.scrollingTextCommand("TOO CLOSE", Color.YELLOW, 5),
+                new WaitCommand(5),
+                s_Matrix.clearCommand()
+            ));
     }
 }

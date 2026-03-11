@@ -686,7 +686,7 @@ public class LEDMatrix extends SubsystemBase {
     }
 
     public Command scrollingTextCommand(String text, Color color, int speed) {
-        return Commands.runOnce(() -> playAnimation(new ScrollingText(text, color, speed)))
+        return Commands.runOnce(() -> playAnimation(new ScrollingText(text, color, speed)), this)
             .ignoringDisable(true);
     }
 
@@ -701,7 +701,7 @@ public class LEDMatrix extends SubsystemBase {
         return new ParallelDeadlineGroup(
             new WaitCommand(time),
             Commands.runOnce(() -> playAnimation(new FlashColor(color, interval)), this)
-        ).ignoringDisable(true);
+        ).finallyDo(this::clear).ignoringDisable(true);
     }
 
     /**

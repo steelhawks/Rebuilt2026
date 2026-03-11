@@ -49,7 +49,7 @@ public class ShooterStructure {
 
     static {
         minShootDistance = 3;
-        maxShootDistance = Double.POSITIVE_INFINITY;
+        maxShootDistance = 10;
 
         minFerryDistance = 0.0;
         maxFerryDistance = Double.MAX_VALUE;

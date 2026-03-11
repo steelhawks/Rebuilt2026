@@ -3,6 +3,7 @@ package org.steelhawks.util;
 import com.google.gson.InstanceCreator;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class DriverWarnings extends VirtualSubsystem {
     private static DriverWarnings instance;
@@ -56,6 +57,14 @@ public class DriverWarnings extends VirtualSubsystem {
                     lastTriggeredAt = -1;
                 }
             }
+        }
+
+        public boolean isActive() {
+            return active;
+        }
+
+        public Trigger asTrigger() {
+            return new Trigger(() -> this.isActive());
         }
     }
 
