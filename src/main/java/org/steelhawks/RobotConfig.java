@@ -422,7 +422,7 @@ public class RobotConfig {
     public static class CANBusList {
         public static final com.ctre.phoenix6.CANBus kDrivetrainBus = new com.ctre.phoenix6.CANBus("NoImJacobivore");
         public static final com.ctre.phoenix6.CANBus kTurretBus = new com.ctre.phoenix6.CANBus("Farhanivore");
-        public static final com.ctre.phoenix6.CANBus kRioBus = new com.ctre.phoenix6.CANBus("");
+        public static final com.ctre.phoenix6.CANBus kRioBus = new com.ctre.phoenix6.CANBus("rio");
     }
 
     // Subsystem factory interface

@@ -93,6 +93,36 @@ public class SubsystemConstants {
             new IndexerConstants(0, 0, 0, 0, OptionalInt.empty());
     }
 
+    public static final class OmegaBot {
+        public static final LUTConstants LUT = LUTConstants.UNSET;
+        public static final IntakeConstants INTAKE =
+            new IntakeConstants(
+                1, 2, 3,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0,
+                35.0, 0.05,
+                1.0, -1.0,
+                0.8
+            );
+        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final TurretConstants TURRET = TurretConstants.UNSET;
+        // hood constants
+        // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
+        private static final double M = Units.lbsToKilograms(0.0);
+        private static final double G = 9.81;
+        private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
+        private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
+        private static final double HOOD_REDUCTION = 4.357 / 1.0;
+        private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
+
+        public static final HoodConstants HOOD = HoodConstants.UNSET;
+
+        public static final IndexerConstants INDEXER =
+            new IndexerConstants(
+                1, 3, 10.0, 10.0, OptionalInt.of(2));
+    }
+
     public static final class AlphaBot {
         public static final LUTConstants LUT =
             new LUTConstants(
@@ -153,36 +183,6 @@ public class SubsystemConstants {
                 40, 40,
                 OptionalInt.empty()
             );
-    }
-
-    public static final class OmegaBot {
-        public static final LUTConstants LUT = LUTConstants.UNSET;
-        public static final IntakeConstants INTAKE =
-            new IntakeConstants(
-                1, 2, 3,
-                0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0,
-                0.0, 0.0,
-                20.0, 0.5,
-                1.0, -1.0,
-                0.8
-            );
-        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
-        public static final TurretConstants TURRET = TurretConstants.UNSET;
-        // hood constants
-        // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
-        private static final double M = Units.lbsToKilograms(0.0);
-        private static final double G = 9.81;
-        private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
-        private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
-        private static final double HOOD_REDUCTION = 4.357 / 1.0;
-        private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
-
-        public static final HoodConstants HOOD = HoodConstants.UNSET;
-
-        public static final IndexerConstants INDEXER =
-            new IndexerConstants(
-                1, 3, 10.0, 10.0, OptionalInt.of(2));
     }
 
     public static final class SimBot {

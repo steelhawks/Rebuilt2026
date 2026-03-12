@@ -2,14 +2,13 @@ package org.steelhawks.subsystems.intake;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import org.steelhawks.Constants;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class IntakeConstants {
 
     public static final double REDUCTION = (7.0 / 1.0);
     public static final double PINION_RADIUS = Units.inchesToMeters(1.033922 / 2.0);
-    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS) / REDUCTION;
+    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS);
     public static final double METERS_PER_RADIAN = PINION_RADIUS / REDUCTION;
     public static final double MASS_KG = 0.0;
 
@@ -19,8 +18,9 @@ public class IntakeConstants {
     public enum State {
         // TODO In meters, need to tune
         RETRACTED(0.15),
-        HOME(0.0),
-        INTAKE(0.15);
+        CENTER_OF_MOTION(0.15),
+        HOME(MAX_EXTENSION_FROM_FRAME - 0.33),
+        INTAKE(0.3);
 
         private final double positionMeters;
 
@@ -32,6 +32,8 @@ public class IntakeConstants {
             return positionMeters;
         }
     }
+
+    public static final double MAX_EXTENSION_FROM_FRAME = Units.inchesToMeters(12.0 + (1.0 / 8.0));
 
     public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 5.0);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
@@ -45,10 +47,8 @@ public class IntakeConstants {
 
     public static final double TOLERANCE = 0.02;
 
-    public static final double MAX_EXTENSION = 0.32;
-
 //    0.144461m
-    public static final double MIN_EXTENSION = 0.0;
+    public static final double MIN_EXTENSION = MAX_EXTENSION_FROM_FRAME - 0.33 - 0.02;
 
     public static final int LEFT_ID = 1;
     public static final int RIGHT_ID = 2;

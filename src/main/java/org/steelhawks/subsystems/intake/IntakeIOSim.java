@@ -70,7 +70,7 @@ public class IntakeIOSim implements IntakeIO {
         );
         visualizer = new IntakeVisualizer(
             () -> leftMotorSim.getAngularPositionRad() * IntakeConstants.METERS_PER_RADIAN,
-            IntakeConstants.MAX_EXTENSION,
+            IntakeConstants.MAX_EXTENSION_FROM_FRAME,
             -Math.PI + IntakeConstants.RACK_ANGLE.getRadians());
     }
 
