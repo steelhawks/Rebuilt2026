@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -98,13 +99,16 @@ public class RobotContainer {
                 TeleopSwerve.overrideState()
                     .alongWith(new VibrateController(driver).repeatedly()));
 
-        if (config.hasTurret) {
-            driver.rightTrigger().onTrue(
-                Commands.run(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.MANUAL)));
-            driver.x().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI)));
-            driver.y().onTrue(s_Turret.setDesiredRotation(new Rotation2d(Math.PI / 2)));
-            driver.a().onTrue(s_Turret.setDesiredRotation(new Rotation2d(-Math.PI / 2)));
-            driver.b().onTrue(s_Turret.setDesiredRotation(new Rotation2d(0)));
+        if (config.hasIntake) {
+//            driver.x().onTrue(
+//                s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME)
+//            );
+            driver.x().onTrue(
+                s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION)
+            );
+            driver.y().onTrue(
+                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
+            );
         }
     }
 }

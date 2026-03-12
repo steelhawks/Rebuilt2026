@@ -42,8 +42,8 @@ public class Intake extends SubsystemBase {
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
-    private static LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC;
-    private static LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ;
+    private static LoggedTunableNumber MAX_VELOCITY_METERS_PER_SEC;
+    private static LoggedTunableNumber MAX_ACCEL_METERS_PER_SEC_SQ;
 
     SubsystemConstants.IntakeConstants constants;
 
@@ -57,13 +57,13 @@ public class Intake extends SubsystemBase {
         kP = new LoggedTunableNumber("Intake/kP", constants.kP());
         kI = new LoggedTunableNumber("Intake/kI", constants.kI());
         kD = new LoggedTunableNumber("Intake/kD", constants.kD());
-        MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadPerSecSq", constants.maxAccelMetersPerSecSq());
-        MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityRadPerSec", constants.maxVelocityMetersPerSec());
+        MAX_ACCEL_METERS_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelMetersPerSecSq", constants.maxAccelMetersPerSecSq());
+        MAX_VELOCITY_METERS_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", constants.maxVelocityMetersPerSec());
         profile =
             new TrapezoidProfile(
                 new TrapezoidProfile.Constraints(
-                    MAX_VELOCITY_RAD_PER_SEC.get(),
-                    MAX_ACCEL_RAD_PER_SEC_SQ.get()));
+                    MAX_VELOCITY_METERS_PER_SEC.get(),
+                    MAX_ACCEL_METERS_PER_SEC_SQ.get()));
     }
 
     public boolean atGoal() {
@@ -87,15 +87,16 @@ public class Intake extends SubsystemBase {
     @AutoLogOutput(key = "Intake/IsStalling")
     private boolean isStalling() {
         return homingDebouncer.calculate(
-            inputs.leftSupplyCurrentAmps > currentHomingThreshold.getAsDouble()
-                && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
+            (Math.abs(inputs.leftTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
+                && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble())
+                || Math.abs(inputs.rightTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
+                    && Math.abs(inputs.rightVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
     }
 
     @AutoLogOutput(key = "Intake/IsTwisting")
     private boolean isTwisting() {
         return twistingDebouncer.calculate(
-            Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble()
-        );
+            Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble()) && isHomed;
     }
 
     @Override
@@ -115,7 +116,7 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
-                io.setPosition(0.0);
+                io.setPosition(IntakeConstants.State.HOME.getPosition());
                 io.stopRack();
                 isZeroed = true;
                 Logger.recordOutput("Intake/Zeroed", true);
@@ -132,7 +133,7 @@ public class Intake extends SubsystemBase {
                 && !Toggles.Intake.toggleCurrentOverride.get()
                 && !Toggles.Intake.toggleVoltageOverride.get()
                 && (getPosition() >= IntakeConstants.MIN_EXTENSION
-                    && getPosition() <= IntakeConstants.MAX_EXTENSION);
+                    && getPosition() <= IntakeConstants.MAX_EXTENSION_FROM_FRAME);
         Logger.recordOutput("Intake/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
@@ -163,14 +164,14 @@ public class Intake extends SubsystemBase {
                     kI.get(),
                     kD.get());
             }, kP, kI, kD);
-            if (MAX_VELOCITY_RAD_PER_SEC.hasChanged(hashCode())
-                || MAX_ACCEL_RAD_PER_SEC_SQ.hasChanged(hashCode())
+            if (MAX_VELOCITY_METERS_PER_SEC.hasChanged(hashCode())
+                || MAX_ACCEL_METERS_PER_SEC_SQ.hasChanged(hashCode())
             ) {
                 profile =
                     new TrapezoidProfile(
                         new TrapezoidProfile.Constraints(
-                            MAX_VELOCITY_RAD_PER_SEC.get(),
-                            MAX_ACCEL_RAD_PER_SEC_SQ.get()));
+                            MAX_VELOCITY_METERS_PER_SEC.get(),
+                            MAX_ACCEL_METERS_PER_SEC_SQ.get()));
             }
         }
         if (shouldRun) {
@@ -181,14 +182,14 @@ public class Intake extends SubsystemBase {
             setpoint =
                 profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
             if (setpoint.position <= IntakeConstants.MIN_EXTENSION
-                || setpoint.position >= IntakeConstants.MAX_EXTENSION
+                || setpoint.position >= IntakeConstants.MAX_EXTENSION_FROM_FRAME
             ) {
                 setpoint =
                     new TrapezoidProfile.State(
                         MathUtil.clamp(
                             setpoint.position,
                             IntakeConstants.MIN_EXTENSION,
-                            IntakeConstants.MAX_EXTENSION),
+                            IntakeConstants.MAX_EXTENSION_FROM_FRAME),
                         0.0);
             }
             atGoal = Math.abs(getPosition() - goal.position) <= IntakeConstants.TOLERANCE;
@@ -238,7 +239,7 @@ public class Intake extends SubsystemBase {
         inputs.goal = MathUtil.clamp(
             state.getPosition(),
             IntakeConstants.MIN_EXTENSION,
-            IntakeConstants.MAX_EXTENSION);
+            IntakeConstants.MAX_EXTENSION_FROM_FRAME);
         goal = new TrapezoidProfile.State(inputs.goal, 0.0);
         desiredGoal = state;
     }

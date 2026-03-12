@@ -49,6 +49,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final DutyCycleOut intakeDutyCycleOut;
 
     private final TalonFXConfiguration leftConfig;
+    private final TalonFXConfiguration rightConfig;
     private final TalonFXConfiguration intakeConfig;
 
     private final TalonFX leftMotor;
@@ -62,6 +63,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         leftConfig = new TalonFXConfiguration();
+        rightConfig = new TalonFXConfiguration();
         intakeConfig = new TalonFXConfiguration();
 
         leftConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -71,6 +73,11 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Slot0.kD = constants.kD();
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
+
+        rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        rightConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
+        tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
+
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         intakeConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -188,7 +195,10 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void setPosition(double meters) {
-        new Thread(() -> tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION))).start();
+        new Thread(() -> {
+            tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
+            tryUntilOk(5, () -> rightMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
+        }).start();
     }
 
     @Override
