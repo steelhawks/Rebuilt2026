@@ -116,6 +116,10 @@ public class RobotState extends VirtualSubsystem {
     private Alliance initialActiveHub = null;
     private Alliance activeHub = null;
 
+    // bump check
+    private Pose2d lastAcceptedVisionPose = null;
+    private double lastAcceptedVisionTimestamp = 0.0;
+
     private final Timer timer = new Timer();
     private static RobotState instance;
 
@@ -386,6 +390,8 @@ public class RobotState extends VirtualSubsystem {
             observation.timestamp(),
             observation.stdDevs()
         );
+        lastAcceptedVisionPose = observation.robotPose();
+        lastAcceptedVisionTimestamp = observation.timestamp;
         Logger.recordOutput("RobotState/LatestVisionPose", observation.robotPose());
     }
 
@@ -510,4 +516,10 @@ public class RobotState extends VirtualSubsystem {
         double confidence,
         double timestamp
     ) {}
+
+    public Optional<Pose2d> getLatestVisionMeasurement(double timeCutoff) {
+        if (lastAcceptedVisionPose == null) return Optional.empty();
+        if (Timer.getFPGATimestamp() - lastAcceptedVisionTimestamp > timeCutoff) return Optional.empty();
+        return Optional.of(lastAcceptedVisionPose);
+    }
 }

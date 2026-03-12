@@ -62,6 +62,7 @@ public class Swerve extends SubsystemBase {
     private static final double SPEED_MULTIPLIER = 1.0;
     private boolean isPathfinding = false;
     private boolean requestSlowMode = false;
+    private boolean wasPreviouslyOnBump = false;
 
     public static final double ODOMETRY_FREQUENCY;
     public static final double DRIVE_BASE_RADIUS;
@@ -464,7 +465,7 @@ public class Swerve extends SubsystemBase {
             Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[]{});
         }
 
-        processOdometryObservations();
+        handleOdometryWithBump();
         robotState.updateChassisSpeeds(getChassisSpeeds());
         FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
@@ -509,6 +510,19 @@ public class Swerve extends SubsystemBase {
                     gyroInputs.connected ? Optional.of(rawGyroRotation) : Optional.empty()
                 )
             );
+        }
+    }
+
+    private void handleOdometryWithBump() {
+        boolean onBump = isOnBump();
+
+        if (wasPreviouslyOnBump && !onBump) {
+            RobotState.getInstance().getLatestVisionMeasurement(0.5).ifPresent(this::setPose);
+        }
+        wasPreviouslyOnBump = onBump;
+
+        if (!onBump) {
+            processOdometryObservations();
         }
     }
 
