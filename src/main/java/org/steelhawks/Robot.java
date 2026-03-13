@@ -11,6 +11,9 @@ import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.util.ClassPreloader;
 import edu.wpi.first.wpilibj.*;
@@ -31,7 +34,11 @@ import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
+import org.steelhawks.simulation.FuelPhysicsSim;
+import org.steelhawks.simulation.ProjectileSim;
+import org.steelhawks.simulation.ShotCalculator;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.superstructure.SuperstructureVisualizer;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
@@ -70,6 +77,28 @@ public class Robot extends LoggedRobot {
     public static boolean isFirstRun() {
         return isFirstRun;
     }
+
+    public static ShotCalculator.Config shotCalcConfig = new ShotCalculator.Config();
+    public static ShotCalculator shotCalc = new ShotCalculator(shotCalcConfig);
+    ProjectileSim.SimParameters params = new ProjectileSim.SimParameters(
+        0.215,   // ball mass kg
+        0.1501,  // ball diameter m
+        0.47,    // drag coeff (smooth sphere)
+        0.2,     // Magnus coeff
+        1.225,   // air density
+        0.43,    // exit height (m), floor to where the ball leaves the shooter
+        0.1016,  // flywheel diameter (m), measure with calipers
+        1.83,    // target height (m), from game manual
+        0.6,     // slip factor (0=no grip, 1=perfect), tune this on the real robot
+        45.0,    // launch angle from horizontal, measure from CAD
+        0.001,   // sim timestep
+        1500, 6000, 25, 5.0  // RPM search range, iterations, max sim time
+    );
+    ProjectileSim sim = new ProjectileSim(params);
+    ProjectileSim.GeneratedLUT lut = sim.generateLUT();
+    FuelPhysicsSim ballSim = new FuelPhysicsSim("Sim/Fuel");
+
+
 
     @SuppressWarnings("resource")
     public Robot() {
@@ -209,6 +238,18 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
+    public void robotInit() {
+        ProjectileSim sim = new ProjectileSim(params);
+        ProjectileSim.GeneratedLUT lut = sim.generateLUT();
+
+        for (ProjectileSim.LUTEntry entry : lut.entries()) {
+            if (entry.reachable()) {
+                shotCalc.loadLUTEntry(entry.distanceM(), entry.rpm(), entry.tof());
+            }
+        }
+    }
+
+    @Override
     public void robotPeriodic() {
         LoopTimeUtil.reset();
 
@@ -228,6 +269,45 @@ public class Robot extends LoggedRobot {
             || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
         ) {
             RobotContainer.s_Swerve.updatePhysicsSimulation();
+            Translation2d hubCenter = new Translation2d(4.6, 4.0);  // your target
+            Translation2d hubForward = new Translation2d(1, 0);       // which way the hub faces
+
+            ShotCalculator.ShotInputs inputs = new ShotCalculator.ShotInputs(
+                RobotContainer.s_Swerve.getPose(),
+                RobotContainer.s_Swerve.getFieldRelativeSpeeds(),
+                RobotContainer.s_Swerve.getChassisSpeeds(),
+                hubCenter,
+                hubForward,
+                0.9,  // vision confidence, 0 to 1
+                RobotContainer.s_Swerve.getPitch().getDegrees(),  // pitch for tilt gate (0.0 if no gyro)
+                RobotContainer.s_Swerve.getRoll().getDegrees()    // roll for tilt gate (0.0 if no gyro)
+            );
+
+            ShotCalculator.LaunchParameters shot = shotCalc.calculate(inputs);
+            if (shot.isValid() && shot.confidence() > 50) {
+                RobotContainer.s_Flywheel.setTargetVelocity(shot.rpm());
+                RobotContainer.s_Turret.setDesiredRotation(shot.driveAngle());
+                Translation3d launchPosition = new Translation3d(new Translation2d(
+                    SuperstructureVisualizer.turretOffset.getX(),
+                    SuperstructureVisualizer.turretOffset.getY())
+                );
+                double speed =
+                    (shot.rpm() / 60) * (SubsystemConstants.OmegaBot.FLYWHEEL.flywheelRadius() * params.slipFactor());
+                double launchRad = Units.degreesToRadians(RobotContainer.s_Hood.getPositionDeg());
+                double horizontal = speed * Math.cos(launchRad);
+                double vertical = speed * Math.sin(launchRad);
+                Rotation2d heading = org.steelhawks.RobotState.getInstance().getEstimatedPose().getRotation();
+                Translation3d launchVelocity = new Translation3d(
+                    horizontal * heading.getCos(),
+                    horizontal * heading.getSin(),
+                    vertical
+                );
+                ballSim.launchBall(
+                    launchPosition,
+                    launchVelocity,
+                    shot.rpm());
+//                shot.driveAngularVelocityRadPerSec(); gives you a heading feedforward if you want it
+            }
         }
     }
 
@@ -293,5 +373,18 @@ public class Robot extends LoggedRobot {
         if (Constants.getMode() == Mode.SIM) {
             RobotContainer.s_Swerve.resetSimulation(new Pose2d(0, 0, new Rotation2d()));
         }
+        ballSim.enable();
+        ballSim.placeFieldBalls();
+
+        ballSim.configureRobot(
+            Constants.RobotConstants.ROBOT_WIDTH_WITH_BUMPERS,
+            Constants.RobotConstants.ROBOT_LENGTH_WITH_BUMPERS,
+            Units.inchesToMeters(6.0),
+            () -> RobotContainer.s_Swerve.getPose(), () -> RobotContainer.s_Swerve.getChassisSpeeds());
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        ballSim.tick();
     }
 }

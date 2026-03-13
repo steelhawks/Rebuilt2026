@@ -125,7 +125,7 @@ public class ShooterStructure {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
             double x_dist = distanceToTarget(predictedTarget);
-            if (Toggles.useLUT.getAsBoolean()) {
+            if (Toggles.useLUT.getAsBoolean() && Constants.getRobot() == Constants.RobotType.OMEGABOT) {
                 return new ProjectileData(
                     shootingFlywheelVelocityMap.get(x_dist),
                     shootingHoodAngleMap.get(x_dist).getRadians(),

@@ -608,8 +608,17 @@ public class Swerve extends SubsystemBase {
         return distances;
     }
 
+    public Pose2d getPose() {
+        return RobotState.getInstance().getEstimatedPose();
+    }
     public Rotation2d getPitch() {
         return gyroInputs.pitchPosition;
+    }
+    public Rotation2d getYaw() {
+        return gyroInputs.yawPosition;
+    }
+    public Rotation2d getRoll() {
+        return gyroInputs.rollPosition;
     }
 
     public void stop() {
@@ -653,6 +662,10 @@ public class Swerve extends SubsystemBase {
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
+    }
+
+    public ChassisSpeeds getFieldRelativeSpeeds() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), RobotState.getInstance().getRotation());
     }
 
     @AutoLogOutput(key = "Swerve/Is Slow Mode")

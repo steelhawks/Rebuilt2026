@@ -1,10 +1,10 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
+import org.steelhawks.simulation.ShotCalculator;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -12,14 +12,14 @@ import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
-import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
-import org.steelhawks.util.geometry.RobotFootprint;
+
+import static org.steelhawks.Robot.shotCalc;
 
 public class RobotContainer {
 
@@ -35,6 +35,7 @@ public class RobotContainer {
     public static Intake s_Intake = null;
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
+    public static ShotCalculator shotCalculator = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -110,5 +111,9 @@ public class RobotContainer {
                 s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
             );
         }
+        if (Constants.getRobot() == RobotType.SIMBOT) {
+            shotCalc.resetOffset();
+            driver.povUp().onTrue(Commands.runOnce(() -> shotCalc.adjustOffset(25)));
+            driver.povDown().onTrue(Commands.runOnce(() -> shotCalc.adjustOffset(-25)));        }
     }
 }

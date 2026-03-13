@@ -34,6 +34,8 @@ public class SuperstructureVisualizer {
 
     private static final double TURRET_X = Constants.RobotConstants.ROBOT_TO_TURRET.getX();
     private static final double TURRET_Y = Constants.RobotConstants.ROBOT_TO_TURRET.getY();
+    public static final Translation2d turretOffset = new Translation2d(TURRET_X, TURRET_Y);
+
 
     private static final Translation3d HOOD_PIVOT = new Translation3d(
         Units.inchesToMeters(0.0),
