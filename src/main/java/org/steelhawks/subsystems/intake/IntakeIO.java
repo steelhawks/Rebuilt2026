@@ -13,6 +13,8 @@ public interface IntakeIO {
         public double rightExtensionCurrentAmps = 0.0;
         public double rightExtensionTempCelsius = 0.0;
         public double rightExtensionAppliedVolts = 0.0;
+        public double rightExtensionTorqueCurrent = 0.0;
+        public double rightExtensionStatorCurrent = 0.0;
 
         // left electrical data
         public boolean leftConnected = false;
@@ -21,6 +23,8 @@ public interface IntakeIO {
         public double leftExtensionCurrentAmps = 0.0;
         public double leftExtensionTempCelsius = 0.0;
         public double leftExtensionAppliedVolts = 0.0;
+        public double leftExtensionTorqueCurrent = 0.0;
+        public double leftExtensionStatorCurrent = 0.0;
 
         // intake electrical data
         public boolean rollerConnected = false;
@@ -29,6 +33,8 @@ public interface IntakeIO {
         public double rollerCurrentAmps = 0.0;
         public double rollerTempCelsius = 0.0;
         public double rollerAppliedVolts = 0.0;
+        public double rollerTorqueCurrent = 0.0;
+        public double rollerStatorCurrent = 0.0;
 
         // states
         public boolean isIntaking = false;

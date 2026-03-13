@@ -28,18 +28,24 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final StatusSignal<Angle> rightExtensionPosition;
     private final StatusSignal<AngularVelocity> rightExtensionVelocityPerSec;
     private final StatusSignal<Current> rightExtensionCurrentAmps;
+    private final StatusSignal<Current> rightExtensionTorqueCurrent;
+    private final StatusSignal<Current> rightExtensionStatorCurrent;
     private final StatusSignal<Voltage> rightExtensionAppliedVoltage;
     private final StatusSignal<Temperature> rightExtensionTemp;
 
     private final StatusSignal<Angle> leftExtensionPosition;
     private final StatusSignal<AngularVelocity> leftExtensionVelocityPerSec;
     private final StatusSignal<Current> leftExtensionCurrentAmps;
+    private final StatusSignal<Current> leftExtensionTorqueCurrent;
+    private final StatusSignal<Current> leftExtensionStatorCurrent;
     private final StatusSignal<Voltage> leftExtensionAppliedVoltage;
     private final StatusSignal<Temperature> leftExtensionTemp;
 
     private final StatusSignal<Angle> rollerPosition;
     private final StatusSignal<AngularVelocity> rollerVelocityPerSec;
     private final StatusSignal<Current> rollerCurrentAmps;
+    private final StatusSignal<Current> rollerTorqueCurrent;
+    private final StatusSignal<Current> rollerStatorCurrent;
     private final StatusSignal<Voltage> rollerAppliedVoltage;
     private final StatusSignal<Temperature> rollerTemp;
 
@@ -126,17 +132,24 @@ public class IntakeIOTalonFX implements IntakeIO {
         rightExtensionAppliedVoltage = right_motor.getMotorVoltage();
         rightExtensionVelocityPerSec = right_motor.getVelocity();
         rightExtensionCurrentAmps = right_motor.getSupplyCurrent();
+        rightExtensionStatorCurrent = right_motor.getStatorCurrent();
+        rightExtensionTorqueCurrent = right_motor.getTorqueCurrent();
         rightExtensionTemp = right_motor.getDeviceTemp();
+
 
         leftExtensionPosition = left_motor.getPosition();
         leftExtensionAppliedVoltage = left_motor.getMotorVoltage();
         leftExtensionVelocityPerSec = left_motor.getVelocity();
+        leftExtensionTorqueCurrent = left_motor.getTorqueCurrent();
+        leftExtensionStatorCurrent = left_motor.getStatorCurrent();
         leftExtensionCurrentAmps = left_motor.getSupplyCurrent();
         leftExtensionTemp = left_motor.getDeviceTemp();
 
         rollerPosition = intake_motor.getPosition();
         rollerAppliedVoltage = intake_motor.getMotorVoltage();
         rollerVelocityPerSec = intake_motor.getVelocity();
+        rollerStatorCurrent = intake_motor.getStatorCurrent();
+        rollerTorqueCurrent = intake_motor.getTorqueCurrent();
         rollerCurrentAmps = intake_motor.getSupplyCurrent();
         rollerTemp = intake_motor.getDeviceTemp();
 
@@ -145,17 +158,23 @@ public class IntakeIOTalonFX implements IntakeIO {
                 rightExtensionAppliedVoltage,
                 rightExtensionTemp,
                 rightExtensionCurrentAmps,
+                rightExtensionTorqueCurrent,
+                rightExtensionStatorCurrent,
                 rightExtensionVelocityPerSec,
 
                 leftExtensionAppliedVoltage,
                 leftExtensionPosition,
                 leftExtensionCurrentAmps,
+                leftExtensionTorqueCurrent,
+                leftExtensionStatorCurrent,
                 leftExtensionTemp,
                 leftExtensionVelocityPerSec,
 
                 rollerTemp,
                 rollerAppliedVoltage,
                 rollerCurrentAmps,
+                rollerTorqueCurrent,
+                rollerStatorCurrent,
                 rollerPosition,
                 rollerVelocityPerSec
                 );
@@ -172,6 +191,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.leftExtensionVelocity = leftExtensionVelocityPerSec.getValueAsDouble() * IntakeConstants.PINION_ROTATION;
         inputs.leftExtensionAppliedVolts = leftExtensionAppliedVoltage.getValueAsDouble();
         inputs.leftExtensionCurrentAmps = leftExtensionCurrentAmps.getValueAsDouble();
+        inputs.leftExtensionTorqueCurrent = leftExtensionTorqueCurrent.getValueAsDouble();
+        inputs.leftExtensionStatorCurrent = leftExtensionStatorCurrent.getValueAsDouble();
         inputs.leftExtensionTempCelsius = leftExtensionTemp.getValueAsDouble();
 
         inputs.rightConnected = BaseStatusSignal.isAllGood(rightExtensionTemp, rightExtensionCurrentAmps, rightExtensionVelocityPerSec, rightExtensionPosition, rightExtensionAppliedVoltage);
@@ -179,6 +200,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.rightExtensionVelocity = rightExtensionVelocityPerSec.getValueAsDouble() * IntakeConstants.PINION_ROTATION;
         inputs.rightExtensionAppliedVolts = rightExtensionAppliedVoltage.getValueAsDouble();
         inputs.rightExtensionCurrentAmps = rightExtensionCurrentAmps.getValueAsDouble();
+        inputs.rightExtensionTorqueCurrent = rightExtensionTorqueCurrent.getValueAsDouble();
+        inputs.rightExtensionStatorCurrent = rightExtensionStatorCurrent.getValueAsDouble();
         inputs.rightExtensionTempCelsius = leftExtensionTemp.getValueAsDouble();
 
         inputs.rollerConnected = BaseStatusSignal.isAllGood(rollerPosition, rollerVelocityPerSec, rollerTemp, rollerCurrentAmps, rollerAppliedVoltage);
@@ -186,6 +209,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.rollerVelocity = rollerVelocityPerSec.getValueAsDouble();
         inputs.rollerAppliedVolts = rollerAppliedVoltage.getValueAsDouble();
         inputs.rollerCurrentAmps = rollerCurrentAmps.getValueAsDouble();
+        inputs.rollerTorqueCurrent = rollerStatorCurrent.getValueAsDouble();
         inputs.rollerTempCelsius = rollerTemp.getValueAsDouble();
 
         inputs.isExtended = inputs.rightExtensionPosition >= IntakeConstants.MAX_EXTENSION - IntakeConstants.POSITION_TOLERANCE;
