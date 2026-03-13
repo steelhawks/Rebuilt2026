@@ -87,10 +87,11 @@ public class SubsystemConstants {
     public record IndexerConstants(
         int spindexerMotor1Id, int feederId,
         double indexerJamCurrent, double feederJamCurrent,
-        OptionalInt spindexerMotor2Id
+        OptionalInt spindexerMotor2Id,
+        OptionalInt beamId
     ) {
         public static final IndexerConstants UNSET =
-            new IndexerConstants(0, 0, 0, 0, OptionalInt.empty());
+            new IndexerConstants(0, 0, 0, 0, OptionalInt.empty(), OptionalInt.empty());
     }
 
     public static final class OmegaBot {
@@ -120,7 +121,7 @@ public class SubsystemConstants {
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
-                1, 3, 10.0, 10.0, OptionalInt.of(2));
+                1, 3, 10.0, 10.0, OptionalInt.of(2), OptionalInt.empty());
     }
 
     public static final class AlphaBot {
@@ -181,6 +182,7 @@ public class SubsystemConstants {
             new IndexerConstants(
                 45, 26,
                 40, 40,
+                OptionalInt.empty(),
                 OptionalInt.empty()
             );
     }
@@ -250,6 +252,7 @@ public class SubsystemConstants {
             new IndexerConstants(
                 45, 26,
                 40, 40,
+                OptionalInt.empty(),
                 OptionalInt.empty()
             );
     }

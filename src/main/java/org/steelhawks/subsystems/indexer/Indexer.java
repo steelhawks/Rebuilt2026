@@ -7,6 +7,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.beam.BeamIO;
+import org.steelhawks.subsystems.beam.BeamIOInputsAutoLogged;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Indexer extends SubsystemBase {
@@ -32,14 +34,17 @@ public class Indexer extends SubsystemBase {
 
     private final SpindexerIOInputsAutoLogged spindexerInputs = new SpindexerIOInputsAutoLogged();
     private final FeederIOInputsAutoLogged feederInputs = new FeederIOInputsAutoLogged();
+    private final BeamIOInputsAutoLogged beamInputs = new BeamIOInputsAutoLogged();
     private final IndexerIO io;
+    private final BeamIO beamIO;
 
-    public Indexer(IndexerIO io, SubsystemConstants.IndexerConstants constants) {
+    public Indexer(IndexerIO io, BeamIO beamIO, SubsystemConstants.IndexerConstants constants) {
         SPINDEXER_JAM_CURRENT =
             new LoggedTunableNumber("Indexer/Spindexer/JamCurrent", constants.indexerJamCurrent());
         FEEDER_JAM_CURRENT =
             new LoggedTunableNumber("Indexer/Feeder/JamCurrent", constants.indexerJamCurrent());
         this.io = io;
+        this.beamIO = beamIO;
     }
 
     @Override

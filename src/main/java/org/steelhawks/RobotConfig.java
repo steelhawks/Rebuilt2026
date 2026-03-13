@@ -5,13 +5,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.beam.BeamIO;
+import org.steelhawks.subsystems.beam.BeamIOCANRange;
 import org.steelhawks.subsystems.indexer.IndexerIO;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
 import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
 import org.steelhawks.subsystems.oldintake.*;
-import org.steelhawks.subsystems.oldintake.OldIntakeIOTalonFX;
 import org.steelhawks.subsystems.oldintake.OldIntakeIO;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.indexer.IndexerIOSim;
@@ -500,7 +501,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(CANBusList.kTurretBus, c), c); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(CANBusList.kTurretBus, c), new BeamIOCANRange(CANBusList.kTurretBus, new BeamIO.BeamBreakConfig(c.beamId().orElse(-1), 0.01, 0.1, BeamIO.UpdateMode.SHORT_RANGE, 100.0)), c); }
     }
 
     // AlphaBot factory
@@ -816,7 +817,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOSim(), c); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOSim(), new BeamIO() {}, c); }
     }
 
     private static class ReplayFactory implements SubsystemFactory {
@@ -877,6 +878,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIO() {}, c); }
+        public Indexer createIndexer(IndexerConstants c) {
+            return new Indexer(new IndexerIO() {}, new BeamIO() {}, c);
+        }
     }
 }
