@@ -1,7 +1,5 @@
 package org.steelhawks.subsystems.vision;
 
-import edu.wpi.first.wpilibj.Filesystem;
-import org.dyn4j.geometry.Rotation;
 import org.steelhawks.RobotConfig;
 import org.steelhawks.RobotState;
 import org.steelhawks.subsystems.vision.VisionConstants.CameraConfig.CameraType;
@@ -12,7 +10,6 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.subsystems.vision.VisionConstants.Factors.ObjFactors.LimelightFactors;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIO;
@@ -21,25 +18,14 @@ import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIOPhoton;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionSim;
 import org.steelhawks.util.LoggedTunableNumber;
 
-import java.io.IOException;
-import java.nio.file.FileSystem;
-
 public class VisionConstants {
 
     public static LoggedTunableNumber baselineDropOdomFactor
         = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.1);
 
     // AprilTag layout
-    public static AprilTagFieldLayout APRIL_TAG_LAYOUT;
-
-    static {
-//        try {
-//            APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadFromResource("/home/lvuser/deploy/field_map.json");
-            APRIL_TAG_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-    }
+    public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
+        AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     public static int[] ALL_ALLOWED_TAGS = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
@@ -134,11 +120,37 @@ public class VisionConstants {
 
     private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
         new CameraConfig(
+            "ardu-front-right",
+            new Transform3d(
+                Units.inchesToMeters(3.062), // 3.062 up
+                Units.inchesToMeters(-12.332), // 12.332 to the right
+                Units.inchesToMeters(20.782),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(-45.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-front-left",
+            new Transform3d(
+                Units.inchesToMeters(3.062), // 3.062 up
+                Units.inchesToMeters(12.332), // 12.332 to the left
+                Units.inchesToMeters(20.782),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(45.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
             "ardu-middle-right",
             new Transform3d(
-                Units.inchesToMeters(-2.048), // 2.048 down
-                Units.inchesToMeters(-12.728), // 12.728 to the right
-                Units.inchesToMeters(20.679),
+                Units.inchesToMeters(0.012), // 0.012 up
+                Units.inchesToMeters(-12.724), // 12.724 to the right
+                Units.inchesToMeters(20.677),
                 new Rotation3d(
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
@@ -149,7 +161,7 @@ public class VisionConstants {
         new CameraConfig(
             "ardu-middle-left",
             new Transform3d(
-                Units.inchesToMeters(-2.047), // 2.047 down
+                Units.inchesToMeters(0.013), // 0.013 up
                 Units.inchesToMeters(12.728), // 12.728 to the left
                 Units.inchesToMeters(20.679),
                 new Rotation3d(
@@ -162,8 +174,8 @@ public class VisionConstants {
         new CameraConfig(
         "ardu-back-right",
             new Transform3d(
-                Units.inchesToMeters(-13.341), // 12.333 to the right
-                Units.inchesToMeters(-12.333), // 13.341 down
+                Units.inchesToMeters(-13.333), // 12.333 to the right
+                Units.inchesToMeters(-12.339), // 13.333 down
                 Units.inchesToMeters(20.774),
             new Rotation3d(
                 Units.degreesToRadians(0.0),
@@ -344,25 +356,7 @@ public class VisionConstants {
 
     private static final CameraConfig[] ALPHA_OBJ_DETECT_CONFIG = {};
 
-    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {
-        new CameraConfig(
-            "limelight-coral",
-//            Constants.fromOnshapeCoordinates(4.469, 9.261, 21.578, 15.0, -20.0, 0.0),
-//            Constants.fromOnshapeCoordinates(5.531, -15.261, -23.578 - 1.414, 15.0, -20.0, 0.0),
-            new Transform3d(
-                Units.inchesToMeters(15.261),
-                Units.inchesToMeters(5.531),
-                Units.inchesToMeters(23.578 + 1.414),  // height (keep as is)
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-20.0),
-                    Units.degreesToRadians(15.0)
-                )
-            ),
-            new Factors.ObjFactors(0.8, LimelightFactors.LIMELIGHT_4, 1280.0, 800.0),
-            CameraType.LIMELIGHT
-        )
-    };
+    private static final CameraConfig[] LAST_YEAR_OBJ_DETECT_CONFIG = {};
 
     public static CameraConfig[] getCameraConfig() {
         return switch (Constants.getRobot()) {
