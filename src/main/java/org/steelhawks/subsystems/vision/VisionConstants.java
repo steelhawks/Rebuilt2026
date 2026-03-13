@@ -122,11 +122,37 @@ public class VisionConstants {
 
     private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
         new CameraConfig(
+            "ardu-front-right",
+            new Transform3d(
+                Units.inchesToMeters(3.062), // 3.062 up
+                Units.inchesToMeters(-12.332), // 12.332 to the right
+                Units.inchesToMeters(20.782),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(-45.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-front-left",
+            new Transform3d(
+                Units.inchesToMeters(3.062), // 3.062 up
+                Units.inchesToMeters(12.332), // 12.332 to the left
+                Units.inchesToMeters(20.782),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(45.0))),
+            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
             "ardu-middle-right",
             new Transform3d(
-                Units.inchesToMeters(-2.048), // 2.048 down
-                Units.inchesToMeters(-12.728), // 12.728 to the right
-                Units.inchesToMeters(20.679),
+                Units.inchesToMeters(0.012), // 0.012 up
+                Units.inchesToMeters(-12.724), // 12.724 to the right
+                Units.inchesToMeters(20.677),
                 new Rotation3d(
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
@@ -137,7 +163,7 @@ public class VisionConstants {
         new CameraConfig(
             "ardu-middle-left",
             new Transform3d(
-                Units.inchesToMeters(-2.047), // 2.047 down
+                Units.inchesToMeters(0.013), // 0.013 up
                 Units.inchesToMeters(12.728), // 12.728 to the left
                 Units.inchesToMeters(20.679),
                 new Rotation3d(
@@ -150,8 +176,8 @@ public class VisionConstants {
         new CameraConfig(
         "ardu-back-right",
             new Transform3d(
-                Units.inchesToMeters(-13.341), // 12.333 to the right
-                Units.inchesToMeters(-12.333), // 13.341 down
+                Units.inchesToMeters(-13.333), // 12.333 to the right
+                Units.inchesToMeters(-12.339), // 13.333 down
                 Units.inchesToMeters(20.774),
             new Rotation3d(
                 Units.degreesToRadians(0.0),
