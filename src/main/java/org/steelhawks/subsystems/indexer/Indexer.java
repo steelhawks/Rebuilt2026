@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.indexer;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,11 +14,14 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class Indexer extends SubsystemBase {
 
-    private static  LoggedTunableNumber SPINDEXER_JAM_CURRENT;// TODO tune
+    private static LoggedTunableNumber SPINDEXER_JAM_CURRENT;// TODO tune
     private static LoggedTunableNumber FEEDER_JAM_CURRENT; // TODO tune
+    private static LoggedTunableNumber BEAM_DEBOUNCE_TIME; // TODO tune
 
     private LoggedTunableNumber tuningSpindexerVolts;
     private LoggedTunableNumber tuningFeederVolts;
+
+    private Debouncer beamDebouncer;
 
     public enum IndexerState {
         RUNNING(0.6, 1.0),
@@ -43,16 +47,20 @@ public class Indexer extends SubsystemBase {
             new LoggedTunableNumber("Indexer/Spindexer/JamCurrent", constants.indexerJamCurrent());
         FEEDER_JAM_CURRENT =
             new LoggedTunableNumber("Indexer/Feeder/JamCurrent", constants.indexerJamCurrent());
+        BEAM_DEBOUNCE_TIME =
+            new LoggedTunableNumber("Indexer/Beam/BeamDebounceTime", 0);
         this.io = io;
         this.beamIO = beamIO;
+        beamDebouncer = new Debouncer(BEAM_DEBOUNCE_TIME.get(), Debouncer.DebounceType.kFalling);
     }
 
     @Override
     public void periodic() {
         io.updateInputs(spindexerInputs, feederInputs);
+        beamIO.updateInputs(beamInputs);
         Logger.processInputs("Indexer/Spindexer/Inputs", spindexerInputs);
         Logger.processInputs("Indexer/Feeder/Inputs", feederInputs);
-
+        Logger.processInputs("Indexer/Beam/Inputs", beamInputs);
         if (Toggles.tuningMode.get()) {
             if (Toggles.Indexer.toggleSpindexerVoltageOverride.get()) {
                 if (tuningSpindexerVolts == null) {
@@ -80,6 +88,11 @@ public class Indexer extends SubsystemBase {
     public boolean isJammed() {
         return spindexerInputs.motor1TorqueCurrentAmps >= SPINDEXER_JAM_CURRENT.get()
             || feederInputs.torqueCurrentAmps >= FEEDER_JAM_CURRENT.get();
+    }
+
+    @AutoLogOutput(key = "Indexer/HasBalls")
+    public boolean hasBalls() {
+        return beamDebouncer.calculate(beamInputs.detected);
     }
 
     public Command runSpindexer() {
