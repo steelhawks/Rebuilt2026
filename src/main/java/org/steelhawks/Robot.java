@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import au.grapplerobotics.CanBridge;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
@@ -204,6 +205,7 @@ public class Robot extends LoggedRobot {
         }
         // ENABLE ONLY IF YOU KNOW WHAT YOU ARE DOING
 //        Threads.setCurrentThreadPriority(true, 10);
+        CanBridge.runTCP();
     }
 
     @Override
