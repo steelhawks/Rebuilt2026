@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.signals.UpdateModeValue;
 import edu.wpi.first.units.measure.Distance;
+import org.steelhawks.util.PhoenixUtil;
 
 import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
 
@@ -31,6 +32,9 @@ public class BeamIOCANRange implements BeamIO {
 
         distanceSignal = range.getDistance();
         detectedSignal = range.getIsDetected();
+
+        PhoenixUtil.registerSignals(
+            bus, distanceSignal, detectedSignal);
     }
 
     @Override

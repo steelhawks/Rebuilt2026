@@ -121,7 +121,7 @@ public class SubsystemConstants {
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
-                1, 3, 10.0, 10.0, OptionalInt.of(2), OptionalInt.empty());
+                1, 3, 10.0, 10.0, OptionalInt.of(2), OptionalInt.of(0));
     }
 
     public static final class AlphaBot {
