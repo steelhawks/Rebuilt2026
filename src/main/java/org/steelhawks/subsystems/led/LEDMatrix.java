@@ -111,15 +111,11 @@ public class LEDMatrix extends SubsystemBase {
             return -1;
         }
 
-        // reflect x and y coordinate -> rotate 180
-        int flippedX = (width - 1 - x);
-        int flippedY = (height - 1 - y);
-
         if (layout == MatrixLayout.SERPENTINE) {
             if (x % 2 == 0) {
-                return (flippedX * height) + flippedY;
+                return (x * height) + y;
             } else {
-                return (flippedX * height) + (height - 1 - flippedY);
+                return (x * height) + (height - 1 - y);
             }
         } else {
             return y * width + x;
