@@ -114,7 +114,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         BaseStatusSignal.setUpdateFrequencyForAll(
             100,
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
-            rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp,
+            rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         PhoenixUtil.registerSignals(
             bus,
