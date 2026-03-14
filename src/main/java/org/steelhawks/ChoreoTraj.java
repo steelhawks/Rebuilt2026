@@ -59,54 +59,47 @@ public record ChoreoTraj(
 	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
 	    new Pose2d(5, 0.537, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj Rebound = new ChoreoTraj(
-	    "Rebound",
+	public static final ChoreoTraj RRebound = new ChoreoTraj(
+	    "RRebound",
 	    OptionalInt.empty(),
 	    8.89642,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj Rebound$0 = new ChoreoTraj(
-	    "Rebound",
+	public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
+	    "RRebound",
 	    OptionalInt.of(0),
 	    4.99213,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj Rebound$1 = new ChoreoTraj(
-	    "Rebound",
+	public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
+	    "RRebound",
 	    OptionalInt.of(1),
 	    3.9042900000000005,
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj RTrenchMidRTrench = new ChoreoTraj(
-	    "RTrenchMidRTrench",
+	public static final ChoreoTraj LRebound = new ChoreoTraj(
+	    "LRebound",
 	    OptionalInt.empty(),
-	    7.69638,
-	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
-	    new Pose2d(4.411, 7.413, Rotation2d.fromRadians(3.142))
+	    8.90393,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj RTrenchMidRTrench$0 = new ChoreoTraj(
-	    "RTrenchMidRTrench",
+	public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
+	    "LRebound",
 	    OptionalInt.of(0),
-	    2.66264,
-	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
-	    new Pose2d(7.744, 3.84, Rotation2d.fromRadians(1.518))
+	    5.00206,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj RTrenchMidRTrench$1 = new ChoreoTraj(
-	    "RTrenchMidRTrench",
+	public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
+	    "LRebound",
 	    OptionalInt.of(1),
-	    1.8229799999999998,
-	    new Pose2d(7.744, 3.84, Rotation2d.fromRadians(1.518)),
-	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
-	);
-	public static final ChoreoTraj RTrenchMidRTrench$2 = new ChoreoTraj(
-	    "RTrenchMidRTrench",
-	    OptionalInt.of(2),
-	    3.2107600000000005,
-	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
-	    new Pose2d(4.411, 7.413, Rotation2d.fromRadians(3.142))
+	    3.9018700000000006,
+	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0))
 	);
 
     /**
@@ -119,13 +112,12 @@ public record ChoreoTraj(
 		Map.entry("CenterPath$1", CenterPath$1),
 		Map.entry("FourMeterSpinTest", FourMeterSpinTest),
 		Map.entry("FourMeterTest", FourMeterTest),
-		Map.entry("Rebound", Rebound),
-		Map.entry("Rebound$0", Rebound$0),
-		Map.entry("Rebound$1", Rebound$1),
-		Map.entry("RTrenchMidRTrench", RTrenchMidRTrench),
-		Map.entry("RTrenchMidRTrench$0", RTrenchMidRTrench$0),
-		Map.entry("RTrenchMidRTrench$1", RTrenchMidRTrench$1),
-		Map.entry("RTrenchMidRTrench$2", RTrenchMidRTrench$2)
+		Map.entry("RRebound", RRebound),
+		Map.entry("RRebound$0", RRebound$0),
+		Map.entry("RRebound$1", RRebound$1),
+		Map.entry("LRebound", LRebound),
+		Map.entry("LRebound$0", LRebound$0),
+		Map.entry("LRebound$1", LRebound$1)
     );
 
     /**
