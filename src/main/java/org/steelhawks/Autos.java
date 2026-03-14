@@ -190,6 +190,7 @@ public final class Autos {
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound$2.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
@@ -203,7 +204,9 @@ public final class Autos {
                     .alongWith(RobotContainer.s_Intake.runIntake()),
                 ShootingCommands.shoot()
                     .until(() -> !s_Indexer.hasBalls())
-                    .withTimeout(5.0)
+                    .withTimeout(5.0),
+                trenchToOutpost.cmd(),
+                ShootingCommands.shoot()
             )
         );
 
@@ -215,6 +218,7 @@ public final class Autos {
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundToTrench = ChoreoTraj.LRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToOutpost = ChoreoTraj.LRebound$2.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
@@ -228,7 +232,9 @@ public final class Autos {
                     .alongWith(RobotContainer.s_Intake.runIntake()),
                 ShootingCommands.shoot()
                     .until(() -> !s_Indexer.hasBalls())
-                    .withTimeout(5.0)
+                    .withTimeout(5.0),
+                trenchToOutpost.cmd(),
+                ShootingCommands.shoot()
             )
         );
 

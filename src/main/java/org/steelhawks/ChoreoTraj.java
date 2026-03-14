@@ -62,9 +62,9 @@ public record ChoreoTraj(
 	public static final ChoreoTraj RRebound = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.empty(),
-	    8.89642,
+	    9.86098,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
-	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
+	    new Pose2d(0.445, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
 	    "RRebound",
@@ -76,16 +76,23 @@ public record ChoreoTraj(
 	public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.of(1),
-	    3.9042900000000005,
+	    3.67861,
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
+	    "RRebound",
+	    OptionalInt.of(2),
+	    1.1902399999999993,
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.445, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj LRebound = new ChoreoTraj(
 	    "LRebound",
 	    OptionalInt.empty(),
-	    8.90393,
+	    9.86837,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
-	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0))
+	    new Pose2d(0.445, 7.436, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
 	    "LRebound",
@@ -97,9 +104,16 @@ public record ChoreoTraj(
 	public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
 	    "LRebound",
 	    OptionalInt.of(1),
-	    3.9018700000000006,
+	    3.6760699999999993,
 	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LRebound$2 = new ChoreoTraj(
+	    "LRebound",
+	    OptionalInt.of(2),
+	    1.190240000000001,
+	    new Pose2d(4.411, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.445, 7.436, Rotation2d.fromRadians(0))
 	);
 
     /**
@@ -115,9 +129,11 @@ public record ChoreoTraj(
 		Map.entry("RRebound", RRebound),
 		Map.entry("RRebound$0", RRebound$0),
 		Map.entry("RRebound$1", RRebound$1),
+		Map.entry("RRebound$2", RRebound$2),
 		Map.entry("LRebound", LRebound),
 		Map.entry("LRebound$0", LRebound$0),
-		Map.entry("LRebound$1", LRebound$1)
+		Map.entry("LRebound$1", LRebound$1),
+		Map.entry("LRebound$2", LRebound$2)
     );
 
     /**
