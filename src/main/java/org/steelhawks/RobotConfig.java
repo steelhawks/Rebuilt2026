@@ -1,8 +1,8 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.swerve.*;
@@ -250,6 +250,28 @@ public class RobotConfig {
         }
     }
 
+    public static class IntakeCANBus extends CANBus {
+
+        public final int leftIntakeMotorID;
+        public final int leftIntakeEncoderID;
+
+        public final int rightIntakeMotorID;
+        public final int rightIntakeEncoderID;
+
+        public final int rollerMotorID;
+        public final int rollerEncoderID;
+
+        public IntakeCANBus(String name, int leftIntakeMotorID, int leftIntakeEncoderID, int rightIntakeMotorID, int rightIntakeEncoderID, int rollerMotorID, int rollerEncoderID) {
+            super(name);
+            this.leftIntakeMotorID = leftIntakeMotorID;
+            this.leftIntakeEncoderID = -leftIntakeEncoderID;
+            this.rightIntakeMotorID = rightIntakeMotorID;
+            this.rightIntakeEncoderID = -rightIntakeEncoderID;
+            this.rollerMotorID = rollerMotorID;
+            this.rollerEncoderID = -rollerEncoderID;
+        }
+    }
+
     // Subsystem factory interface
     private interface SubsystemFactory {
         Swerve  createSwerve();
@@ -257,11 +279,19 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
+        /*
+         SuperStructure createSuperStructure();
+         Intake createIntake();
+        */
     }
 
     // OmegaBot factory
     private static class OmegaBotFactory implements SubsystemFactory {
+
         private final SwerveCANBus swerveCANBus;
+//        private final TurretCANBus turretCANBus;
+        private final IntakeCANBus intakeCANBus;
+
         public OmegaBotFactory() {
             this.swerveCANBus = new SwerveCANBus(
                 TunerConstants.DrivetrainConstants.CANBusName,
@@ -279,6 +309,33 @@ public class RobotConfig {
                 TunerConstants.BackRight.SteerMotorId,
                 TunerConstants.BackRight.EncoderId
             );
+
+/*
+            this.turretCANBus = new TurretCANBus(
+                    CANBusList.kTurretBus,
+                    SuperStructureConstants.TurretMotorID,
+                    SuperStructureConstants.TurretEncoderID,
+                    SuperStructureConstants.FlywheelID,
+                    SuperStructureConstants.HoodMotorID,
+                    SuperStructureConstants.HoodEncoderID,
+
+            );
+*/
+            this.intakeCANBus = new IntakeCANBus(
+                    IntakeConstants.EXTENSION_CANBUS_NAME,
+
+                    IntakeConstants.EXTENSION_LEFT_MOTOR_ID,
+                    IntakeConstants.EXTENSION_LEFT_ENCODER_ID,
+
+
+                    IntakeConstants.EXTENSION_RIGHT_MOTOR_ID,
+                    IntakeConstants.EXTENSION_RIGHT_ENCODER_ID,
+
+                    IntakeConstants.ROLLER_MOTOR_ID,
+                    IntakeConstants.ROLLER_ENCODER_ID
+
+            );
+
         }
 
         @Override
@@ -316,6 +373,7 @@ public class RobotConfig {
     // AlphaBot factory
     private static class AlphaBotFactory implements SubsystemFactory {
         private final SwerveCANBus swerveCANBus;
+        private final IntakeCANBus intakeCANBus;
 
         public AlphaBotFactory() {
             this.swerveCANBus = new SwerveCANBus(
@@ -333,6 +391,31 @@ public class RobotConfig {
                 TunerConstantsAlpha.BackRight.DriveMotorId,
                 TunerConstantsAlpha.BackRight.SteerMotorId,
                 TunerConstantsAlpha.BackRight.EncoderId
+            );
+ /**
+            this.turretCANBus = new TurretCANBus(
+                    CANBusList.kTurretBus,
+                    SuperStructureConstants.TurretMotorID,
+                    SuperStructureConstants.TurretEncoderID,
+                    SuperStructureConstants.FlywheelID,
+                    SuperStructureConstants.HoodMotorID,
+                    SuperStructureConstants.HoodEncoderID,
+
+                    );
+*/
+            this.intakeCANBus = new IntakeCANBus(
+                    IntakeConstants.EXTENSION_CANBUS_NAME,
+
+                    IntakeConstants.EXTENSION_LEFT_MOTOR_ID,
+                    IntakeConstants.EXTENSION_LEFT_ENCODER_ID,
+
+
+                    IntakeConstants.EXTENSION_RIGHT_MOTOR_ID,
+                    IntakeConstants.EXTENSION_RIGHT_ENCODER_ID,
+
+                    IntakeConstants.ROLLER_MOTOR_ID,
+                    IntakeConstants.ROLLER_ENCODER_ID
+
             );
         }
 
@@ -371,6 +454,7 @@ public class RobotConfig {
     // Last year robot factory
     private static class LastYearFactory implements SubsystemFactory {
         private final SwerveCANBus swerveCANBus;
+        private final IntakeCANBus intakeCANBus;
 
         public LastYearFactory() {
             this.swerveCANBus = new SwerveCANBus(
@@ -388,6 +472,32 @@ public class RobotConfig {
                 TunerConstantsLastYear.BackRight.DriveMotorId,
                 TunerConstantsLastYear.BackRight.SteerMotorId,
                 TunerConstantsLastYear.BackRight.EncoderId
+            );
+
+            /**
+             this.turretCANBus = new TurretCANBus(
+             CANBusList.kTurretBus,
+             SuperStructureConstants.TurretMotorID,
+             SuperStructureConstants.TurretEncoderID,
+             SuperStructureConstants.FlywheelID,
+             SuperStructureConstants.HoodMotorID,
+             SuperStructureConstants.HoodEncoderID,
+
+             );
+             */
+            this.intakeCANBus = new IntakeCANBus(
+                    IntakeConstants.EXTENSION_CANBUS_NAME,
+
+                    IntakeConstants.EXTENSION_LEFT_MOTOR_ID,
+                    IntakeConstants.EXTENSION_LEFT_ENCODER_ID,
+
+
+                    IntakeConstants.EXTENSION_RIGHT_MOTOR_ID,
+                    IntakeConstants.EXTENSION_RIGHT_ENCODER_ID,
+
+                    IntakeConstants.ROLLER_MOTOR_ID,
+                    IntakeConstants.ROLLER_ENCODER_ID
+
             );
         }
 
