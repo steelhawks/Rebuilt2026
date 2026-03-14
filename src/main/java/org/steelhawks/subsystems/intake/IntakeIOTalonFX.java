@@ -16,6 +16,8 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.RobotConfig;
+import org.steelhawks.util.PhoenixUtil;
 
 
 public class IntakeIOTalonFX implements IntakeIO {
@@ -153,7 +155,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         rollerCurrentAmps = intake_motor.getSupplyCurrent();
         rollerTemp = intake_motor.getDeviceTemp();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(50,
+        PhoenixUtil.registerSignals(RobotConfig.CANBusList.kRioBus,
                 rightExtensionPosition,
                 rightExtensionAppliedVoltage,
                 rightExtensionTemp,
@@ -186,7 +188,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-        inputs.leftConnected = BaseStatusSignal.isAllGood(leftExtensionTemp, leftExtensionPosition, leftExtensionCurrentAmps, leftExtensionAppliedVoltage, leftExtensionVelocityPerSec);
+        inputs.leftConnected = PhoenixUtil.refreshAll();
         inputs.leftExtensionPosition = leftExtensionPosition.getValueAsDouble() * IntakeConstants.PINION_ROTATION;
         inputs.leftExtensionVelocity = leftExtensionVelocityPerSec.getValueAsDouble() * IntakeConstants.PINION_ROTATION;
         inputs.leftExtensionAppliedVolts = leftExtensionAppliedVoltage.getValueAsDouble();
@@ -209,6 +211,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.rollerVelocity = rollerVelocityPerSec.getValueAsDouble();
         inputs.rollerAppliedVolts = rollerAppliedVoltage.getValueAsDouble();
         inputs.rollerCurrentAmps = rollerCurrentAmps.getValueAsDouble();
+        inputs.rollerTorqueCurrent = rollerTorqueCurrent.getValueAsDouble();
+        inputs.rollerStatorCurrent = rollerStatorCurrent.getValueAsDouble();
         inputs.rollerTorqueCurrent = rollerStatorCurrent.getValueAsDouble();
         inputs.rollerTempCelsius = rollerTemp.getValueAsDouble();
 

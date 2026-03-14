@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotConfig;
 import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.util.PhoenixUtil;
@@ -178,7 +179,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             turnTemp);
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon, cancoder);
         PhoenixUtil.registerSignals(
-            TunerConstants.DrivetrainConstants.CANBusName.equals("canivore"),
+                RobotConfig.CANBusList.kDrivetrainBus,
             driveVelocity,
             driveAppliedVolts,
             driveCurrent,

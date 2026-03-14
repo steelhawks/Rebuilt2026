@@ -1,10 +1,12 @@
 package org.steelhawks.util;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import org.ironmaple.simulation.SimulatedArena;
+import org.steelhawks.RobotConfig;
 
 import java.util.function.Supplier;
 
@@ -17,6 +19,7 @@ public final class PhoenixUtil extends VirtualSubsystem {
 
     /** Signals for synchronized refresh. */
     private static BaseStatusSignal[] canivoreSignals = new BaseStatusSignal[0];
+    private static BaseStatusSignal[] turretSignals = new BaseStatusSignal[0];
     private static BaseStatusSignal[] rioSignals = new BaseStatusSignal[0];
 
     private PhoenixUtil() {
@@ -67,12 +70,19 @@ public final class PhoenixUtil extends VirtualSubsystem {
     }
 
     /** Registers a set of signals for synchronized refresh. */
-    public static void registerSignals(boolean canivore, BaseStatusSignal... signals) {
-        if (canivore) {
-            BaseStatusSignal[] newSignals = new BaseStatusSignal[canivoreSignals.length + signals.length];
-            System.arraycopy(canivoreSignals, 0, newSignals, 0, canivoreSignals.length);
-            System.arraycopy(signals, 0, newSignals, canivoreSignals.length, signals.length);
-            canivoreSignals = newSignals;
+    public static void registerSignals(CANBus bus, BaseStatusSignal... signals) {
+        if (bus.isNetworkFD()) {
+            var busSignals = bus.equals(RobotConfig.CANBusList.kDrivetrainBus) ? canivoreSignals : turretSignals;
+            BaseStatusSignal[] newSignals = new BaseStatusSignal[busSignals.length + busSignals.length];
+            System.arraycopy(busSignals, 0, newSignals, 0, busSignals.length);
+            System.arraycopy(signals, 0, newSignals, busSignals.length, signals.length);
+            if (bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
+                canivoreSignals = newSignals;
+                BaseStatusSignal.setUpdateFrequencyForAll(1000, canivoreSignals);
+            } else if (bus.equals(RobotConfig.CANBusList.kTurretBus)) {
+                turretSignals = newSignals;
+                BaseStatusSignal.setUpdateFrequencyForAll(1000, turretSignals);
+            }
         } else {
             BaseStatusSignal[] newSignals = new BaseStatusSignal[rioSignals.length + signals.length];
             System.arraycopy(rioSignals, 0, newSignals, 0, rioSignals.length);
@@ -82,14 +92,35 @@ public final class PhoenixUtil extends VirtualSubsystem {
     }
 
     /** Refresh all registered signals. */
-    public static void refreshAll() {
+    public static boolean refreshAll() {
         if (canivoreSignals.length > 0) {
             BaseStatusSignal.refreshAll(canivoreSignals);
+            return true;
         }
         if (rioSignals.length > 0) {
             BaseStatusSignal.refreshAll(rioSignals);
+            return true;
+        }
+        if (turretSignals.length > 0) {
+            BaseStatusSignal.refreshAll(turretSignals);
+            return true;
+        }
+        return false;
+    }
+
+    /** Wait until all for synchronization */
+    public static void waitForAll() {
+        if (canivoreSignals.length > 0) {
+            BaseStatusSignal.waitForAll(0.1, canivoreSignals);
+        }
+        if (rioSignals.length > 0) {
+            BaseStatusSignal.waitForAll(0.1, rioSignals);
+        }
+        if (turretSignals.length > 0) {
+            BaseStatusSignal.waitForAll(0.1, turretSignals);
         }
     }
+
 
     @Override
     public void periodic() {
