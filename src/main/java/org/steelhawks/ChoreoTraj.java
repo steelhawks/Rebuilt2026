@@ -27,37 +27,86 @@ public record ChoreoTraj(
     public static final ChoreoTraj CenterPath = new ChoreoTraj(
 	    "CenterPath",
 	    OptionalInt.empty(),
-	    4.77211,
+	    4.79102,
 	    new Pose2d(3.539, 0.66, Rotation2d.fromRadians(1.571)),
 	    new Pose2d(2.581, 0.784, Rotation2d.fromRadians(1.597))
 	);
 	public static final ChoreoTraj CenterPath$0 = new ChoreoTraj(
 	    "CenterPath",
 	    OptionalInt.of(0),
-	    2.22802,
+	    2.23506,
 	    new Pose2d(3.539, 0.66, Rotation2d.fromRadians(1.571)),
 	    new Pose2d(7.601, 2.828, Rotation2d.fromRadians(-3.088))
 	);
 	public static final ChoreoTraj CenterPath$1 = new ChoreoTraj(
 	    "CenterPath",
 	    OptionalInt.of(1),
-	    2.5440899999999997,
+	    2.55596,
 	    new Pose2d(7.601, 2.828, Rotation2d.fromRadians(-3.088)),
 	    new Pose2d(2.581, 0.784, Rotation2d.fromRadians(1.597))
-	);
-	public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
-	    "FourMeterTest",
-	    OptionalInt.empty(),
-	    2.225,
-	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
-	    new Pose2d(5, 0.537, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj FourMeterSpinTest = new ChoreoTraj(
 	    "FourMeterSpinTest",
 	    OptionalInt.empty(),
-	    2.22252,
+	    2.22931,
 	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
 	    new Pose2d(5, 0.537, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
+	    "FourMeterTest",
+	    OptionalInt.empty(),
+	    2.23045,
+	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
+	    new Pose2d(5, 0.537, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj Rebound = new ChoreoTraj(
+	    "Rebound",
+	    OptionalInt.empty(),
+	    8.89642,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj Rebound$0 = new ChoreoTraj(
+	    "Rebound",
+	    OptionalInt.of(0),
+	    4.99213,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj Rebound$1 = new ChoreoTraj(
+	    "Rebound",
+	    OptionalInt.of(1),
+	    3.9042900000000005,
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RTrenchMidRTrench = new ChoreoTraj(
+	    "RTrenchMidRTrench",
+	    OptionalInt.empty(),
+	    7.69638,
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 7.413, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj RTrenchMidRTrench$0 = new ChoreoTraj(
+	    "RTrenchMidRTrench",
+	    OptionalInt.of(0),
+	    2.66264,
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.744, 3.84, Rotation2d.fromRadians(1.518))
+	);
+	public static final ChoreoTraj RTrenchMidRTrench$1 = new ChoreoTraj(
+	    "RTrenchMidRTrench",
+	    OptionalInt.of(1),
+	    1.8229799999999998,
+	    new Pose2d(7.744, 3.84, Rotation2d.fromRadians(1.518)),
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RTrenchMidRTrench$2 = new ChoreoTraj(
+	    "RTrenchMidRTrench",
+	    OptionalInt.of(2),
+	    3.2107600000000005,
+	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.411, 7.413, Rotation2d.fromRadians(3.142))
 	);
 
     /**
@@ -68,8 +117,15 @@ public record ChoreoTraj(
     	Map.entry("CenterPath", CenterPath),
 		Map.entry("CenterPath$0", CenterPath$0),
 		Map.entry("CenterPath$1", CenterPath$1),
+		Map.entry("FourMeterSpinTest", FourMeterSpinTest),
 		Map.entry("FourMeterTest", FourMeterTest),
-		Map.entry("FourMeterSpinTest", FourMeterSpinTest)
+		Map.entry("Rebound", Rebound),
+		Map.entry("Rebound$0", Rebound$0),
+		Map.entry("Rebound$1", Rebound$1),
+		Map.entry("RTrenchMidRTrench", RTrenchMidRTrench),
+		Map.entry("RTrenchMidRTrench$0", RTrenchMidRTrench$0),
+		Map.entry("RTrenchMidRTrench$1", RTrenchMidRTrench$1),
+		Map.entry("RTrenchMidRTrench$2", RTrenchMidRTrench$2)
     );
 
     /**
