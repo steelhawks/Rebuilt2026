@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import com.ctre.phoenix6.CANBus;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -230,6 +231,25 @@ public class RobotConfig {
         }
     }
 
+    public static class TurretCANBus extends CANBus {
+
+        public final int turretMotorID;
+        public final int turretEncoderID;
+        public final int flywheelID;
+        public final int hoodMotorID;
+        public final int hoodEncoderID;
+
+
+        public TurretCANBus(String name, int turretMotorID, int turretEncoderID, int flywheelID, int hoodEncoderID, int hoodMotorID) {
+            super(name);
+            this.turretMotorID = turretMotorID;
+            this.turretEncoderID = turretEncoderID;
+            this.flywheelID = flywheelID;
+            this.hoodEncoderID = hoodEncoderID;
+            this.hoodMotorID = hoodMotorID;
+        }
+    }
+
     // Subsystem factory interface
     private interface SubsystemFactory {
         Swerve  createSwerve();
@@ -443,10 +463,9 @@ public class RobotConfig {
     public static class CANBusList {
         public static final com.ctre.phoenix6.CANBus kDrivetrainBus = new com.ctre.phoenix6.CANBus("NoImJacobivore");
         public static final com.ctre.phoenix6.CANBus kTurretBus = new com.ctre.phoenix6.CANBus("Farhanivore");
+        public static final com.ctre.phoenix6.CANBus kIntakeBus = new com.ctre.phoenix6.CANBus("Parmesanivore");
         public static final com.ctre.phoenix6.CANBus kRioBus = new com.ctre.phoenix6.CANBus("rio");
     }
-
-    
 
     // Replay factory
     private static class ReplayFactory implements SubsystemFactory {

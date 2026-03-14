@@ -155,7 +155,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         rollerCurrentAmps = intake_motor.getSupplyCurrent();
         rollerTemp = intake_motor.getDeviceTemp();
 
-        PhoenixUtil.registerSignals(RobotConfig.CANBusList.kRioBus,
+        PhoenixUtil.registerSignals(RobotConfig.CANBusList.kIntakeBus,
                 rightExtensionPosition,
                 rightExtensionAppliedVoltage,
                 rightExtensionTemp,
