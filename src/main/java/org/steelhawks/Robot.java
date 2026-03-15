@@ -28,6 +28,7 @@ import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
+import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
@@ -44,6 +45,8 @@ public class Robot extends LoggedRobot {
     private static final double loopOverrunWarningTimeout = 0.2;
     private static RobotState mState = RobotState.DISABLED;
     private final RobotContainer robotContainer;
+    private RobotContainer newRobotContainer;
+//    private final Command m_staticText = RobotContainer.s_LEDMatrix.staticTextCommand("NO", Color.RED);
     private static boolean isFirstRun = true;
     private Command autonomousCommand;
 
@@ -246,6 +249,9 @@ public class Robot extends LoggedRobot {
         Elastic.selectTab("Teleoperated");
         if (autonomousCommand != null)
             CommandScheduler.getInstance().schedule(autonomousCommand);
+        if (RobotContainer.s_LEDMatrix != null) {
+            CommandScheduler.getInstance().schedule(RobotContainer.s_LEDMatrix.staticTextCommand("NO", Color.RED));
+        }
     }
 
     @Override
@@ -262,6 +268,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationInit() {
+
         if (Constants.getMode() == Mode.SIM) {
             RobotContainer.s_Swerve.resetSimulation(new Pose2d(3, 3, new Rotation2d()));
         }

@@ -1,8 +1,10 @@
 package org.steelhawks;
 
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.steelhawks.commands.*;
+import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
@@ -24,9 +26,12 @@ public class RobotContainer {
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
+
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
+
+
 
         s_Swerve = config.createSwerve();
 
@@ -39,6 +44,10 @@ public class RobotContainer {
             Autos.init();
         }
 
+        if (config.hasLEDMatrix) {
+            s_LEDMatrix.staticTextCommand("NO", Color.PINK);
+        }
+
         s_Swerve.setDefaultCommand(
             DriveCommands.joystickDrive(
                 () -> -driver.getLeftY(),
@@ -47,9 +56,11 @@ public class RobotContainer {
 
         configureTriggers();
         configureDriver();
+
     }
 
     private void configureTriggers() {}
 
-    private void configureDriver() {}
+    private void configureDriver() {
+    }
 }
