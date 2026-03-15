@@ -73,7 +73,7 @@ public final class PhoenixUtil extends VirtualSubsystem {
     public static void registerSignals(CANBus bus, BaseStatusSignal... signals) {
         if (bus.isNetworkFD()) {
             var busSignals = bus.equals(RobotConfig.CANBusList.kDrivetrainBus) ? canivoreSignals : turretSignals;
-            BaseStatusSignal[] newSignals = new BaseStatusSignal[busSignals.length + busSignals.length];
+            BaseStatusSignal[] newSignals = new BaseStatusSignal[busSignals.length + signals.length];
             System.arraycopy(busSignals, 0, newSignals, 0, busSignals.length);
             System.arraycopy(signals, 0, newSignals, busSignals.length, signals.length);
             if (bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {

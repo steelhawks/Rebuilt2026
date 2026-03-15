@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.BuilderConstants;
 import org.steelhawks.RobotConfig;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -87,27 +88,30 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         left_motor.getConfigurator().apply(extensionConfig);
 
-        var extensionSlot0Configs = new Slot0Configs();
-        extensionSlot0Configs
-                .withKA(IntakeConstants.EXTENSION_POSITION_KA.getAsDouble())
-                .withKP(IntakeConstants.EXTENSION_POSITION_KP.getAsDouble())
-                .withKI(IntakeConstants.EXTENSION_POSITION_KI.getAsDouble())
-                .withKD(IntakeConstants.EXTENSION_POSITION_KD.getAsDouble())
-                .withKS(IntakeConstants.EXTENSION_POSITION_KS.getAsDouble())
-                .withKV(IntakeConstants.EXTENSION_POSITION_KV.getAsDouble())
-                .withKG(IntakeConstants.EXTENSION_POSITION_KG.getAsDouble());
-        var extensionSlot1Configs = new Slot1Configs();
-        extensionSlot1Configs
-                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
-                .withKP(IntakeConstants.EXTENSION_VELOCITY_KP.getAsDouble())
-                .withKI(IntakeConstants.EXTENSION_VELOCITY_KI.getAsDouble())
-                .withKD(IntakeConstants.EXTENSION_VELOCITY_KD.getAsDouble())
-                .withKV(IntakeConstants.EXTENSION_VELOCITY_KV.getAsDouble())
-                .withKS(IntakeConstants.EXTENSION_VELOCITY_KS.getAsDouble())
-                .withKG(IntakeConstants.EXTENSION_VELOCITY_KG.getAsDouble());
+//        var extensionSlot0Configs = new Slot0Configs();
+//        extensionSlot0Configs
+//                .withKA(IntakeConstants.EXTENSION_POSITION_KA.getAsDouble())
+//                .withKP(IntakeConstants.EXTENSION_POSITION_KP.getAsDouble())
+//                .withKI(IntakeConstants.EXTENSION_POSITION_KI.getAsDouble())
+//                .withKD(IntakeConstants.EXTENSION_POSITION_KD.getAsDouble())
+//                .withKS(IntakeConstants.EXTENSION_POSITION_KS.getAsDouble())
+//                .withKV(IntakeConstants.EXTENSION_POSITION_KV.getAsDouble())
+//                .withKG(IntakeConstants.EXTENSION_POSITION_KG.getAsDouble());
+//        var extensionSlot1Configs = new Slot1Configs();
+//        extensionSlot1Configs
+//                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
+//                .withKP(IntakeConstants.EXTENSION_VELOCITY_KP.getAsDouble())
+//                .withKI(IntakeConstants.EXTENSION_VELOCITY_KI.getAsDouble())
+//                .withKD(IntakeConstants.EXTENSION_VELOCITY_KD.getAsDouble())
+//                .withKV(IntakeConstants.EXTENSION_VELOCITY_KV.getAsDouble())
+//                .withKS(IntakeConstants.EXTENSION_VELOCITY_KS.getAsDouble())
+//                .withKG(IntakeConstants.EXTENSION_VELOCITY_KG.getAsDouble());
+//
+//        left_motor.getConfigurator().apply(extensionSlot0Configs);
+//        left_motor.getConfigurator().apply(extensionSlot1Configs);
 
-        left_motor.getConfigurator().apply(extensionSlot0Configs);
-        left_motor.getConfigurator().apply(extensionSlot1Configs);
+        BuilderConstants.ExtensionPIDConstants.setPID(left_motor);
+        BuilderConstants.ExtensionPIDConstants.setPID(right_motor);
 
         var rollerConfig = new TalonFXConfiguration()
                 .withMotorOutput(new MotorOutputConfigs()
@@ -119,16 +123,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         intake_motor.getConfigurator().apply(rollerConfig);
 
-        var rollerSlot0Configs = new Slot0Configs();
-        rollerSlot0Configs
-                .withKA(IntakeConstants.ROLLER_KA.getAsDouble())
-                .withKP(IntakeConstants.ROLLER_KP.getAsDouble())
-                .withKI(IntakeConstants.ROLLER_KI.getAsDouble())
-                .withKD(IntakeConstants.ROLLER_KD.getAsDouble())
-                .withKS(IntakeConstants.ROLLER_KS.getAsDouble())
-                .withKV(IntakeConstants.ROLLER_KV.getAsDouble());
-
-        intake_motor.getConfigurator().apply(rollerSlot0Configs);
+        BuilderConstants.RollerPIDConstants.setPID(intake_motor);
 
         rightExtensionPosition = right_motor.getPosition();
         rightExtensionAppliedVoltage = right_motor.getMotorVoltage();
