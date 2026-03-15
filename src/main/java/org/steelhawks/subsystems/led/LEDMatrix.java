@@ -291,6 +291,8 @@ public class LEDMatrix extends SubsystemBase {
         private final String text;
         private final Color color;
         private final int speed;
+        private final int startX;
+        private final int regionWidth;
         private int offset = 0;
         private static final int CHAR_WIDTH = 4;
         private static final int CHAR_SPACING = 1;
@@ -299,27 +301,33 @@ public class LEDMatrix extends SubsystemBase {
             this.text = text.toUpperCase();
             this.color = color;
             this.speed = speed;
+            this.startX = 0;
+            this.regionWidth = -1;
         }
 
         @Override
         public void render(LEDMatrix matrix) {
-            matrix.clear();
+            int effWidth = regionWidth > 0 ? regionWidth : matrix.width;
+            int effStart = startX;
+
+            // clear our region
+            for (int x = effStart; x < effStart + effWidth; x++) {
+                for (int y = 0; y < matrix.height; y++) {
+                    matrix.setPixel(x, y, Color.BLACK);
+                }
+            }
 
             if (frameCount % speed == 0) {
                 offset++;
-                // Reset when text has scrolled completely off screen
-                if (offset > text.length() * (CHAR_WIDTH + CHAR_SPACING) + matrix.width) {
+                if (offset > text.length() * (CHAR_WIDTH + CHAR_SPACING) + effWidth) {
                     offset = 0;
                 }
             }
 
-            // Draw each character
+            int charY = (matrix.height - 5) / 2;
             for (int i = 0; i < text.length(); i++) {
-                int charX = matrix.width - offset + i * (CHAR_WIDTH + CHAR_SPACING);
-                int charY = (matrix.height - 5) / 2; // Center vertically (5 is char height)
-
-                // Only draw if character is visible on screen
-                if (charX > -CHAR_WIDTH && charX < matrix.width) {
+                int charX = effStart + effWidth - offset + i * (CHAR_WIDTH + CHAR_SPACING);
+                if (charX > effStart - CHAR_WIDTH && charX < effStart + effWidth) {
                     drawChar(matrix, text.charAt(i), charX, charY, color);
                 }
             }
@@ -357,8 +365,11 @@ public class LEDMatrix extends SubsystemBase {
         public void render(LEDMatrix matrix) {
             matrix.clear();
 
+            int totalWidth = text.length() * ( CHAR_WIDTH + CHAR_SPACING ) - CHAR_SPACING;
+            int startX = (matrix.width - totalWidth) / 2;
+
             for (int i = 0; i < text.length(); i++) {
-                int charX = matrix.width - offset + i * (CHAR_WIDTH + CHAR_SPACING);
+                int charX = startX + i * (CHAR_WIDTH + CHAR_SPACING);
                 int charY = (matrix.height - 5) / 2;
 
                 if (charX > -CHAR_WIDTH && charX < matrix.width) {
@@ -837,7 +848,7 @@ public class LEDMatrix extends SubsystemBase {
     }
 
     public Command scrollingTextCommand(String text, Color color, int speed) {
-        return Commands.runOnce(() -> playAnimation(new ScrollingText(text, color, speed)))
+        return Commands.runOnce(() -> playAnimation(new ScrollingText(text, color, speed)), this)
             .ignoringDisable(true);
     }
 

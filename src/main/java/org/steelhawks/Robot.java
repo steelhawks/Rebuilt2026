@@ -250,7 +250,7 @@ public class Robot extends LoggedRobot {
         if (autonomousCommand != null)
             CommandScheduler.getInstance().schedule(autonomousCommand);
         if (RobotContainer.s_LEDMatrix != null) {
-            CommandScheduler.getInstance().schedule(RobotContainer.s_LEDMatrix.staticTextCommand("NO", Color.RED));
+            CommandScheduler.getInstance().schedule(RobotContainer.s_LEDMatrix.staticTextCommand("Hello", Color.PINK));
         }
     }
 
