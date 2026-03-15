@@ -95,7 +95,41 @@ public class SubsystemConstants {
     }
 
     public static final class OmegaBot {
-        public static final LUTConstants LUT = LUTConstants.UNSET;
+        public static final LUTConstants LUT =
+                new LUTConstants(
+                        0.0, Double.MAX_VALUE,
+                        0.0, Double.MAX_VALUE,
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        });
+
         public static final IntakeConstants INTAKE =
             new IntakeConstants(
                 1, 2, 3,
@@ -106,7 +140,8 @@ public class SubsystemConstants {
                 1.0, -1.0,
                 0.8
             );
-        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
+        public static final FlywheelConstants FLYWHEEL =
+                new FlywheelConstants(5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523* 1.2, 50.0, 1.0, 50, 1.1, Units.inchesToMeters(1.16), (1.0 / 2.0));
         public static final TurretConstants TURRET = TurretConstants.UNSET;
         // hood constants
         // copied from previous constants file for kG calculation, since some math needs to be done while creating the record

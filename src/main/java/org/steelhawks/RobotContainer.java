@@ -1,9 +1,8 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -19,7 +18,6 @@ import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
-import org.steelhawks.util.geometry.RobotFootprint;
 
 public class RobotContainer {
 
@@ -45,13 +43,14 @@ public class RobotContainer {
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
-        s_Vision = config.createVision().orElse(null);
+//        s_Vision = config.createVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
         s_Hood = config.createHood().orElse(null);
         s_Intake = config.createIntake().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
+        s_Vision = new Vision();
 
 
         if (config.hasAutos) {
@@ -67,48 +66,14 @@ public class RobotContainer {
         Toggles.configureOverrides();
         LEDCommands.configureTriggers(driver.leftTrigger());
         Autos.testingBoard();
-//        ShooterTuner.getInstance();
     }
 
     private void configureDriver() {
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
 
-        if (config.hasIntake) {
-//            driver.x().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-//            driver.y().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-//            driver.a().onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
 
-            driver.rightTrigger()
-                .whileTrue(
-                    s_Intake.runIntake());
-        }
-
-        if (config.hasIntake && config.hasIndexer && config.hasIntake) {
-            driver.leftBumper()
+        driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
-        }
-
-        if (config.hasIndexer) {
-            driver.rightBumper()
-                .whileTrue(s_Indexer.outtake());
-        }
-
-        driver.leftTrigger()
-            .whileTrue(
-                TeleopSwerve.overrideState()
-                    .alongWith(new VibrateController(driver).repeatedly()));
-
-        if (config.hasIntake) {
-//            driver.x().onTrue(
-//                s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME)
-//            );
-            driver.x().onTrue(
-                s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION)
-            );
-            driver.y().onTrue(
-                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
-            );
-        }
     }
 }
