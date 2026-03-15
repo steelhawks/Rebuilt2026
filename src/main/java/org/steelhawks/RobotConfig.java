@@ -2,7 +2,7 @@ package org.steelhawks;
 
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
-import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.intake.*;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.swerve.*;
@@ -20,7 +20,10 @@ public class RobotConfig {
     public final boolean hasVision;
     public final boolean hasObjectVision;
     public final boolean hasAutos;
-    public final boolean hasShooter; // hasFlywheel on main
+    public final boolean hasShooter;// hasFlywheel on main
+    public final boolean hasIntake;
+
+    private final IntakeConstants intakeConstants;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -31,7 +34,9 @@ public class RobotConfig {
         this.hasVision = builder.hasVision;
         this.hasObjectVision = builder.hasObjectVision;
         this.hasAutos = builder.hasAutos;
-        this.hasShooter = builder.hasShooter; // builder.hasFlywheel on main
+        this.hasShooter = builder.hasShooter;// builder.hasFlywheel on main
+        this.hasIntake = builder.hasIntake;
+        this.intakeConstants = builder.intakeConstants;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -69,6 +74,13 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createObjectVision());
     }
 
+    public Optional<Intake> createIntake() {
+        if (!hasIntake) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(factory.createIntake(intakeConstants));
+    }
+
     public static RobotConfig getConfig() {
         if (Constants.getMode() == Mode.REPLAY) {
             return getReplayConfig();
@@ -76,11 +88,13 @@ public class RobotConfig {
 
         return switch (Constants.getRobot()) {
             case OMEGABOT -> new Builder()
+                    .withShooter(true)
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
                 .withAutos(true)
-                .withFactory(new OmegaBotFactory()).withShooter(true)
+                .withFactory(new OmegaBotFactory())
+                    .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                 .build();
 
             case ALPHABOT -> new Builder()
@@ -88,6 +102,7 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
+                    .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                 .withFactory(new AlphaBotFactory()).withShooter(true)
                 .build();
 
@@ -95,6 +110,7 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(false)
+                    .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                 .withAutos(true)
                 .withFactory(new LastYearFactory()).withShooter(false)
                 .build();
@@ -103,6 +119,7 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(true)
                 .withObjectVision(true)
+                    .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                 .withAutos(true)
                 .withFactory(new SimBotFactory()).withShooter(true)
                 .build();
@@ -116,12 +133,14 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withAutos(true)
+                    .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                 .withFactory(new ReplayFactory()).withShooter(true)
                 .build();
 
             default -> new Builder()
                 .withLEDMatrix(true)
                 .withVision(true)
+                    .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                 .withObjectVision(false)
                 .withAutos(true)
                 .withFactory(new ReplayFactory()).withShooter(true)
@@ -137,7 +156,10 @@ public class RobotConfig {
         private boolean hasObjectVision = false;
         private boolean hasAutos = false;
         private boolean hasShooter = false;
+        private boolean hasIntake = false;
         private SubsystemFactory factory = null;
+
+        private IntakeConstants intakeConstants;
 
         public Builder withLEDMatrix(boolean enabled) {
             this.hasLEDMatrix = enabled;
@@ -167,6 +189,13 @@ public class RobotConfig {
         public Builder withShooter(boolean enabled) {
             this.hasShooter = enabled;
             return this;
+        }
+
+        public Builder withIntake(boolean enabled, IntakeConstants intakeConstants) {
+            this.hasIntake = enabled;
+            this.intakeConstants = intakeConstants;
+            return this;
+
         }
 
         public Builder withFactory(SubsystemFactory factory) {
@@ -283,6 +312,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
+        Intake createIntake(IntakeConstants c);
         /*
          SuperStructure createSuperStructure();
          Intake createIntake();
@@ -372,6 +402,12 @@ public class RobotConfig {
             return new ObjectVision();
         }
 
+        @Override
+        public Intake createIntake(IntakeConstants c) {
+            return null;
+        }
+
+
     }
 
     // AlphaBot factory
@@ -452,6 +488,12 @@ public class RobotConfig {
         public ObjectVision createObjectVision() {
             return null; // Not available on AlphaBot
         }
+
+        @Override
+        public Intake createIntake(IntakeConstants c) {
+            return null;
+        }
+
 
     }
 
@@ -535,6 +577,12 @@ public class RobotConfig {
             return null;
         }
 
+        @Override
+        public Intake createIntake(IntakeConstants c) {
+            return null;
+        }
+
+
 
     }
 
@@ -570,6 +618,11 @@ public class RobotConfig {
         @Override
         public ObjectVision createObjectVision() {
             return new ObjectVision();
+        }
+
+        @Override
+        public Intake createIntake(IntakeConstants c) {
+            return new Intake(new IntakeIOSim(c));
         }
 
     }
@@ -610,6 +663,11 @@ public class RobotConfig {
 
         @Override
         public ObjectVision createObjectVision() {
+            return null;
+        }
+
+        @Override
+        public Intake createIntake(IntakeConstants c) {
             return null;
         }
 

@@ -36,6 +36,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final StatusSignal<Voltage> rightExtensionAppliedVoltage;
     private final StatusSignal<Temperature> rightExtensionTemp;
 
+    private final TalonFXConfiguration left_config;
+    private final TalonFXConfiguration right_config;
+
+
     private final StatusSignal<Angle> leftExtensionPosition;
     private final StatusSignal<AngularVelocity> leftExtensionVelocityPerSec;
     private final StatusSignal<Current> leftExtensionCurrentAmps;
@@ -68,6 +72,9 @@ public class IntakeIOTalonFX implements IntakeIO {
         right_motor = new TalonFX(IntakeConstants.EXTENSION_RIGHT_MOTOR_ID);
         intake_motor = new TalonFX(IntakeConstants.ROLLER_MOTOR_ID);
 
+        right_config = new TalonFXConfiguration();
+        left_config = new TalonFXConfiguration();
+
         extensionVoltage = new VoltageOut(0).withEnableFOC(true);
         extensionVelocityVoltage = new VelocityVoltage(0).withEnableFOC(true);
         extensionPositionVoltage = new PositionVoltage(0).withEnableFOC(true);
@@ -77,18 +84,26 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         left_motor.setControl(new Follower(IntakeConstants.EXTENSION_RIGHT_MOTOR_ID, MotorAlignmentValue.Opposed));
 
-        var extensionConfig = new TalonFXConfiguration();
-        extensionConfig.CurrentLimits.SupplyCurrentLimit = IntakeConstants.EXTENSION_CURRENT_LIMIT.getAsDouble();
-        extensionConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        right_config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.EXTENSION_CURRENT_LIMIT.getAsDouble();
+        right_config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        extensionConfig.MotorOutput = new MotorOutputConfigs()
+        left_config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.EXTENSION_CURRENT_LIMIT.getAsDouble();
+        left_config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+        right_config.MotorOutput = new MotorOutputConfigs()
                 .withInverted(InvertedValue.CounterClockwise_Positive)
                 .withNeutralMode(NeutralModeValue.Brake);
-        extensionConfig.Feedback.SensorToMechanismRatio = IntakeConstants.EXTENSION_GEAR_RATIO.getAsDouble();
+        right_config.Feedback.SensorToMechanismRatio = IntakeConstants.EXTENSION_GEAR_RATIO.getAsDouble();
 
-        left_motor.getConfigurator().apply(extensionConfig);
+        left_config.MotorOutput = new MotorOutputConfigs()
+                .withInverted(InvertedValue.CounterClockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake);
+        left_config.Feedback.SensorToMechanismRatio = IntakeConstants.EXTENSION_GEAR_RATIO.getAsDouble();
 
-//        var extensionSlot0Configs = new Slot0Configs();
+        left_motor.getConfigurator().apply(left_config);
+        right_motor.getConfigurator().apply(right_config);
+
+        var right_extensionSlot0Configs = new Slot0Configs();
 //        extensionSlot0Configs
 //                .withKA(IntakeConstants.EXTENSION_POSITION_KA.getAsDouble())
 //                .withKP(IntakeConstants.EXTENSION_POSITION_KP.getAsDouble())
@@ -96,8 +111,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 //                .withKD(IntakeConstants.EXTENSION_POSITION_KD.getAsDouble())
 //                .withKS(IntakeConstants.EXTENSION_POSITION_KS.getAsDouble())
 //                .withKV(IntakeConstants.EXTENSION_POSITION_KV.getAsDouble())
-//                .withKG(IntakeConstants.EXTENSION_POSITION_KG.getAsDouble());
-//        var extensionSlot1Configs = new Slot1Configs();
+//                .withKG(IntakeConstants.EXTENSION_POSITION_KG.getAsDouble())
 //        extensionSlot1Configs
 //                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
 //                .withKP(IntakeConstants.EXTENSION_VELOCITY_KP.getAsDouble())
@@ -286,5 +300,18 @@ public class IntakeIOTalonFX implements IntakeIO {
         return rollerVelocityVoltage.Velocity * (2.0 * Math.PI);
     }
 
+    @Override
+    public void setExtensionPID(double kP, double kI, double kD) {
+        right_config.Slot0.kP = kP;
+        right_config.Slot0.kI = kI;
+        right_config.Slot0.kD = kD;
+
+        left_config.Slot0.kP = kP;
+        left_config.Slot0.kI = kI;
+        left_config.Slot0.kD = kD;
+
+        right_motor.getConfigurator().apply(right_config);
+        left_motor.getConfigurator().apply(left_config);
+    }
 
 }

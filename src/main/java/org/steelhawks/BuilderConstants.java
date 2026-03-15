@@ -7,6 +7,10 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class BuilderConstants {
 
+    public static class OmegaBot {
+        public static final IntakeConstants INTAKE = new IntakeConstants();
+    }
+
      public static class TurretPIDConstants {
         public static final LoggedTunableNumber kP = new LoggedTunableNumber("Turret kP", 0.0);
         public static final LoggedTunableNumber kI = new LoggedTunableNumber("Turret kI", 0.0);
@@ -76,21 +80,18 @@ public class BuilderConstants {
     }
 
     public static class ExtensionPIDConstants {
-        public static final LoggedTunableNumber kP = new LoggedTunableNumber("Extension kP", 0.0);
-        public static final LoggedTunableNumber kI = new LoggedTunableNumber("Extension kI", 0.0);
-        public static final LoggedTunableNumber kD = new LoggedTunableNumber("Extension kD", 0.0);
-        public static final LoggedTunableNumber kA = new LoggedTunableNumber("Extension kA", 0.0);
-        public static final LoggedTunableNumber kV = new LoggedTunableNumber("Extension kV", 0.0);
-        public static final LoggedTunableNumber kS = new LoggedTunableNumber("Extension kS", 0.0);
-        public static final LoggedTunableNumber kG = new LoggedTunableNumber("Extension kG", 0.0);
+        public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/Extension kP", 0.0);
+        public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/Extension kI", 0.0);
+        public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/Extension kD", 0.0);
+        public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/Extension kA", 0.0);
+        public static final LoggedTunableNumber kV = new LoggedTunableNumber("Intake/Extension kV", 0.0);
+        public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/Extension kS", 0.0);
+        public static final LoggedTunableNumber kG = new LoggedTunableNumber("Intake/Extension kG", 0.0);
 
         public static void setPID(TalonFX motor) {
             var rollerSlot0Configs = new Slot0Configs();
             rollerSlot0Configs
                     .withKA(kA.getAsDouble())
-                    .withKP(kP.getAsDouble())
-                    .withKI(kI.getAsDouble())
-                    .withKD(kD.getAsDouble())
                     .withKS(kS.getAsDouble())
                     .withKV(kV.getAsDouble())
                     .withKG(kG.getAsDouble());
@@ -100,20 +101,17 @@ public class BuilderConstants {
     }
 
     public static class RollerPIDConstants {
-        public static final LoggedTunableNumber kP = new LoggedTunableNumber("Roller kP", 0.0);
-        public static final LoggedTunableNumber kI = new LoggedTunableNumber("Roller kI", 0.0);
-        public static final LoggedTunableNumber kD = new LoggedTunableNumber("Roller kD", 0.0);
-        public static final LoggedTunableNumber kA = new LoggedTunableNumber("Roller kA", 0.0);
-        public static final LoggedTunableNumber kV = new LoggedTunableNumber("Roller kV", 0.0);
-        public static final LoggedTunableNumber kS = new LoggedTunableNumber("Roller kS", 0.0);
+        public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/Roller kP", 0.0);
+        public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/Roller kI", 0.0);
+        public static final LoggedTunableNumber kD = new LoggedTunableNumber("Intake/Roller kD", 0.0);
+        public static final LoggedTunableNumber kA = new LoggedTunableNumber("Intake/Roller kA", 0.0);
+        public static final LoggedTunableNumber kV = new LoggedTunableNumber("Intake/Roller kV", 0.0);
+        public static final LoggedTunableNumber kS = new LoggedTunableNumber("Intake/Roller kS", 0.0);
 
         public static void setPID(TalonFX motor) {
             var rollerSlot0Configs = new Slot0Configs();
             rollerSlot0Configs
                     .withKA(kA.getAsDouble())
-                    .withKP(kP.getAsDouble())
-                    .withKI(kI.getAsDouble())
-                    .withKD(kD.getAsDouble())
                     .withKS(kS.getAsDouble())
                     .withKV(kV.getAsDouble());
 

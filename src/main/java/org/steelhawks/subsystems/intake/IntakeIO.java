@@ -96,4 +96,8 @@ public interface IntakeIO {
         return 0.0;
     }
 
+    default void setExtensionPID(double kP, double kI, double kD) {}
+
+    default void setRollerPID(double kP, double kI, double kD) {}
+
 }
