@@ -21,9 +21,15 @@ public class Hood extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
+    private final Debouncer homingDebouncer =
+        new Debouncer(0.25, Debouncer.DebounceType.kRising);
+
     private Rotation2d setpoint;
     private boolean brakeModeEnabled = false;
     private boolean atGoal = false;
+    private boolean isHomed = false;
+    private boolean isZeroed = false;
+    private final double homingVolts = 3.0;
     private final SubsystemConstants.HoodConstants constants;
 
     private static LoggedTunableNumber kP;
@@ -41,25 +47,11 @@ public class Hood extends SubsystemBase {
         kD = new LoggedTunableNumber("Hood/kD", constants.kD());
         kS = new LoggedTunableNumber("Hood/kS", constants.kS());
         kG = new LoggedTunableNumber("Hood/kG", constants.kG());
-
-//        io.setPosition(Rotation2d.fromDegrees(80.0));
         inputs.goal = 80.0;
     }
 
-    private boolean isHomed = false;
-    private boolean isZeroed = false;
-
-    private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
-
-    private final double homingVolts = 3.0;
-
     @AutoLogOutput(key = "Hood/IsStalling")
     private boolean isStalling() {
-//        return homingDebouncer.calculate(
-//                (Math.abs(inputs.leftTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
-//                        && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble())
-//                        || Math.abs(inputs.rightTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
-//                        && Math.abs(inputs.rightVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
         return homingDebouncer.calculate(Math.abs(inputs.torqueCurrentAmps) > 60.0);
     }
 
@@ -128,9 +120,7 @@ public class Hood extends SubsystemBase {
 //            }
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
-                setpoint,
-//                kS.get() * Math.signum(inputs.motorVelocityDegPerSec));
-                0.0);
+                setpoint, 0.0);
         }
     }
 
@@ -169,7 +159,6 @@ public class Hood extends SubsystemBase {
     }
 
     public double getPositionDeg() {
-//        return inputs.cancoderPositionDeg.getDegrees();
         return inputs.motorPositionDeg.getDegrees();
     }
 

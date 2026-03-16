@@ -62,14 +62,12 @@ public class HoodIOTalonFX implements HoodIO {
         motorConfig.Slot0.kD = constants.kD();
         motorConfig.Slot0.kS = constants.kS();
         motorConfig.Slot0.kG = constants.kG();
-//        motorConfig.Slot0.kV = constants.kV();
         motorConfig.Slot0.kA = constants.kA();
 
         motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
 
-        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 8.0;
-        motorConfig.MotionMagic.MotionMagicAcceleration   = 10.0;
-//        motorConfig.MotionMagic.MotionMagicJerk           = constants.mmJerk();
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = constants.maxVelocity();
+        motorConfig.MotionMagic.MotionMagicAcceleration = constants.maxAcceleration();
 
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
 

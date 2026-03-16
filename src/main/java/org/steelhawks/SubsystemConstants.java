@@ -63,13 +63,14 @@ public class SubsystemConstants {
         int motorId, int cancoderId,
         double kP, double kI, double kD,
         double kS, double kG, double kA,
+        double maxVelocity, double maxAcceleration,
         double reduction,
         Rotation2d minAngle, Rotation2d maxAngle,
         Rotation2d magOffset,
         double tolerance
     ) {
         public static final HoodConstants UNSET =
-            new HoodConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d() , new Rotation2d(), 0);
+            new HoodConstants(0, 0, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, new Rotation2d(), new Rotation2d() , new Rotation2d(), 0);
     }
 
     public record IntakeConstants(
@@ -97,39 +98,39 @@ public class SubsystemConstants {
 
     public static final class OmegaBot {
         public static final LUTConstants LUT =
-                new LUTConstants(
-                        0.0, Double.MAX_VALUE,
-                        0.0, Double.MAX_VALUE,
-                        new double[][]{
-                                {1.75, 14.8},
-                                {2.12, 15.0},
-                                {3.16, 18.8}
-                        },
-                        new double[][]{
-                                {1.75, 14.8},
-                                {2.12, 15.0},
-                                {3.16, 18.8}
-                        },
-                        new double[][]{
-                                {1.75, 14.8},
-                                {2.12, 15.0},
-                                {3.16, 18.8}
-                        },
-                        new double[][]{
-                                {1.75, 14.8},
-                                {2.12, 15.0},
-                                {3.16, 18.8}
-                        },
-                        new double[][]{
-                                {1.75, 14.8},
-                                {2.12, 15.0},
-                                {3.16, 18.8}
-                        },
-                        new double[][]{
-                                {1.75, 14.8},
-                                {2.12, 15.0},
-                                {3.16, 18.8}
-                        });
+            new LUTConstants(
+                0.0, Double.MAX_VALUE,
+                0.0, Double.MAX_VALUE,
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                },
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                },
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                },
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                },
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                },
+                new double[][]{
+                    {1.75, 14.8},
+                    {2.12, 15.0},
+                    {3.16, 18.8}
+                });
 
         public static final IntakeConstants INTAKE =
             new IntakeConstants(
@@ -139,26 +140,19 @@ public class SubsystemConstants {
                 0.8, 2.0,
                 40.0, 0.05,
                 1.0, -1.0,
-                0.8
-            );
-        public static final FlywheelConstants FLYWHEEL =
-                new FlywheelConstants(5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523* 1.2, 50.0, 1.0, 50, 1.1, Units.inchesToMeters(1.16), (1.0 / 2.0));
-        public static final TurretConstants TURRET =
-            new TurretConstants(4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromDegrees(160.0), Rotation2d.fromRotations(0.064697265625));
+                0.8);
 
-        // hood constants
-        // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
-        private static final double M = Units.lbsToKilograms(0.0);
-        private static final double G = 9.81;
-        private static final double R = Units.inchesToMeters(0.0); // dist from pivot point to CoM
-        private static final double kT = DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
-        private static final double HOOD_REDUCTION = 4.357 / 1.0;
-        private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
+        public static final FlywheelConstants FLYWHEEL =
+            new FlywheelConstants(
+                5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523 * 1.2, 50.0, 1.0, 50, 1.1, Units.inchesToMeters(1.16), (1.0 / 2.0));
+
+        public static final TurretConstants TURRET =
+            new TurretConstants(
+                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromDegrees(160.0), Rotation2d.fromRotations(0.064697265625));
 
         public static final HoodConstants HOOD =
-                new HoodConstants(
-                        7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02
-                );
+            new HoodConstants(
+                    7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02);
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
@@ -284,6 +278,7 @@ public class SubsystemConstants {
             0,
             (M * G * R) / (kT * HOOD_REDUCTION),
             0,
+            10.0, 20.0,
             HOOD_REDUCTION,
             // min angle is full extension, max angle is home
             minAngle, Rotation2d.fromDegrees(80.0),
