@@ -144,7 +144,7 @@ public class SubsystemConstants {
         public static final FlywheelConstants FLYWHEEL =
                 new FlywheelConstants(5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523* 1.2, 50.0, 1.0, 50, 1.1, Units.inchesToMeters(1.16), (1.0 / 2.0));
         public static final TurretConstants TURRET =
-            new TurretConstants(4, 9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(180.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromRotations(0.064697265625));
+            new TurretConstants(4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromDegrees(180.0), Rotation2d.fromRotations(0.064697265625));
 
         // hood constants
         // copied from previous constants file for kG calculation, since some math needs to be done while creating the record

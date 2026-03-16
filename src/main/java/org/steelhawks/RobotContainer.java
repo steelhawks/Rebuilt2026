@@ -77,18 +77,25 @@ public class RobotContainer {
         driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
 
-//        driver.x()
-//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(45.0)));
-//
-//        driver.y()
-//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(60.0)));
-//
-//        driver.a()
-//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(75.0)));
+        if (config.hasIntake) {
+            driver.rightTrigger()
+                .whileTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
+                    .andThen(s_Intake.runIntake())
+                    .finallyDo(() -> s_Intake.setDesiredState(IntakeConstants.State.HOME)));
+        }
 
-        driver.x()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-        driver.y()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
+        if (config.hasTurret) {
+            driver.x()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0.0)));
+
+            driver.y()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
+
+            driver.a()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(180.0)));
+
+            driver.b()
+                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(-90.0)));
+        }
     }
 }
