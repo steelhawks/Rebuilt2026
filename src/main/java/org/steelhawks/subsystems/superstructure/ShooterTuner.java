@@ -10,7 +10,7 @@ import org.steelhawks.util.VirtualSubsystem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShooterTuner extends VirtualSubsystem {
+public class ShooterTuner {
 
     private static ShooterTuner instance;
     public static ShooterTuner getInstance() {
@@ -48,7 +48,6 @@ public class ShooterTuner extends VirtualSubsystem {
     private final List<double[]> savedPoints =
         new ArrayList<>(); // [distance, hoodAngle, flywheelSpeed]
 
-    @Override
     public void periodic() {
         double activeDistance = useOdomDistance.get()
             ? ShooterStructure.distanceToTarget(FieldConstants.Hub.HUB_CENTER_3D)
