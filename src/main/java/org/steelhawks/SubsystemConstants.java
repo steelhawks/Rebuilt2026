@@ -152,7 +152,10 @@ public class SubsystemConstants {
         private static final double HOOD_REDUCTION = 4.357 / 1.0;
         private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
 
-        public static final HoodConstants HOOD = HoodConstants.UNSET;
+        public static final HoodConstants HOOD =
+                new HoodConstants(
+                        7, 8, 2800.0, 0.0, 0.0, 35.0, 0.0, 0.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02
+                );
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(

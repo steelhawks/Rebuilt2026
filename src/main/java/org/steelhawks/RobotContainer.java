@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -43,14 +44,14 @@ public class RobotContainer {
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
-//        s_Vision = config.createVision().orElse(null);
+        s_Vision = config.createVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
         s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
         s_Hood = config.createHood().orElse(null);
         s_Intake = config.createIntake().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
-        s_Vision = new Vision();
+//        s_Vision = new Vision();
 
 
         if (config.hasAutos) {
@@ -75,5 +76,14 @@ public class RobotContainer {
 
         driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
+
+        driver.x()
+                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(45.0)));
+
+        driver.y()
+                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(60.0)));
+
+        driver.a()
+                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(75.0)));
     }
 }

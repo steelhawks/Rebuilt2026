@@ -61,6 +61,7 @@ public class HoodIOTalonFX implements HoodIO {
         motorConfig.Slot0.kI = constants.kI();
         motorConfig.Slot0.kD = constants.kD();
         motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
+//        motorConfig.Feedback.SensorToMechanismRatio = 81.95;
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
 
         cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
@@ -88,7 +89,8 @@ public class HoodIOTalonFX implements HoodIO {
 
         PhoenixUtil.registerSignals(
             bus,
-            position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp);
+            position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp,
+            cancoderPosition, cancoderVelocity, cancoderVoltage);
         tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(hoodMotor, cancoder));
     }
 
@@ -140,6 +142,11 @@ public class HoodIOTalonFX implements HoodIO {
         motorConfig.Slot0.kI = kI;
         motorConfig.Slot0.kD = kD;
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
+    }
+
+    @Override
+    public void setPosition(Rotation2d position) {
+        tryUntilOk(5, () -> hoodMotor.setPosition(position.getRotations()));
     }
 
     @Override
