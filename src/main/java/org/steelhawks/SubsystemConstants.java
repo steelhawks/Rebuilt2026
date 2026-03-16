@@ -44,7 +44,7 @@ public class SubsystemConstants {
     }
 
     public record TurretConstants(
-        int turretId,
+        int turretId, int encoderId,
         double kP, double kI, double kD, double kS, double kA,
         double maxVelocityRadPerSec,
         double maxAccelerationRadPerSecSq,
@@ -52,10 +52,11 @@ public class SubsystemConstants {
         double currentHomingThreshold,
         double motorReduction,
         Rotation2d minRotation,
-        Rotation2d maxRotation
+        Rotation2d maxRotation,
+        Rotation2d encoderOffset
     ) {
         public static final TurretConstants UNSET =
-            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d());
+            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d(), new Rotation2d());
     }
 
     public record HoodConstants(
@@ -95,7 +96,41 @@ public class SubsystemConstants {
     }
 
     public static final class OmegaBot {
-        public static final LUTConstants LUT = LUTConstants.UNSET;
+        public static final LUTConstants LUT =
+                new LUTConstants(
+                        0.0, Double.MAX_VALUE,
+                        0.0, Double.MAX_VALUE,
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        },
+                        new double[][]{
+                                {1.75, 14.8},
+                                {2.12, 15.0},
+                                {3.16, 18.8}
+                        });
+
         public static final IntakeConstants INTAKE =
             new IntakeConstants(
                 1, 2, 3,
@@ -106,8 +141,11 @@ public class SubsystemConstants {
                 1.0, -1.0,
                 0.8
             );
-        public static final FlywheelConstants FLYWHEEL = FlywheelConstants.UNSET;
-        public static final TurretConstants TURRET = TurretConstants.UNSET;
+        public static final FlywheelConstants FLYWHEEL =
+                new FlywheelConstants(5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523* 1.2, 50.0, 1.0, 50, 1.1, Units.inchesToMeters(1.16), (1.0 / 2.0));
+        public static final TurretConstants TURRET =
+            new TurretConstants(4, 9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(180.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromRotations(0.064697265625));
+
         // hood constants
         // copied from previous constants file for kG calculation, since some math needs to be done while creating the record
         private static final double M = Units.lbsToKilograms(0.0);
@@ -117,7 +155,10 @@ public class SubsystemConstants {
         private static final double HOOD_REDUCTION = 4.357 / 1.0;
         private static final Rotation2d minAngle = Rotation2d.fromDegrees(40);
 
-        public static final HoodConstants HOOD = HoodConstants.UNSET;
+        public static final HoodConstants HOOD =
+                new HoodConstants(
+                        7, 8, 2800.0, 0.0, 0.0, 35.0, 0.0, 0.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02
+                );
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
@@ -167,7 +208,7 @@ public class SubsystemConstants {
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                1,
+                1, 0,
                 1100, 0, 90,
                 3.0, 0,
                 10, 20,
@@ -175,7 +216,8 @@ public class SubsystemConstants {
                 5,
                 (200.0 / 20.0),
                 new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
-                new Rotation2d(Math.PI + (Math.PI / 60))
+                new Rotation2d(Math.PI + (Math.PI / 60)),
+                new Rotation2d()
             );
 
         public static final IndexerConstants INDEXER =
@@ -215,7 +257,7 @@ public class SubsystemConstants {
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                1,
+                1, 0,
                 200, 0, 7,
                 0.2, 0,
                 10, 20,
@@ -223,7 +265,8 @@ public class SubsystemConstants {
                 40,
                 (200.0 / 20.0),
                 new Rotation2d((-Math.PI / 2) - (Math.PI / 60)),
-                new Rotation2d(Math.PI + (Math.PI / 60))
+                new Rotation2d(Math.PI + (Math.PI / 60)),
+                new Rotation2d()
             );
 
         // hood constants

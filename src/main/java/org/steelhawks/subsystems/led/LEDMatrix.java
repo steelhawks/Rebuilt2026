@@ -111,11 +111,14 @@ public class LEDMatrix extends SubsystemBase {
             return -1;
         }
 
+        int fx = (width - 1) - x;
+        int fy = (height - 1) - y;
+
         if (layout == MatrixLayout.SERPENTINE) {
-            if (x % 2 == 0) {
-                return (x * height) + y;
+            if (fx % 2 == 0) {
+                return (fx * height) + fy;
             } else {
-                return (x * height) + (height - 1 - y);
+                return (fx * height) + (height - 1 - fy);
             }
         } else {
             return y * width + x;
@@ -695,6 +698,7 @@ public class LEDMatrix extends SubsystemBase {
             matrix.clear();
 
             for (int i = 0; i < text.length(); i++) {
+//                int reversedI = text.length() - 1 - i;
                 int charX = (matrix.width / 2) - ((text.length() * CHAR_WIDTH + (text.length() - 1) * CHAR_SPACING) / 2) + (i * (CHAR_WIDTH + CHAR_SPACING));
                 int charY = (matrix.height - 5) / 2;
                 drawChar(matrix, text.charAt(i), charX, charY, color);

@@ -175,23 +175,23 @@ public class RobotConfig {
                 .withLEDMatrix(true)
                 .withVision(false)
                 .withObjectVision(false)
-                .withFlywheel(false, SubsystemConstants.OmegaBot.FLYWHEEL)
-                .withTurret(false, SubsystemConstants.OmegaBot.TURRET)
-                .withHood(false, SubsystemConstants.OmegaBot.HOOD)
+                .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)
+                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
+                .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
-                .withIntake(false, SubsystemConstants.OmegaBot.INTAKE)
+                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
                 .withAutos(false)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
             case ALPHABOT -> new Builder()
-                .withSwerve(false)
+                .withSwerve(true)
                 .withLEDMatrix(false)
                 .withLEDStrip(false)
                 .withVision(false)
                 .withObjectVision(false)
-                .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
+                .withFlywheel(false, SubsystemConstants.AlphaBot.FLYWHEEL)
                 .withTurret(false, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
@@ -510,13 +510,11 @@ public class RobotConfig {
         public Swerve createSwerve() {
             return new Swerve(
                 CANBusList.kRioBus,
-                new GyroIOSim(Objects.requireNonNull(
-                    Swerve.getDriveSimulation(), "Drive simulation not initialized")
-                    .getGyroSimulation()),
-                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[0]),
-                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[1]),
-                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[2]),
-                new ModuleIOSim(Swerve.getDriveSimulation().getModules()[3]));
+            new GyroIOPigeon2(TunerConstantsAlpha.DrivetrainConstants.Pigeon2Id, CANBusList.kRioBus),
+            new ModuleIOTalonFX(TunerConstantsAlpha.FrontLeft, CANBusList.kRioBus),
+            new ModuleIOTalonFX(TunerConstantsAlpha.FrontRight, CANBusList.kRioBus),
+            new ModuleIOTalonFX(TunerConstantsAlpha.BackLeft, CANBusList.kRioBus),
+            new ModuleIOTalonFX(TunerConstantsAlpha.BackRight, CANBusList.kRioBus));
         }
 
         @Override
@@ -773,7 +771,7 @@ public class RobotConfig {
 
         @Override
         public LEDMatrix createLEDMatrix() {
-            return new LEDMatrix(8, 32);
+            return new LEDMatrix(32, 8);
         }
 
         @Override

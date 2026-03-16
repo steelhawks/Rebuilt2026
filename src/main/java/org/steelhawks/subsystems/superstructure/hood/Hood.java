@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -46,20 +48,53 @@ public class Hood extends SubsystemBase {
         kS = new LoggedTunableNumber("Hood/kS", constants.kS());
         kA = new LoggedTunableNumber("Hood/kA", constants.kA());
         kG = new LoggedTunableNumber("Hood/kG", constants.kG());
+
+//        io.setPosition(Rotation2d.fromDegrees(80.0));
+
+        inputs.goal = 80.0;
+    }
+
+    private boolean isHomed = false;
+    private boolean isZeroed = false;
+
+    private final double homingVolts = 1.0;
+
+    @AutoLogOutput(key = "Hood/IsStalling")
+    private boolean isStalling() {
+//        return homingDebouncer.calculate(
+//                (Math.abs(inputs.leftTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
+//                        && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble())
+//                        || Math.abs(inputs.rightTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
+//                        && Math.abs(inputs.rightVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
+        return Math.abs(inputs.torqueCurrentAmps) > 60.0;
     }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Hood", inputs);
+
+        if (!isHomed && Toggles.Hood.isEnabled.get()) {
+            io.runOpenLoop(homingVolts, false);
+            isHomed = isStalling();
+            Logger.recordOutput("Intake/IsHomed", isHomed);
+        } else {
+            if (!isZeroed) {
+                io.setPosition(Rotation2d.fromDegrees(80.0));
+                io.stop();
+                isZeroed = true;
+                Logger.recordOutput("Intake/Zeroed", true);
+            }
+        }
+
         final boolean shouldRun =
             DriverStation.isEnabled()
             && (inputs.motorConnected && inputs.cancoderConnected)
             && Toggles.Hood.isEnabled.get()
             && !Toggles.Hood.voltageOverride.get()
-            && !Toggles.Hood.currentOverride.get()
-            && (getPositionDeg() >= constants.minAngle().getDegrees())
-            && (getPositionDeg() <= constants.maxAngle().getDegrees());
+            && !Toggles.Hood.currentOverride.get();
+//            && (getPositionDeg() >= constants.minAngle().getDegrees())
+//            && (getPositionDeg() <= constants.maxAngle().getDegrees());
         Logger.recordOutput("Hood/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
@@ -92,14 +127,14 @@ public class Hood extends SubsystemBase {
             );
         }
         if (shouldRun) {
-            if (!Toggles.shooterTuningMode.get()) {
-                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
-            }
+//            if (!Toggles.shooterTuningMode.get()) {
+//                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+//                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+//            }
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
                 setpoint,
-                kG.get());
+                kS.get());
         }
     }
 
@@ -133,7 +168,8 @@ public class Hood extends SubsystemBase {
     }
 
     public double getPositionDeg() {
-        return inputs.cancoderPositionDeg.getDegrees();
+//        return inputs.cancoderPositionDeg.getDegrees();
+        return inputs.motorPositionDeg.getDegrees();
     }
 
     public void setBrakeMode(boolean enabled) {

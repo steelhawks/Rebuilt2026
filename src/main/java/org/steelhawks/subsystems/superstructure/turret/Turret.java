@@ -84,6 +84,7 @@ public class Turret extends SubsystemBase {
                 new TrapezoidProfile.Constraints(
                     maxVelocityRadPerSec.getAsDouble(),
                     maxAccelerationRadPerSecSq.getAsDouble()));
+        isHomed = Constants.getRobot().equals(Constants.RobotType.OMEGABOT);
     }
 
     private Pose2d getPose() {

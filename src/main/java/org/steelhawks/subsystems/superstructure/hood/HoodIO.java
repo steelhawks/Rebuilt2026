@@ -33,5 +33,7 @@ public interface HoodIO {
 
     default void setPID(double kP, double kI, double kD) {}
 
+    default void setPosition(Rotation2d position) {}
+
     default void stop() {}
 }
