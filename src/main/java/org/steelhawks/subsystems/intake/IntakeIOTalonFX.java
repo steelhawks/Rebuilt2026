@@ -38,6 +38,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     private final TalonFXConfiguration left_config;
     private final TalonFXConfiguration right_config;
+    private final TalonFXConfiguration roller_config;
 
 
     private final StatusSignal<Angle> leftExtensionPosition;
@@ -74,6 +75,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         right_config = new TalonFXConfiguration();
         left_config = new TalonFXConfiguration();
+        roller_config = new TalonFXConfiguration();
 
         extensionVoltage = new VoltageOut(0).withEnableFOC(true);
         extensionVelocityVoltage = new VelocityVoltage(0).withEnableFOC(true);
@@ -127,15 +129,15 @@ public class IntakeIOTalonFX implements IntakeIO {
         BuilderConstants.ExtensionPIDConstants.setPID(left_motor);
         BuilderConstants.ExtensionPIDConstants.setPID(right_motor);
 
-        var rollerConfig = new TalonFXConfiguration()
-                .withMotorOutput(new MotorOutputConfigs()
+
+                roller_config.withMotorOutput(new MotorOutputConfigs()
                         .withNeutralMode(NeutralModeValue.Brake)
                         .withInverted(InvertedValue.CounterClockwise_Positive));
 
-        rollerConfig.CurrentLimits.SupplyCurrentLimit = IntakeConstants.ROLLER_CURRENT_LIMIT.getAsDouble();
-        rollerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        roller_config.CurrentLimits.SupplyCurrentLimit = IntakeConstants.ROLLER_CURRENT_LIMIT.getAsDouble();
+        roller_config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        intake_motor.getConfigurator().apply(rollerConfig);
+        intake_motor.getConfigurator().apply(roller_config);
 
         BuilderConstants.RollerPIDConstants.setPID(intake_motor);
 
@@ -314,4 +316,10 @@ public class IntakeIOTalonFX implements IntakeIO {
         left_motor.getConfigurator().apply(left_config);
     }
 
+    @Override
+    public void setRollerPID(double kP, double kI, double kD) {
+        roller_config.Slot0.kP = kP;
+        roller_config.Slot0.kI = kI;
+        roller_config.Slot0.kP = kP;
+    }
 }
