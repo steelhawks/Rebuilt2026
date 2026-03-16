@@ -157,7 +157,7 @@ public class SubsystemConstants {
 
         public static final HoodConstants HOOD =
                 new HoodConstants(
-                        7, 8, 2800.0, 0.0, 0.0, 35.0, 0.0, 0.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02
+                        7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02
                 );
 
         public static final IndexerConstants INDEXER =

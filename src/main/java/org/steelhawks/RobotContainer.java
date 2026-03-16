@@ -84,18 +84,29 @@ public class RobotContainer {
                     .finallyDo(() -> s_Intake.setDesiredState(IntakeConstants.State.HOME)));
         }
 
-        if (config.hasTurret) {
+//        if (config.hasTurret) {
+//            driver.x()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0.0)));
+//
+//            driver.y()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
+//
+//            driver.a()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(180.0)));
+//
+//            driver.b()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(-90.0)));
+//        }
+
+        if (config.hasHood) {
             driver.x()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0.0)));
+                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)));
 
             driver.y()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
+                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(60.0)));
 
             driver.a()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(180.0)));
-
-            driver.b()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(-90.0)));
+                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(45.0)));
         }
     }
 }

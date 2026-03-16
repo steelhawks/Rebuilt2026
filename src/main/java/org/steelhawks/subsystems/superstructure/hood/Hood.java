@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure.hood;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -8,13 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.Robot;
-import org.steelhawks.SubsystemConstants;
-import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.intake.IntakeConstants;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.util.AllianceFlip;
+import org.steelhawks.*;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -35,7 +30,6 @@ public class Hood extends SubsystemBase {
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
-    private static LoggedTunableNumber kA;
     private static LoggedTunableNumber kG;
 
     public Hood(HoodIO io, SubsystemConstants.HoodConstants constants) {
@@ -46,18 +40,18 @@ public class Hood extends SubsystemBase {
         kI = new LoggedTunableNumber("Hood/kI", constants.kI());
         kD = new LoggedTunableNumber("Hood/kD", constants.kD());
         kS = new LoggedTunableNumber("Hood/kS", constants.kS());
-        kA = new LoggedTunableNumber("Hood/kA", constants.kA());
         kG = new LoggedTunableNumber("Hood/kG", constants.kG());
 
 //        io.setPosition(Rotation2d.fromDegrees(80.0));
-
         inputs.goal = 80.0;
     }
 
     private boolean isHomed = false;
     private boolean isZeroed = false;
 
-    private final double homingVolts = 1.0;
+    private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
+
+    private final double homingVolts = 3.0;
 
     @AutoLogOutput(key = "Hood/IsStalling")
     private boolean isStalling() {
@@ -66,7 +60,7 @@ public class Hood extends SubsystemBase {
 //                        && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble())
 //                        || Math.abs(inputs.rightTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
 //                        && Math.abs(inputs.rightVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
-        return Math.abs(inputs.torqueCurrentAmps) > 60.0;
+        return homingDebouncer.calculate(Math.abs(inputs.torqueCurrentAmps) > 60.0);
     }
 
     @Override
@@ -89,10 +83,11 @@ public class Hood extends SubsystemBase {
 
         final boolean shouldRun =
             DriverStation.isEnabled()
-            && (inputs.motorConnected && inputs.cancoderConnected)
-            && Toggles.Hood.isEnabled.get()
-            && !Toggles.Hood.voltageOverride.get()
-            && !Toggles.Hood.currentOverride.get();
+                && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
+                && (inputs.motorConnected && inputs.cancoderConnected)
+                && Toggles.Hood.isEnabled.get()
+                && !Toggles.Hood.voltageOverride.get()
+                && !Toggles.Hood.currentOverride.get();
 //            && (getPositionDeg() >= constants.minAngle().getDegrees())
 //            && (getPositionDeg() <= constants.maxAngle().getDegrees());
         Logger.recordOutput("Hood/ShouldRun", shouldRun);
@@ -134,10 +129,12 @@ public class Hood extends SubsystemBase {
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
                 setpoint,
-                kS.get());
+//                kS.get() * Math.signum(inputs.motorVelocityDegPerSec));
+                0.0);
         }
     }
 
+    @AutoLogOutput(key = "Hood/AtGoal")
     public boolean atGoal() {
         return atGoal;
     }
@@ -160,7 +157,11 @@ public class Hood extends SubsystemBase {
     }
 
     public Command zeroHood() {
-        return Commands.runOnce(() -> {}, this);
+        return Commands.runOnce(() -> {
+            isHomed = false;
+            isZeroed = false;
+            homingDebouncer.calculate(false);
+        }, this);
     }
 
     public Command setDesiredPositionCommand(Rotation2d position) {

@@ -102,7 +102,7 @@ public interface Toggles {
 
     interface Hood {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Hood/IsEnabled", false);
+            new LoggedNetworkBoolean("Toggles/Hood/IsEnabled", true);
         LoggedNetworkBoolean disableBrakeMode =
             new LoggedNetworkBoolean("Toggles/Hood/DisableBrakeMode", true);
         LoggedNetworkBoolean currentOverride =
