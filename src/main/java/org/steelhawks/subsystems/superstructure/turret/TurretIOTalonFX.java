@@ -3,11 +3,15 @@ package org.steelhawks.subsystems.superstructure.turret;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
@@ -23,26 +27,41 @@ public class TurretIOTalonFX implements TurretIO {
     private final StatusSignal<Current> torqueCurrent;
     private final StatusSignal<Temperature> temp;
 
+    private final StatusSignal<Angle> cancoderPosition;
+    private final StatusSignal<AngularVelocity> cancoderVelocity;
+    private final StatusSignal<Voltage> cancoderVoltage;
+
     private final PositionVoltage positionVoltage;
     private final PositionTorqueCurrentFOC positionTorqueCurrentFOC;
     private final VoltageOut voltageOut;
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final DutyCycleOut dutyCycleOut;
 
-    private final TalonFXConfiguration config;
+    private final TalonFXConfiguration motorConfig;
+    private final CANcoderConfiguration encoderConfig;
     private final TalonFX motor;
+    private final CANcoder encoder;
 
     public TurretIOTalonFX(CANBus bus, SubsystemConstants.TurretConstants constants) {
+        encoder = new CANcoder(constants.encoderId(), bus);
+        encoderConfig = new CANcoderConfiguration();
+        encoderConfig.MagnetSensor.MagnetOffset = constants.encoderOffset().getRotations();
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        PhoenixUtil.tryUntilOk(5, () -> encoder.getConfigurator().apply(encoderConfig)); // encoder first
+
         motor = new TalonFX(constants.turretId(), bus);
-        config = new TalonFXConfiguration();
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        config.Slot0.kP = constants.kP();
-        config.Slot0.kI = constants.kI();
-        config.Slot0.kD = constants.kD();
-        config.Feedback.SensorToMechanismRatio = constants.motorReduction();
-        config.ClosedLoopGeneral.ContinuousWrap = false;
-        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
+        motorConfig = new TalonFXConfiguration();
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        motorConfig.Slot0.kP = constants.kP();
+        motorConfig.Slot0.kI = constants.kI();
+        motorConfig.Slot0.kD = constants.kD();
+        motorConfig.ClosedLoopGeneral.ContinuousWrap = false;
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID(); // set before apply
+        motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
+        motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
+        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig)); // one apply at the end
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
         position = motor.getPosition();
@@ -52,6 +71,10 @@ public class TurretIOTalonFX implements TurretIO {
         torqueCurrent = motor.getTorqueCurrent();
         temp = motor.getDeviceTemp();
 
+        cancoderPosition = encoder.getAbsolutePosition();
+        cancoderVelocity = encoder.getVelocity();
+        cancoderVoltage = encoder.getSupplyVoltage();
+
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withSlot(0);
         positionVoltage = new PositionVoltage(0.0).withSlot(1);
         voltageOut = new VoltageOut(0.0);
@@ -60,9 +83,13 @@ public class TurretIOTalonFX implements TurretIO {
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             100, position, velocity, voltage, current, torqueCurrent, temp);
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            250,
+            cancoderPosition, cancoderVelocity, cancoderVoltage);
         PhoenixUtil.registerSignals(
             bus,
-            position, velocity, voltage, current, torqueCurrent, temp);
+            position, velocity, voltage, current, torqueCurrent, temp,
+            cancoderPosition, cancoderVelocity, cancoderVoltage);
     }
 
     @Override
@@ -74,13 +101,18 @@ public class TurretIOTalonFX implements TurretIO {
         inputs.supplyCurrentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
         inputs.tempCelsius = temp.getValueAsDouble();
+
+        inputs.encoderConnected = BaseStatusSignal.isAllGood(cancoderPosition, cancoderVelocity, cancoderVoltage);
+        inputs.encoderPositionRad = Rotation2d.fromRotations(cancoderPosition.getValueAsDouble());
+        inputs.encoderVelocityRadPerSec = Units.rotationsToRadians(cancoderVelocity.getValueAsDouble());
+        inputs.encoderAppliedVolts = cancoderVoltage.getValueAsDouble();
     }
 
     @Override
     public void setBrakeMode(boolean enabled) {
         new Thread(() -> {
-            config.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-            PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
+            motorConfig.MotorOutput.NeutralMode = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+            PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
         }).start();
     }
 
@@ -107,10 +139,10 @@ public class TurretIOTalonFX implements TurretIO {
 
     @Override
     public void setPID(double kp, double ki, double kd) {
-        config.Slot0.kP = kp;
-        config.Slot0.kI = ki;
-        config.Slot0.kD = kd;
-        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(config));
+        motorConfig.Slot0.kP = kp;
+        motorConfig.Slot0.kI = ki;
+        motorConfig.Slot0.kD = kd;
+        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
     }
 
     @Override
