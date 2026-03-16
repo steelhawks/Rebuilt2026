@@ -38,6 +38,8 @@ public interface IntakeIO {
 
     default void setBrakeMode(boolean enabled) {}
 
+    default void runRackPositionBoth(double positionMeters, double leftFF, double rightFF) {}
+
     default void runRackPosition(double positionMeters, double feedforward) {}
 
     default void runRackOpenLoop(double output, boolean isTorqueCurrent) {}

@@ -218,9 +218,14 @@ public class Intake extends SubsystemBase {
                 double kT = DCMotor.getKrakenX44Foc(2).KtNMPerAmp;
                 double feedforwardCurrent = motorTorque / kT;
                 double staticFriction = kS.get() * Math.signum(setpoint.velocity);
-                io.runRackPosition(
-                    setpoint.position,
-                    staticFriction);
+                double kCrossCouple = 0.5; // tune this — units are amps per meter of error // Cross-coupling: penalize the faster side, help the slower side
+                double positionError = inputs.leftPositionMeters - inputs.rightPositionMeters;
+                double crossCoupleCorrection = kCrossCouple * positionError;
+
+                double leftFF = staticFriction - crossCoupleCorrection;
+                double rightFF = staticFriction + crossCoupleCorrection;
+
+                io.runRackPositionBoth(setpoint.position, leftFF, rightFF);
             }
             Logger.recordOutput("Intake/SetpointPosition", setpoint.position);
             Logger.recordOutput("Intake/SetpointVelocity", setpoint.velocity);
