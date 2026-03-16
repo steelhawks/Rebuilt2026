@@ -32,6 +32,7 @@ import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LoopTimeUtil;
@@ -214,8 +215,9 @@ public class Robot extends LoggedRobot {
 
         PhoenixUtil.refreshAll();
         LoopTimeUtil.record("PhoenixUtil");
-        VirtualSubsystem.periodicAll();
-        LoopTimeUtil.record("VirtualPeriodic");
+//        VirtualSubsystem.periodicAll();
+//        LoopTimeUtil.record("VirtualPeriodic");
+        ShooterTuner.getInstance().periodic();
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
 

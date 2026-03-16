@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.*;
 
@@ -163,10 +164,12 @@ public class Vision extends SubsystemBase {
             }
             LoopTimeUtil.record("Normal Vision");
 
-            Logger.recordOutput("Vision/Camera" + cameraIndex + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
-            Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPoses", robotPoses.toArray(new Pose3d[0]));
-            Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesAccepted", robotPosesAccepted.toArray(new Pose3d[0]));
-            Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesRejected", robotPosesRejected.toArray(new Pose3d[0]));
+            if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
+                Logger.recordOutput("Vision/Camera" + cameraIndex + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
+                Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPoses", robotPoses.toArray(new Pose3d[0]));
+                Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesAccepted", robotPosesAccepted.toArray(new Pose3d[0]));
+                Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesRejected", robotPosesRejected.toArray(new Pose3d[0]));
+            }
             allTagPoses.addAll(tagPoses);
             allRobotPoses.addAll(robotPoses);
             allRobotPosesAccepted.addAll(robotPosesAccepted);
@@ -180,36 +183,37 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
 
         // Log camera poses and rays from cameras to tags
-        CameraConfig[] cameraConfigs = VisionConstants.getCameraConfig();
-        if (cameraConfigs != null) {
-            Pose2d robotPose2d = RobotState.getInstance().getEstimatedPose();
-            Pose3d robotPose3d = new Pose3d(
-                robotPose2d.getX(),
-                robotPose2d.getY(),
-                0.0,
-                new Rotation3d(0, 0, robotPose2d.getRotation().getRadians()));
-            // camear positions on the robot
-            Pose3d[] cameraPoses = new Pose3d[cameraConfigs.length];
-            for (int i = 0; i < cameraConfigs.length; i++) {
-                cameraPoses[i] = robotPose3d.transformBy(cameraConfigs[i].robotToCamera());
-            }
-            Logger.recordOutput("Vision/Summary/CameraPoses", cameraPoses);
-            // log a separate trajectory per camera, only to tags that camera sees
-            for (int i = 0; i < cameraConfigs.length; i++) {
-                Pose3d cameraPose = cameraPoses[i];
-                List<Pose3d> cameraRays = new LinkedList<>();
-                // get tag poses seen by this camera
-                for (int tagId : inputs[i].tagIds) {
-                    var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
-                    if (tagPose.isPresent()) {
-                        cameraRays.add(cameraPose);
-                        cameraRays.add(tagPose.get());
-                    }
+        if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
+            CameraConfig[] cameraConfigs = VisionConstants.getCameraConfig();
+            if (cameraConfigs != null) {
+                Pose2d robotPose2d = RobotState.getInstance().getEstimatedPose();
+                Pose3d robotPose3d = new Pose3d(
+                    robotPose2d.getX(),
+                    robotPose2d.getY(),
+                    0.0,
+                    new Rotation3d(0, 0, robotPose2d.getRotation().getRadians()));
+                // camera positions on the robot
+                Pose3d[] cameraPoses = new Pose3d[cameraConfigs.length];
+                for (int i = 0; i < cameraConfigs.length; i++) {
+                    cameraPoses[i] = robotPose3d.transformBy(cameraConfigs[i].robotToCamera());
                 }
-                Logger.recordOutput("Vision/Camera" + i + "/CameraRays", cameraRays.toArray(new Pose3d[0]));
+                Logger.recordOutput("Vision/Summary/CameraPoses", cameraPoses);
+                // log a separate trajectory per camera, only to tags that camera sees
+                for (int i = 0; i < cameraConfigs.length; i++) {
+                    Pose3d cameraPose = cameraPoses[i];
+                    List<Pose3d> cameraRays = new LinkedList<>();
+                    // get tag poses seen by this camera
+                    for (int tagId : inputs[i].tagIds) {
+                        var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
+                        if (tagPose.isPresent()) {
+                            cameraRays.add(cameraPose);
+                            cameraRays.add(tagPose.get());
+                        }
+                    }
+                    Logger.recordOutput("Vision/Camera" + i + "/CameraRays", cameraRays.toArray(new Pose3d[0]));
+                }
             }
         }
-
         LoopTimeUtil.record("Vision");
         if (questNav != null) {
             if (DriverStation.isDisabled() && Robot.isFirstRun() && Constants.loggedValue("RobotPosesEmpty", !allRobotPosesAccepted.isEmpty())) {
