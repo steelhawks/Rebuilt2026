@@ -4,11 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.RobotContainer;
-import org.steelhawks.Toggles;
-import org.steelhawks.Constants;
-import org.steelhawks.SubsystemConstants;
+import org.steelhawks.*;
 import org.steelhawks.util.VirtualSubsystem;
 
 import java.util.ArrayList;
@@ -66,7 +62,9 @@ public class ShooterTuner extends VirtualSubsystem {
             double rps = ShooterStructure.linearToAngularVelocity(
                 manualFlywheelSpeed.get(), FLYWHEEL_RADIUS);
             RobotContainer.s_Flywheel.setTargetVelocityForced(rps);
-//            RobotContainer.s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get()));
+            if (RobotConfig.getConfig().hasHood && RobotContainer.s_Hood != null) {
+                RobotContainer.s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get()));
+            }
         }
         if (saveTrigger.get()) {
             saveTrigger.set(false); // auto reset

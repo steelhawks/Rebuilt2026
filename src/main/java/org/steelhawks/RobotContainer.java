@@ -66,6 +66,7 @@ public class RobotContainer {
         configureDriver();
         Toggles.configureOverrides();
         LEDCommands.configureTriggers(driver.leftTrigger());
+        ShooterTuner.getInstance();
         Autos.testingBoard();
     }
 
