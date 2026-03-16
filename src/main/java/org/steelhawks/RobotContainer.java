@@ -77,13 +77,18 @@ public class RobotContainer {
         driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
 
+//        driver.x()
+//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(45.0)));
+//
+//        driver.y()
+//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(60.0)));
+//
+//        driver.a()
+//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(75.0)));
+
         driver.x()
-                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(45.0)));
-
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
         driver.y()
-                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(60.0)));
-
-        driver.a()
-                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(75.0)));
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED));
     }
 }

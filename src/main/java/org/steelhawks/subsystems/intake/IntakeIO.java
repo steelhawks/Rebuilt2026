@@ -44,6 +44,8 @@ public interface IntakeIO {
 
     default void runRackOpenLoop(double output, boolean isTorqueCurrent) {}
 
+    default void runRackOpenLoopBoth(double leftOutput, double rightOutput, boolean isTorqueCurrent) {}
+
     default void runRackPercentOut(double output) {}
 
     default void setRackPID(double kP, double kI, double kD) {}

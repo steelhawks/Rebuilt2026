@@ -8,7 +8,6 @@ import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -43,10 +42,12 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     private final PositionTorqueCurrentFOC leftPositionTorqueCurrentFOC;
     private final PositionTorqueCurrentFOC rightPositionTorqueCurrentFOC;
-    private final TorqueCurrentFOC rackTorqueCurrentFOC;
-    private final DutyCycleOut rackDutyCycleOut;
-    private final VoltageOut rackVoltageOut;
-    private final Follower rightFollower;
+    private final TorqueCurrentFOC leftRackTorqueCurrentFOC;
+    private final TorqueCurrentFOC rightRackTorqueCurrentFOC;
+    private final DutyCycleOut leftRackDutyCycleOut;
+    private final DutyCycleOut rightRackDutyCycleOut;
+    private final VoltageOut leftRackVoltageOut;
+    private final VoltageOut rightRackVoltageOut;
 
     private final DutyCycleOut intakeDutyCycleOut;
 
@@ -68,7 +69,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeConfig = new TalonFXConfiguration();
 
         leftConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        leftConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        leftConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         leftConfig.Slot0.kP = constants.kP();
         leftConfig.Slot0.kI = constants.kI();
         leftConfig.Slot0.kD = constants.kD();
@@ -76,14 +77,12 @@ public class IntakeIOTalonFX implements IntakeIO {
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
         rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        rightConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        rightConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         rightConfig.Slot0.kP = constants.kP();
         rightConfig.Slot0.kI = constants.kI();
         rightConfig.Slot0.kD = constants.kD();
         rightConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
         tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
-
-        rightFollower = new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed);
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         intakeConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -113,22 +112,24 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         leftPositionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
         rightPositionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
-        rackTorqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-        rackDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
-        rackVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
+        leftRackTorqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+        rightRackTorqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+        leftRackDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+        rightRackDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+        leftRackVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
+        rightRackVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
         intakeDutyCycleOut = new DutyCycleOut(0.0).withEnableFOC(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             100,
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
-            intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
+            intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         PhoenixUtil.registerSignals(
             bus,
             leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
-            intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp
-        );
+            intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp);
     }
 
     @Override
@@ -143,7 +144,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.leftTempCelsius = leftTemp.getValueAsDouble();
 
         inputs.rightConnected =
-            BaseStatusSignal.isAllGood(rightPosition, rightVelocity, rightVelocity, rightCurrent, rightTorqueCurrent, rightTemp);
+            BaseStatusSignal.isAllGood(rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp);
         inputs.rightPositionMeters = rightPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
         inputs.rightVelocityMetersPerSec = rightVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
         inputs.rightAppliedVolts = rightVoltage.getValueAsDouble();
@@ -152,7 +153,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         inputs.rightTempCelsius = rightTemp.getValueAsDouble();
 
         inputs.intakeConnected =
-            BaseStatusSignal.isAllGood(intakePosition, intakeVelocity, intakeCurrent, intakeTorqueCurrent, intakeTemp);
+            BaseStatusSignal.isAllGood(intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         inputs.intakePositionRad = Rotation2d.fromRotations(intakePosition.getValueAsDouble());
         inputs.intakeVelocityRadPerSec = Units.rotationsToRadians(intakeVelocity.getValueAsDouble());
         inputs.intakeAppliedVolts = intakeVoltage.getValueAsDouble();
@@ -166,7 +167,10 @@ public class IntakeIOTalonFX implements IntakeIO {
         new Thread(() -> {
             leftConfig.MotorOutput.NeutralMode =
                 enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+            rightConfig.MotorOutput.NeutralMode =
+                enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
             tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
+            tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
         }).start();
     }
 
@@ -187,16 +191,30 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void runRackOpenLoop(double output, boolean isTorqueCurrent) {
         leftMotor.setControl(
             isTorqueCurrent
-                ? rackTorqueCurrentFOC.withOutput(output)
-                : rackVoltageOut.withOutput(output));
-        rightMotor.setControl(rightFollower);
+                ? leftRackTorqueCurrentFOC.withOutput(output)
+                : leftRackVoltageOut.withOutput(output));
+        rightMotor.setControl(
+            isTorqueCurrent
+                ? rightRackTorqueCurrentFOC.withOutput(output)
+                : rightRackVoltageOut.withOutput(output));
+    }
+
+    @Override
+    public void runRackOpenLoopBoth(double leftOutput, double rightOutput, boolean isTorqueCurrent) {
+        leftMotor.setControl(
+            isTorqueCurrent
+                ? leftRackTorqueCurrentFOC.withOutput(leftOutput)
+                : leftRackVoltageOut.withOutput(leftOutput));
+        rightMotor.setControl(
+            isTorqueCurrent
+                ? rightRackTorqueCurrentFOC.withOutput(rightOutput)
+                : rightRackVoltageOut.withOutput(rightOutput));
     }
 
     @Override
     public void runRackPercentOut(double output) {
-        leftMotor.setControl(
-            rackDutyCycleOut.withOutput(output));
-        rightMotor.setControl(rightFollower);
+        leftMotor.setControl(leftRackDutyCycleOut.withOutput(output));
+        rightMotor.setControl(rightRackDutyCycleOut.withOutput(output));
     }
 
     @Override
@@ -222,8 +240,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void runIntake(double output) {
-        intakeMotor.setControl(
-            intakeDutyCycleOut.withOutput(output));
+        intakeMotor.setControl(intakeDutyCycleOut.withOutput(output));
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.steelhawks.subsystems.intake;
 
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -31,9 +30,10 @@ public class Intake extends SubsystemBase {
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
+    private boolean kickApplied = false;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
-    private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising); // TODO: tune
+    private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
     private static LoggedTunableNumber currentHomingThreshold;
     private static LoggedTunableNumber velocityStallingThreshold;
@@ -42,6 +42,10 @@ public class Intake extends SubsystemBase {
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber kStictionKickLeft;
+    private static LoggedTunableNumber kStictionKickRight;
+    private static LoggedTunableNumber kStictionVelocityThreshold;
+    private static LoggedTunableNumber crossCouple;
     private static LoggedTunableNumber MAX_VELOCITY_METERS_PER_SEC;
     private static LoggedTunableNumber MAX_ACCEL_METERS_PER_SEC_SQ;
 
@@ -57,6 +61,10 @@ public class Intake extends SubsystemBase {
         kP = new LoggedTunableNumber("Intake/kP", constants.kP());
         kI = new LoggedTunableNumber("Intake/kI", constants.kI());
         kD = new LoggedTunableNumber("Intake/kD", constants.kD());
+        kStictionKickLeft = new LoggedTunableNumber("Intake/StictionKickAmpsLeft", 5.0);
+        kStictionKickRight = new LoggedTunableNumber("Intake/StictionKickAmpsRight", 5.0);
+        kStictionVelocityThreshold = new LoggedTunableNumber("Intake/StictionVelocityThreshold", 0.005);
+        crossCouple = new LoggedTunableNumber("Intake/CrossCouple", 0.3);
         MAX_ACCEL_METERS_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelMetersPerSecSq", constants.maxAccelMetersPerSecSq());
         MAX_VELOCITY_METERS_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", constants.maxVelocityMetersPerSec());
         profile =
@@ -90,7 +98,7 @@ public class Intake extends SubsystemBase {
             (Math.abs(inputs.leftTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
                 && Math.abs(inputs.leftVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble())
                 || Math.abs(inputs.rightTorqueCurrentAmps) > currentHomingThreshold.getAsDouble()
-                    && Math.abs(inputs.rightVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
+                && Math.abs(inputs.rightVelocityMetersPerSec) < velocityStallingThreshold.getAsDouble());
     }
 
     @AutoLogOutput(key = "Intake/IsTwisting")
@@ -99,10 +107,17 @@ public class Intake extends SubsystemBase {
             Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble()) && isHomed;
     }
 
+    @AutoLogOutput(key = "Intake/BothMoving")
+    private boolean bothMoving() {
+        return Math.abs(inputs.leftVelocityMetersPerSec) > kStictionVelocityThreshold.getAsDouble()
+            && Math.abs(inputs.rightVelocityMetersPerSec) > kStictionVelocityThreshold.getAsDouble();
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
+
         if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             io.setPosition(0);
@@ -110,6 +125,7 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/IsHomed", true);
             Logger.recordOutput("Intake/Zeroed", true);
         }
+
         if (!isHomed && Toggles.Intake.isEnabled.get()) {
             io.runRackOpenLoop(homingVolts, false);
             isHomed = isStalling();
@@ -122,9 +138,11 @@ public class Intake extends SubsystemBase {
                 Logger.recordOutput("Intake/Zeroed", true);
             }
         }
+
         if (isTwisting()) {
             isHomed = false;
         }
+
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
@@ -133,7 +151,7 @@ public class Intake extends SubsystemBase {
                 && !Toggles.Intake.toggleCurrentOverride.get()
                 && !Toggles.Intake.toggleVoltageOverride.get()
                 && (getPosition() >= IntakeConstants.MIN_EXTENSION
-                    && getPosition() <= IntakeConstants.MAX_EXTENSION_FROM_FRAME);
+                && getPosition() <= IntakeConstants.MAX_EXTENSION_FROM_FRAME);
         Logger.recordOutput("Intake/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
@@ -145,6 +163,7 @@ public class Intake extends SubsystemBase {
         if (DriverStation.isEnabled()) {
             setBrakeMode(true);
         }
+
         if (Toggles.tuningMode.get()) {
             if (Toggles.Intake.toggleVoltageOverride.get()) {
                 if (tuningVolts == null) {
@@ -158,15 +177,11 @@ public class Intake extends SubsystemBase {
                 }
                 io.runRackOpenLoop(tuningAmps.get(), true);
             }
-            LoggedTunableNumber.ifChanged(this.hashCode(), () -> {
-                io.setRackPID(
-                    kP.get(),
-                    kI.get(),
-                    kD.get());
-            }, kP, kI, kD);
+            LoggedTunableNumber.ifChanged(this.hashCode(), () ->
+                    io.setRackPID(kP.get(), kI.get(), kD.get()),
+                kP, kI, kD);
             if (MAX_VELOCITY_METERS_PER_SEC.hasChanged(hashCode())
-                || MAX_ACCEL_METERS_PER_SEC_SQ.hasChanged(hashCode())
-            ) {
+                || MAX_ACCEL_METERS_PER_SEC_SQ.hasChanged(hashCode())) {
                 profile =
                     new TrapezoidProfile(
                         new TrapezoidProfile.Constraints(
@@ -174,16 +189,16 @@ public class Intake extends SubsystemBase {
                             MAX_ACCEL_METERS_PER_SEC_SQ.get()));
             }
         }
+
         if (shouldRun) {
             if (RobotContainer.s_Swerve.collisionDetected()) {
                 setDesiredState(IntakeConstants.State.RETRACTED);
             }
+
             double previousVelocity = setpoint.velocity;
-            setpoint =
-                profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
+            setpoint = profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
             if (setpoint.position <= IntakeConstants.MIN_EXTENSION
-                || setpoint.position >= IntakeConstants.MAX_EXTENSION_FROM_FRAME
-            ) {
+                || setpoint.position >= IntakeConstants.MAX_EXTENSION_FROM_FRAME) {
                 setpoint =
                     new TrapezoidProfile.State(
                         MathUtil.clamp(
@@ -192,17 +207,27 @@ public class Intake extends SubsystemBase {
                             IntakeConstants.MAX_EXTENSION_FROM_FRAME),
                         0.0);
             }
+
             atGoal = Math.abs(getPosition() - goal.position) <= IntakeConstants.TOLERANCE;
+
             if (atGoal) {
+                kickApplied = false;
                 io.stopRack();
+            } else if (!kickApplied && !bothMoving()) {
+                io.runRackOpenLoopBoth(
+                    kStictionKickLeft.get(),
+                    kStictionKickRight.get(),
+                    true);
+                Logger.recordOutput("Intake/KickApplied", false);
             } else {
-                // drivetrain accel
-                //RAHMAN IS BEST
+                kickApplied = true;
+                Logger.recordOutput("Intake/KickApplied", true);
+
                 double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
                 double pitchRadians = RobotContainer.s_Swerve.getPitch().getRadians();
                 double drivetrainAccelG = rawAccelY - Math.sin(pitchRadians);
                 double drivetrainAccel = drivetrainAccelG * 9.81;
-                // physics based ff
+
                 double mass = IntakeConstants.MASS_KG;
                 double rackAngle = IntakeConstants.RACK_ANGLE.getRadians();
                 double pinionRadius = IntakeConstants.PINION_RADIUS;
@@ -217,16 +242,23 @@ public class Intake extends SubsystemBase {
                 double motorTorque = torqueAtPinion / gearRatio;
                 double kT = DCMotor.getKrakenX44Foc(2).KtNMPerAmp;
                 double feedforwardCurrent = motorTorque / kT;
-                double staticFriction = kS.get() * Math.signum(setpoint.velocity);
-                double kCrossCouple = 0.5; // tune this — units are amps per meter of error // Cross-coupling: penalize the faster side, help the slower side
-                double positionError = inputs.leftPositionMeters - inputs.rightPositionMeters;
-                double crossCoupleCorrection = kCrossCouple * positionError;
 
-                double leftFF = staticFriction - crossCoupleCorrection;
-                double rightFF = staticFriction + crossCoupleCorrection;
+                double staticFriction = kS.get() * Math.signum(setpoint.velocity);
+                double positionError = inputs.leftPositionMeters - inputs.rightPositionMeters;
+                double crossCoupleCorrection = crossCouple.get() * positionError;
+
+//                double leftFF = staticFriction - crossCoupleCorrection;
+//                double rightFF = staticFriction + crossCoupleCorrection;
+                double leftFF = staticFriction;
+                double rightFF = staticFriction;
+
+                Logger.recordOutput("Intake/LeftFF", leftFF);
+                Logger.recordOutput("Intake/RightFF", rightFF);
+                Logger.recordOutput("Intake/PositionError", positionError);
 
                 io.runRackPositionBoth(setpoint.position, leftFF, rightFF);
             }
+
             Logger.recordOutput("Intake/SetpointPosition", setpoint.position);
             Logger.recordOutput("Intake/SetpointVelocity", setpoint.velocity);
             Logger.recordOutput("Intake/GoalPosition", goal.position);
@@ -247,6 +279,7 @@ public class Intake extends SubsystemBase {
             IntakeConstants.MAX_EXTENSION_FROM_FRAME);
         goal = new TrapezoidProfile.State(inputs.goal, 0.0);
         desiredGoal = state;
+        kickApplied = false;
     }
 
     public Command setDesiredStateCommand(IntakeConstants.State state) {
@@ -265,11 +298,11 @@ public class Intake extends SubsystemBase {
 
     public Command agitate() {
         return Commands.sequence(
-            setDesiredStateCommand(IntakeConstants.State.INTAKE),
-            Commands.waitUntil(this::atGoal),
-            setDesiredStateCommand(IntakeConstants.State.HOME),
-            Commands.waitUntil(() -> atGoal() || isStalling()))
-        .repeatedly()
-        .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
+                setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                Commands.waitUntil(this::atGoal),
+                setDesiredStateCommand(IntakeConstants.State.HOME),
+                Commands.waitUntil(() -> atGoal() || isStalling()))
+            .repeatedly()
+            .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
     }
 }
