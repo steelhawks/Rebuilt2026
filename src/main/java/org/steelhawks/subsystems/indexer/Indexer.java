@@ -48,10 +48,11 @@ public class Indexer extends SubsystemBase {
         FEEDER_JAM_CURRENT =
             new LoggedTunableNumber("Indexer/Feeder/JamCurrent", constants.indexerJamCurrent());
         BEAM_DEBOUNCE_TIME =
-            new LoggedTunableNumber("Indexer/Beam/BeamDebounceTime", 0);
+            new LoggedTunableNumber("Indexer/Beam/BeamDebounceTime", 3.0);
         this.io = io;
         this.beamIO = beamIO;
-        beamDebouncer = new Debouncer(BEAM_DEBOUNCE_TIME.get(), Debouncer.DebounceType.kFalling);
+//        beamDebouncer = new Debouncer(BEAM_DEBOUNCE_TIME.get(), Debouncer.DebounceType.kFalling);
+        beamDebouncer = new Debouncer(1.0, Debouncer.DebounceType.kFalling);
     }
 
     @Override
@@ -93,6 +94,7 @@ public class Indexer extends SubsystemBase {
     @AutoLogOutput(key = "Indexer/HasBalls")
     public boolean hasBalls() {
         return beamDebouncer.calculate(beamInputs.detected);
+//        return beamInputs.detected;
     }
 
     public Command runSpindexer() {

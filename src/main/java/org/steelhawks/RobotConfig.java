@@ -181,7 +181,7 @@ public class RobotConfig {
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
-                .withAutos(false)
+                .withAutos(true)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
@@ -501,7 +501,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(CANBusList.kTurretBus, c), new BeamIOCANRange(CANBusList.kTurretBus, new BeamIO.BeamBreakConfig(c.beamId().orElse(-1), 0.01, 0.1, BeamIO.UpdateMode.SHORT_RANGE, 100.0)), c); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(CANBusList.kTurretBus, c), new BeamIOCANRange(CANBusList.kTurretBus, new BeamIO.BeamBreakConfig(c.beamId().orElse(-1), 0.01, 0.05, BeamIO.UpdateMode.SHORT_RANGE, 100.0)), c); }
     }
 
     // AlphaBot factory

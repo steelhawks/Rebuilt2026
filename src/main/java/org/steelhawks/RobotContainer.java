@@ -89,6 +89,10 @@ public class RobotContainer {
             driver.y()
                 .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
         }
+
+        driver.leftTrigger()
+            .whileTrue(
+                TeleopSwerve.overrideState());
 //
 //            driver.a()
 //                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(180.0)));

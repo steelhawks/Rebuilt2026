@@ -197,20 +197,35 @@ public final class Autos {
             Commands.sequence(
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                trenchToMidToTrench.cmd()
-                    .alongWith(RobotContainer.s_Intake.runIntake()),
-                ShootingCommands.shoot()
-                    .until(() -> !s_Indexer.hasBalls())
-                    .withTimeout(5.0),
+                trenchToMidToTrench.spawnCmd()
+            )
+        );
+
+        trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchToMidToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                ShootingCommands.shoot().withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToReboundToTrench.cmd()
-                    .alongWith(RobotContainer.s_Intake.runIntake()),
-                ShootingCommands.shoot()
-                    .until(() -> !s_Indexer.hasBalls())
-                    .withTimeout(5.0),
+                trenchToReboundToTrench.spawnCmd()
+            )
+        );
+
+        trenchToReboundToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                ShootingCommands.shoot().withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToOutpost.cmd(),
-                ShootingCommands.shoot()
+                trenchToOutpost.spawnCmd()
+            )
+        );
+
+        trenchToOutpost.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                ShootingCommands.shoot().withTimeout(5.0)
             )
         );
 
