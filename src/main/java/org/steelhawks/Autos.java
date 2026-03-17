@@ -4,6 +4,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -194,17 +195,20 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.cmd()
                     .alongWith(RobotContainer.s_Intake.runIntake()),
                 ShootingCommands.shoot()
                     .until(() -> !s_Indexer.hasBalls())
                     .withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.cmd()
                     .alongWith(RobotContainer.s_Intake.runIntake()),
                 ShootingCommands.shoot()
                     .until(() -> !s_Indexer.hasBalls())
                     .withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToOutpost.cmd(),
                 ShootingCommands.shoot()
             )
@@ -222,17 +226,20 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.cmd()
                     .alongWith(RobotContainer.s_Intake.runIntake()),
                 ShootingCommands.shoot()
                     .until(() -> !s_Indexer.hasBalls())
                     .withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.cmd()
                     .alongWith(RobotContainer.s_Intake.runIntake()),
                 ShootingCommands.shoot()
                     .until(() -> !s_Indexer.hasBalls())
                     .withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToOutpost.cmd(),
                 ShootingCommands.shoot()
             )
