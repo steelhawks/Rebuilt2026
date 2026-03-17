@@ -6,10 +6,10 @@ import org.steelhawks.ChoreoTraj;
 
 public class RRebound extends SequentialCommandGroup {
 
-	public RRebound() {
-		super(
-		Autos.followTrajectory(ChoreoTraj.LRebound.);
-		);
-		withName("Hi");
-	}
+//	public RRebound() {
+//		super(
+//		Autos.followTrajectory(ChoreoTraj.LRebound.);
+//		);
+//		withName("Hi");
+//	}
 }
