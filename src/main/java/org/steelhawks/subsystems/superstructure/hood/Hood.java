@@ -81,9 +81,9 @@ public class Hood extends SubsystemBase {
                 && (inputs.motorConnected && inputs.cancoderConnected)
                 && Toggles.Hood.isEnabled.get()
                 && !Toggles.Hood.voltageOverride.get()
-                && !Toggles.Hood.currentOverride.get();
-//            && (getPositionDeg() >= constants.minAngle().getDegrees())
-//            && (getPositionDeg() <= constants.maxAngle().getDegrees());
+                && !Toggles.Hood.currentOverride.get()
+                && (!isHomed || (getPositionDeg() >= constants.minAngle().getDegrees()
+                    && getPositionDeg() <= constants.maxAngle().getDegrees()));
         Logger.recordOutput("Hood/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {

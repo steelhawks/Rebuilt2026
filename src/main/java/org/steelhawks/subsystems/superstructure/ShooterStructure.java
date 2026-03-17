@@ -76,7 +76,7 @@ public class ShooterStructure {
          }
          if (c.ferryHoodAngleMap() != null) {
              for (double[] entry : c.ferryHoodAngleMap()) {
-                 ferryHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
+                 ferryHoodAngleMap.put(entry[0], Rotation2d.fromDegrees(entry[1]));
              }
          }
     }
