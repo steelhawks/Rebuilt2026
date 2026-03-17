@@ -32,6 +32,7 @@ import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.Elastic;
@@ -217,7 +218,7 @@ public class Robot extends LoggedRobot {
         LoopTimeUtil.record("PhoenixUtil");
 //        VirtualSubsystem.periodicAll();
 //        LoopTimeUtil.record("VirtualPeriodic");
-//        ShooterTuner.getInstance().periodic();
+        ShooterTuner.getInstance().periodic();
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
 
@@ -231,6 +232,7 @@ public class Robot extends LoggedRobot {
         ) {
             RobotContainer.s_Swerve.updatePhysicsSimulation();
         }
+        Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(FieldConstants.Hub.HUB_CENTER_3D));
     }
 
     private void visualizeFieldConstants() {

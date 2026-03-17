@@ -54,16 +54,31 @@ public class ShooterStructure {
                  shootingTimeOfFlightMap.put(entry[0], entry[1]);
              }
          }
-         if (c.shootingFlywheelVelocityMap() != null) {
-             for (double[] entry : c.shootingFlywheelVelocityMap()) {
-                 shootingFlywheelVelocityMap.put(entry[0], entry[1]);
-             }
-         }
-         if (c.shootingHoodAngleMap() != null) {
-             for (double[] entry : c.shootingHoodAngleMap()) {
-                 shootingHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
-             }
-         }
+//         if (c.shootingFlywheelVelocityMap() != null) {
+//             for (double[] entry : c.shootingFlywheelVelocityMap()) {
+//                 shootingFlywheelVelocityMap.put(entry[0], entry[1]);
+//             }
+//         }
+        shootingFlywheelVelocityMap.put(1.146, 10.0);
+        shootingFlywheelVelocityMap.put(1.633, 10.5);
+        shootingFlywheelVelocityMap.put(2.639, 12.2);
+        shootingFlywheelVelocityMap.put(3.3315, 13.1);
+        shootingFlywheelVelocityMap.put(3.965, 13.5);
+        shootingFlywheelVelocityMap.put(4.057, 15.0);
+        shootingFlywheelVelocityMap.put(5.512, 13.5);
+//         if (c.shootingHoodAngleMap() != null) {
+//             for (double[] entry : c.shootingHoodAngleMap()) {
+//                 shootingHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
+//             }
+//         }
+        shootingHoodAngleMap.put(1.146, Rotation2d.fromDegrees(80.0));
+        shootingHoodAngleMap.put(1.633, Rotation2d.fromDegrees(78.0));
+        shootingHoodAngleMap.put(2.639, Rotation2d.fromDegrees(76.0));
+        shootingHoodAngleMap.put(3.3315, Rotation2d.fromDegrees(74.0));
+        shootingHoodAngleMap.put(3.965, Rotation2d.fromDegrees(72.0));
+        shootingHoodAngleMap.put(4.057, Rotation2d.fromDegrees(71.0));
+        shootingHoodAngleMap.put(5.512, Rotation2d.fromDegrees(40.0));
+
          if (c.ferryTimeOfFlightMap() != null) {
              for (double[] entry : c.ferryTimeOfFlightMap()) {
                  ferryTimeOfFlightMap.put(entry[0], entry[1]);

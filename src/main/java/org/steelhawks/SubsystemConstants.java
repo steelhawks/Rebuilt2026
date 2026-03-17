@@ -145,7 +145,7 @@ public class SubsystemConstants {
                 200.0, 0.0, 0.0,
                 0.8, 2.0,
                 40.0, 0.05,
-                1.0, -1.0,
+                0.6, -1.0,
                 0.8);
 
         public static final FlywheelConstants FLYWHEEL =

@@ -154,7 +154,7 @@ public class Turret extends SubsystemBase {
                 solution.exitVelocity(),
                 solution.hoodAngle(),
                 distance);
-            Translation3d newPredictedTarget = actualTarget.minus(robotVelocity.times(tof));
+            Translation3d newPredictedTarget = actualTarget.minus(robotVelocity.times(tof)); // it was minus and it seemed to work better
             double error = predictedTarget.getDistance(newPredictedTarget);
             Logger.recordOutput("Turret/Moving/IterationError_" + i, error);
             if (error < convergenceThreshold) break;
