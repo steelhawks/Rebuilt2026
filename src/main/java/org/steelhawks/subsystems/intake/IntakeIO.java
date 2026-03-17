@@ -47,53 +47,21 @@ public interface IntakeIO {
     // update all data
     default void updateInputs(IntakeIOInputs inputs) {}
 
-    // velocityVoltage most likely
-    default void setExtensionVoltage(double volts) {}
+    default void setExtensionPosition(double position, double Lfeedfoward, double Rfeedforward) {}
 
-    // feedforward
-    default void setExtensionVelocity(double velocityPerSec, double ffOutput) {}
+    default void runExtensionOpenLoop(double output, boolean isTorqueCurrent) {}
 
-    // pid and feedforward
-    default void setExtensionPosition(double position, double ffOutput) {}
+    default void runExtensionPercentOut(double output) {}
 
-    // stop only extension
+    default void runIntake(double output) {}
+
+    default void stopIntake() {}
+
     default void stopExtension() {}
 
-
-    // set the brake type
-    default void setExtensionBrakeMode(boolean enabled) {}
-
-    default void resetExtension(double position) {}
-
-    // velocityVoltage most likely
-    default void setRollerVoltage(double volts) {}
-
-    // feedforward
-    default void setRollerVelocity(double velocityPerSec, double ffOutput) {}
-
-
-    // stop only extension
-    default void stopRoller() {}
-
-
-    // set the brake type
-    default void setRollerBrakeMode(boolean enabled) {}
-
     default void stopAll() {
+        stopIntake();
         stopExtension();
-        stopRoller();
-    }
-
-    default double getExtensionSetpoint() {
-        return 0.0;
-    }
-
-    default double getExtensionVelocitySetpoint() {
-        return 0.0;
-    }
-
-    default double getRollerVelocitySetpoint() {
-        return 0.0;
     }
 
     default void setExtensionPID(double kP, double kI, double kD) {}

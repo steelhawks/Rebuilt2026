@@ -463,6 +463,7 @@ public class Swerve extends SubsystemBase {
         }
 
         FieldConstants.FIELD_2D.setRobotPose(getPose());
+        Logger.recordOutput("Odometry/Robot", getPose());
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
     }

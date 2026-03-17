@@ -23,7 +23,7 @@ public class RobotConfig {
     public final boolean hasShooter;// hasFlywheel on main
     public final boolean hasIntake;
 
-    private final IntakeConstants intakeConstants;
+    private final BuilderConstants.IntakeConstants intakeConstants;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -78,7 +78,7 @@ public class RobotConfig {
         if (!hasIntake) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createIntake(intakeConstants));
+        return Optional.ofNullable(factory.createIntake(BuilderConstants.IntakeConstants));
     }
 
     public static RobotConfig getConfig() {
@@ -159,7 +159,7 @@ public class RobotConfig {
         private boolean hasIntake = false;
         private SubsystemFactory factory = null;
 
-        private IntakeConstants intakeConstants;
+        private BuilderConstants.IntakeConstants intakeConstants;
 
         public Builder withLEDMatrix(boolean enabled) {
             this.hasLEDMatrix = enabled;
@@ -191,7 +191,7 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withIntake(boolean enabled, IntakeConstants intakeConstants) {
+        public Builder withIntake(boolean enabled, BuilderConstants.IntakeConstants intakeConstants) {
             this.hasIntake = enabled;
             this.intakeConstants = intakeConstants;
             return this;
@@ -312,7 +312,7 @@ public class RobotConfig {
         LEDStrip createLEDStrip();
         Vision createVision(VisionConsumer poseConsumer);
         ObjectVision createObjectVision();
-        Intake createIntake(IntakeConstants c);
+        Intake createIntake(BuilderConstants.IntakeConstants c);
         /*
          SuperStructure createSuperStructure();
          Intake createIntake();
@@ -403,7 +403,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public Intake createIntake(BuilderConstants.IntakeConstants c) {
             return null;
         }
 
@@ -490,7 +490,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public Intake createIntake(BuilderConstants.IntakeConstants c) {
             return null;
         }
 
@@ -578,7 +578,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public Intake createIntake(BuilderConstants.IntakeConstants c) {
             return null;
         }
 
@@ -621,7 +621,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public Intake createIntake(BuilderConstants.IntakeConstants c) {
             return new Intake(new IntakeIOSim(c));
         }
 
@@ -667,7 +667,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public Intake createIntake(BuilderConstants.IntakeConstants c) {
             return null;
         }
 

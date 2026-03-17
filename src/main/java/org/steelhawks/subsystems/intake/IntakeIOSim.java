@@ -29,7 +29,7 @@ public class IntakeIOSim implements IntakeIO {
 
     private boolean enablePID;
 
-    public IntakeIOSim(IntakeConstants intakeConstants) {
+    public IntakeIOSim(BuilderConstants.IntakeConstants intakeConstants) {
         intakeSimulation = IntakeSimulation.OverTheBumperIntake(
                 "Fuel",
                 Swerve.getDriveSimulation(),

@@ -7,8 +7,16 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class BuilderConstants {
 
+    public static IntakeConstants IntakeConstants;
+
     public static class OmegaBot {
-        public static final IntakeConstants INTAKE = new IntakeConstants();
+        public static final IntakeConstants INTAKE = new IntakeConstants(
+                1, 2, 3,
+                5.0, 0.0, 0.0,
+                200.0, 0.0, 0.0,
+                0.8, 2.0,
+                40.0, 0.05,
+                1.0);
     }
 
      public static class TurretPIDConstants {
@@ -119,5 +127,15 @@ public class BuilderConstants {
         }
     }
 
+    public record IntakeConstants(
+            int leftId, int rightId, int intakeId,
+            double kS, double kG, double kA, double kP, double kI, double kD,
+            double maxVelocityMetersPerSec, double maxAccelMetersPerSecSq,
+            double currentHomingThreshold,
+            double intakeSpeed, double outtakeSpeed
+    ) {
+        public static final IntakeConstants UNSET =
+                new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0);
+    }
 
 }

@@ -37,4 +37,13 @@ public interface Toggles {
         LoggedNetworkBoolean turnOpenLoopOverride =
             new LoggedNetworkBoolean("Toggles/Swerve/TurnOpenLoopOverride", false);
     }
+
+    interface Intake {
+        LoggedNetworkBoolean isEnabled =
+                new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", false);
+        LoggedNetworkBoolean toggleVoltageOverride =
+                new LoggedNetworkBoolean("TogglesToggles/Intake/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleCurrentOverride =
+                new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
+    }
 }

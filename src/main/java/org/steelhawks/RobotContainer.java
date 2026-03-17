@@ -32,7 +32,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
-        SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
+        SmartDashboard.putData("Rebuilt/Field", FieldConstants.FIELD_2D);
 
 
 

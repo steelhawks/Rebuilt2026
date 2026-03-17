@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -277,6 +278,11 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationPeriodic() {
         if (Constants.getMode() == Mode.SIM) {
+
+            SimulatedArena.getInstance().simulationPeriodic();
+
+            Logger.recordOutput("Field Simulation/Game Pieces", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+
             RobotContainer.s_Swerve.updatePhysicsSimulation();
         }
     }

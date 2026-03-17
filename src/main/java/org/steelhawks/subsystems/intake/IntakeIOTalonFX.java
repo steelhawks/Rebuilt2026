@@ -6,10 +6,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -57,12 +54,15 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final StatusSignal<Voltage> rollerAppliedVoltage;
     private final StatusSignal<Temperature> rollerTemp;
 
-    private final VoltageOut extensionVoltage;
-    private final VelocityVoltage extensionVelocityVoltage;
-    private final PositionVoltage extensionPositionVoltage;
+    private final PositionTorqueCurrentFOC left_motor_torque_current;
+    private final PositionTorqueCurrentFOC right_motor_torque_current;
+    private final TorqueCurrentFOC left_extension_torque_current;
+    private final TorqueCurrentFOC right_extension_torque_current;
 
-    private final VoltageOut rollerVoltage;
-    private final VelocityVoltage rollerVelocityVoltage;
+    private final DutyCycleOut intakePercentOut;
+    private final VoltageOut extensionVoltage;
+
+    private final DutyCycleOut extensionPercentOut;
 
     private boolean isHomed = false;
 
@@ -77,12 +77,17 @@ public class IntakeIOTalonFX implements IntakeIO {
         left_config = new TalonFXConfiguration();
         roller_config = new TalonFXConfiguration();
 
-        extensionVoltage = new VoltageOut(0).withEnableFOC(true);
-        extensionVelocityVoltage = new VelocityVoltage(0).withEnableFOC(true);
-        extensionPositionVoltage = new PositionVoltage(0).withEnableFOC(true);
+       left_motor_torque_current = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
+       right_motor_torque_current = new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(0);
 
-        rollerVoltage = new VoltageOut(0).withEnableFOC(true);
-        rollerVelocityVoltage = new VelocityVoltage(0).withEnableFOC(true);
+
+        left_extension_torque_current = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+        right_extension_torque_current = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
+        extensionVoltage = new VoltageOut(0.0).withUpdateFreqHz(0.0).withEnableFOC(true);
+
+        extensionPercentOut = new DutyCycleOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
+
+        intakePercentOut = new DutyCycleOut(0.0).withEnableFOC(true).withUpdateFreqHz(0.0);
 
         left_motor.setControl(new Follower(IntakeConstants.EXTENSION_RIGHT_MOTOR_ID, MotorAlignmentValue.Opposed));
 
@@ -105,26 +110,6 @@ public class IntakeIOTalonFX implements IntakeIO {
         left_motor.getConfigurator().apply(left_config);
         right_motor.getConfigurator().apply(right_config);
 
-        var right_extensionSlot0Configs = new Slot0Configs();
-//        extensionSlot0Configs
-//                .withKA(IntakeConstants.EXTENSION_POSITION_KA.getAsDouble())
-//                .withKP(IntakeConstants.EXTENSION_POSITION_KP.getAsDouble())
-//                .withKI(IntakeConstants.EXTENSION_POSITION_KI.getAsDouble())
-//                .withKD(IntakeConstants.EXTENSION_POSITION_KD.getAsDouble())
-//                .withKS(IntakeConstants.EXTENSION_POSITION_KS.getAsDouble())
-//                .withKV(IntakeConstants.EXTENSION_POSITION_KV.getAsDouble())
-//                .withKG(IntakeConstants.EXTENSION_POSITION_KG.getAsDouble())
-//        extensionSlot1Configs
-//                .withKA(IntakeConstants.EXTENSION_VELOCITY_KA.getAsDouble())
-//                .withKP(IntakeConstants.EXTENSION_VELOCITY_KP.getAsDouble())
-//                .withKI(IntakeConstants.EXTENSION_VELOCITY_KI.getAsDouble())
-//                .withKD(IntakeConstants.EXTENSION_VELOCITY_KD.getAsDouble())
-//                .withKV(IntakeConstants.EXTENSION_VELOCITY_KV.getAsDouble())
-//                .withKS(IntakeConstants.EXTENSION_VELOCITY_KS.getAsDouble())
-//                .withKG(IntakeConstants.EXTENSION_VELOCITY_KG.getAsDouble());
-//
-//        left_motor.getConfigurator().apply(extensionSlot0Configs);
-//        left_motor.getConfigurator().apply(extensionSlot1Configs);
 
         BuilderConstants.ExtensionPIDConstants.setPID(left_motor);
         BuilderConstants.ExtensionPIDConstants.setPID(right_motor);
@@ -232,74 +217,48 @@ public class IntakeIOTalonFX implements IntakeIO {
     }
 
     @Override
-    public void setExtensionVoltage(double voltage) {
-        left_motor.setControl(extensionVoltage.withOutput(voltage));
+    public void setExtensionPosition(double position, double Lfeedforward, double Rfeedforward) {
+        double rotations = position / IntakeConstants.PINION_METERS_TO_RADIANS;
+        left_motor.setControl(
+                left_motor_torque_current.withPosition(rotations).withFeedForward(Lfeedforward)
+        );
+
+        right_motor.setControl(
+                right_motor_torque_current.withPosition(rotations).withFeedForward(Rfeedforward)
+        );
     }
 
-    @Override
-    public void setExtensionVelocity(double velocityPerSec, double ffOutput) {
-        left_motor.setControl(extensionVelocityVoltage
-                .withVelocity(velocityPerSec / IntakeConstants.PINION_ROTATION)
-                .withFeedForward(ffOutput)
-                .withSlot(1));
-    }
 
     @Override
     public void stopExtension() { left_motor.stopMotor(); }
 
-    @Override
-    public void setExtensionBrakeMode(boolean enable) {
-        left_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-        right_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    }
 
     @Override
-    public void setExtensionPosition(double positionMeters, double ffVolts) {
+    public void stopIntake() { intake_motor.stopMotor(); }
+
+    @Override
+    public void runExtensionOpenLoop(double output, boolean isTorqueCurrent) {
         left_motor.setControl(
-                extensionPositionVoltage
-                        .withPosition(positionMeters / IntakeConstants.PINION_ROTATION)
-                        .withFeedForward(ffVolts)
-                        .withSlot(0)
+                isTorqueCurrent ? left_extension_torque_current.withOutput(output) : extensionVoltage.withOutput(output)
+        );
+
+        right_motor.setControl(
+                isTorqueCurrent ? right_extension_torque_current.withOutput(output) : extensionVoltage.withOutput(output)
         );
     }
 
     @Override
-    public void resetExtension( double positionMeters ) {
-        left_motor.setPosition(positionMeters / IntakeConstants.PINION_ROTATION);
+    public void runExtensionPercentOut(double output) {
+        left_motor.setControl(
+                extensionPercentOut.withOutput(output)
+        );
     }
 
     @Override
-    public void setRollerVoltage(double voltage) {
-        intake_motor.setControl(rollerVoltage.withOutput(voltage));
-    }
-
-    @Override
-    public void setRollerVelocity(double velocityPerSec, double ffVolts) {
-        intake_motor.setControl(rollerVelocityVoltage.withVelocity(velocityPerSec / (2.0 * Math.PI)).withFeedForward(ffVolts));
-    }
-
-    @Override
-    public void stopRoller() { intake_motor.stopMotor(); }
-
-    @Override
-    public void setRollerBrakeMode(boolean enable) {
-        left_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-        right_motor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    }
-
-    @Override
-    public double getExtensionSetpoint() {
-        return extensionPositionVoltage.Position * IntakeConstants.PINION_ROTATION;
-    }
-
-    @Override
-    public double getExtensionVelocitySetpoint() {
-        return extensionVelocityVoltage.Velocity * IntakeConstants.PINION_ROTATION;
-    }
-
-    @Override
-    public double getRollerVelocitySetpoint() {
-        return rollerVelocityVoltage.Velocity * (2.0 * Math.PI);
+    public void runIntake(double output) {
+        intake_motor.setControl(
+                intakePercentOut.withOutput(output)
+        );
     }
 
     @Override

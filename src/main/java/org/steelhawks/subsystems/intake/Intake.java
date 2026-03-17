@@ -23,6 +23,12 @@ public class Intake extends SubsystemBase {
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
 
 
+    private LoggedTunableNumber tuningVolts;
+    private LoggedTunableNumber tuningAmps;
+
+
+
+
 
     enum IntakeState {
         IDLE,
@@ -35,9 +41,6 @@ public class Intake extends SubsystemBase {
     public Intake(IntakeIO io) {
         this.io = io;
 
-        io.setExtensionBrakeMode(true);
-        io.setRollerBrakeMode(false);
-
         profile = new TrapezoidProfile(
                 new TrapezoidProfile.Constraints(
                         IntakeConstants.MAX_VELOCITY_PER_SEC.getAsDouble(),
@@ -45,9 +48,6 @@ public class Intake extends SubsystemBase {
                 )
         );
 
-
-        io.setExtensionBrakeMode(true);
-        io.setRollerBrakeMode(false);
     }
 
     @Override
@@ -86,8 +86,6 @@ public class Intake extends SubsystemBase {
                     RollerPIDConstants.kD
             );
 
-
-
             // Log all PID values
             Logger.recordOutput("Intake/Extension/PID/kP", ExtensionPIDConstants.kP.get());
             Logger.recordOutput("Intake/Extension/PID/kI", ExtensionPIDConstants.kI.get());
@@ -104,6 +102,16 @@ public class Intake extends SubsystemBase {
 
             Logger.recordOutput("Intake/Roller/FF/kS", RollerPIDConstants.kS.getAsDouble());
             Logger.recordOutput("Intake/Roller/FF/kV", RollerPIDConstants.kV.getAsDouble());
+
+            if (Toggles.Intake.toggleVoltageOverride.getAsBoolean()) {
+                if (tuningVolts == null) {
+                    tuningVolts = new LoggedTunableNumber("Intake/Tuning Volts", 0.0);
+                }
+
+                if (tuningAmps == null) {
+                    tuningAmps = new LoggedTunableNumber("Intake/Tuning Amps", 0.0);
+                }
+            }
         }
 
         // These always log regardless of tuning mode
@@ -122,7 +130,6 @@ public class Intake extends SubsystemBase {
         // Log the computed FF output so you can see what's being sent
         Logger.recordOutput("Intake/Extension/FFOutput", ffOutput);
 
-        io.setExtensionPosition(setpoint.position, ffOutput);
     }
 
     private double calculateExtensionFeedForward(double velocity) {
@@ -154,19 +161,19 @@ public class Intake extends SubsystemBase {
     }
 
     public void intake() {
-        io.setRollerVoltage(IntakeConstants.INTAKE_SPEED);
+        io.runIntake(IntakeConstants.INTAKE_SPEED);
         intakeState = IntakeState.INTAKING;
         Logger.recordOutput("Intake/Roller/AppliedVolts", IntakeConstants.INTAKE_SPEED);
     }
 
     public void eject() {
-        io.setRollerVoltage(IntakeConstants.EJECT_SPEED);
+        io.runIntake(IntakeConstants.EJECT_SPEED);
         intakeState = IntakeState.EJECTING;
         Logger.recordOutput("Intake/Roller/AppliedVolts", IntakeConstants.EJECT_SPEED);
     }
 
     public void stopRollers() {
-        io.stopRoller();
+        io.stopIntake();
         Logger.recordOutput("Intake/Roller/AppliedVolts", 0.0);
         if (intakeState == IntakeState.INTAKING || intakeState == IntakeState.EJECTING) {
             intakeState = IntakeState.IDLE;
@@ -174,7 +181,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setRollerVoltage(double volts) {
-        io.setRollerVoltage(volts);
+        io.runIntake(tuningVolts.getAsDouble());
         Logger.recordOutput("Intake/Roller/AppliedVolts", volts);
     }
 
@@ -182,7 +189,7 @@ public class Intake extends SubsystemBase {
         double ffOutput = calculateRollerFeedforward(velocityRadPerSec);
         Logger.recordOutput("Intake/Roller/TargetVelocity", velocityRadPerSec);
         Logger.recordOutput("Intake/Roller/FFOutput", ffOutput);
-        io.setRollerVelocity(velocityRadPerSec, ffOutput);
+        io.runIntake(tuningAmps.getAsDouble());
     }
 
     public void setExtensionGoal(double positionMeters) {
