@@ -90,28 +90,28 @@ public record ChoreoTraj(
 	public static final ChoreoTraj RRebound = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.empty(),
-	    9.9716,
+	    10.03873,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(0.451, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.of(0),
-	    4.86323,
+	    4.86294,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.of(1),
-	    3.7528000000000006,
+	    3.820220000000001,
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.of(2),
-	    1.3555700000000002,
+	    1.3555699999999984,
 	    new Pose2d(4.411, 0.643, Rotation2d.fromRadians(0)),
 	    new Pose2d(0.451, 0.643, Rotation2d.fromRadians(0))
 	);

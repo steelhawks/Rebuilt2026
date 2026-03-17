@@ -59,13 +59,16 @@ public class ShooterStructure {
 //                 shootingFlywheelVelocityMap.put(entry[0], entry[1]);
 //             }
 //         }
+
+        // 5.512 is bad, just a big jump so its kinda poorly tuned
+
         shootingFlywheelVelocityMap.put(1.146, 10.0);
         shootingFlywheelVelocityMap.put(1.633, 10.5);
         shootingFlywheelVelocityMap.put(2.639, 12.2);
         shootingFlywheelVelocityMap.put(3.3315, 13.1);
         shootingFlywheelVelocityMap.put(3.965, 13.5);
         shootingFlywheelVelocityMap.put(4.057, 15.0);
-        shootingFlywheelVelocityMap.put(5.512, 13.5);
+        shootingFlywheelVelocityMap.put(5.512, 13.0); // 5.512 is pretty inconsistnet
 //         if (c.shootingHoodAngleMap() != null) {
 //             for (double[] entry : c.shootingHoodAngleMap()) {
 //                 shootingHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
