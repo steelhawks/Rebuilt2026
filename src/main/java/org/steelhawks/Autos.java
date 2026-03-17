@@ -241,6 +241,21 @@ public final class Autos {
         return routine;
     }
 
+    public static AutoRoutine rightReboundWithBump() {
+        AutoRoutine routine = factory.newRoutine("Right Rebound With Bump Auton");
+
+        AutoTrajectory trenchToMidToHub = ChoreoTraj.RRebound_Bump$0.asAutoTraj(routine);
+        AutoTrajectory hubToReboundToTrench = ChoreoTraj.RRebound_Bump$1.asAutoTraj(routine);
+        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound_Bump$2.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE);
+                trenchToMidToHub
+            )
+        )
+    }
+
     public static Command followTrajectory(ChoreoTraj traj) {
         return factory.trajectoryCmd(traj.name());
     }
