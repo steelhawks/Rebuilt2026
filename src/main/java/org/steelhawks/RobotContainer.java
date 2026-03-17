@@ -65,9 +65,7 @@ public class RobotContainer {
                 () -> -driver.getRightX()));
         configureDriver();
         Toggles.configureOverrides();
-//        LEDCommands.configureTriggers(driver.leftTrigger());
-//        ShooterTuner.getInstance();
-//        Autos.testingBoard();
+        LEDCommands.configureTriggers(driver.leftTrigger());
     }
 
     private void configureDriver() {

@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -29,7 +31,7 @@ public class Hood extends SubsystemBase {
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
-    private final double homingVolts = 3.0;
+    private final double homingVolts = 4.0;
     private final SubsystemConstants.HoodConstants constants;
 
     private static LoggedTunableNumber kP;
@@ -114,10 +116,10 @@ public class Hood extends SubsystemBase {
             );
         }
         if (shouldRun) {
-//            if (!Toggles.shooterTuningMode.get()) {
-//                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-//                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
-//            }
+            if (!Toggles.shooterTuningMode.get()) {
+                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+            }
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
                 setpoint, 0.0);

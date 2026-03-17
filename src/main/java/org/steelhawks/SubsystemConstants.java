@@ -102,19 +102,25 @@ public class SubsystemConstants {
                 0.0, Double.MAX_VALUE,
                 0.0, Double.MAX_VALUE,
                 new double[][]{
-                    {1.75, 14.8},
-                    {2.12, 15.0},
-                    {3.16, 18.8}
+                    {1.210, 1},
+                    {1.870, 1},
+                    {2.290, 1},
+                    {2.920, 1},
+                    {3.590, 1}
                 },
                 new double[][]{
-                    {1.75, 14.8},
-                    {2.12, 15.0},
-                    {3.16, 18.8}
+                    {1.210, 10.0},
+                    {1.870, 10.5},
+                    {2.290, 10.7},
+                    {2.920, 11},
+                    {3.590, 12}
                 },
                 new double[][]{
-                    {1.75, 14.8},
-                    {2.12, 15.0},
-                    {3.16, 18.8}
+                    {1.210, 80.0},
+                    {1.870, 75.0},
+                    {2.290, 70.0},
+                    {2.920, 65.0},
+                    {3.590, 63.0}
                 },
                 new double[][]{
                     {1.75, 14.8},
@@ -144,7 +150,7 @@ public class SubsystemConstants {
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523 * 1.2, 50.0, 1.0, 50, 1.1, Units.inchesToMeters(1.16), (1.0 / 2.0));
+                5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523 * 1.2, 50.0, 1.0, 50, 1.0, Units.inchesToMeters(1.16), (1.0 / 2.0));
 
         public static final TurretConstants TURRET =
             new TurretConstants(
