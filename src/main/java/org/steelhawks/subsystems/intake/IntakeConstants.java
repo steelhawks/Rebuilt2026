@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.intake;
 
 import edu.wpi.first.math.util.Units;
+import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.TunableNumber;
 
 public class IntakeConstants {
@@ -43,14 +44,12 @@ public class IntakeConstants {
     public static final double INTAKE_VELOCITY_RAD_PER_SEC = Units.rotationsPerMinuteToRadiansPerSecond(3000.0);
     public static final double EJECT_VELOCITY_RAD_PER_SEC = Units.rotationsPerMinuteToRadiansPerSecond(-2000.0);
 
-    public static final TunableNumber EXTENSION_POSITION_KS = new TunableNumber("Extension Position KS", 0.0);
-    public static final TunableNumber EXTENSION_POSITION_KG = new TunableNumber("Extension Position KG", 0.0);
+    public static final LoggedTunableNumber EXTENSION_POSITION_KS = new LoggedTunableNumber("Intake/Extension KS", 0.0);
+    public static final LoggedTunableNumber EXTENSION_POSITION_KG = new LoggedTunableNumber("Intake/Extension KG", 0.0);
 
-    public static final TunableNumber EXTENSION_VELOCITY_KV = new TunableNumber("Extension Velocity KV", 0.0);
+    public static final LoggedTunableNumber EXTENSION_VELOCITY_KV = new LoggedTunableNumber("Extension/Velocity KV", 0.0);
 
 
-    public static final TunableNumber ROLLER_KS = new TunableNumber("Roller KS", 0.0);
-    public static final TunableNumber ROLLER_KV = new TunableNumber("Roller KV", 0.0);
 
     public static final double POSITION_TOLERANCE = 0.02;
 
