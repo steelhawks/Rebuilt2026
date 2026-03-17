@@ -13,6 +13,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.commands.DriveCommands;
 import org.steelhawks.commands.ShootingCommands;
+import org.steelhawks.subsystems.indexer.Indexer;
+import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -22,6 +24,9 @@ import java.io.IOException;
 public final class Autos {
 
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
+    private static final Intake s_Intake = RobotContainer.s_Intake;
+    private static final Indexer s_Indexer = RobotContainer.s_Indexer;
+
     private static final LoggedDashboardChooser<Command> autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser");
 
@@ -56,6 +61,8 @@ public final class Autos {
         autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName("FOUR_METER_TEST"));
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName("FOUR_METER_SPIN_TEST"));
         autoChooser.addOption("Center Test", centerPathTest().cmd().withName("CENTER_METER_TEST"));
+        autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName("RIGHT_REBOUND_AUTON"));
+        autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName("LEFT_REBOUND_AUTON"));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
@@ -176,6 +183,81 @@ public final class Autos {
                 ShootingCommands.shoot()));
 
         return routine;
+    }
+
+    public static AutoRoutine rightRebound() {
+        AutoRoutine routine = factory.newRoutine("Right Rebound Auton");
+
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound$2.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                trenchToMidToTrench.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake()),
+                ShootingCommands.shoot()
+                    .until(() -> !s_Indexer.hasBalls())
+                    .withTimeout(5.0),
+                trenchToReboundToTrench.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake()),
+                ShootingCommands.shoot()
+                    .until(() -> !s_Indexer.hasBalls())
+                    .withTimeout(5.0),
+                trenchToOutpost.cmd(),
+                ShootingCommands.shoot()
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine leftRebound() {
+        AutoRoutine routine = factory.newRoutine("Left Rebound Auton");
+
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.LRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToOutpost = ChoreoTraj.LRebound$2.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                trenchToMidToTrench.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake()),
+                ShootingCommands.shoot()
+                    .until(() -> !s_Indexer.hasBalls())
+                    .withTimeout(5.0),
+                trenchToReboundToTrench.cmd()
+                    .alongWith(RobotContainer.s_Intake.runIntake()),
+                ShootingCommands.shoot()
+                    .until(() -> !s_Indexer.hasBalls())
+                    .withTimeout(5.0),
+                trenchToOutpost.cmd(),
+                ShootingCommands.shoot()
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine rightReboundWithBump() {
+        AutoRoutine routine = factory.newRoutine("Right Rebound With Bump Auton");
+
+        AutoTrajectory trenchToMidToHub = ChoreoTraj.RRebound_Bump$0.asAutoTraj(routine);
+        AutoTrajectory hubToReboundToTrench = ChoreoTraj.RRebound_Bump$1.asAutoTraj(routine);
+        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound_Bump$2.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE);
+                trenchToMidToHub
+            )
+        )
+    }
+
+    public static Command followTrajectory(ChoreoTraj traj) {
+        return factory.trajectoryCmd(traj.name());
     }
 
 //    public static AutoRoutine outpostTrenchClimbAuto() {
