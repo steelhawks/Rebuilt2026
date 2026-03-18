@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.superstructure;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
@@ -214,6 +215,17 @@ public class ShooterStructure {
                 return kNoSolution;
             }
             return new ProjectileData(v0, theta, predictedTarget);
+        }
+
+        public ProjectileData calculateFerryShot(Translation3d actualTarget) {
+            double x = distanceToTarget(actualTarget);
+            double y = -turretHeightAboveField(); // ferry shot is on the ground so simplfiies to this from 0 - turret_height
+
+            double theta = Math.PI / 4.0;
+            double cos = Math.cos(theta);
+            double v0 = Math.sqrt((G * x * x / 2) * (cos * cos * (x * Math.tan(theta) - y)));
+
+            return new ProjectileData(v0, theta, actualTarget);
         }
     }
 
