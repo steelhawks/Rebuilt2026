@@ -154,7 +154,11 @@ public class Robot extends LoggedRobot {
             "edu.wpi.first.math.geometry.Twist2d",
             "java.lang.FdLibm$Hypot",
             "choreo.trajectory.Trajectory",
-            "choreo.trajectory.SwerveSample");
+            "choreo.trajectory.SwerveSample",
+            "edu.wpi.first.apriltag.AprilTagFieldLayout",
+            "edu.wpi.first.math.estimator.SwerveDrivePoseEstimator",
+            "edu.wpi.first.math.VecBuilder",
+            "org.photonvision.PhotonCamera");
 
         // Check for valid swerve config
         var modules =
