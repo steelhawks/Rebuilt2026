@@ -24,7 +24,7 @@ public class Indexer extends SubsystemBase {
     private Debouncer beamDebouncer;
 
     public enum IndexerState {
-        RUNNING(0.6, 1.0),
+        RUNNING(1.0, 1.0),
         OUTTAKING(-0.6, -1.0);
 
         final double spindexerOutput;
