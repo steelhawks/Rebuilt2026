@@ -218,7 +218,9 @@ public class Robot extends LoggedRobot {
         LoopTimeUtil.record("PhoenixUtil");
 //        VirtualSubsystem.periodicAll();
 //        LoopTimeUtil.record("VirtualPeriodic");
-        ShooterTuner.getInstance().periodic();
+        if (Toggles.shooterTuningMode.get()) {
+            ShooterTuner.getInstance().periodic();
+        }
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
 
