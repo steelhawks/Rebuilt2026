@@ -9,11 +9,11 @@ public class SwerveDriveController {
 
     private final PIDController xController;
     private final PIDController yController;
-    private final ProfiledPIDController thetaController;
+    private final PIDController thetaController;
     private boolean firstRun = true;
 
     public SwerveDriveController(
-        PIDController xController, PIDController yController, ProfiledPIDController thetaController) {
+        PIDController xController, PIDController yController, PIDController thetaController) {
         this.xController = xController;
         this.yController = yController;
         this.thetaController = thetaController;
@@ -39,14 +39,14 @@ public class SwerveDriveController {
         return yController;
     }
 
-    public ProfiledPIDController getThetaController() {
+    public PIDController getThetaController() {
         return thetaController;
     }
 
     public void reset(Pose2d measurement) {
         xController.reset();
         yController.reset();
-        thetaController.reset(measurement.getRotation().getRadians());
+        thetaController.reset();
     }
 
     public ChassisSpeeds getOutput(Pose2d measurement, Pose2d setpoint) {
@@ -70,6 +70,6 @@ public class SwerveDriveController {
         return new ChassisSpeeds(
             xController.getError(),
             yController.getError(),
-            thetaController.getVelocityError());
+            thetaController.getError());
     }
 }

@@ -116,10 +116,7 @@ public class Swerve extends SubsystemBase {
         new SwerveDriveController(
             new PIDController(AutonConstants.TRANSLATION_KP.getAsDouble(), AutonConstants.TRANSLATION_KI.getAsDouble(), AutonConstants.TRANSLATION_KD.getAsDouble()),
             new PIDController(AutonConstants.TRANSLATION_KP.getAsDouble(), AutonConstants.TRANSLATION_KI.getAsDouble(), AutonConstants.TRANSLATION_KD.getAsDouble()),
-            new ProfiledPIDController(AutonConstants.ROTATION_KP.getAsDouble(), AutonConstants.ROTATION_KI.getAsDouble(), AutonConstants.ROTATION_KD.getAsDouble(),
-                new TrapezoidProfile.Constraints(
-                    AutonConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                    AutonConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED)))
+            new PIDController(AutonConstants.ROTATION_KP.getAsDouble(), AutonConstants.ROTATION_KI.getAsDouble(), AutonConstants.ROTATION_KD.getAsDouble()))
             .withLinearTolerance(0.05)
             .withRotationalTolerance(Math.PI / 60.0);
     private final ProfiledPIDController mAlignController;
