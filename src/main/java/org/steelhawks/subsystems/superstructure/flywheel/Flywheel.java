@@ -128,7 +128,7 @@ public class Flywheel extends SubsystemBase {
                         double mps = ShooterStructure.Static.calculateShot(
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
-                        if (rps != targetVelocityRadPerSec) {
+                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
                             setTargetVelocity(rps * constants.idleMultiplier());
                         }
                     }
@@ -136,7 +136,7 @@ public class Flywheel extends SubsystemBase {
                         double mps = ShooterStructure.Moving.calculateMovingShot(
                             FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
-                        if (rps != targetVelocityRadPerSec) {
+                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
                             setTargetVelocity(rps);
                         }
                     }
@@ -144,7 +144,7 @@ public class Flywheel extends SubsystemBase {
                         double mps = ShooterStructure.Static.calculateShot(
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
-                        if (rps != targetVelocityRadPerSec) {
+                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
                             setTargetVelocity(constants.stationaryHoodVelocityFactor() * rps);
                         }
                     }
