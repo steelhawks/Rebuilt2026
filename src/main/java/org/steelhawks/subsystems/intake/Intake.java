@@ -105,11 +105,12 @@ public class Intake extends SubsystemBase {
 
             if (Toggles.Intake.toggleVoltageOverride.getAsBoolean()) {
                 if (tuningVolts == null) {
-                    tuningVolts = new LoggedTunableNumber("Intake/Tuning Volts", 0.0);
+                    tuningVolts = new LoggedTunableNumber("Intake/TuningVolts", 0.0);
                 }
+                io.runExtensionOpenLoop(tuningVolts.getAsDouble(), false);
 
                 if (tuningAmps == null) {
-                    tuningAmps = new LoggedTunableNumber("Intake/Tuning Amps", 0.0);
+                    tuningAmps = new LoggedTunableNumber("Intake/TuningAmps", 0.0);
                 }
             }
         }
