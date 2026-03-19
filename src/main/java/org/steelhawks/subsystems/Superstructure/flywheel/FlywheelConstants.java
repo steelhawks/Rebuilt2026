@@ -16,4 +16,15 @@ public class FlywheelConstants {
     public double kV;
 
 
+    public double kP() {
+        return kP;
+    }
+
+    public double kI() {
+        return kI;
+    }
+
+    public double kD() {
+        return kI;
+    }
 }

@@ -42,9 +42,9 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         config.Feedback.SensorToMechanismRatio = constants.GEAR_RATIO;
 
-        config.Slot0.kP = constants.kP.getAsDouble();
-        config.Slot0.kI = constants.kI.getAsDouble();
-        config.Slot0.kD = constants.kD.getAsDouble();
+        config.Slot0.kP = constants.kP();
+        config.Slot0.kI = constants.kI();
+        config.Slot0.kD = constants.kD();
 
         right_motor.setControl(new Follower(constants.leftMotorID, MotorAlignmentValue.Opposed));
 
