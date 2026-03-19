@@ -95,33 +95,9 @@ public record ChoreoTraj(
     public static final ChoreoTraj RRebound = new ChoreoTraj(
         "RRebound",
         OptionalInt.empty(),
-        9.93765,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(0.44475, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(0),
-        5.02554,
+        4.82367,
         new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
         new Pose2d(4.25, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(1),
-        3.769989999999999,
-        new Pose2d(4.25, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(4.25, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(2),
-        1.1421200000000002,
-        new Pose2d(4.25, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(0.44475, 0.64334, Rotation2d.fromRadians(0))
     );
     public static final ChoreoTraj RRebound_Bump = new ChoreoTraj(
         "RRebound_Bump",
@@ -170,9 +146,6 @@ public record ChoreoTraj(
         Map.entry("LRebound$1", LRebound$1),
         Map.entry("LRebound$2", LRebound$2),
         Map.entry("RRebound", RRebound),
-        Map.entry("RRebound$0", RRebound$0),
-        Map.entry("RRebound$1", RRebound$1),
-        Map.entry("RRebound$2", RRebound$2),
         Map.entry("RRebound_Bump", RRebound_Bump),
         Map.entry("RRebound_Bump$0", RRebound_Bump$0),
         Map.entry("RRebound_Bump$1", RRebound_Bump$1),
