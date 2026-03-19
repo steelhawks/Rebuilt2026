@@ -48,6 +48,8 @@ public interface Toggles {
     }
 
     interface  FLywheel {
+        LoggedNetworkBoolean isEnabled =
+                new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", false);
         LoggedNetworkBoolean toggleVoltageOverride =
                 new LoggedNetworkBoolean("Toggles/Flywheel/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
