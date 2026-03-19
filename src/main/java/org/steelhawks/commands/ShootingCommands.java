@@ -15,8 +15,8 @@ public class ShootingCommands {
                 RobotState.getInstance().setAimState(ShootingState.SHOOTING)),
             Commands.sequence(
                 Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
-                Commands.waitUntil(RobotContainer.s_Turret::atGoal),
-                Commands.waitUntil(RobotContainer.s_Hood::atGoal),
+//                Commands.waitUntil(RobotContainer.s_Turret::atGoal),
+//                Commands.waitUntil(RobotContainer.s_Hood::atGoal),
                 RobotContainer.s_Indexer.feed()
                     .alongWith(RobotContainer.s_Intake.runIntake())
 //                    .alongWith(RobotContainer.s_Intake.agitate())
