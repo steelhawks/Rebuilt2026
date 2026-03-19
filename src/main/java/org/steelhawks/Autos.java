@@ -59,11 +59,11 @@ public final class Autos {
     public static void init() {
         /* ------------- Autons ------------- */
 
-        autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName("FOUR_METER_TEST"));
-        autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName("FOUR_METER_SPIN_TEST"));
-        autoChooser.addOption("Center Test", centerPathTest().cmd().withName("CENTER_METER_TEST"));
-        autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName("RIGHT_REBOUND_AUTON"));
-        autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName("LEFT_REBOUND_AUTON"));
+        autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName(ChoreoTraj.FourMeterTest.name()));
+        autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
+        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
+        autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
+        autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 //        autoChooser.addOption("Outpost Trench Climb", outpostTrenchClimbAuto().cmd().withName("OutpostTrenchClimbAuto"));
 
