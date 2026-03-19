@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -66,6 +67,9 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
+        new Trigger(() -> true)
+            .whileTrue(TeleopSwerve.overrideState());
+
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
 
@@ -78,7 +82,7 @@ public class RobotContainer {
                 }
             }));
 
-        driver.leftTrigger()
+        driver.rightBumper()
             .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
@@ -94,8 +98,8 @@ public class RobotContainer {
         driver.y()
             .onTrue(s_Intake.slamIn());
 
-        driver.leftTrigger()
-            .whileTrue(
-                TeleopSwerve.overrideState());
+//        driver.leftTrigger()
+//            .whileTrue(
+//                TeleopSwerve.overrideState());
     }
 }
