@@ -78,7 +78,7 @@ public class RobotContainer {
                 }
             }));
 
-        driver.rightTrigger()
+        driver.leftTrigger()
             .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
