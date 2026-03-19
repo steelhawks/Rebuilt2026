@@ -64,7 +64,7 @@ public class LEDCommands {
 
     public static Command runTechnicianWizard() {
         return Commands.sequence(
-            Commands.runOnce(() -> s_Matrix.setBrightness(0.5)),
+        Commands.runOnce(() -> s_Matrix.setBrightness(0.25)),
             // No Auton Selected warning
             Commands.sequence(
                 Commands.sequence(
@@ -184,8 +184,8 @@ public class LEDCommands {
                 .onFalse(s_Matrix.clearCommand());
 
             Trigger warn10Seconds = new Trigger(() -> RobotState.getInstance().isShift() && RobotState.getInstance().timeLeftInShift() < 10.0)
-                .whileTrue(displayTimeLeftInShift()
-                    .beforeStarting(() -> s_Matrix.setBrightness(1.0)))
+                .whileTrue(displayTimeLeftInShift())
+//                    .beforeStarting(() -> s_Matrix.setBrightness(1.0)))
                 .onFalse(s_Matrix.clearCommand());
 
             toggleMatchData
@@ -193,8 +193,8 @@ public class LEDCommands {
                 .onFalse(s_Matrix.clearCommand());
 
             Trigger isAuton = new Trigger(() -> Robot.getState().equals(AUTON))
-                .whileTrue(s_Matrix.plasmaCommand(100)
-                    .beforeStarting(() -> s_Matrix.setBrightness(1.0)));
+                .whileTrue(s_Matrix.plasmaCommand(100));
+//                    .beforeStarting(() -> s_Matrix.setBrightness(1.0)));
 
             Trigger isTeleop = new Trigger(() -> Robot.getState().equals(TELEOP))
                     .and(runTechnicianScreen.negate())
