@@ -174,7 +174,7 @@ public class RobotConfig {
             case OMEGABOT -> new Builder()
                 .withLEDMatrix(true)
                 .withVision(true)
-                .withObjectVision(true)
+                .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)
                 .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
