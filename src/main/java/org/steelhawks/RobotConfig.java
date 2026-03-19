@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.Constants.*;
 import org.steelhawks.generated.*;
+import org.steelhawks.subsystems.LoggedMitoCANdria;
 import org.steelhawks.subsystems.beam.BeamIO;
 import org.steelhawks.subsystems.beam.BeamIOCANRange;
 import org.steelhawks.subsystems.indexer.IndexerIO;
@@ -58,6 +59,7 @@ public class RobotConfig {
     public final boolean hasOldIntake;
     public final boolean hasIntake;
     public final boolean hasIndexer;
+    public final boolean hasMitoCANDria;
 
     // Subsystem factory
     private final SubsystemFactory factory;
@@ -87,6 +89,7 @@ public class RobotConfig {
         this.hoodConstants = builder.hoodConstants;
         this.intakeConstants = builder.intakeConstants;
         this.indexerConstants = builder.indexerConstants;
+        this.hasMitoCANDria = builder.hasMitoCANdria;
         this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
     }
 
@@ -163,6 +166,14 @@ public class RobotConfig {
             return Optional.empty();
         }
         return Optional.ofNullable(factory.createIntake(intakeConstants));
+    }
+
+    public Optional<LoggedMitoCANdria> createMitoCANdria() {
+        if (!hasMitoCANDria) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(factory.createMitoCANdria());
     }
 
     public static RobotConfig getConfig() {
@@ -324,6 +335,7 @@ public class RobotConfig {
         private boolean hasIntake = false;
         private boolean hasIndexer = false;
         private boolean hasAutos = false;
+        private boolean hasMitoCANdria = false;
         private TurretConstants turretConstants;
         private FlywheelConstants flywheelConstants;
         private HoodConstants hoodConstants;
@@ -396,6 +408,11 @@ public class RobotConfig {
             return this;
         }
 
+        public Builder withMitoCANdria(boolean enabled) {
+            this.hasMitoCANdria = enabled;
+            return this;
+        }
+
         public Builder withFactory(SubsystemFactory factory) {
             this.factory = factory;
             return this;
@@ -440,6 +457,7 @@ public class RobotConfig {
         OldIntake createOldIntake();
         Intake createIntake(IntakeConstants c);
         Indexer createIndexer(IndexerConstants c);
+        LoggedMitoCANdria createMitoCANdria();
     }
 
     // OmegaBot factory
@@ -502,6 +520,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOTalonFX(CANBusList.kTurretBus, c), new BeamIOCANRange(CANBusList.kTurretBus, new BeamIO.BeamBreakConfig(c.beamId().orElse(-1), 0.01, 0.05, BeamIO.UpdateMode.SHORT_RANGE, 100.0)), c); }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
+        }
     }
 
     // AlphaBot factory
@@ -565,6 +588,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer(IndexerConstants c) { return null; }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
+        }
     }
 
     private static class ChassisBotFactory implements SubsystemFactory {
@@ -627,6 +655,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer(IndexerConstants c) { return null; }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
+        }
     }
 
     private static class LastYearFactory implements SubsystemFactory {
@@ -689,6 +722,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer(IndexerConstants c) { return null; }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
+        }
     }
 
     private static class TestBoardFactory implements SubsystemFactory {
@@ -753,6 +791,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer(IndexerConstants c) { return null; }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
+        }
     }
 
     private static class SimBotFactory implements SubsystemFactory {
@@ -816,6 +859,11 @@ public class RobotConfig {
 
         @Override
         public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOSim(), new BeamIO() {}, c); }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
+        }
     }
 
     private static class ReplayFactory implements SubsystemFactory {
@@ -878,6 +926,11 @@ public class RobotConfig {
         @Override
         public Indexer createIndexer(IndexerConstants c) {
             return new Indexer(new IndexerIO() {}, new BeamIO() {}, c);
+        }
+
+        @Override
+        public LoggedMitoCANdria createMitoCANdria() {
+            return null;
         }
     }
 }
