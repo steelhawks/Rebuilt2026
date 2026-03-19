@@ -238,8 +238,8 @@ public class Turret extends SubsystemBase {
             DriverStation.isEnabled()
                 && !isManual
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
-                && inputs.connected
                 && Toggles.Turret.isEnabled.get()
+                && (inputs.connected && inputs.encoderConnected) // add check to make sure it only checks for omega
                 && !Toggles.Turret.toggleVoltageOverride.get()
                 && !Toggles.Turret.toggleCurrentOverride.get()
                 && (getPosition().getRadians() <= constants.maxRotation().getRadians()

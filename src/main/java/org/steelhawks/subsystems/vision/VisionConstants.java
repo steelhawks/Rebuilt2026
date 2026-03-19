@@ -142,7 +142,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(45.0))),
-            new Factors.StdDevFactors(3.0), // TODO: tune stddev factors
+            new Factors.StdDevFactors(8.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -155,7 +155,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(-90.0))),
-            new Factors.StdDevFactors(1.3), // TODO: tune stddev factors
+            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -168,7 +168,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(90.0))),
-            new Factors.StdDevFactors(1.3), // TODO: tune stddev factors
+            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -181,7 +181,7 @@ public class VisionConstants {
                 Units.degreesToRadians(0.0),
                 Units.degreesToRadians(-30.0),
                 Units.degreesToRadians(-135.0))),
-            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            new Factors.StdDevFactors(1.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -194,7 +194,7 @@ public class VisionConstants {
                 Units.degreesToRadians(0.0),
                 Units.degreesToRadians(-30),
                 Units.degreesToRadians(-225))),
-            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            new Factors.StdDevFactors(1.0), // TODO: tune stddev factors
             CameraType.PHOTON
         )
 //        new CameraConfig(

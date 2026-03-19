@@ -139,9 +139,9 @@ public class Intake extends SubsystemBase {
             }
         }
 
-        if (isTwisting()) {
-            isHomed = false;
-        }
+//        if (isTwisting()) {
+//            isHomed = false;
+//        }
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -284,6 +284,19 @@ public class Intake extends SubsystemBase {
 
     public Command setDesiredStateCommand(IntakeConstants.State state) {
         return Commands.runOnce(() -> setDesiredState(state), this);
+    }
+
+    public Command slamOut() {
+        return Commands.run(
+            () -> io.runRackOpenLoop(2.0, false)
+        ).until(this::isStalling)
+            .finallyDo(() -> io.setPosition(IntakeConstants.State.INTAKE.getPosition()));
+    }
+
+    public Command slamIn() {
+        return Commands.run(
+            () -> io.runRackOpenLoop(-2.0, false)).until(this::isStalling)
+                .finallyDo(() -> io.setPosition(IntakeConstants.State.HOME.getPosition()));
     }
 
     public Command runIntake() {
