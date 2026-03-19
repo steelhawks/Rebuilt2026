@@ -38,7 +38,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         config.Feedback.SensorToMechanismRatio = constants.reduction();
-        config.CurrentLimits.SupplyCurrentLimit = 60.0;
+        config.CurrentLimits.SupplyCurrentLimit = 40.0;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.Slot0.kP = constants.kP();
         config.Slot0.kI = constants.kI();
@@ -57,7 +57,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         rightConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         rightConfig.Feedback.SensorToMechanismRatio = constants.reduction();
-        rightConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
+        rightConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
         rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         rightMotor.getConfigurator().apply(rightConfig);
