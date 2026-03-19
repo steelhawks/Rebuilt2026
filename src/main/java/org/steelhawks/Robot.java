@@ -33,10 +33,7 @@ import org.steelhawks.Constants.Mode;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.vision.VisionConstants;
-import org.steelhawks.util.Elastic;
-import org.steelhawks.util.LoopTimeUtil;
-import org.steelhawks.util.PhoenixUtil;
-import org.steelhawks.util.VirtualSubsystem;
+import org.steelhawks.util.*;
 
 import java.lang.reflect.Field;
 
@@ -237,7 +234,7 @@ public class Robot extends LoggedRobot {
         ) {
             RobotContainer.s_Swerve.updatePhysicsSimulation();
         }
-        Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(FieldConstants.Hub.HUB_CENTER_3D));
+        Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
     }
 
     private void visualizeFieldConstants() {
