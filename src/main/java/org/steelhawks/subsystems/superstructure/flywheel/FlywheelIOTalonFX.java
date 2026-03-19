@@ -60,6 +60,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
         rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+        rightMotor.getConfigurator().apply(rightConfig);
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);
         velocityTorqueCurrentFOC = new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0).withSlot(1);
