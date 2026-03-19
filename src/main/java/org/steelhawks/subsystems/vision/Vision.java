@@ -55,7 +55,12 @@ public class Vision extends SubsystemBase {
                 new Alert(
                     "Vision camera " + i + " is disconnected.", AlertType.kWarning);
         }
-        whitelistTagIds(ALL_ALLOWED_TAGS);
+//        whitelistTagIds(ALL_ALLOWED_TAGS);
+        List<Integer> test = new List<Integer>() {};
+        for (int i = 19; i < 22; i++) {
+            test.add(i);
+        }
+        whitelistTagIds(test.toArray());
     }
 
     public static void whitelistTagIds(int... tagIds) {
