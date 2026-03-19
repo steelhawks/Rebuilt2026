@@ -1,6 +1,7 @@
 package org.steelhawks.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
@@ -27,8 +28,10 @@ public class ShootingCommands {
 //                jamRecovery())
                 )
             .repeatedly())
-            .finallyDo(() ->
-                RobotState.getInstance().setAimState(ShootingState.NOTHING));
+            .finallyDo(() -> {
+                RobotState.getInstance().setAimState(ShootingState.NOTHING);
+                CommandScheduler.getInstance().schedule(RobotContainer.s_Intake.slamOut());
+            });
     }
 
     private static Command jamRecovery() {
