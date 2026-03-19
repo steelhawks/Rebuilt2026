@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.superstructure;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -45,8 +46,11 @@ public class ShooterStructure {
                 case OMEGABOT, SIMBOT -> SubsystemConstants.OmegaBot.LUT;
                 default -> SubsystemConstants.LUTConstants.UNSET;
             };
-        minShootDistance = c.minShootDistance();
-        maxShootDistance = c.maxShootDistance();
+//        minShootDistance = c.minShootDistance();
+//        maxShootDistance = c.maxShootDistance();
+
+        minShootDistance = 1.146;
+        maxShootDistance = 5.512;
 
         minFerryDistance = c.minFerryDistance();
         maxFerryDistance = c.maxFerryDistance();
@@ -143,7 +147,7 @@ public class ShooterStructure {
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
-            double x_dist = distanceToTarget(predictedTarget);
+            double x_dist = MathUtil.clamp(distanceToTarget(predictedTarget), minShootDistance, maxShootDistance);
             if (Toggles.useLUT.getAsBoolean()) {
                 return new ProjectileData(
                     shootingFlywheelVelocityMap.get(x_dist),
