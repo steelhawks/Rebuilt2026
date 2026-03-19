@@ -43,6 +43,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.Slot0.kP = constants.kP();
         config.Slot0.kI = constants.kI();
         config.Slot0.kD = constants.kD();
+        PhoenixUtil.tryUntilOk(5, () -> leftMotor.getConfigurator().apply(config));
 
         position = leftMotor.getPosition();
         velocity = leftMotor.getVelocity();
@@ -52,6 +53,12 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         temp = leftMotor.getDeviceTemp();
 
         rightMotor = new TalonFX(constants.rightMotorId(), bus);
+        var rightConfig = new TalonFXConfiguration();
+        rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        rightConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        rightConfig.Feedback.SensorToMechanismRatio = constants.reduction();
+        rightConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
+        rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         velocityVoltage = new VelocityVoltage(0.0).withUpdateFreqHz(0.0).withSlot(0);
@@ -59,7 +66,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
 
-        PhoenixUtil.tryUntilOk(5, () -> leftMotor.getConfigurator().apply(config));
+
         BaseStatusSignal.setUpdateFrequencyForAll(
             100, position, velocity);
         PhoenixUtil.registerSignals(
