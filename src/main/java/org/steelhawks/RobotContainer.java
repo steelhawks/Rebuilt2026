@@ -3,6 +3,7 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -68,9 +69,17 @@ public class RobotContainer {
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
 
+        driver.povRight().onTrue(
+            Commands.runOnce(() -> {
+                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
+                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
+                } else {
+                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
+                }
+            }));
 
         driver.leftBumper()
-                .whileTrue(ShootingCommands.shoot());
+            .whileTrue(ShootingCommands.shoot());
 
         if (config.hasIntake) {
             driver.rightTrigger()
