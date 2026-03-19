@@ -38,6 +38,8 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         config.Feedback.SensorToMechanismRatio = constants.reduction();
+        config.CurrentLimits.SupplyCurrentLimit = 80.0;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.Slot0.kP = constants.kP();
         config.Slot0.kI = constants.kI();
         config.Slot0.kD = constants.kD();
