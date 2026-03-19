@@ -89,7 +89,7 @@ public class RobotContainer {
             .onTrue(s_Intake.slamOut());
 
         driver.y()
-            .onTrue(s_Intake.slamOut());
+            .onTrue(s_Intake.slamIn());
 
         driver.leftTrigger()
             .whileTrue(
