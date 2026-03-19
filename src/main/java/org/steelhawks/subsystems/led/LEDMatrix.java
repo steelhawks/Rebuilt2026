@@ -58,7 +58,7 @@ public class LEDMatrix extends SubsystemBase {
          * @param matrix The LED matrix to render to
          */
         public abstract void render(LEDMatrix matrix);
-p
+
         /**
          * Reset animation state
          */
