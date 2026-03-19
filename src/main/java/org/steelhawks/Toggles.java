@@ -3,6 +3,7 @@ package org.steelhawks;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
 
@@ -109,5 +110,14 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Hood/ToggleCurrentOverride");
         LoggedNetworkBoolean voltageOverride =
             new LoggedNetworkBoolean("Toggles/Hood/ToggleVoltageOverride");
+    }
+
+    interface MitoCANdria {
+        LoggedNetworkBoolean enableUSBCOne =
+            new LoggedNetworkBoolean("Toggles/MitoCANdria/EnableUSBCOne", true);
+        LoggedNetworkBoolean enableUSBCTwo =
+            new LoggedNetworkBoolean("Toggles/MitoCANdria/EnableUSBCTwo", true);
+        LoggedNetworkBoolean enableAdjustable =
+            new LoggedNetworkBoolean("Toggles/MitoCANdria/EnableAdjustable", false);
     }
 }

@@ -1,10 +1,12 @@
 package org.steelhawks.subsystems;
 
+import au.grapplerobotics.ConfigurationFailedException;
 import au.grapplerobotics.CouldNotGetException;
 import au.grapplerobotics.MitoCANdria;
 import au.grapplerobotics.interfaces.MitoCANdriaInterface;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.Toggles;
 import org.steelhawks.util.VirtualSubsystem;
 
 public class LoggedMitoCANdria extends VirtualSubsystem {
@@ -13,9 +15,6 @@ public class LoggedMitoCANdria extends VirtualSubsystem {
     public static final int ORANGE_PI_1_CHANNEL = MitoCANdriaInterface.MITOCANDRIA_CHANNEL_USB1;
     public static final int ORANGE_PI_2_CHANNEL = MitoCANdriaInterface.MITOCANDRIA_CHANNEL_USB2;
     public static final int LIMELIGHT_CHANNEL = MitoCANdriaInterface.MITOCANDRIA_CHANNEL_ADJ;
-    private boolean last5VAEnabled = false;
-    private boolean last5VBEnabled = false;
-    private boolean lastAdjustableEnabled = false;
 
     public LoggedMitoCANdria(int roboRioCANId) {
         mito = new MitoCANdria(MITOCANDRIA_ID);
@@ -26,6 +25,10 @@ public class LoggedMitoCANdria extends VirtualSubsystem {
         logChannel("OrangePi1", ORANGE_PI_1_CHANNEL);
         logChannel("OrangePi2", ORANGE_PI_2_CHANNEL);
         logChannel("Limelight", LIMELIGHT_CHANNEL);
+
+        applyChannelState(ORANGE_PI_1_CHANNEL, Toggles.MitoCANdria.enableUSBCOne.get());
+        applyChannelState(ORANGE_PI_2_CHANNEL, Toggles.MitoCANdria.enableUSBCTwo.get());
+        applyChannelState(LIMELIGHT_CHANNEL, Toggles.MitoCANdria.enableAdjustable.get());
     }
 
     private void logChannel(String channelName, int id) {
@@ -40,4 +43,27 @@ public class LoggedMitoCANdria extends VirtualSubsystem {
             DriverStation.reportWarning("Could not get status of MitoCANDria channel " + channelName + " at id " + id, false);
         }
     }
+
+    private void applyChannelState(int id, boolean enabled) {
+        boolean currentlyEnabled = getChannelEnabled(id);
+
+        try {
+            if (currentlyEnabled != enabled) {
+                mito.setChannelEnabled(id, enabled);
+            }
+        } catch (ConfigurationFailedException e) {
+            DriverStation.reportWarning("Failed to configure MitoCANdria channel id " + id, false);
+        }
+    }
+
+    public boolean getChannelEnabled(int id) {
+        boolean enabled = false;
+        try {
+            enabled = mito.getChannelEnabled(id).orElse(0) == 1;
+        } catch (CouldNotGetException e) {
+            DriverStation.reportWarning("Could not get status of MitoCANdria channel " + id, false);
+        }
+
+        return enabled;
+    };
 }
