@@ -72,19 +72,23 @@ public class RobotContainer {
         driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
 
-        if (config.hasIntake) {
-            driver.rightTrigger()
-                .whileTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
-                    .andThen(s_Intake.runIntake())
-                    .finallyDo(() -> s_Intake.setDesiredState(IntakeConstants.State.HOME)));
-        }
+//        if (config.hasIntake) {
+//            driver.rightTrigger()
+//                .whileTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
+//                    .andThen(s_Intake.runIntake())
+//                    .finallyDo(() -> s_Intake.setDesiredState(IntakeConstants.State.HOME)));
+//        }
+        driver.rightTrigger()
+            .whileTrue(
+                s_Intake.
+            )
 
-        if (config.hasTurret) {
-            driver.x()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0.0)));
-            driver.y()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
-        }
+//        if (config.hasTurret) {
+//            driver.x()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0.0)));
+//            driver.y()
+//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
+//        }
 
         driver.leftTrigger()
             .whileTrue(
