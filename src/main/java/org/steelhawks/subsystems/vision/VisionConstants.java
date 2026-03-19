@@ -155,7 +155,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(-90.0))),
-            new Factors.StdDevFactors(2.1), // TODO: tune stddev factors
+            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -168,7 +168,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(90.0))),
-            new Factors.StdDevFactors(2.1), // TODO: tune stddev factors
+            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
