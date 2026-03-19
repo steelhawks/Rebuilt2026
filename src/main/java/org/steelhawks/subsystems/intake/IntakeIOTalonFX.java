@@ -75,7 +75,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Slot0.kD = constants.kD();
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
 
-        leftConfig.CurrentLimits.SupplyCurrentLimit = 35.0;
+        leftConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
         leftConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
@@ -87,7 +87,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         rightConfig.Slot0.kD = constants.kD();
         rightConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
 
-        rightConfig.CurrentLimits.SupplyCurrentLimit = 35.0;
+        rightConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
         rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
 
