@@ -78,8 +78,8 @@ public class RobotContainer {
 //                    .andThen(s_Intake.runIntake())
 //                    .finallyDo(() -> s_Intake.setDesiredState(IntakeConstants.State.HOME)));
 //        }
-        driver.rightTrigger()
-            .whileTrue()
+//        driver.rightTrigger()
+//            .whileTrue();
 
 //        if (config.hasTurret) {
 //            driver.x()
