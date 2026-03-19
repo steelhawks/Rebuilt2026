@@ -150,7 +150,7 @@ public class SubsystemConstants {
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 0.15, 0.0, 0.0, 0.60728, 0.010523 * 1.08, 20.0, 1.0, 50, 1.18, Units.inchesToMeters(1.16), (1.0 / 2.0));
+                5, 6, 0.85, 0.15, 0.0, 0.0, 0.60728, 0.010523 * 1.08, 20.0, 1.0, 50, 1.22, Units.inchesToMeters(1.16), (1.0 / 2.0));
 
         public static final TurretConstants TURRET =
             new TurretConstants(
