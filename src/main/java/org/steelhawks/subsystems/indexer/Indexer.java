@@ -48,7 +48,7 @@ public class Indexer extends SubsystemBase {
         FEEDER_JAM_CURRENT =
             new LoggedTunableNumber("Indexer/Feeder/JamCurrent", constants.indexerJamCurrent());
         BEAM_DEBOUNCE_TIME =
-            new LoggedTunableNumber("Indexer/Beam/BeamDebounceTime", 3.0);
+            new LoggedTunableNumber("Indexer/Beam/BeamDebounceTime", 1.5); // TODO tune
         this.io = io;
         this.beamIO = beamIO;
 //        beamDebouncer = new Debouncer(BEAM_DEBOUNCE_TIME.get(), Debouncer.DebounceType.kFalling);
