@@ -190,8 +190,8 @@ public final class Autos {
     public static AutoRoutine rightRebound() {
         AutoRoutine routine = factory.newRoutine("Right Rebound Auton");
 
-        AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound.asAutoTraj(routine);
-//        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
 //        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound$2.asAutoTraj(routine);
 
         routine.active().onTrue(
@@ -204,27 +204,27 @@ public final class Autos {
         );
 
         trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
-//        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
 
         trenchToMidToTrench.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 ShootingCommands.shoot().withTimeout(2.0), // TODO tune
                 ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
-//                trenchToReboundToTrench.spawnCmd()
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToReboundToTrench.spawnCmd()
             )
         );
 
-//        trenchToReboundToTrench.done().onTrue(
-//            Commands.sequence(
-//                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-//                ShootingCommands.shoot().withTimeout(2.0),
-//                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
-//                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+        trenchToReboundToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
 //                trenchToOutpost.spawnCmd()
-//            )
-//        );
+            )
+        );
 //
 //        trenchToOutpost.done().onTrue(
 //            Commands.sequence(
