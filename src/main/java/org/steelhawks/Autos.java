@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
@@ -196,7 +197,8 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+//                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -244,7 +246,8 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+//                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
                 trenchToMidToTrench.spawnCmd()
             )
         );
