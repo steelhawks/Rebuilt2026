@@ -56,7 +56,12 @@ public class Intake extends SubsystemBase {
         Logger.processInputs("Intake", inputs);
         Logger.recordOutput("Intake/State", intakeState.toString());
 
-        if (goal.position != setpoint.position) {
+        inputs.isExtended = inputs.leftExtensionPosition >= IntakeConstants.MAX_EXTENSION - IntakeConstants.POSITION_TOLERANCE;
+        inputs.isRetracted = inputs.leftExtensionPosition <= IntakeConstants.MIN_EXTENSION + IntakeConstants.POSITION_TOLERANCE;
+
+
+
+        if (Math.abs(goal.position - setpoint.position) > IntakeConstants.POSITION_TOLERANCE) {
             updateMotionProfile();
         }
 
@@ -131,6 +136,8 @@ public class Intake extends SubsystemBase {
         // Log the computed FF output so you can see what's being sent
         Logger.recordOutput("Intake/Extension/FFOutput", ffOutput);
 
+        io.setExtensionPosition(setpoint.position, ffOutput, ffOutput);
+
     }
 
     private double calculateExtensionFeedForward(double velocity) {
@@ -182,11 +189,13 @@ public class Intake extends SubsystemBase {
     }
 
     public void setRollerVoltage(double volts) {
+        if (tuningVolts == null) return;
         io.runIntake(tuningVolts.getAsDouble());
         Logger.recordOutput("Intake/Roller/AppliedVolts", volts);
     }
 
     public void setRollerVelocity(double velocityRadPerSec) {
+        if (tuningAmps == null) return;
         double ffOutput = calculateRollerFeedforward(velocityRadPerSec);
         Logger.recordOutput("Intake/Roller/TargetVelocity", velocityRadPerSec);
         Logger.recordOutput("Intake/Roller/FFOutput", ffOutput);
@@ -194,6 +203,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setExtensionGoal(double positionMeters) {
+        System.out.println("setExtensionGoal called with: " + positionMeters);
         positionMeters = Math.max(IntakeConstants.MIN_EXTENSION,
                 Math.min(IntakeConstants.MAX_EXTENSION, positionMeters));
         goal = new TrapezoidProfile.State(positionMeters, 0.0);
@@ -219,6 +229,14 @@ public class Intake extends SubsystemBase {
         Logger.recordOutput("Intake/Extension/AtTarget", atTarget);
 
         return atTarget;
+    }
+
+    public double[] getCurrentDraw() {
+        return new double[]{
+                inputs.leftExtensionCurrentAmps,
+                inputs.rightExtensionCurrentAmps,
+                inputs.rollerCurrentAmps
+        };
     }
 
 

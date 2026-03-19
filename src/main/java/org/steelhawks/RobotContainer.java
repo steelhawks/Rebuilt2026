@@ -3,6 +3,7 @@ package org.steelhawks;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -14,6 +15,8 @@ import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+
+import static org.steelhawks.Constants.RobotType.SIMBOT;
 
 public class RobotContainer {
 
@@ -64,9 +67,13 @@ public class RobotContainer {
     private void configureTriggers() {}
 
     private void configureDriver() {
-/**        if (config.hasIntake) {
-            driver.rightTrigger().whileTrue(s_Intake.extendIntake())
-          }
- **/
+
+        System.out.println("Intake is: " + s_Intake);
+//        if (Constants.getMode() == Mode.SIM) {
+            driver.button(1).onTrue(Commands.parallel(
+                    Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MAX_EXTENSION))
+            ));
+            driver.button(2).onTrue(Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MIN_EXTENSION)));
+//        }
     }
 }

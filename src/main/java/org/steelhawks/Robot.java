@@ -14,7 +14,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -279,10 +281,18 @@ public class Robot extends LoggedRobot {
     public void simulationPeriodic() {
         if (Constants.getMode() == Mode.SIM) {
 
+
+            RoboRioSim.setVInVoltage(
+                    BatterySim.calculateDefaultBatteryLoadedVoltage(
+                            RobotContainer.s_Intake != null
+                                    ? RobotContainer.s_Intake.getCurrentDraw()
+                                    : new double[]{}
+                    )
+            );
+
             SimulatedArena.getInstance().simulationPeriodic();
-
-            Logger.recordOutput("Field Simulation/Game Pieces", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
-
+            Logger.recordOutput("Field Simulation/Game Pieces",
+                    SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
             RobotContainer.s_Swerve.updatePhysicsSimulation();
         }
     }

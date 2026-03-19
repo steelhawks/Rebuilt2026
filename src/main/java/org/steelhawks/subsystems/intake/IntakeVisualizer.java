@@ -22,9 +22,9 @@ public class IntakeVisualizer {
     ) {
         this.rackPositionSupplier = rackPositionSupplier;
         mechanism = new LoggedMechanism2d(3, 3);
-        LoggedMechanismRoot2d root = mechanism.getRoot("pinion", 2, 2);
+        LoggedMechanismRoot2d root = mechanism.getRoot("pinion", 1.5, 1.5);
         rack = root.append(new LoggedMechanismLigament2d(
-                "rack", rackLength, rackAngle, 10, new Color8Bit(Color.kWhite)
+                "rack", rackLength, rackAngle, 10, new Color8Bit(Color.kPink)
         ));
     }
 
@@ -35,9 +35,9 @@ public class IntakeVisualizer {
         Logger.recordOutput("Intake/ComponentPoses", new Pose3d[]{
                 new Pose3d(
                         new Translation3d(
-                                positionMeters * Math.cos(IntakeConstants.EXTENSION_ANGLE),
+                                positionMeters * -Math.cos(Math.toDegrees(IntakeConstants.EXTENSION_ANGLE)),
                                 0.0,
-                                positionMeters * Math.sin(IntakeConstants.EXTENSION_ANGLE)
+                                positionMeters * -Math.sin(Math.toDegrees(IntakeConstants.EXTENSION_ANGLE))
                         ),
                         new Rotation3d()
                 )

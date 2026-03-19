@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.steelhawks.BuilderConstants;
 import org.steelhawks.Constants;
@@ -72,10 +73,22 @@ public class IntakeIOSim implements IntakeIO {
                 BuilderConstants.ExtensionPIDConstants.kD.getAsDouble()
         );
 
+//        intakeVisualizer = new IntakeVisualizer(
+//                () -> left_extension_motor.getAngularPositionRad() * IntakeConstants.PINION_METERS_TO_RADIANS,
+//                IntakeConstants.MAX_EXTENSION,
+//                -Math.PI + IntakeConstants.EXTENSION_ANGLE
+//        );
+
         intakeVisualizer = new IntakeVisualizer(
-                () -> left_extension_motor.getAngularPositionRad() * IntakeConstants.PINION_METERS_TO_RADIANS,
+                () -> Math.min(
+                        Math.max(
+                                left_extension_motor.getAngularPositionRad() * RADIUS,
+                                IntakeConstants.MIN_EXTENSION
+                        ),
+                        IntakeConstants.MAX_EXTENSION
+                ),
                 IntakeConstants.MAX_EXTENSION,
-                -Math.PI + IntakeConstants.EXTENSION_ANGLE
+                -Math.toDegrees(IntakeConstants.EXTENSION_ANGLE)
         );
     }
 
@@ -111,6 +124,23 @@ public class IntakeIOSim implements IntakeIO {
         inputs.rollerTorqueCurrent = roller_motor.getCurrentDrawAmps();
         inputs.rollerTempCelsius = roller_motor.getCurrentDrawAmps() * 0.1;
 
+        inputs.isExtended = inputs.leftExtensionPosition == IntakeConstants.MAX_EXTENSION - IntakeConstants.POSITION_TOLERANCE;
+        inputs.isRetracted = inputs.leftExtensionPosition == IntakeConstants.MIN_EXTENSION + IntakeConstants.POSITION_TOLERANCE;
+
+        if (inputs.leftExtensionPosition >= IntakeConstants.MAX_EXTENSION) {
+            left_extension_motor.setInputVoltage(0.0);
+            right_extension_motor.setInputVoltage(0.0);
+            inputs.leftExtensionPosition = IntakeConstants.MAX_EXTENSION;
+            inputs.rightExtensionPosition = IntakeConstants.MAX_EXTENSION;
+        }
+
+        if (inputs.leftExtensionPosition <= IntakeConstants.MIN_EXTENSION) {
+            left_extension_motor.setInputVoltage(0.0);
+            right_extension_motor.setInputVoltage(0.0);
+            inputs.leftExtensionPosition = IntakeConstants.MIN_EXTENSION;
+            inputs.rightExtensionPosition = IntakeConstants.MIN_EXTENSION;
+        }
+
         if (enablePID) {
             double currentPosition = inputs.leftExtensionPosition;
             double pidOutput = intakePIDController.calculate(currentPosition, goalPosition);
@@ -128,5 +158,54 @@ public class IntakeIOSim implements IntakeIO {
         right_extension_motor.setInputVoltage(volts);
     }
 
-    // rest of override functions
+    @Override
+    public void setExtensionPosition(double position, double Lfeedforward, double Rfeedforward) {
+        enablePID = true;
+        goalPosition = position;
+        feedforward = (Lfeedforward + Rfeedforward) / 2;
+    }
+
+    @Override
+    public void runExtensionOpenLoop(double output, boolean isTorqueCurrent) {
+        enablePID = false;
+        if (isTorqueCurrent) {
+            setMotorAmps(output);
+        } else {
+            left_extension_motor.setInputVoltage(output);
+            right_extension_motor.setInputVoltage(output);
+        }
+    }
+
+    @Override
+    public void runExtensionPercentOut(double output) {
+        enablePID = false;
+        double voltage = output * RoboRioSim.getVInVoltage();
+
+        left_extension_motor.setInputVoltage(voltage);
+        right_extension_motor.setInputVoltage(voltage);
+    }
+
+    @Override
+    public void runIntake(double output) {
+        double voltage = output * RoboRioSim.getVInVoltage();
+        roller_motor.setInputVoltage(voltage);
+    }
+
+    @Override
+    public void stopIntake() {
+        roller_motor.setInputVoltage(0.0);
+    }
+
+    @Override
+    public void stopExtension() {
+        enablePID = false;
+
+        left_extension_motor.setInputVoltage(0.0);
+        right_extension_motor.setInputVoltage(0.0);
+    }
+
+    @Override
+    public void setExtensionPID(double kP, double kI, double kD)  {
+        intakePIDController.setPID(kP, kI, kD);
+    }
 }
