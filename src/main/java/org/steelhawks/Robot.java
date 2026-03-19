@@ -222,6 +222,7 @@ public class Robot extends LoggedRobot {
         LoopTimeUtil.record("PhoenixUtil");
 //        VirtualSubsystem.periodicAll();
 //        LoopTimeUtil.record("VirtualPeriodic");
+        org.steelhawks.RobotState.getInstance().periodic();
         if (Toggles.shooterTuningMode.get()) {
             ShooterTuner.getInstance().periodic();
         }
