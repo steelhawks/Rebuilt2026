@@ -136,17 +136,19 @@ public class Flywheel extends SubsystemBase {
                         double mps = ShooterStructure.Moving.calculateMovingShot(
                             FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
-                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
-                            setTargetVelocity(rps);
-                        }
+//                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
+//                            setTargetVelocity(rps);
+//                        }
+                        setTargetVelocity(rps);
                     }
                     case SHOOTING_STATIONARY -> {
                         double mps = ShooterStructure.Static.calculateShot(
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
-                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
-                            setTargetVelocity(constants.stationaryHoodVelocityFactor() * rps);
-                        }
+                        setTargetVelocity(rps);
+//                        if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
+//                            setTargetVelocity(constants.stationaryHoodVelocityFactor() * rps);
+//                        }
                     }
                 }
             }
@@ -223,6 +225,9 @@ public class Flywheel extends SubsystemBase {
 
     public void setTargetVelocity(double velocityRadPerSec) {
         if (Toggles.shooterTuningMode.get()) return;
+        if (Double.isNaN(velocityRadPerSec) || Double.isInfinite(velocityRadPerSec)) {
+            Logger.recordOutput("Flywheel/InvalidSetpointRejected", true);
+        }
         sampledVoltage = 0.0;
         targetVelocityRadPerSec = velocityRadPerSec;
         state = FlywheelState.RAMP_UP;
