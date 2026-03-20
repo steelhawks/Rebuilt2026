@@ -178,9 +178,9 @@ public class Intake extends SubsystemBase {
         }
 
         if (shouldRun) {
-            if (RobotContainer.s_Swerve.collisionDetected()) {
-                setDesiredState(IntakeConstants.State.RETRACTED);
-            }
+//            if (RobotContainer.s_Swerve.collisionDetected()) {
+//                setDesiredState(IntakeConstants.State.RETRACTED);
+//            }
 
             double previousVelocity = setpoint.velocity;
             setpoint = profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
