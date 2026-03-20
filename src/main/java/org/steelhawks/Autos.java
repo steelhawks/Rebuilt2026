@@ -248,7 +248,6 @@ public final class Autos {
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundToTrench = ChoreoTraj.LRebound$1.asAutoTraj(routine);
-        AutoTrajectory trenchToOutpost = ChoreoTraj.LRebound$2.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
@@ -265,8 +264,8 @@ public final class Autos {
         trenchToMidToTrench.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-//                ShootingCommands.shoot().withTimeout(2.0), // TODO tune
-//                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                ShootingCommands.shoot().withTimeout(2.0), // TODO tune
+                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
                 ShootingCommands.shoot().withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
@@ -276,19 +275,19 @@ public final class Autos {
         trenchToReboundToTrench.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                ShootingCommands.shoot().withTimeout(5.0),
-//                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToOutpost.spawnCmd()
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+//                trenchToOutpost.spawnCmd()
             )
         );
 
-        trenchToOutpost.done().onTrue(
-            Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                ShootingCommands.shoot().withTimeout(5.0)
-            )
-        );
+//        trenchToOutpost.done().onTrue(
+//            Commands.sequence(
+//                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+//                ShootingCommands.shoot().withTimeout(5.0)
+//            )
+//        );
 
         return routine;
     }
