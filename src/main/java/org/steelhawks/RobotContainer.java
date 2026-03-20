@@ -69,7 +69,7 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-        new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftTrigger())
+        new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .onTrue(new VibrateController(driver).repeatedly());
 
 
