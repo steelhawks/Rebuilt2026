@@ -70,7 +70,7 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-        driver.rightBumper()
+        driver.leftBumper()
             .whileTrue(
                 Commands.either(
                     Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.RED_HUB_ONLY)),
