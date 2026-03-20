@@ -158,19 +158,19 @@ public class VisionConstants {
             new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
-        new CameraConfig(
-            "ardu-middle-left",
-            new Transform3d(
-                Units.inchesToMeters(0.013), // 0.013 up
-                Units.inchesToMeters(12.728), // 12.728 to the left
-                Units.inchesToMeters(20.679),
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-30.0),
-                    Units.degreesToRadians(90.0))),
-            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
+//        new CameraConfig(
+//            "ardu-middle-left",
+//            new Transform3d(
+//                Units.inchesToMeters(0.013), // 0.013 up
+//                Units.inchesToMeters(12.728), // 12.728 to the left
+//                Units.inchesToMeters(20.679),
+//                new Rotation3d(
+//                    Units.degreesToRadians(0.0),
+//                    Units.degreesToRadians(-30.0),
+//                    Units.degreesToRadians(90.0))),
+//            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
+//            CameraType.PHOTON
+//        ),
         new CameraConfig(
         "ardu-back-right",
             new Transform3d(
