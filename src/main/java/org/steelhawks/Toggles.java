@@ -16,6 +16,8 @@ public interface Toggles {
             bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
         if (RobotConfig.getConfig().hasHood)
             bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
+        if (RobotConfig.getConfig().hasIntake)
+            bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
     }
 
     private static void bindMomentary(String key, Command command) {

@@ -318,4 +318,11 @@ public class Intake extends SubsystemBase {
             .repeatedly()
             .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
     }
+
+    public Command zeroIntake() {
+        return Commands.runOnce(() -> {
+            isZeroed = false;
+            isHomed = false;
+        });
+    }
 }
