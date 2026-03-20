@@ -50,7 +50,7 @@ public class ShooterStructure {
 //        maxShootDistance = c.maxShootDistance();
 
         minShootDistance = 1.146;
-        maxShootDistance = 5.512;
+        maxShootDistance = 4.057;
 
         minFerryDistance = c.minFerryDistance();
         maxFerryDistance = c.maxFerryDistance();
@@ -73,7 +73,7 @@ public class ShooterStructure {
         shootingFlywheelVelocityMap.put(3.3315, 13.1);
         shootingFlywheelVelocityMap.put(3.965, 13.5);
         shootingFlywheelVelocityMap.put(4.057, 15.0);
-        shootingFlywheelVelocityMap.put(5.512, 13.0); // 5.512 is pretty inconsistnet
+//        shootingFlywheelVelocityMap.put(5.512, 13.0); // 5.512 is pretty inconsistnet
 //         if (c.shootingHoodAngleMap() != null) {
 //             for (double[] entry : c.shootingHoodAngleMap()) {
 //                 shootingHoodAngleMap.put(entry[0], Rotation2d.fromRadians(entry[1]));
@@ -85,7 +85,7 @@ public class ShooterStructure {
         shootingHoodAngleMap.put(3.3315, Rotation2d.fromDegrees(74.0));
         shootingHoodAngleMap.put(3.965, Rotation2d.fromDegrees(72.0));
         shootingHoodAngleMap.put(4.057, Rotation2d.fromDegrees(71.0));
-        shootingHoodAngleMap.put(5.512, Rotation2d.fromDegrees(40.0));
+//        shootingHoodAngleMap.put(5.512, Rotation2d.fromDegrees(40.0));
 
          if (c.ferryTimeOfFlightMap() != null) {
              for (double[] entry : c.ferryTimeOfFlightMap()) {

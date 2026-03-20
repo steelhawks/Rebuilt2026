@@ -7,31 +7,35 @@ import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.vision.Vision;
+import org.steelhawks.subsystems.vision.VisionConstants;
+import org.steelhawks.util.AllianceFlip;
 
 public class ShootingCommands {
 
     public static Command shoot() {
-
         return Commands.sequence(
             Commands.runOnce(() ->
                 RobotState.getInstance().setAimState(ShootingState.SHOOTING)),
+            Commands.runOnce(() -> {
+                if (AllianceFlip.shouldFlip()) {
+                    Vision.whitelistTagIds(VisionConstants.RED_TAGS);
+                } else {
+                    Vision.whitelistTagIds(VisionConstants.BLUE_TAGS);
+                }
+            }),
             Commands.sequence(
                 Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
 //                Commands.waitUntil(RobotContainer.s_Turret::atGoal),
 //                Commands.waitUntil(RobotContainer.s_Hood::atGoal),
                 RobotContainer.s_Indexer.feed()
-                    .deadlineFor(RobotContainer.s_Intake.agitate()).repeatedly()
-//                    .alongWith(Commands.sequence(
-//                        RobotContainer.s_Intake.slamIn(),
-//                        RobotContainer.s_Intake.slamOut()
-//                    ).repeatedly())
-//                    .until(RobotContainer.s_Indexer::isJammed),
-//                jamRecovery())
-                )
+                    .deadlineFor(RobotContainer.s_Intake.agitate()).repeatedly())
             .repeatedly())
             .finallyDo(() -> {
                 RobotState.getInstance().setAimState(ShootingState.NOTHING);
-                CommandScheduler.getInstance().schedule(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+                Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
+                CommandScheduler.getInstance().schedule(
+                    RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
             });
     }
 

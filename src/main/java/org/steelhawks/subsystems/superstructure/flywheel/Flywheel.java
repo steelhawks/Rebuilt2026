@@ -208,7 +208,10 @@ public class Flywheel extends SubsystemBase {
     }
 
     public Command incrementVelocityFactor(double increment) {
-        return Commands.runOnce(() -> stationaryHoodVelocityFactor+= increment);
+        return Commands.runOnce(() -> {
+            stationaryHoodVelocityFactor += increment;
+            Logger.recordOutput("Flywheel/VelocityFactor", stationaryHoodVelocityFactor);
+        });
     }
 
 
