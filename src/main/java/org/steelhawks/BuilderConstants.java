@@ -17,6 +17,10 @@ public class BuilderConstants {
                 0.8, 2.0,
                 40.0, 0.05,
                 1.0);
+
+        public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
+                1, 2, 0.85, 0.5, 0.2, 0.8, 3, 5, 300, 5, 4, 2/1);
+
     }
 
      public static class TurretPIDConstants {
@@ -136,6 +140,20 @@ public class BuilderConstants {
     ) {
         public static final IntakeConstants UNSET =
                 new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0);
+    }
+
+    public record FlywheelConstants(
+            int leftMotorId,
+            int rightMotorId,
+            double idleMultiplier,
+            double kP, double kI, double kD, double kS, double kV,
+            double velocityToleranceRadPerSec,
+            double stationaryHoodVelocityFactor,
+            double flywheelRadius,
+            double reduction
+    ) {
+        public static final FlywheelConstants UNSET =
+                new FlywheelConstants(0, 0, 0, 0, 0, 0,  0, 0, 0, 0,0, 0);
     }
 
 }
