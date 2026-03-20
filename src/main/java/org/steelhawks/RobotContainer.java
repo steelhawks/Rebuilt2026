@@ -69,47 +69,47 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-//        new Trigger(() -> true)
-//            .whileTrue(TeleopSwerve.overrideState());
-//
-//        driver.povLeft().onTrue(s_Swerve.zeroHeading())
-//            .onTrue(new VibrateController(driver));
-//
-//        driver.povRight().onTrue(
-//            Commands.runOnce(() -> {
-//                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
-//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
-//                } else {
-//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
-//                }
-//            }));
-//
-//        driver.rightBumper()
-//            .whileTrue(s_Intake.outtakeIntake());
-//
-//        driver.leftBumper()
-//                .whileTrue(ShootingCommands.shoot());
-//
-//        driver.rightTrigger()
-//            .whileTrue(
-//                s_Intake.runIntake());
-//
-//        driver.x()
-//            .onTrue(s_Intake.slamOut());
-//
-//        driver.y()
-//            .onTrue(s_Intake.slamIn());
+        new Trigger(() -> true)
+            .whileTrue(TeleopSwerve.overrideState());
+
+        driver.povLeft().onTrue(s_Swerve.zeroHeading())
+            .onTrue(new VibrateController(driver));
+
+        driver.povRight().onTrue(
+            Commands.runOnce(() -> {
+                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
+                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
+                } else {
+                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
+                }
+            }));
+
+        driver.rightBumper()
+            .whileTrue(s_Intake.outtakeIntake());
+
+        driver.leftBumper()
+                .whileTrue(ShootingCommands.shoot());
+
+        driver.rightTrigger()
+            .whileTrue(
+                s_Intake.runIntake());
 
         driver.x()
-            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
+            .onTrue(s_Intake.slamOut());
 
         driver.y()
-            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
+            .onTrue(s_Intake.slamIn());
 
-        driver.a()
-            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        driver.b()
-            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+//        driver.x()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
+//
+//        driver.y()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
+//
+//        driver.a()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//        driver.b()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
 
 //        driver.leftTrigger()
