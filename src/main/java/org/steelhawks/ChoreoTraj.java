@@ -62,42 +62,42 @@ public record ChoreoTraj(
 	public static final ChoreoTraj LRebound = new ChoreoTraj(
 	    "LRebound",
 	    OptionalInt.empty(),
-	    10.75935,
+	    9.5246,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.5, 7.436, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
 	    "LRebound",
 	    OptionalInt.of(0),
-	    5.11441,
+	    4.53341,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.5, 7.436, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
 	    "LRebound",
 	    OptionalInt.of(1),
-	    5.644939999999999,
+	    4.99119,
 	    new Pose2d(3.5, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.5, 7.436, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.empty(),
-	    10.96021,
+	    9.96065,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.5, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.of(0),
-	    5.5039,
+	    5.00375,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.5, 0.643, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
 	    "RRebound",
 	    OptionalInt.of(1),
-	    5.45631,
+	    4.956899999999999,
 	    new Pose2d(3.5, 0.643, Rotation2d.fromRadians(0)),
 	    new Pose2d(3.5, 0.643, Rotation2d.fromRadians(0))
 	);
