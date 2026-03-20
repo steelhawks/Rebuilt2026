@@ -87,6 +87,12 @@ public class RobotContainer {
                 }
             }));
 
+        driver.povUp().onTrue(
+            s_Flywheel.incrementVelocityFactor(0.01));
+
+        driver.povDown().onTrue(
+            s_Flywheel.incrementVelocityFactor(-0.01));
+
         driver.rightBumper()
             .whileTrue(s_Intake.outtakeIntake());
 

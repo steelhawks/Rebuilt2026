@@ -46,6 +46,8 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kS;
     private static LoggedTunableNumber kV;
 
+    private static double stationaryHoodVelocityFactor;
+
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
 
@@ -57,6 +59,7 @@ public class Flywheel extends SubsystemBase {
         kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
+        stationaryHoodVelocityFactor = constants.stationaryHoodVelocityFactor();
         velocityTolerance =
             new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         routine =
@@ -121,7 +124,7 @@ public class Flywheel extends SubsystemBase {
                         double mps = ShooterStructure.Moving.calculateMovingShot(
                             FieldConstants.Hub.HUB_CENTER_3D,
                             Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(constants.stationaryHoodVelocityFactor() * mps, constants.flywheelRadius());
+                        double rps = ShooterStructure.linearToAngularVelocity(stationaryHoodVelocityFactor * mps, constants.flywheelRadius());
                         setTargetVelocity(rps);
                     }
                     case SHOOTING_STATIONARY -> {
@@ -129,7 +132,7 @@ public class Flywheel extends SubsystemBase {
                             FieldConstants.Hub.HUB_CENTER_3D, FieldConstants.Hub.HUB_CENTER_3D,
                             Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(
-                            constants.stationaryHoodVelocityFactor() * mps, constants.flywheelRadius());
+                            stationaryHoodVelocityFactor * mps, constants.flywheelRadius());
                         setTargetVelocity(rps);
                     }
                 }
@@ -203,6 +206,12 @@ public class Flywheel extends SubsystemBase {
         return Commands.runOnce(() -> setTargetVelocityForced(velocityRadPerSec), this)
             .finallyDo(io::stop);
     }
+
+    public Command incrementVelocityFactor(double increment) {
+        return Commands.runOnce(() -> stationaryHoodVelocityFactor+= increment);
+    }
+
+
 
     public Command sysIdQuasistaic(SysIdRoutine.Direction direction) {
         return Commands.runOnce(() -> Toggles.Flywheel.isEnabled.set(false)).andThen(routine.quasistatic(direction))
