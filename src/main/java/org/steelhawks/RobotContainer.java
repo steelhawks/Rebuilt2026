@@ -20,6 +20,7 @@ import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.util.AllianceFlip;
 
 public class RobotContainer {
 
@@ -69,6 +70,14 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
+        driver.rightBumper()
+            .whileTrue(
+                Commands.either(
+                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.RED_TAGS)),
+                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.BLUE_TAGS)),
+                    AllianceFlip::shouldFlip))
+            .onFalse(Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS)));
+
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .onTrue(new VibrateController(driver).repeatedly());
 

@@ -27,7 +27,15 @@ public class VisionConstants {
     public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
         AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    public static int[] ALL_ALLOWED_TAGS = new int[] {
+    public static final int[] BLUE_TAGS = new int[]  {
+        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
+    };
+
+    public static final int[] RED_TAGS = new int[] {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+    };
+
+    public static final int[] ALL_ALLOWED_TAGS = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
     };
 
