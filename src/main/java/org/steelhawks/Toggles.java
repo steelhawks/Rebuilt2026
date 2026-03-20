@@ -12,7 +12,7 @@ import java.util.Map;
 public interface Toggles {
 
     static void configureOverrides() {
-        if (RobotConfig.getConfig().hasTurret)
+        if (RobotConfig.getConfig().hasTurret && Constants.getRobot() != Constants.RobotType.OMEGABOT)
             bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
         if (RobotConfig.getConfig().hasHood)
             bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
