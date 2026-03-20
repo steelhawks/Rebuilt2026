@@ -21,7 +21,7 @@ public class ShootingCommands {
 //                Commands.waitUntil(RobotContainer.s_Hood::atGoal),
                 RobotContainer.s_Indexer.feed()
 //                    .alongWith(RobotContainer.s_Intake.runIntake())
-                    .alongWith(RobotContainer.s_Intake.agitate())
+                    .alongWith(RobotContainer.s_Intake.agitate().repeatedly())
 //                    .alongWith(Commands.sequence(
 //                        RobotContainer.s_Intake.slamIn(),
 //                        RobotContainer.s_Intake.slamOut()
