@@ -30,7 +30,6 @@ public class Intake extends SubsystemBase {
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
-    private boolean kickApplied = false;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
     private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
@@ -42,9 +41,6 @@ public class Intake extends SubsystemBase {
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
-    private static LoggedTunableNumber kStictionKickLeft;
-    private static LoggedTunableNumber kStictionKickRight;
-    private static LoggedTunableNumber kStictionVelocityThreshold;
     private static LoggedTunableNumber crossCouple;
     private static LoggedTunableNumber MAX_VELOCITY_METERS_PER_SEC;
     private static LoggedTunableNumber MAX_ACCEL_METERS_PER_SEC_SQ;
@@ -61,9 +57,6 @@ public class Intake extends SubsystemBase {
         kP = new LoggedTunableNumber("Intake/kP", constants.kP());
         kI = new LoggedTunableNumber("Intake/kI", constants.kI());
         kD = new LoggedTunableNumber("Intake/kD", constants.kD());
-        kStictionKickLeft = new LoggedTunableNumber("Intake/StictionKickAmpsLeft", 5.0);
-        kStictionKickRight = new LoggedTunableNumber("Intake/StictionKickAmpsRight", 5.0);
-        kStictionVelocityThreshold = new LoggedTunableNumber("Intake/StictionVelocityThreshold", 0.005);
         crossCouple = new LoggedTunableNumber("Intake/CrossCouple", 0.3);
         MAX_ACCEL_METERS_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelMetersPerSecSq", constants.maxAccelMetersPerSecSq());
         MAX_VELOCITY_METERS_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", constants.maxVelocityMetersPerSec());
@@ -107,12 +100,6 @@ public class Intake extends SubsystemBase {
             Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble()) && isHomed;
     }
 
-    @AutoLogOutput(key = "Intake/BothMoving")
-    private boolean bothMoving() {
-        return Math.abs(inputs.leftVelocityMetersPerSec) > kStictionVelocityThreshold.getAsDouble()
-            && Math.abs(inputs.rightVelocityMetersPerSec) > kStictionVelocityThreshold.getAsDouble();
-    }
-
     @Override
     public void periodic() {
         io.updateInputs(inputs);
@@ -122,6 +109,8 @@ public class Intake extends SubsystemBase {
             isHomed = true;
             io.setPosition(0);
             isZeroed = true;
+            goal = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
+            setpoint = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
             Logger.recordOutput("Intake/IsHomed", true);
             Logger.recordOutput("Intake/Zeroed", true);
         }
@@ -135,13 +124,11 @@ public class Intake extends SubsystemBase {
                 io.setPosition(IntakeConstants.State.HOME.getPosition());
                 io.stopRack();
                 isZeroed = true;
+                goal = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
+                setpoint = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
                 Logger.recordOutput("Intake/Zeroed", true);
             }
         }
-
-//        if (isTwisting()) {
-//            isHomed = false;
-//        }
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -211,18 +198,8 @@ public class Intake extends SubsystemBase {
             atGoal = Math.abs(getPosition() - goal.position) <= IntakeConstants.TOLERANCE;
 
             if (atGoal) {
-                kickApplied = false;
                 io.stopRack();
-            } else if (!kickApplied && !bothMoving()) {
-                io.runRackOpenLoopBoth(
-                    kStictionKickLeft.get(),
-                    kStictionKickRight.get(),
-                    true);
-                Logger.recordOutput("Intake/KickApplied", false);
             } else {
-                kickApplied = true;
-                Logger.recordOutput("Intake/KickApplied", true);
-
                 double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
                 double pitchRadians = RobotContainer.s_Swerve.getPitch().getRadians();
                 double drivetrainAccelG = rawAccelY - Math.sin(pitchRadians);
@@ -245,10 +222,7 @@ public class Intake extends SubsystemBase {
 
                 double staticFriction = kS.get() * Math.signum(setpoint.velocity);
                 double positionError = inputs.leftPositionMeters - inputs.rightPositionMeters;
-                double crossCoupleCorrection = crossCouple.get() * positionError;
 
-//                double leftFF = staticFriction - crossCoupleCorrection;
-//                double rightFF = staticFriction + crossCoupleCorrection;
                 double leftFF = staticFriction;
                 double rightFF = staticFriction;
 
@@ -279,7 +253,6 @@ public class Intake extends SubsystemBase {
             IntakeConstants.MAX_EXTENSION_FROM_FRAME);
         goal = new TrapezoidProfile.State(inputs.goal, 0.0);
         desiredGoal = state;
-        kickApplied = false;
     }
 
     public Command setDesiredStateCommand(IntakeConstants.State state) {
@@ -288,15 +261,15 @@ public class Intake extends SubsystemBase {
 
     public Command slamOut() {
         return Commands.run(
-            () -> io.runRackOpenLoop(5.0, false)
-        ).until(this::isStalling)
+                () -> io.runRackOpenLoop(5.0, false)
+            ).until(this::isStalling)
             .finallyDo(() -> io.setPosition(IntakeConstants.State.INTAKE.getPosition()));
     }
 
     public Command slamIn() {
         return Commands.run(
-            () -> io.runRackOpenLoop(-5.0, false)).until(this::isStalling)
-                .finallyDo(() -> io.setPosition(IntakeConstants.State.HOME.getPosition()));
+                () -> io.runRackOpenLoop(-5.0, false)).until(this::isStalling)
+            .finallyDo(() -> io.setPosition(IntakeConstants.State.HOME.getPosition()));
     }
 
     public Command runIntake() {
