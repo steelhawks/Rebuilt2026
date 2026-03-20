@@ -261,8 +261,8 @@ public class Intake extends SubsystemBase {
 
     public Command slamOut() {
         return Commands.run(
-                () -> io.runRackOpenLoop(5.0, false)
-            ).until(this::isStalling)
+                () -> io.runRackOpenLoop(5.0, false))
+            .until(this::isStalling)
             .finallyDo(() -> io.setPosition(IntakeConstants.State.INTAKE.getPosition()));
     }
 
