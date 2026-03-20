@@ -66,18 +66,15 @@ public class LEDCommands {
         return Commands.sequence(
         Commands.runOnce(() -> s_Matrix.setBrightness(0.25)),
             // No Auton Selected warning
-            Commands.sequence(
-                Commands.sequence(
-                    Commands.run(() -> s_Matrix.playAnimation(AnimationLibrary.warningSign()), s_Matrix).withTimeout(0.25),
-                    s_Matrix.flashCommand(Color.BLACK, 0.0, 0.1))
-                .repeatedly().withTimeout(1.0),
-
                 s_Matrix.clearCommand(),
                 Commands.waitSeconds(0.3),
                 Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("NO", Color.RED)), s_Matrix),
                 Commands.waitSeconds(1.0),
                 s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5),
                 Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("AUTON", Color.RED)), s_Matrix),
+                Commands.waitSeconds(1.0),
+                s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5),
+                Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("SELECT", Color.RED)), s_Matrix),
                 Commands.waitSeconds(1.0),
                 s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5)
             ).repeatedly().until(() -> Autos.getAuto() != null),
