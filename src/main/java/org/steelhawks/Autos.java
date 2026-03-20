@@ -4,6 +4,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +22,7 @@ import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public final class Autos {
@@ -38,7 +40,12 @@ public final class Autos {
             s_Swerve::setPose, // A function that resets the current robot pose to the provided Pose2d
             s_Swerve::followTrajectory, // The drive subsystem trajectory follower
             true, // If alliance flipping should be enabled
-            s_Swerve // The drive subsystem
+            s_Swerve, // The drive subsystem
+            ((trajectory, starting) -> {
+                Pose2d[] poses = trajectory.getPoses();
+                FieldConstants.FIELD_2D.getObject("Path").setPoses(List.of(poses));
+                Logger.recordOutput("Odometry/Trajectory", poses);
+            })
         );
 
     public enum Misalignment {
