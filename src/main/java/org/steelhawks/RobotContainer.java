@@ -110,8 +110,7 @@ public class RobotContainer {
 
         driver.rightTrigger()
             .whileTrue(
-                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
-                    .deadlineFor(s_Intake.runIntake()))
+                s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)))
             .onFalse(
                 s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME)
             );
