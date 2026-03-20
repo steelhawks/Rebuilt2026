@@ -141,8 +141,8 @@ public class SubsystemConstants {
         public static final IntakeConstants INTAKE =
             new IntakeConstants(
                 1, 2, 3,
-                5.0, 0.0, 0.0,
-                200.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0,
                 0.8, 2.0,
                 60.0, 0.05,
                 0.6, -1.0,
