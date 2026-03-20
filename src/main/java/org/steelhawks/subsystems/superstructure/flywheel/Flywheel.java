@@ -77,7 +77,7 @@ public class Flywheel extends SubsystemBase {
         samplingTimeoutDuration =
             new LoggedTunableNumber("Flywheel/SamplingTimeoutDurationSeconds", constants.samplingTimeoutDuration());
         timeoutAvgMinSamples =
-            new LoggedTunableNumber("Flywheel/TimeoutMinSamplesForAvgCalculation", constants.samplingTimeoutDuration());
+            new LoggedTunableNumber("Flywheel/TimeoutMinSamplesForAvgCalculation", constants.timeoutAvgMinSamples());
         routine =
             new SysIdRoutine(
                 new SysIdRoutine.Config(
