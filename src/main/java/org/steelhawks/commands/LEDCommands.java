@@ -79,9 +79,6 @@ public class LEDCommands {
                 s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5),
                 Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("AUTON", Color.RED)), s_Matrix),
                 Commands.waitSeconds(1.0),
-                s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5),
-                Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("SELECT", Color.RED)), s_Matrix),
-                Commands.waitSeconds(1.0),
                 s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5)
             ).repeatedly().until(() -> Autos.getAuto() != null),
 
