@@ -138,7 +138,7 @@ public class Intake extends SubsystemBase {
                 && !Toggles.Intake.toggleCurrentOverride.get()
                 && !Toggles.Intake.toggleVoltageOverride.get()
                 && (getPosition() >= IntakeConstants.MIN_EXTENSION
-                && getPosition() <= IntakeConstants.MAX_EXTENSION_FROM_FRAME);
+                && getPosition() <= IntakeConstants.MAX_EXTENSION_FROM_FRAME + 0.05);
         Logger.recordOutput("Intake/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
