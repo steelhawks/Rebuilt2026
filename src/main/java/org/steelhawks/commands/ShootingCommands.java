@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
+import org.steelhawks.subsystems.intake.IntakeConstants;
 
 public class ShootingCommands {
 
@@ -31,7 +32,7 @@ public class ShootingCommands {
             .repeatedly())
             .finallyDo(() -> {
                 RobotState.getInstance().setAimState(ShootingState.NOTHING);
-                CommandScheduler.getInstance().schedule(RobotContainer.s_Intake.slamOut());
+                CommandScheduler.getInstance().schedule(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
             });
     }
 
