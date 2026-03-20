@@ -69,36 +69,36 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-        new Trigger(() -> true)
-            .whileTrue(TeleopSwerve.overrideState());
-
-        driver.povLeft().onTrue(s_Swerve.zeroHeading())
-            .onTrue(new VibrateController(driver));
-
-        driver.povRight().onTrue(
-            Commands.runOnce(() -> {
-                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
-                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
-                } else {
-                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
-                }
-            }));
-
-        driver.rightBumper()
-            .whileTrue(s_Intake.outtakeIntake());
-
-        driver.leftBumper()
-                .whileTrue(ShootingCommands.shoot());
-
-        driver.rightTrigger()
-            .whileTrue(
-                s_Intake.runIntake());
-
-        driver.x()
-            .onTrue(s_Intake.slamOut());
-
-        driver.y()
-            .onTrue(s_Intake.slamIn());
+//        new Trigger(() -> true)
+//            .whileTrue(TeleopSwerve.overrideState());
+//
+//        driver.povLeft().onTrue(s_Swerve.zeroHeading())
+//            .onTrue(new VibrateController(driver));
+//
+//        driver.povRight().onTrue(
+//            Commands.runOnce(() -> {
+//                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
+//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
+//                } else {
+//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
+//                }
+//            }));
+//
+//        driver.rightBumper()
+//            .whileTrue(s_Intake.outtakeIntake());
+//
+//        driver.leftBumper()
+//                .whileTrue(ShootingCommands.shoot());
+//
+//        driver.rightTrigger()
+//            .whileTrue(
+//                s_Intake.runIntake());
+//
+//        driver.x()
+//            .onTrue(s_Intake.slamOut());
+//
+//        driver.y()
+//            .onTrue(s_Intake.slamIn());
 
 //        driver.x()
 //            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
@@ -115,5 +115,17 @@ public class RobotContainer {
 //        driver.leftTrigger()
 //            .whileTrue(
 //                TeleopSwerve.overrideState());
+
+        driver.x()
+            .onTrue(
+                s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+        driver.y()
+            .onTrue(
+                s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
+
+        driver.a()
+            .onTrue(
+                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
     }
 }
