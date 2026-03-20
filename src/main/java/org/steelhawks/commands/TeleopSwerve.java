@@ -82,7 +82,7 @@ public class TeleopSwerve extends Command {
         this.omegaSupplier = omegaSupplier;
 
         RobotState.getInstance().getTrenchTrigger()
-            .onTrue(setDriveState(DriveState.TRENCH_ALIGN));
+            .onTrue(Commands.runOnce(() -> Logger.recordOutput("AlignDebug/Trench/InTrigger", true)));
         RobotState.getInstance().getBumpTrigger()
             .onTrue(setDriveState(DriveState.BUMP_ALIGN));
         RobotState.getInstance().getSOTMTrigger().onTrue(
