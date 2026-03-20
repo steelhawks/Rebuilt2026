@@ -263,7 +263,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousInit() {
         setState(RobotState.AUTON);
-        Elastic.selectTab("Autonomous");
+//        Elastic.selectTab("Autonomous");
         autonomousCommand = Autos.getAuto();
 
 
