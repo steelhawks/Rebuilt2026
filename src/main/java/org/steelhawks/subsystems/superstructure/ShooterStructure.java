@@ -141,7 +141,8 @@ public class ShooterStructure {
             return calculateShot(target, predictedTarget, false);
         }
 
-        public static ProjectileData calculateShot(
+        public static ProjectileData
+        calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch
         ) {
             if (isFixedPitch) {
