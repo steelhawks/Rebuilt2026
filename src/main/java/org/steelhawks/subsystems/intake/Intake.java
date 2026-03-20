@@ -256,7 +256,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command setDesiredStateCommand(IntakeConstants.State state) {
-        return Commands.runOnce(() -> setDesiredState(state), this);
+        return Commands.runOnce(() -> setDesiredState(state));
     }
 
     public Command slamOut() {

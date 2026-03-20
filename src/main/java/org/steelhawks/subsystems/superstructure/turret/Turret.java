@@ -5,6 +5,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,7 +36,7 @@ public class Turret extends SubsystemBase {
     private static LoggedTunableNumber maxVelocityRadPerSec;
     private static LoggedTunableNumber maxAccelerationRadPerSecSq;
     private static LoggedTunableNumber manualIncrement;
-    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Math.PI / 60.0); // 3deg
+    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Units.degreesToRadians(5.0));
 
     private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
