@@ -66,6 +66,7 @@ public class LEDCommands {
         return Commands.sequence(
         Commands.runOnce(() -> s_Matrix.setBrightness(0.25)),
             // No Auton Selected warning
+            Commands.sequence(
                 s_Matrix.clearCommand(),
                 Commands.waitSeconds(0.3),
                 Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("NO", Color.RED)), s_Matrix),
