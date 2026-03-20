@@ -56,12 +56,6 @@ public class Vision extends SubsystemBase {
                     "Vision camera " + i + " is disconnected.", AlertType.kWarning);
         }
         whitelistTagIds(ALL_ALLOWED_TAGS);
-////        List<Integer> test = new ArrayList<Integer>();
-//        int[] testing = new int[3];
-//        for (int i = 19; i < 22; i++) {
-//            testing[i - 19] = i;
-//        }
-//        whitelistTagIds(testing);
     }
 
     public static void whitelistTagIds(int... tagIds) {
@@ -69,6 +63,20 @@ public class Vision extends SubsystemBase {
         for (int id : tagIds) {
             allowedTagIds.add(id);
         }
+    }
+
+    /**
+     * Returns true if at least one of the tags currently seen by this camera is whitelisted.
+     * This is used to gate pose observations — if a camera is only seeing tags from the
+     * opposing alliance, we reject all of its observations to prevent pose corruption.
+     */
+    private boolean cameraHasAllowedTag(int cameraIndex) {
+        for (int tagId : inputs[cameraIndex].tagIds) {
+            if (allowedTagIds.contains(tagId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Rotation2d getTargetX(int cameraIndex) {
@@ -95,24 +103,43 @@ public class Vision extends SubsystemBase {
             }
             Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
         }
+
         List<Pose3d> allTagPoses = new LinkedList<>();
         List<Pose3d> allRobotPoses = new LinkedList<>();
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
             if (!Toggles.Vision.camerasEnabled.get(io[cameraIndex].getName()).get()) {
                 continue;
             }
+
             disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+
             List<Pose3d> tagPoses = new LinkedList<>();
             List<Pose3d> robotPoses = new LinkedList<>();
             List<Pose3d> robotPosesAccepted = new LinkedList<>();
             List<Pose3d> robotPosesRejected = new LinkedList<>();
 
+            // Only log tags that are whitelisted
             for (int tagId : inputs[cameraIndex].tagIds) {
                 if (!allowedTagIds.contains(tagId)) continue;
                 var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
                 tagPose.ifPresent(tagPoses::add);
+            }
+
+            // Gate the entire camera's pose observations if it sees no whitelisted tags.
+            // Without this check, the whitelist only filtered tag logging but still allowed
+            // pose observations solved from opposing alliance tags to enter the estimator,
+            // corrupting the robot's field position and causing bad shots at competition.
+            if (!cameraHasAllowedTag(cameraIndex)) {
+                if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
+                    Logger.recordOutput("Vision/Camera" + cameraIndex + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
+                    Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPoses", new Pose3d[0]);
+                    Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesAccepted", new Pose3d[0]);
+                    Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesRejected", new Pose3d[0]);
+                }
+                continue;
             }
 
             for (var observation : inputs[cameraIndex].poseObservations) {
@@ -138,14 +165,16 @@ public class Vision extends SubsystemBase {
                     Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
                 double linearStdDev = LINEAR_STD_DEV_BASELINE * stdDevFactor;
                 double angularStdDev = ANGULAR_STD_DEV_BASELINE * stdDevFactor;
+
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
                     linearStdDev *= LINEAR_STD_DEV_MEGATAG2_FACTOR;
                     angularStdDev *= ANGULAR_STD_DEV_MEGATAG2_FACTOR;
                 }
+
                 if (cameraIndex < Objects.requireNonNull(VisionConstants.getCameraConfig()).length) {
                     double cameraLinearFactor = getCameraConfig()[cameraIndex].factors().getFactors()[0];
                     double cameraAngularFactor = getCameraConfig()[cameraIndex].factors().getFactors()[1];
-                    if (RobotContainer.s_Swerve.isOnBump()) { // trust vision as much as possible
+                    if (RobotContainer.s_Swerve.isOnBump()) {
                         linearStdDev *= VisionConstants.baselineDropOdomFactor.get();
                         angularStdDev *= VisionConstants.baselineDropOdomFactor.get();
                     } else {
@@ -153,6 +182,7 @@ public class Vision extends SubsystemBase {
                         angularStdDev *= cameraAngularFactor;
                     }
                 }
+
                 if (useQuestNav && !Robot.isFirstRun()) {
                     assert questNav != null;
                     if (questNav.isRunning()) {
@@ -160,6 +190,7 @@ public class Vision extends SubsystemBase {
                         angularStdDev = 2601_2601;
                     }
                 }
+
                 RobotState.getInstance().addVisionObservation(
                     new RobotState.VisionObservation(
                         observation.timestamp(),
@@ -176,6 +207,7 @@ public class Vision extends SubsystemBase {
                 Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesAccepted", robotPosesAccepted.toArray(new Pose3d[0]));
                 Logger.recordOutput("Vision/Camera" + cameraIndex + "/RobotPosesRejected", robotPosesRejected.toArray(new Pose3d[0]));
             }
+
             allTagPoses.addAll(tagPoses);
             allRobotPoses.addAll(robotPoses);
             allRobotPosesAccepted.addAll(robotPosesAccepted);
@@ -198,17 +230,16 @@ public class Vision extends SubsystemBase {
                     robotPose2d.getY(),
                     0.0,
                     new Rotation3d(0, 0, robotPose2d.getRotation().getRadians()));
-                // camera positions on the robot
+
                 Pose3d[] cameraPoses = new Pose3d[cameraConfigs.length];
                 for (int i = 0; i < cameraConfigs.length; i++) {
                     cameraPoses[i] = robotPose3d.transformBy(cameraConfigs[i].robotToCamera());
                 }
                 Logger.recordOutput("Vision/Summary/CameraPoses", cameraPoses);
-                // log a separate trajectory per camera, only to tags that camera sees
+
                 for (int i = 0; i < cameraConfigs.length; i++) {
                     Pose3d cameraPose = cameraPoses[i];
                     List<Pose3d> cameraRays = new LinkedList<>();
-                    // get tag poses seen by this camera
                     for (int tagId : inputs[i].tagIds) {
                         var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
                         if (tagPose.isPresent()) {
@@ -220,7 +251,9 @@ public class Vision extends SubsystemBase {
                 }
             }
         }
+
         LoopTimeUtil.record("Vision");
+
         if (questNav != null) {
             if (DriverStation.isDisabled() && Robot.isFirstRun() && Constants.loggedValue("RobotPosesEmpty", !allRobotPosesAccepted.isEmpty())) {
                 questNav.setPose(allRobotPosesAccepted.get(0).toPose2d());
