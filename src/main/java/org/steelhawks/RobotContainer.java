@@ -73,8 +73,8 @@ public class RobotContainer {
         driver.rightBumper()
             .whileTrue(
                 Commands.either(
-                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.RED_TAGS)),
-                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.BLUE_TAGS)),
+                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.RED_HUB_ONLY)),
+                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.BLUE_HUB_ONLY)),
                     AllianceFlip::shouldFlip))
             .onFalse(Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS)));
 
