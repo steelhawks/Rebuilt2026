@@ -205,7 +205,8 @@ public final class Autos {
             Commands.sequence(
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
 //                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
+//                new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
             )
         );

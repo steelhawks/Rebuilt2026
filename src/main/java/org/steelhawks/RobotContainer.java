@@ -72,7 +72,6 @@ public class RobotContainer {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .onTrue(new VibrateController(driver).repeatedly());
 
-
         new Trigger(() -> true)
             .whileTrue(TeleopSwerve.overrideState());
 
