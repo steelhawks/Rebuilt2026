@@ -3,8 +3,11 @@ package org.steelhawks.subsystems.Superstructure.flywheel;
 
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.opencv.core.Mat;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -25,8 +28,12 @@ public class Flywheel extends SubsystemBase {
     }
 
     // Flywheel state
-    private double targetFlywheelVelocity = 100.0;
+    private double targetFlywheelVelocity;
     private double flywheelVelocityTolerance = 5.0; // rad/s
+
+    private static LoggedTunableNumber targetVelocityTunable;
+    private double sampledVelocity = 0.0;
+
 
     private FlywheelConstants constants;
 
@@ -46,6 +53,8 @@ public class Flywheel extends SubsystemBase {
         kD = new LoggedTunableNumber("Flywheel/kD", constants.kD);
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS);
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV);
+
+        targetVelocityTunable = new LoggedTunableNumber("Flywheel/Target Velocity", 0.0);
 
         inputs = new FlywheelIOInputsAutoLogged();
 
@@ -94,13 +103,13 @@ public class Flywheel extends SubsystemBase {
                 case RAMP_UP -> {
                     io.runFlywheel(targetFlywheelVelocity, feedforward, false);
 
-                    if (inputs.velocityRadPerSec == targetFlywheelVelocity) {
+                    if (isAtTarget()) {
                         io.runOpenLoop(feedforward, false);
                     }
                 }
 
                 case RUNNING -> {
-                    if (inputs.velocityRadPerSec == targetFlywheelVelocity) {
+                    if (isAtTarget()) {
                         io.runOpenLoop(feedforward, true);
                     } else {
                         flywheelState = FlywheelState.RAMP_UP;
@@ -114,5 +123,44 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Flywheel/TargetVelocity", targetFlywheelVelocity);
     }
 
-    // Everything else: TARGET VELOCITY, COMMAND FACTORIES
+    // velocity sampling:
+
+    private void sampleCurrentVelocity() {
+        sampledVelocity = inputs.velocityRadPerSec;
+        targetFlywheelVelocity = sampledVelocity;
+        Logger.recordOutput("Flywheel/Sampled Velocity", sampledVelocity);
+    }
+
+    public double getSampledVelocity() {
+        return sampledVelocity;
+    }
+
+    public double getVelocity() {
+        return inputs.velocityRadPerSec;
+    }
+
+    public boolean isAtTarget() {
+        return Math.abs(inputs.velocityRadPerSec - targetFlywheelVelocity) <= flywheelVelocityTolerance;
+    }
+
+    // Command Factories
+
+    public Command runAtSampleVelocity() {
+        return Commands.sequence(
+                Commands.runOnce(() -> {
+                    sampleCurrentVelocity();
+                    flywheelState = FlywheelState.RAMP_UP;
+                }, this),
+                Commands.waitUntil(this::isAtTarget),
+                Commands.runOnce(() -> flywheelState = FlywheelState.RUNNING, this)
+                        .withName("Flywheel.runAtSampledVelocity")
+        );
+    }
+
+    public Command stopCommand() {
+        return Commands.runOnce(() -> {
+            flywheelState = FlywheelState.IDLE;
+            io.stopFlywheel();
+        }, this).withName("Flywheel.stop");
+    }
 }

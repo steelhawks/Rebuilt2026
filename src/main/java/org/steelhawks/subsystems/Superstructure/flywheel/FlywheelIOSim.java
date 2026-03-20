@@ -1,9 +1,11 @@
 package org.steelhawks.subsystems.Superstructure.flywheel;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import org.steelhawks.BuilderConstants;
@@ -57,9 +59,9 @@ public class FlywheelIOSim implements FlywheelIO {
 
     }
 
-    public void currentToTorqueVolts(double current) {
-        DCMotor motor = DCMotor.getKrakenX44Foc(2);
+    DCMotor motor = DCMotor.getKrakenX44Foc(2);
 
+    public void currentToTorqueVolts(double current) {
         double torque = motor.KtNMPerAmp * current;
 
         double voltage = current * motor.rOhms
@@ -79,10 +81,49 @@ public class FlywheelIOSim implements FlywheelIO {
         }
     }
 
-    @Override
-    public void runFlywheel(double velocity, double ffoutput, boolean isTorqueCurrent) {
-        
+    private double getAppliedVolts(double velocity, double ffoutput) {
+        double velocityErrorRotsPerSec = velocity
+                - Units.radiansToRotations(left_motor.getAngularVelocityRadPerSec());
+        double totalCurrentAmps = BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRotsPerSec + ffoutput;
+
+        double motorResistanceOhms = motor.nominalVoltageVolts / motor.stallCurrentAmps;
+        double backEMFVolts = left_motor.getAngularVelocityRadPerSec();
+
+        return MathUtil.clamp(
+                totalCurrentAmps * motorResistanceOhms + backEMFVolts,
+                -12.0, 12.0);
     }
 
+    @Override
+    public void runFlywheel(double velocity, double ffoutput, boolean isTorqueCurrent) {
+        if (isTorqueCurrent) {
+            double appliedVolts = getAppliedVolts(velocity, ffoutput);
 
+            left_motor.setInputVoltage(appliedVolts);
+            right_motor.setInputVoltage(appliedVolts);
+
+        } else {
+
+            double velocityErrorRotsPerSec = velocity
+                    - Units.radiansToRotations(left_motor.getAngularVelocityRadPerSec());
+
+           double  appliedVolts = MathUtil.clamp(
+                    BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRotsPerSec + ffoutput,
+                    -12.0, 12.0);
+
+           left_motor.setInputVoltage(appliedVolts);
+           right_motor.setInputVoltage(appliedVolts);
+        }
+    }
+
+    @Override
+    public void stopFlywheel() {
+        left_motor.setInputVoltage(0.0);
+        right_motor.setInputVoltage(0.0);
+    }
+
+    @Override
+    public void setFlywheelPID(double kP, double kI, double kD) {
+        pidController.setPID(kP, kI, kD);
+    }
 }

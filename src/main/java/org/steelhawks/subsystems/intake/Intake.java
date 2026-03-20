@@ -117,6 +117,7 @@ public class Intake extends SubsystemBase {
                 if (tuningAmps == null) {
                     tuningAmps = new LoggedTunableNumber("Intake/TuningAmps", 0.0);
                 }
+                io.runExtensionOpenLoop(tuningAmps.getAsDouble(), false);
             }
         }
 
