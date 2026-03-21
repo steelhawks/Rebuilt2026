@@ -87,25 +87,33 @@ public record ChoreoTraj(
     public static final ChoreoTraj RRebound = new ChoreoTraj(
         "RRebound",
         OptionalInt.empty(),
-        9.96065,
+        10.82556,
         new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5, 0.64334, Rotation2d.fromRadians(0))
+        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
         "RRebound",
         OptionalInt.of(0),
-        5.00375,
+        5.23906,
         new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5, 0.64334, Rotation2d.fromRadians(0))
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
         "RRebound",
         OptionalInt.of(1),
-        4.956899999999999,
-        new Pose2d(3.5, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5, 0.64334, Rotation2d.fromRadians(0))
+        4.963659999999999,
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
+        "RRebound",
+        OptionalInt.of(2),
+        0.6228400000000001,
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
+        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
     );
     public static final ChoreoTraj RRebound_Bump = new ChoreoTraj(
         "RRebound_Bump",
@@ -155,6 +163,7 @@ public record ChoreoTraj(
         Map.entry("RRebound", RRebound),
         Map.entry("RRebound$0", RRebound$0),
         Map.entry("RRebound$1", RRebound$1),
+        Map.entry("RRebound$2", RRebound$2),
         Map.entry("RRebound_Bump", RRebound_Bump),
         Map.entry("RRebound_Bump$0", RRebound_Bump$0),
         Map.entry("RRebound_Bump$1", RRebound_Bump$1),

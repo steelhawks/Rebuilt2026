@@ -206,7 +206,6 @@ public final class Autos {
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
 //                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
-//                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -267,7 +266,6 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 ShootingCommands.shoot().withTimeout(2.0), // TODO tune
                 ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
-                ShootingCommands.shoot().withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
