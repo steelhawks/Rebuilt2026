@@ -224,7 +224,7 @@ public class Intake extends SubsystemBase {
                 double positionError = inputs.leftPositionMeters - inputs.rightPositionMeters;
 
                 double leftFF = staticFriction;
-                double rightFF = staticFriction;
+                double rightFF = staticFriction + 0.5;
 
                 Logger.recordOutput("Intake/LeftFF", leftFF);
                 Logger.recordOutput("Intake/RightFF", rightFF);
