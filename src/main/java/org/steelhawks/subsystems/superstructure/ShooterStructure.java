@@ -148,7 +148,7 @@ public class ShooterStructure {
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
-            double x_dist = MathUtil.clamp(distanceToTarget(predictedTarget), minShootDistance, maxShootDistance);
+            double x_dist = MathUtil.clamp(distanceToTarget(actualTarget), minShootDistance, maxShootDistance);
             if (Toggles.useLUT.getAsBoolean()) {
                 return new ProjectileData(
                     shootingFlywheelVelocityMap.get(x_dist),
