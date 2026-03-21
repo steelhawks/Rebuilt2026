@@ -117,5 +117,17 @@ public class RobotContainer {
 
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+//        driver.x()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
+//
+//        driver.y()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
+//
+//        driver.a()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//
+//        driver.b()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 }

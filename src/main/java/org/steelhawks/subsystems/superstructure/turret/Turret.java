@@ -178,7 +178,7 @@ public class Turret extends SubsystemBase {
         var direction = target2d.minus(turretTranslation);
         double fieldRelativeAngle = direction.getAngle().getRadians();
         var projectileData = ShooterStructure.Static.calculateShot(target3d, target3d);
-        if (projectileData == null) {
+        if (projectileData == null || ShooterStructure.isNoSolution(projectileData)) {
             return new ArrayList<>();
         }
         double launchAngle = projectileData.hoodAngle();
