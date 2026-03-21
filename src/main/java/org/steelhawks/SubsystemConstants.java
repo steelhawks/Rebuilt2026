@@ -154,7 +154,7 @@ public class SubsystemConstants {
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromDegrees(160.0), Rotation2d.fromRotations(0.064697265625));
+                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.064697265625));
 
         public static final HoodConstants HOOD =
             new HoodConstants(
