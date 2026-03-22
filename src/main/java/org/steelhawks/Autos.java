@@ -18,10 +18,10 @@ import org.steelhawks.commands.DriveCommands;
 import org.steelhawks.commands.ShootingCommands;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -42,7 +42,9 @@ public final class Autos {
             true, // If alliance flipping should be enabled
             s_Swerve, // The drive subsystem
             ((trajectory, starting) -> {
-                Pose2d[] poses = trajectory.getPoses();
+                Pose2d[] poses = Arrays.stream(trajectory.getPoses())
+                    .map(AllianceFlip::apply)
+                    .toArray(Pose2d[]::new);
                 FieldConstants.FIELD_2D.getObject("Path").setPoses(List.of(poses));
                 Logger.recordOutput("Odometry/Trajectory", poses);
             })
