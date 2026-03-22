@@ -27,7 +27,23 @@ public class VisionConstants {
     public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
         AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    public static int[] ALL_ALLOWED_TAGS = new int[] {
+    public static final int[] BLUE_TAGS = new int[]  {
+        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
+    };
+
+    public static final int[] BLUE_HUB_ONLY = new int[] {
+        18, 19, 20, 21, 24, 25, 26, 27
+    };
+
+    public static final int[] RED_TAGS = new int[] {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+    };
+
+    public static final int[] RED_HUB_ONLY = new int[] {
+        2, 3, 4, 5, 8, 9, 10, 11
+    };
+
+    public static final int[] ALL_ALLOWED_TAGS = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
     };
 
@@ -142,22 +158,22 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(45.0))),
-            new Factors.StdDevFactors(3.0), // TODO: tune stddev factors
+            new Factors.StdDevFactors(8.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
-        new CameraConfig(
-            "ardu-middle-right",
-            new Transform3d(
-                Units.inchesToMeters(0.012), // 0.012 up
-                Units.inchesToMeters(-12.724), // 12.724 to the right
-                Units.inchesToMeters(20.677),
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-30.0),
-                    Units.degreesToRadians(-90.0))),
-            new Factors.StdDevFactors(1.3), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
+//        new CameraConfig(
+//            "ardu-middle-right",
+//            new Transform3d(
+//                Units.inchesToMeters(0.012), // 0.012 up
+//                Units.inchesToMeters(-12.724), // 12.724 to the right
+//                Units.inchesToMeters(20.677),
+//                new Rotation3d(
+//                    Units.degreesToRadians(0.0),
+//                    Units.degreesToRadians(-30.0),
+//                    Units.degreesToRadians(-90.0))),
+//            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
+//            CameraType.PHOTON
+//        ),
         new CameraConfig(
             "ardu-middle-left",
             new Transform3d(
@@ -168,7 +184,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0),
                     Units.degreesToRadians(-30.0),
                     Units.degreesToRadians(90.0))),
-            new Factors.StdDevFactors(1.3), // TODO: tune stddev factors
+            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -181,7 +197,7 @@ public class VisionConstants {
                 Units.degreesToRadians(0.0),
                 Units.degreesToRadians(-30.0),
                 Units.degreesToRadians(-135.0))),
-            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            new Factors.StdDevFactors(1.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -194,7 +210,7 @@ public class VisionConstants {
                 Units.degreesToRadians(0.0),
                 Units.degreesToRadians(-30),
                 Units.degreesToRadians(-225))),
-            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+            new Factors.StdDevFactors(1.0), // TODO: tune stddev factors
             CameraType.PHOTON
         )
 //        new CameraConfig(

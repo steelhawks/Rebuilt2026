@@ -12,10 +12,12 @@ import java.util.Map;
 public interface Toggles {
 
     static void configureOverrides() {
-        if (RobotConfig.getConfig().hasTurret)
+        if (RobotConfig.getConfig().hasTurret && Constants.getRobot() != Constants.RobotType.OMEGABOT)
             bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
         if (RobotConfig.getConfig().hasHood)
             bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
+        if (RobotConfig.getConfig().hasIntake)
+            bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
     }
 
     private static void bindMomentary(String key, Command command) {
@@ -38,7 +40,7 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
 
     LoggedNetworkBoolean useLUT =
-        new LoggedNetworkBoolean("Toggles/LUT", true);
+        new LoggedNetworkBoolean("Toggles/LUT", false);
 
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =
@@ -62,7 +64,7 @@ public interface Toggles {
 
     interface Flywheel {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
+        new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Flywheel/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
@@ -82,7 +84,7 @@ public interface Toggles {
 
     interface Intake {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", false);
+            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Intake/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =

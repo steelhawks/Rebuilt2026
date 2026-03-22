@@ -4,10 +4,12 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
@@ -20,6 +22,7 @@ import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public final class Autos {
@@ -37,7 +40,12 @@ public final class Autos {
             s_Swerve::setPose, // A function that resets the current robot pose to the provided Pose2d
             s_Swerve::followTrajectory, // The drive subsystem trajectory follower
             true, // If alliance flipping should be enabled
-            s_Swerve // The drive subsystem
+            s_Swerve, // The drive subsystem
+            ((trajectory, starting) -> {
+                Pose2d[] poses = trajectory.getPoses();
+                FieldConstants.FIELD_2D.getObject("Path").setPoses(List.of(poses));
+                Logger.recordOutput("Odometry/Trajectory", poses);
+            })
         );
 
     public enum Misalignment {
@@ -191,12 +199,13 @@ public final class Autos {
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
-        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound$2.asAutoTraj(routine);
+//        AutoTrajectory trenchToOutpost = ChoreoTraj.RRebound$2.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+//                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -219,17 +228,17 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 ShootingCommands.shoot().withTimeout(2.0),
                 ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToOutpost.spawnCmd()
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+//                trenchToOutpost.spawnCmd()
             )
         );
-
-        trenchToOutpost.done().onTrue(
-            Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                ShootingCommands.shoot().withTimeout(5.0)
-            )
-        );
+//
+//        trenchToOutpost.done().onTrue(
+//            Commands.sequence(
+//                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+//                ShootingCommands.shoot().withTimeout(5.0)
+//            )
+//        );
 
         return routine;
     }
@@ -239,28 +248,45 @@ public final class Autos {
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundToTrench = ChoreoTraj.LRebound$1.asAutoTraj(routine);
-        AutoTrajectory trenchToOutpost = ChoreoTraj.LRebound$2.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                trenchToMidToTrench.cmd()
-                    .alongWith(RobotContainer.s_Intake.runIntake()),
-                ShootingCommands.shoot()
-                    .until(() -> !s_Indexer.hasBalls())
-                    .withTimeout(5.0),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToReboundToTrench.cmd()
-                    .alongWith(RobotContainer.s_Intake.runIntake()),
-                ShootingCommands.shoot()
-                    .until(() -> !s_Indexer.hasBalls())
-                    .withTimeout(5.0),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToOutpost.cmd(),
-                ShootingCommands.shoot()
+//                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                new ScheduleCommand(RobotContainer.s_Intake.slamOut()),
+                trenchToMidToTrench.spawnCmd()
             )
         );
+
+        trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchToMidToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                ShootingCommands.shoot().withTimeout(2.0), // TODO tune
+                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToReboundToTrench.spawnCmd()
+            )
+        );
+
+        trenchToReboundToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+//                trenchToOutpost.spawnCmd()
+            )
+        );
+
+//        trenchToOutpost.done().onTrue(
+//            Commands.sequence(
+//                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+//                ShootingCommands.shoot().withTimeout(5.0)
+//            )
+//        );
 
         return routine;
     }

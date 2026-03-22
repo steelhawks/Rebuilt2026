@@ -92,6 +92,8 @@ public class LEDMatrix extends SubsystemBase {
         ledStrip.setLength(ledBuffer.getLength());
         ledStrip.setData(ledBuffer);
         ledStrip.start();
+
+        setBrightness(0.25);
     }
 
     public LEDMatrix(int width, int height) {

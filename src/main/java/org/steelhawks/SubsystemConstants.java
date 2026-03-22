@@ -143,22 +143,22 @@ public class SubsystemConstants {
                 1, 2, 3,
                 5.0, 0.0, 0.0,
                 200.0, 0.0, 0.0,
-                0.8, 2.0,
-                40.0, 0.05,
+                3.0, 5.0,
+                60.0, 0.05,
                 0.6, -1.0,
                 0.8);
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.5, 0.15, 0.0, 0.0, 0.60728, 0.010523 * 1.08, 20.0, 1.0, 50, 1.0, Units.inchesToMeters(1.16), (1.0 / 2.0));
+                5, 6, 0.85, 0.15, 0.0, 0.0, 0.49485, 0.021495 * 1.02, 20.0, 1.0, 50, 1.61, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromDegrees(-180.0), Rotation2d.fromDegrees(160.0), Rotation2d.fromRotations(0.064697265625));
+                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.064697265625));
 
         public static final HoodConstants HOOD =
             new HoodConstants(
-                    7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 0.02);
+                    7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 4.0);
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(

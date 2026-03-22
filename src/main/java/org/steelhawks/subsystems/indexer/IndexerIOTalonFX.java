@@ -56,6 +56,10 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+		spindexerConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
+		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
 		PhoenixUtil.tryUntilOk(5, () -> spindexerMotor.getConfigurator().apply(spindexerConfig));
 		PhoenixUtil.tryUntilOk(5, spindexerMotor::optimizeBusUtilization);
 
@@ -63,6 +67,10 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederConfig.Feedback.SensorToMechanismRatio = 1.0;
         feederConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+		feederConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);
 
@@ -83,6 +91,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 		if (constants.spindexerMotor2Id().isPresent()) {
 			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus);
 			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+			PhoenixUtil.tryUntilOk(5, () -> spindexerMotor2.getConfigurator().apply(spindexerConfig));
 			PhoenixUtil.tryUntilOk(5, spindexerMotor2::optimizeBusUtilization);
 
 			spindexer2Position = spindexerMotor2.getPosition();

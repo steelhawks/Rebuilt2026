@@ -45,7 +45,7 @@ public class IntakeConstants {
     public static final LoggedTunableNumber MAX_VELOCITY_RAD_PER_SEC = new LoggedTunableNumber("Intake/MaxVelocityMetersPerSec", 0.05);
     public static final LoggedTunableNumber MAX_ACCEL_RAD_PER_SEC_SQ = new LoggedTunableNumber("Intake/MaxAccelRadMetersSecSq", 0.08);
 
-    public static final double TOLERANCE = 0.005;
+    public static final double TOLERANCE = 0.01;
 
 //    0.144461m
     public static final double MIN_EXTENSION = MAX_EXTENSION_FROM_FRAME - 0.33 - 0.02;

@@ -3,6 +3,9 @@ package org.steelhawks;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -17,6 +20,7 @@ import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.util.AllianceFlip;
 
 public class RobotContainer {
 
@@ -59,53 +63,71 @@ public class RobotContainer {
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX()));
+        s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
         LEDCommands.configureTriggers(driver.leftTrigger());
     }
 
     private void configureDriver() {
+//        driver.leftBumper()
+//            .whileTrue(
+//                Commands.either(
+//                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.RED_TAGS)),
+//                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.BLUE_TAGS)),
+//                    AllianceFlip::shouldFlip))
+//            .onFalse(Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS)));
+
+        new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
+            .onTrue(new VibrateController(driver).repeatedly());
+
+        new Trigger(() -> true)
+            .whileTrue(TeleopSwerve.overrideState());
+
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
 
+//        driver.povRight().onTrue(
+//            Commands.runOnce(() -> {
+//                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
+//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
+//                } else {
+//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
+//                }
+//            }));
+
+        driver.povUp().onTrue(
+            s_Flywheel.incrementVelocityFactor(0.03));
+
+        driver.povDown().onTrue(
+            s_Flywheel.incrementVelocityFactor(-0.03));
+
+        driver.rightBumper()
+            .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
                 .whileTrue(ShootingCommands.shoot());
 
-        if (config.hasIntake) {
-            driver.rightTrigger()
-                .whileTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
-                    .andThen(s_Intake.runIntake())
-                    .finallyDo(() -> s_Intake.setDesiredState(IntakeConstants.State.HOME)));
-        }
-
-        if (config.hasTurret) {
-            driver.x()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0.0)));
-            driver.y()
-                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(90.0)));
-        }
-
-        driver.leftTrigger()
+        driver.rightTrigger()
             .whileTrue(
-                TeleopSwerve.overrideState());
-//
-//            driver.a()
-//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(180.0)));
-//
-//            driver.b()
-//                .onTrue(s_Turret.setDesiredRotation(Rotation2d.fromDegrees(-90.0)));
-//        }
+                s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
 
-//        if (config.hasHood) {
-//            driver.x()
-//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)));
+        driver.x()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+
+        driver.y()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+//        driver.x()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
 //
-//            driver.y()
-//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(60.0)));
+//        driver.y()
+//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
 //
-//            driver.a()
-//                .onTrue(s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(45.0)));
-//        }
+//        driver.a()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//
+//        driver.b()
+//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 }

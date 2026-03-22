@@ -57,7 +57,7 @@ public class FieldConstants {
 
         public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
         public static final double FUNNEL_HEIGHT = Units.inchesToMeters(72.0 - 56.4);
-        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(-2.0); // go back to 20 for max energy and if you want it to just fall straight into the chute, dont hit side walls
+        public static final double DISTANCE_ABOVE_FUNNEL_TO_CLEAR = Units.inchesToMeters(20.0); // go back to 20 for max energy and if you want it to just fall straight into the chute, dont hit side walls
     }
 
     public final static class Ferrying {

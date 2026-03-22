@@ -116,10 +116,10 @@ public class Hood extends SubsystemBase {
             );
         }
         if (shouldRun) {
-            if (!Toggles.shooterTuningMode.get()) {
-                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
-            }
+//            if (!Toggles.shooterTuningMode.get()) {
+//                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+//                setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+//            }
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
                 setpoint, 0.0);
