@@ -66,14 +66,6 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
-//        driver.leftBumper()
-//            .whileTrue(
-//                Commands.either(
-//                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.RED_TAGS)),
-//                    Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.BLUE_TAGS)),
-//                    AllianceFlip::shouldFlip))
-//            .onFalse(Commands.runOnce(() -> Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS)));
-
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .onTrue(new VibrateController(driver).repeatedly());
 
@@ -82,15 +74,6 @@ public class RobotContainer {
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
-
-//        driver.povRight().onTrue(
-//            Commands.runOnce(() -> {
-//                if (RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)) {
-//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY);
-//                } else {
-//                    RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB);
-//                }
-//            }));
 
         driver.povUp().onTrue(
             s_Flywheel.incrementVelocityFactor(0.03));
@@ -113,17 +96,5 @@ public class RobotContainer {
 
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
-
-//        driver.x()
-//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kForward));
-//
-//        driver.y()
-//            .whileTrue(s_Flywheel.sysIdQuasistaic(SysIdRoutine.Direction.kReverse));
-//
-//        driver.a()
-//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
-//
-//        driver.b()
-//            .whileTrue(s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 }
