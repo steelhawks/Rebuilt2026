@@ -8,6 +8,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.BuilderConstants;
 import org.steelhawks.Constants;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -42,24 +43,22 @@ public class FlywheelIOSim implements FlywheelIO {
         pidController = new PIDController(constants.kP(), constants.kI(), constants.kD());
     }
 
-
-    @Override
-    public void updateInputs(FlywheelIOInputs inputs) {
-        left_motor.update(Constants.UPDATE_LOOP_DT);
-        right_motor.update(Constants.UPDATE_LOOP_DT);
-
-        inputs.isConnected = true;
-        inputs.position = right_motor.getAngularPositionRad() * IntakeConstants.PINION_METERS_TO_RADIANS;
-        inputs.velocityRadPerSec = right_motor.getAngularVelocityRadPerSec() * IntakeConstants.PINION_METERS_TO_RADIANS;
-        inputs.appliedVolts = right_motor.getInputVoltage();
-        inputs.currentAmps = right_motor.getCurrentDrawAmps();
-        inputs.torqueCurrent = right_motor.getCurrentDrawAmps();
-        inputs.statorCurrent  = right_motor.getCurrentDrawAmps();
-        inputs.tempCelsius = right_motor.getCurrentDrawAmps() * 0.1;
-
-    }
-
     DCMotor motor = DCMotor.getKrakenX44Foc(2);
+
+    private double getAppliedVolts(double velocity, double ffoutput) {
+        // velocity is rad/s, so measure in rad/s too
+        double velocityErrorRadPerSec = velocity
+                - left_motor.getAngularVelocityRadPerSec(); // no conversion needed
+
+        double totalCurrentAmps = BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRadPerSec + ffoutput;
+
+        double motorResistanceOhms = motor.nominalVoltageVolts / motor.stallCurrentAmps;
+        double backEMFVolts = left_motor.getAngularVelocityRadPerSec() / motor.KvRadPerSecPerVolt; // ← also fix this
+
+        return MathUtil.clamp(
+                totalCurrentAmps * motorResistanceOhms + backEMFVolts,
+                -12.0, 12.0);
+    }
 
     public void currentToTorqueVolts(double current) {
         double torque = motor.KtNMPerAmp * current;
@@ -72,6 +71,34 @@ public class FlywheelIOSim implements FlywheelIO {
     }
 
     @Override
+    public void runFlywheel(double velocity, double ffoutput, boolean isTorqueCurrent) {
+        if (isTorqueCurrent) {
+            double appliedVolts = getAppliedVolts(velocity, ffoutput);
+            left_motor.setInputVoltage(appliedVolts);
+            right_motor.setInputVoltage(appliedVolts);
+        } else {
+            // Stay in rad/s — matches what Flywheel.java passes in
+            double currentVelocityRadPerSec =
+                    (left_motor.getAngularVelocityRadPerSec()
+                            + right_motor.getAngularVelocityRadPerSec()) / 2.0;
+
+            double velocityErrorRadPerSec = velocity - currentVelocityRadPerSec;
+
+            double appliedVolts = MathUtil.clamp(
+                    BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRadPerSec + ffoutput,
+                    -12.0, 12.0
+            );
+
+            left_motor.setInputVoltage(appliedVolts);
+            right_motor.setInputVoltage(appliedVolts);
+            Logger.recordOutput("Flywheel/AppliedVoltsSim", appliedVolts);
+        }
+
+        left_motor.update(Constants.UPDATE_LOOP_DT);
+        right_motor.update(Constants.UPDATE_LOOP_DT);
+    }
+
+    @Override
     public void runOpenLoop(double output, boolean isTorqueCurrent) {
         if (isTorqueCurrent) {
             currentToTorqueVolts(output);
@@ -79,51 +106,27 @@ public class FlywheelIOSim implements FlywheelIO {
             left_motor.setInputVoltage(output);
             right_motor.setInputVoltage(output);
         }
-    }
-
-    private double getAppliedVolts(double velocity, double ffoutput) {
-        double velocityErrorRotsPerSec = velocity
-                - Units.radiansToRotations(left_motor.getAngularVelocityRadPerSec());
-        double totalCurrentAmps = BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRotsPerSec + ffoutput;
-
-        double motorResistanceOhms = motor.nominalVoltageVolts / motor.stallCurrentAmps;
-        double backEMFVolts = left_motor.getAngularVelocityRadPerSec();
-
-        return MathUtil.clamp(
-                totalCurrentAmps * motorResistanceOhms + backEMFVolts,
-                -12.0, 12.0);
-    }
-
-    @Override
-    public void runFlywheel(double velocity, double ffoutput, boolean isTorqueCurrent) {
-        if (isTorqueCurrent) {
-            double appliedVolts = getAppliedVolts(velocity, ffoutput);
-
-            left_motor.setInputVoltage(appliedVolts);
-            right_motor.setInputVoltage(appliedVolts);
-
-        } else {
-
-            double velocityErrorRotsPerSec = velocity
-                    - Units.radiansToRotations(left_motor.getAngularVelocityRadPerSec());
-
-           double  appliedVolts = MathUtil.clamp(
-                    BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRotsPerSec + ffoutput,
-                    -12.0, 12.0);
-
-           left_motor.setInputVoltage(appliedVolts);
-           right_motor.setInputVoltage(appliedVolts);
-        }
+        left_motor.update(Constants.UPDATE_LOOP_DT);
+        right_motor.update(Constants.UPDATE_LOOP_DT);
     }
 
     @Override
     public void stopFlywheel() {
         left_motor.setInputVoltage(0.0);
         right_motor.setInputVoltage(0.0);
+        left_motor.update(Constants.UPDATE_LOOP_DT);
+        right_motor.update(Constants.UPDATE_LOOP_DT);
     }
 
     @Override
-    public void setFlywheelPID(double kP, double kI, double kD) {
-        pidController.setPID(kP, kI, kD);
+    public void updateInputs(FlywheelIOInputs inputs) {
+        // No update() call here anymore
+        inputs.isConnected = true;
+        inputs.velocityRadPerSec = right_motor.getAngularVelocityRadPerSec();
+        inputs.appliedVolts = right_motor.getInputVoltage();
+        inputs.currentAmps = right_motor.getCurrentDrawAmps();
+        inputs.torqueCurrent = right_motor.getCurrentDrawAmps();
+        inputs.statorCurrent = right_motor.getCurrentDrawAmps();
+        inputs.tempCelsius = right_motor.getCurrentDrawAmps() * 0.1;
     }
 }

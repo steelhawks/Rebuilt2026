@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
+import org.steelhawks.subsystems.Superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.Color;
@@ -28,6 +29,7 @@ public class RobotContainer {
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
     public static Intake s_Intake = null;
+    public static Flywheel s_Flywheel = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -46,6 +48,7 @@ public class RobotContainer {
         s_Vision = config.hasVision ? config.createVision(s_Swerve::accept).orElseThrow() : null;
         s_ObjVision = config.hasObjectVision ? config.createObjectVision().orElseThrow() : null;
         s_Intake = config.hasIntake ? config.createIntake().orElseThrow() : null;
+        s_Flywheel = config.hasFlywheel ? config.createFlywheel().orElseThrow() : null;
 
         if (config.hasAutos) {
             Autos.init();
@@ -68,12 +71,20 @@ public class RobotContainer {
 
     private void configureDriver() {
 
-        System.out.println("Intake is: " + s_Intake);
+        System.out.println("LOGG LOGG LOGG RAHH: Intake goal is: " + s_Intake);
 //        if (Constants.getMode() == Mode.SIM) {
-            driver.button(1).onTrue(Commands.parallel(
-                    Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MAX_EXTENSION))
-            ));
-            driver.button(2).onTrue(Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MIN_EXTENSION)));
+//            driver.button(1).onTrue(Commands.parallel(
+//                    Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MAX_EXTENSION))
+//            ));
+//            driver.button(2).onTrue(Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MIN_EXTENSION)));
 //        }
+
+
+        driver.button(1).onTrue(Commands.parallel(
+                    Commands.runOnce(() -> s_Flywheel.runAtVelocity(200.0)))
+        );
+        driver.button(2).onTrue(s_Flywheel.stopCommand());
+
+
     }
 }
