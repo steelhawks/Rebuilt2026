@@ -19,7 +19,6 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;
-import org.steelhawks.util.VirtualSubsystem;
 import org.steelhawks.util.geometry.Boundary;
 import org.steelhawks.util.geometry.RobotFootprint;
 
