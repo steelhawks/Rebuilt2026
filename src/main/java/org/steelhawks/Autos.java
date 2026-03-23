@@ -65,6 +65,7 @@ public final class Autos {
 
     // Distance threshold to decide between pathfinding vs simple PID recovery
     public static double replanDistanceRequirement = Units.inchesToMeters(15.0); // tune
+    private static boolean tuningOptionsAdded = false;
 
     /**
      * After a trajectory finishes, checks if the robot was bumped away from the
@@ -95,6 +96,13 @@ public final class Autos {
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
 
         if (Toggles.tuningMode.get()) {
+            pollTuningMode();
+        }
+    }
+
+    public static void pollTuningMode() {
+        if (!tuningOptionsAdded && Toggles.tuningMode.get()) {
+
             autoChooser.addOption("Swerve Drive (Quick Characterizer)", DriveCommands.feedforwardCharacterization(s_Swerve));
 
             autoChooser.addOption("Swerve Drive (Quasistatic Forward)", s_Swerve.driveSysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -117,6 +125,7 @@ public final class Autos {
             autoChooser.addOption("Flywheel (Quasistatic Backward)", RobotContainer.s_Flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
             autoChooser.addOption("Flywheel (Dynamic Forward)", RobotContainer.s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
             autoChooser.addOption("Flywheel (Quasistatic Backward)", RobotContainer.s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+            tuningOptionsAdded = true;
         }
     }
 

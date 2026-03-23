@@ -234,6 +234,9 @@ public class Robot extends LoggedRobot {
         ) {
             RobotContainer.s_Swerve.updatePhysicsSimulation();
         }
+        if (DriverStation.isDisabled()) {
+            Autos.pollTuningMode();
+        }
         Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
     }
 
