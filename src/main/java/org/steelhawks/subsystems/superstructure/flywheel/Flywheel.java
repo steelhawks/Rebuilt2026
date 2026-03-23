@@ -148,7 +148,7 @@ public class Flywheel extends SubsystemBase {
             }
 
             double feedforward = kS.get() + kV.get() * targetVelocityRadPerSec;
-            io.runFlywheel(targetVelocityRadPerSec, feedforward, false);
+            io.runFlywheel(targetVelocityRadPerSec, feedforward, true);
         }
 
         Logger.recordOutput("Flywheel/TargetVelocity", targetVelocityRadPerSec);
