@@ -18,7 +18,9 @@ public class ShootingCommands {
             Commands.runOnce(() ->
                 RobotState.getInstance().setAimState(ShootingState.SHOOTING)),
             Commands.runOnce(() -> {
-                if (AllianceFlip.shouldFlip()) {
+                if (AllianceFlip.shouldFlip()
+                    && RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)
+                ) {
                     Vision.whitelistTagIds(VisionConstants.RED_HUB_ONLY);
                 } else {
                     Vision.whitelistTagIds(VisionConstants.BLUE_HUB_ONLY);
