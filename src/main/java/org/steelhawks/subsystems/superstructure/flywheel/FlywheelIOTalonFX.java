@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.Superstructure.flywheel;
+package org.steelhawks.subsystems.superstructure.flywheel;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;

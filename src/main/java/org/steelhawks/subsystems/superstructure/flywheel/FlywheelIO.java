@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.Superstructure.flywheel;
+package org.steelhawks.subsystems.superstructure.flywheel;
 
 import org.littletonrobotics.junction.AutoLog;
 

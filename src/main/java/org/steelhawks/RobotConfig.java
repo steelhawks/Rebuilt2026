@@ -2,9 +2,8 @@
 
     import org.steelhawks.Constants.*;
     import org.steelhawks.generated.*;
-    import org.steelhawks.subsystems.Superstructure.flywheel.Flywheel;
-    import org.steelhawks.subsystems.Superstructure.flywheel.FlywheelIO;
-    import org.steelhawks.subsystems.Superstructure.flywheel.FlywheelIOSim;
+    import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
+    import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOSim;
     import org.steelhawks.subsystems.intake.*;
     import org.steelhawks.subsystems.led.LEDMatrix;
     import org.steelhawks.subsystems.led.LEDStrip;

@@ -1,18 +1,13 @@
-package org.steelhawks.subsystems.Superstructure.flywheel;
+package org.steelhawks.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.BuilderConstants;
 import org.steelhawks.Constants;
-import org.steelhawks.subsystems.intake.IntakeConstants;
-import org.steelhawks.subsystems.intake.IntakeVisualizer;
 
 public class FlywheelIOSim implements FlywheelIO {
 

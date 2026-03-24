@@ -1,6 +1,4 @@
-package org.steelhawks.subsystems.Superstructure.flywheel;
-
-import org.steelhawks.util.LoggedTunableNumber;
+package org.steelhawks.subsystems.superstructure.flywheel;
 
 public class FlywheelConstants {
 

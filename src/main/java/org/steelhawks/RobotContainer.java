@@ -1,14 +1,12 @@
 package org.steelhawks;
 
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.commands.*;
-import org.steelhawks.subsystems.Superstructure.flywheel.Flywheel;
+import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeConstants;
-import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
@@ -16,8 +14,6 @@ import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
-
-import static org.steelhawks.Constants.RobotType.SIMBOT;
 
 public class RobotContainer {
 
@@ -69,6 +65,13 @@ public class RobotContainer {
 
     private void configureTriggers() {}
 
+    public Command spinUp(double velocityRadPerSec) {
+        return Commands.sequence(
+                Commands.runOnce(() -> s_Flywheel.runAtVelocity(velocityRadPerSec), s_Flywheel),
+                Commands.waitUntil(s_Flywheel::isRampComplete)
+        ).withName("Flywheel.spinUp");
+    }
+
     private void configureDriver() {
 
         System.out.println("LOGG LOGG LOGG RAHH: Intake goal is: " + s_Intake);
@@ -77,12 +80,12 @@ public class RobotContainer {
 //                    Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MAX_EXTENSION))
 //            ));
 //            driver.button(2).onTrue(Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MIN_EXTENSION)));
-//        }
 
 
-        driver.button(1).onTrue(Commands.parallel(
-                    Commands.runOnce(() -> s_Flywheel.runAtVelocity(200.0)))
-        );
+//      }
+
+
+        driver.button(1).onTrue(spinUp(200.0));
         driver.button(2).onTrue(s_Flywheel.stopCommand());
 
 
