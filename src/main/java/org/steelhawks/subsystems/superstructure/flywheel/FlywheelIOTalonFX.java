@@ -26,7 +26,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     private final StatusSignal<Voltage> appliedVolts;
     private final StatusSignal<Current> torqueCurrent;
     private final StatusSignal<Current> statorCurrent;
-    private final StatusSignal<Temperature> tempCelcius;
+    private final StatusSignal<Temperature> tempCelsius;
 
     private final VoltageOut voltageOut;
     private final VelocityVoltage velocityVoltage;
@@ -56,7 +56,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         appliedVolts = left_motor.getMotorVoltage();
         torqueCurrent = left_motor.getTorqueCurrent();
         statorCurrent = left_motor.getStatorCurrent();
-        tempCelcius = left_motor.getDeviceTemp();
+        tempCelsius = left_motor.getDeviceTemp();
 
         BaseStatusSignal.setUpdateFrequencyForAll(1000, position, velocityRadPerSec);
 
@@ -95,7 +95,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         inputs.currentAmps = currentAmps.getValueAsDouble();
         inputs.statorCurrent = statorCurrent.getValueAsDouble();
         inputs.torqueCurrent = torqueCurrent.getValueAsDouble();
-        inputs.tempCelsius = tempCelcius.getValueAsDouble();
+        inputs.tempCelsius = tempCelsius.getValueAsDouble();
 
     }
 

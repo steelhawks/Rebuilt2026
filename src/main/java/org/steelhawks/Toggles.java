@@ -47,12 +47,21 @@ public interface Toggles {
                 new LoggedNetworkBoolean("Toggles/Intake/ToggleCurrentOverride", false);
     }
 
-    interface  FLywheel {
+    interface Flywheel {
         LoggedNetworkBoolean isEnabled =
-                new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
+                new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", false);
         LoggedNetworkBoolean toggleVoltageOverride =
                 new LoggedNetworkBoolean("Toggles/Flywheel/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
                 new LoggedNetworkBoolean("Toggles/Flywheel/ToggleCurrentOverride", false);
+    }
+
+    interface Turret {
+        LoggedNetworkBoolean isEnabled =
+                new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", false);
+        LoggedNetworkBoolean toggleVoltageOverride =
+                new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
+        LoggedNetworkBoolean toggleCurrentOverride =
+                new LoggedNetworkBoolean("Toggles/Turret/ToggleCurrentOverride", false);
     }
 }

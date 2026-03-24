@@ -19,7 +19,18 @@ public class BuilderConstants {
                 1.0);
 
         public static final FlywheelConstants FLYWHEEL = new FlywheelConstants(
-                1, 2, 0.85, 0.5, 0.2, 0.8, 3, 5, 300, 5, 4, 2/1);
+                1,
+                2,
+                0.85,
+                0.5,
+                0.2,
+                0.8,
+                3,
+                5,
+                300,
+                5,
+                4,
+                2/1);
 
     }
 

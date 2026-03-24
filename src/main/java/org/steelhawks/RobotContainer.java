@@ -73,21 +73,8 @@ public class RobotContainer {
     }
 
     private void configureDriver() {
+        if (Constants.getMode() == Mode.SIM) {
 
-        System.out.println("LOGG LOGG LOGG RAHH: Intake goal is: " + s_Intake);
-//        if (Constants.getMode() == Mode.SIM) {
-//            driver.button(1).onTrue(Commands.parallel(
-//                    Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MAX_EXTENSION))
-//            ));
-//            driver.button(2).onTrue(Commands.runOnce(() -> s_Intake.setExtensionGoal(IntakeConstants.MIN_EXTENSION)));
-
-
-//      }
-
-
-        driver.button(1).onTrue(spinUp(200.0));
-        driver.button(2).onTrue(s_Flywheel.stopCommand());
-
-
+        }
     }
 }

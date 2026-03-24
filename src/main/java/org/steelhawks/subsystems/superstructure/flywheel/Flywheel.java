@@ -79,7 +79,7 @@ public class Flywheel extends SubsystemBase {
         Logger.processInputs("Flywheel", inputs);
         Logger.recordOutput("Flywheel/State", flywheelState.toString());
 
-        final boolean shouldRun = Toggles.FLywheel.isEnabled.get();
+        final boolean shouldRun = Toggles.Flywheel.isEnabled.get();
 
         // ---- Tuning overrides (only active in tuning mode) -----------------
         if (Toggles.tuningMode.getAsBoolean()) {
@@ -88,14 +88,14 @@ public class Flywheel extends SubsystemBase {
                     hashCode(), () -> io.setFlywheelPID(kP.get(), kI.get(), kD.get()), kP, kI, kD
             );
 
-            if (Toggles.FLywheel.toggleVoltageOverride.getAsBoolean()) {
+            if (Toggles.Flywheel.toggleVoltageOverride.getAsBoolean()) {
                 if (tuningVolts == null) {
                     tuningVolts = new LoggedTunableNumber("Flywheel/TuningVolts", 0.0);
                 }
                 io.runOpenLoop(tuningVolts.getAsDouble(), false);
             }
 
-            if (Toggles.FLywheel.toggleCurrentOverride.getAsBoolean()) {
+            if (Toggles.Flywheel.toggleCurrentOverride.getAsBoolean()) {
                 if (tuningAmps == null) {
                     tuningAmps = new LoggedTunableNumber("Flywheel/TuningAmps", 0.0);
                 }
