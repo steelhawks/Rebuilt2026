@@ -20,8 +20,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -59,7 +57,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final Queue<Double> drivePositionQueue;
     private final StatusSignal<AngularVelocity> driveVelocity;
     private final StatusSignal<Voltage> driveAppliedVolts;
-    private final StatusSignal<Current> driveCurrent;
+    private final StatusSignal<Current> driveSupplyCurrent;
+    private final StatusSignal<Current> driveTorqueCurrent;
     private final StatusSignal<Temperature> driveTemp;
 
     // turn motor inputs
@@ -69,7 +68,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final Queue<Double> turnPositionQueue;
     private final StatusSignal<AngularVelocity> turnVelocity;
     private final StatusSignal<Voltage> turnAppliedVolts;
-    private final StatusSignal<Current> turnCurrent;
+    private final StatusSignal<Current> turnSupplyCurrent;
+    private final StatusSignal<Current> turnTorqueCurrent;
     private final StatusSignal<Temperature> turnTemp;
 
     private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
@@ -151,7 +151,8 @@ public class ModuleIOTalonFX implements ModuleIO {
             PhoenixOdometryThread.getInstance().registerSignal(driveTalon.getPosition());
         driveVelocity = driveTalon.getVelocity();
         driveAppliedVolts = driveTalon.getMotorVoltage();
-        driveCurrent = driveTalon.getSupplyCurrent();
+        driveSupplyCurrent = driveTalon.getSupplyCurrent();
+        driveTorqueCurrent = driveTalon.getTorqueCurrent();
         driveTemp = driveTalon.getDeviceTemp();
 
         // Create turn status signals
@@ -161,36 +162,41 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(turnTalon.getPosition());
         turnVelocity = turnTalon.getVelocity();
         turnAppliedVolts = turnTalon.getMotorVoltage();
-        turnCurrent = turnTalon.getSupplyCurrent();
+        turnSupplyCurrent = turnTalon.getSupplyCurrent();
+        turnTorqueCurrent = turnTalon.getTorqueCurrent();
         turnTemp = turnTalon.getDeviceTemp();
 
         // Configure periodic frames
         BaseStatusSignal.setUpdateFrequencyForAll(
-            RobotContainer.s_Swerve.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+            Swerve.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0,
             driveVelocity,
             driveAppliedVolts,
-            driveCurrent,
+            driveSupplyCurrent,
+            driveTorqueCurrent,
             driveTemp,
             turnMagnetBad,
             turnAbsolutePosition,
             turnVelocity,
             turnAppliedVolts,
-            turnCurrent,
+            turnSupplyCurrent,
+            turnTorqueCurrent,
             turnTemp);
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon, cancoder);
         PhoenixUtil.registerSignals(
             bus,
             driveVelocity,
             driveAppliedVolts,
-            driveCurrent,
+            driveSupplyCurrent,
+            driveTorqueCurrent,
             driveTemp,
             turnMagnetBad,
             turnAbsolutePosition,
             turnVelocity,
             turnAppliedVolts,
-            turnCurrent,
+            turnSupplyCurrent,
+            turnTorqueCurrent,
             turnTemp);
     }
 
@@ -198,9 +204,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Check all signals
         boolean driveStatus =
-            BaseStatusSignal.isAllGood(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
+            BaseStatusSignal.isAllGood(drivePosition, driveVelocity, driveAppliedVolts, driveSupplyCurrent);
         boolean turnStatus =
-            BaseStatusSignal.isAllGood(turnMagnetBad, turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
+            BaseStatusSignal.isAllGood(turnMagnetBad, turnPosition, turnVelocity, turnAppliedVolts, turnSupplyCurrent);
         boolean turnEncoderStatus = BaseStatusSignal.isAllGood(turnAbsolutePosition);
 
         // drive inputs
@@ -208,7 +214,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
         inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
         inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
-        inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
+        inputs.driveCurrentAmps = driveSupplyCurrent.getValueAsDouble();
         inputs.driveTempCelsius = driveTemp.getValueAsDouble();
 
         // turn inputs
@@ -219,7 +225,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());
         inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
         inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
-        inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
+        inputs.turnCurrentAmps = turnSupplyCurrent.getValueAsDouble();
         inputs.turnTempCelsius = turnTemp.getValueAsDouble();
 
         // odometry inputs
