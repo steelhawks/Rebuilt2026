@@ -5,7 +5,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
-import org.steelhawks.util.VirtualSubsystem;
 
 import java.util.ArrayList;
 import java.util.List;
