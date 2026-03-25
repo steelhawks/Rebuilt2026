@@ -77,7 +77,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         leftConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
         leftConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-
+        leftConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+        leftConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
         rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -89,6 +90,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         rightConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
         rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        rightConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+        rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;

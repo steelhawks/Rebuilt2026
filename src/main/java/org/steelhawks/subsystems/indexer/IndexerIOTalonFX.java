@@ -57,7 +57,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-		spindexerConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
+		spindexerConfig.CurrentLimits.SupplyCurrentLimit = 30.0;
 		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
 		PhoenixUtil.tryUntilOk(5, () -> spindexerMotor.getConfigurator().apply(spindexerConfig));
@@ -68,7 +68,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-		feederConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+		feederConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
 		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
