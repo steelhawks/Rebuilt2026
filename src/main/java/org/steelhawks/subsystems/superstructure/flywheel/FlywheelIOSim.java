@@ -48,7 +48,7 @@ public class FlywheelIOSim implements FlywheelIO {
         double totalCurrentAmps = BuilderConstants.OmegaBot.FLYWHEEL.kP() * velocityErrorRadPerSec + ffoutput;
 
         double motorResistanceOhms = motor.nominalVoltageVolts / motor.stallCurrentAmps;
-        double backEMFVolts = left_motor.getAngularVelocityRadPerSec() / motor.KvRadPerSecPerVolt; // ← also fix this
+        double backEMFVolts = left_motor.getAngularVelocityRadPerSec() / motor.KvRadPerSecPerVolt;
 
         return MathUtil.clamp(
                 totalCurrentAmps * motorResistanceOhms + backEMFVolts,

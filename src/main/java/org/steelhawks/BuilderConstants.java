@@ -2,6 +2,7 @@ package org.steelhawks;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -31,6 +32,8 @@ public class BuilderConstants {
                 5,
                 4,
                 2/1);
+
+        public static final TurretConstants TURRET = new TurretConstants(4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.064697265625));
 
     }
 
@@ -165,6 +168,20 @@ public class BuilderConstants {
     ) {
         public static final FlywheelConstants UNSET =
                 new FlywheelConstants(0, 0, 0, 0, 0, 0,  0, 0, 0, 0,0, 0);
+    }
+
+    public record TurretConstants(
+            int turretId, int encoderId,
+            double kP, double kI, double kD, double kS, double kA,
+            double maxVelocityRadPerSec,
+            double maxAccelerationRadPerSecSq,
+            double motorReduction,
+            Rotation2d minRotation,
+            Rotation2d maxRotation,
+            Rotation2d encoderOffset
+    ) {
+        public static final TurretConstants UNSET =
+                new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(0), new Rotation2d(0),new Rotation2d(0) );
     }
 
 }

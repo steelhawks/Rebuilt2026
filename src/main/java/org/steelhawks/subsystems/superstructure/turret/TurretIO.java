@@ -3,23 +3,20 @@ package org.steelhawks.subsystems.superstructure.turret;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface TurretIO {
-
     @AutoLog
     class TurretIOInputs {
 
         boolean isConnected = false;
         double position = 0.0;
         double velocityRadPerSec = 0.0;
-        double appliedVolts = 0.0;
-        double tempCelsius = 0.0;
         double currentAmps = 0.0;
+        double tempCelsius = 0.0;
+        double appliedVolts = 0.0;
         double torqueCurrent = 0.0;
         double statorCurrent = 0.0;
     }
 
     default void updateInputs(TurretIOInputs inputs) {}
-
-    default void setBrakeMode(boolean enabled) {}
 
     default void runOpenLoop(double output, boolean isTorqueCurrent) {}
 
@@ -27,7 +24,7 @@ public interface TurretIO {
 
     default void stopTurret() {}
 
-    default void setTurretPID(double kP, double kI, double kD) {}
+    default void setBrakeMode(boolean enabled) {}
 
-    default void setPosition(double position) {}
+    default void setTurretPID(double kP, double kI, double kD) {}
 }
