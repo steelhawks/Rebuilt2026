@@ -32,5 +32,7 @@ public interface TurretIO {
 
     default void setBrakeMode(boolean enabled) {}
 
+    default void setTurretPosition(double position) {}
+
     default void setTurretPID(double kP, double kI, double kD) {}
 }

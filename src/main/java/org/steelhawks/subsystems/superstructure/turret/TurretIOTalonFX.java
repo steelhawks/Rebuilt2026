@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -16,6 +17,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.BuilderConstants;
 import org.steelhawks.util.PhoenixUtil;
@@ -122,5 +124,32 @@ public class TurretIOTalonFX implements TurretIO {
         );
     }
 
+    @Override
+    public void stopTurret() {
+        turret.stopMotor();
+    }
+
+    @Override
+    public void setBrakeMode(boolean enabled) {
+        if (enabled) {
+            turretConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        } else {
+            turretConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        }
+    }
+
+    @Override
+    public void setTurretPosition(double position) {
+        new Thread(() -> {
+            turret.setPosition(Units.radiansToRotations(position));
+        });
+    }
+
+    @Override
+    public void setTurretPID(double kP, double kI, double kD) {
+        turretConfig.Slot0.kP = kP;
+        turretConfig.Slot0.kI = kI;
+        turretConfig.Slot0.kD = kD;
+    }
 
 }
