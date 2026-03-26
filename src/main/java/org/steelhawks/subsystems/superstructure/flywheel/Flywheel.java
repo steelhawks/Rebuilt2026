@@ -117,9 +117,9 @@ public class Flywheel extends SubsystemBase {
 
         if (shouldRun) {
             if (!Toggles.shooterTuningMode.get()) {
-                Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
+                Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getShootingState().name());
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-                switch (RobotState.getInstance().getAimState()) {
+                switch (RobotState.getInstance().getShootingState()) {
                     case NOTHING -> {
                         double mps = ShooterStructure.Static.calculateShot(
                             hubCenter, hubCenter,
@@ -130,11 +130,13 @@ public class Flywheel extends SubsystemBase {
                         }
                     }
                     case SHOOTING_MOVING -> {
-                        double mps = ShooterStructure.Moving.calculateMovingShot(
-                            hubCenter,
-                            Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(stationaryHoodVelocityFactor * mps, constants.flywheelRadius());
-                        setTargetVelocity(rps);
+                        var sol = RobotState.getInstance().getMovingShotSolution();
+                        if (sol != null) {
+                            double rps = ShooterStructure.linearToAngularVelocity(
+                                stationaryHoodVelocityFactor * sol.flywheelSpeed(),
+                                constants.flywheelRadius());
+                            setTargetVelocity(rps);
+                        }
                     }
                     case SHOOTING_STATIONARY -> {
                         double mps = ShooterStructure.Static.calculateShot(
@@ -176,11 +178,12 @@ public class Flywheel extends SubsystemBase {
         targetVelocityRadPerSec = velocityRadPerSec;
     }
 
-    public Command testfire() {
+    public Command simFire() {
         return Commands.defer(() ->
             Commands.runOnce(
                 () -> {
-                    var t = ShooterStructure.Moving.calculateMovingShot(FieldConstants.Hub.HUB_CENTER_3D, false);
+                    var sol = RobotState.getInstance().getMovingShotSolution();
+                    if (sol == null) return;
 
                     RebuiltFuelOnFly fuelOnFly = new RebuiltFuelOnFly(
                         RobotState.getInstance().getEstimatedPose().getTranslation(),
@@ -188,22 +191,21 @@ public class Flywheel extends SubsystemBase {
                         RobotContainer.s_Swerve.getChassisSpeeds(),
                         RobotContainer.s_Turret.getRotation().plus(Rotation2d.kPi),
                         Meters.of(Constants.RobotConstants.ROBOT_TO_TURRET.getZ()),
-                        MetersPerSecond.of(t.exitVelocity()),
-                        Radians.of(t.hoodAngle())
+                        MetersPerSecond.of(sol.exitVelocity()),
+                        Radians.of(sol.hoodAngleRad())
                     );
-                    fuelOnFly
-                        .withProjectileTrajectoryDisplayCallBack(
-                            (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileSuccessfulShot", pose3ds.toArray(Pose3d[]::new)),
-                            (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileUnsuccessfulShot", pose3ds.toArray(Pose3d[]::new))
-                        );
+                    fuelOnFly.withProjectileTrajectoryDisplayCallBack(
+                        (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileSuccessfulShot", pose3ds.toArray(Pose3d[]::new)),
+                        (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileUnsuccessfulShot", pose3ds.toArray(Pose3d[]::new))
+                    );
                     SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
                 }
             ), Set.of(this));
     }
 
     public Command shooting() {
-        return Commands.run(() -> RobotState.getInstance().setAimState(ShootingState.SHOOTING))
-            .finallyDo(() -> RobotState.getInstance().setAimState(ShootingState.NOTHING));
+        return Commands.run(() -> RobotState.getInstance().setShootingState(ShootingState.SHOOTING))
+            .finallyDo(() -> RobotState.getInstance().setShootingState(ShootingState.NOTHING));
     }
 
     public Command setTargetVelocityCmd(double velocityRadPerSec) {

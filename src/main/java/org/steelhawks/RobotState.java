@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;
@@ -56,7 +57,7 @@ public class RobotState {
         }
     }
 
-    public enum ShooterMode {
+    public enum AimState {
         TO_HUB,
         FERRY,
         MANUAL
@@ -77,8 +78,10 @@ public class RobotState {
     @AutoLogOutput
     private final Trigger inBumpTrigger;
 
+    private ShooterStructure.MovingShotSolution movingShotSolution = null;
+
     private ShootingState lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
-    private ShooterMode currentShooterMode = ShooterMode.TO_HUB;
+    private AimState currentAimState = AimState.TO_HUB;
     private ShootingState shootingState = ShootingState.NOTHING;
     private ShiftState shiftState = ShiftState.AUTO;
 
@@ -123,7 +126,7 @@ public class RobotState {
         this.currentDetectedObjects = new ArrayList<>();
 
         sotmTrigger = new Trigger(
-            () -> getAimState().equals(ShootingState.SHOOTING_MOVING));
+            () -> getShootingState().equals(ShootingState.SHOOTING_MOVING));
         inTrenchTrigger =
             Boundary.asTrigger(
                 "LeftTrench",
@@ -168,31 +171,31 @@ public class RobotState {
         this.currentChassisSpeeds = speeds;
     }
 
-    public void setShooterMode(ShooterMode mode) {
-        if (currentShooterMode != mode) {
-            Logger.recordOutput("ShooterMode/ModeChange",
-                currentShooterMode.name() + " -> " + mode.name());
-            currentShooterMode = mode;
-            Logger.recordOutput("ShooterMode/CurrentMode", mode.name());
+    public void setAimState(AimState mode) {
+        if (currentAimState != mode) {
+            Logger.recordOutput("AimState/ModeChange",
+                currentAimState.name() + " -> " + mode.name());
+            currentAimState = mode;
+            Logger.recordOutput("AimState/CurrentMode", mode.name());
             // clear trajectory
             Logger.recordOutput("Turret/ScoreTrajectory", new Translation3d[0]);
             Logger.recordOutput("Turret/FerryTrajectory", new Translation3d[0]);
         }
     }
 
-    public void setAimState(ShootingState state) {
+    public void setShootingState(ShootingState state) {
         if (shootingState != state) {
-            Logger.recordOutput("AimState/ModeChange",
+            Logger.recordOutput("ShooterState/ModeChange",
                 shootingState.name() + " -> " + state.name());
             shootingState = state;
-            Logger.recordOutput("AimState/CurrentMode", state.name());
+            Logger.recordOutput("ShooterState/CurrentMode", state.name());
             if (state != ShootingState.SHOOTING) {
                 lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
             }
         }
     }
 
-    public ShootingState getAimState() {
+    public ShootingState getShootingState() {
         if (shootingState == ShootingState.NOTHING) {
             return ShootingState.NOTHING;
         }
@@ -211,8 +214,27 @@ public class RobotState {
         return shootingState;
     }
 
-    public ShooterMode getShooterMode() {
-        return currentShooterMode;
+    public AimState getAimState() {
+        return currentAimState;
+    }
+
+    public void updateMovingShot() {
+        var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+        Translation3d robotVelocity = new Translation3d(
+            currentChassisSpeeds.vxMetersPerSecond,
+            currentChassisSpeeds.vyMetersPerSecond,
+            0.0);
+        movingShotSolution = ShooterStructure.Moving.solveMovingShot(
+            hubCenter,
+            robotVelocity,
+            getRotation(),
+            5,
+            0.01
+        );
+    }
+
+    public ShooterStructure.MovingShotSolution getMovingShotSolution() {
+        return movingShotSolution;
     }
 
     public static RobotState getInstance() {
@@ -223,6 +245,14 @@ public class RobotState {
     }
 
     public void periodic() {
+        // sotm update
+        ShootingState currentShootingState = getShootingState();
+        if (currentShootingState == ShootingState.SHOOTING_MOVING
+            || currentShootingState == ShootingState.SHOOTING
+        ) {
+            updateMovingShot();
+        }
+
         if (DriverStation.isDisabled()) {
             timer.stop();
         }
@@ -265,28 +295,28 @@ public class RobotState {
                 }
             }
         }
-        if (currentShooterMode == ShooterMode.MANUAL) {
+        if (currentAimState == AimState.MANUAL) {
             return;
         }
-        ShooterMode desiredMode = calculateDesiredMode();
-        if (desiredMode != currentShooterMode) {
-            setShooterMode(desiredMode);
+        AimState desiredMode = calculateDesiredMode();
+        if (desiredMode != currentAimState) {
+            setAimState(desiredMode);
         }
     }
 
-    private ShooterMode calculateDesiredMode() {
+    private AimState calculateDesiredMode() {
         Optional<Alliance> ourAlliance = DriverStation.getAlliance();
         if (ourAlliance.isEmpty()) {
-            return ShooterMode.TO_HUB;
+            return AimState.TO_HUB;
         }
         boolean inAllianceZone = isInAllianceZone(ourAlliance.get());
         if (inAllianceZone || areBothHubsActive()) {
-            return ShooterMode.TO_HUB;
+            return AimState.TO_HUB;
         }
         if (isOurHubActive(ourAlliance.get())) {
-            return ShooterMode.TO_HUB;
+            return AimState.TO_HUB;
         } else {
-            return ShooterMode.FERRY;
+            return AimState.FERRY;
         }
     }
 

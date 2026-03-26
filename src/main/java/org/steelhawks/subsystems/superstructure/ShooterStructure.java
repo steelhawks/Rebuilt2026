@@ -35,6 +35,14 @@ public class ShooterStructure {
     private static final double maxFerryDistance;
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
+    public record MovingShotSolution(
+        double exitVelocity,
+        double hoodAngleRad,
+        double flywheelSpeed,
+        Rotation2d turretAngle,
+        Translation3d virtualTarget,
+        double timeOfFlight
+    ) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
 
@@ -310,6 +318,49 @@ public class ShooterStructure {
             Logger.recordOutput("Shooter/Moving/FinalExitVelocity", solution.exitVelocity());
 
             return solution;
+        }
+
+        public static MovingShotSolution solveMovingShot(
+            Translation3d actualTarget,
+            Translation3d robotVelocity,
+            Rotation2d robotHeading,
+            int maxIterations,
+            double timeTolerance
+        ) {
+            Translation3d virtualTarget = actualTarget;
+            double tGuess = shootingTimeOfFlightMap.get(distanceToTarget(actualTarget));
+            double virtualDist = distanceToTarget(actualTarget);
+
+            for (int i = 0; i < maxIterations; i++) {
+                virtualTarget = new Translation3d(
+                    actualTarget.getX() - robotVelocity.getX() * tGuess,
+                    actualTarget.getY() - robotVelocity.getY() * tGuess,
+                    actualTarget.getZ());
+                virtualDist = MathUtil.clamp(
+                    distanceToTarget(virtualTarget),
+                    minShootDistance, maxShootDistance);
+                double newTof = shootingTimeOfFlightMap.get(virtualDist);
+                if (Math.abs(newTof - tGuess) < timeTolerance) break;
+                tGuess = newTof;
+            }
+            var turretTranslation = new Pose3d(RobotState.getInstance().getEstimatedPose())
+                .transformBy(RobotConstants.ROBOT_TO_TURRET)
+                .toPose2d()
+                .getTranslation();
+            double fieldRelativeAngle = Math.atan2(
+                virtualTarget.getY() - turretTranslation.getY(),
+                virtualTarget.getX() - turretTranslation.getX());
+            double turretMountYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+            double turretRelativeAngle = MathUtil.angleModulus(
+                fieldRelativeAngle - robotHeading.getRadians() - turretMountYaw);
+            return new MovingShotSolution(
+                shootingFlywheelVelocityMap.get(virtualDist),
+                shootingHoodAngleMap.get(virtualDist).getRadians(),
+                shootingFlywheelVelocityMap.get(virtualDist),
+                Rotation2d.fromRadians(turretRelativeAngle),
+                virtualTarget,
+                tGuess
+            );
         }
     }
 }
