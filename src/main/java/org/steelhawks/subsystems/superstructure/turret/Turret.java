@@ -151,11 +151,16 @@ public class Turret extends SubsystemBase {
             return new ArrayList<>();
         }
         double launchAngle = projectileData.hoodAngle();
-        double timeOfFlight = ShooterStructure.calculateTimeofFlight(
+//        double timeOfFlight = ShooterStructure.calculateTimeOfFlight(
+//            projectileData.exitVelocity(),
+//            launchAngle,
+//            turretTranslation.getDistance(target2d)
+//        );
+        double timeOfFlight = ShooterStructure.calculateTimeOfFlight(
             projectileData.exitVelocity(),
             launchAngle,
-            turretTranslation.getDistance(target2d)
-        );
+            turretTranslation.getDistance(target2d),
+            target3d.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ());
 
         for (int i = 0; i <= numPoints; i++) {
             double t = (timeOfFlight / numPoints) * i;

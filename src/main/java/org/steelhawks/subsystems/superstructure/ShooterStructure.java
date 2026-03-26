@@ -115,8 +115,19 @@ public class ShooterStructure {
         return data == null || Double.isNaN(data.exitVelocity()) || Double.isNaN(data.hoodAngle());
     }
 
-    public static double calculateTimeofFlight(double exitVelocity, double pivotAngle, double distanceToTravel) {
-        return distanceToTravel / (exitVelocity * Math.cos(pivotAngle));
+    public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH) {
+        // rearranged 0.5*g*t^2 - v*sin(theta)*t + deltaH = 0
+        if (Toggles.useLUT.get()) {
+            return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
+        }
+        double a = 0.5 * G;
+        double b = -v * Math.sin(theta);
+        double c = deltaH;
+        double discriminant = b * b - 4 * a * c;
+        if (discriminant < 0) return Double.NaN;
+        double t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+        double t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        return (t1 > 0) ? t1 : t2;
     }
 
     public static double angularToLinearVelocity(double angularVelocityRadPerSec, double radius) {
@@ -293,7 +304,7 @@ public class ShooterStructure {
                 }
 
                 double distance = distanceToTarget(predictedTarget);
-                double tof = calculateTimeofFlight(solution.exitVelocity(), solution.hoodAngle(), distance);
+                double tof = calculateTimeOfFlight(solution.exitVelocity(), solution.hoodAngle(), distance, actualTarget.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ());
 
                 Translation3d relativeVelocity = targetVelocity.minus(robotVelocity);
                 Translation3d newPredictedTarget = actualTarget.plus(relativeVelocity.times(tof));
