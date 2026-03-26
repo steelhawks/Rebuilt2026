@@ -26,7 +26,7 @@ public class Intake extends SubsystemBase {
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
-    private final double homingVolts = -2.0;
+    private final double homingVolts = 5.0;
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
@@ -121,7 +121,7 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
-                io.setPosition(IntakeConstants.State.HOME.getPosition());
+                io.setPosition(IntakeConstants.State.INTAKE.getPosition());
                 io.stopRack();
                 isZeroed = true;
                 goal = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
