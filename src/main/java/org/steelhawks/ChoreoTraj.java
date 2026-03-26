@@ -24,97 +24,6 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj CenterPath = new ChoreoTraj(
-        "CenterPath",
-        OptionalInt.empty(),
-        4.79161,
-        new Pose2d(3.53925, 0.66003, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj CenterPath$0 = new ChoreoTraj(
-        "CenterPath",
-        OptionalInt.of(0),
-        2.2359,
-        new Pose2d(3.53925, 0.66003, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj CenterPath$1 = new ChoreoTraj(
-        "CenterPath",
-        OptionalInt.of(1),
-        2.5557100000000004,
-        new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885)),
-        new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
-    );
-    public static final ChoreoTraj FourMeterSpinTest = new ChoreoTraj(
-        "FourMeterSpinTest",
-        OptionalInt.empty(),
-        2.22895,
-        new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
-        new Pose2d(5, 0.53702, Rotation2d.fromRadians(3.14159))
-    );
-    public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
-        "FourMeterTest",
-        OptionalInt.empty(),
-        2.23064,
-        new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
-        new Pose2d(5, 0.53702, Rotation2d.fromRadians(0))
-    );
-    public static final ChoreoTraj LRebound = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.empty(),
-        9.5246,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.of(0),
-        4.53341,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.of(1),
-        4.99119,
-        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0))
-    );
-    public static final ChoreoTraj RRebound = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.empty(),
-        10.82556,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(0),
-        5.23906,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(1),
-        4.963659999999999,
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(2),
-        0.6228400000000001,
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
-    );
     public static final ChoreoTraj RRebound_Bump = new ChoreoTraj(
         "RRebound_Bump",
         OptionalInt.empty(),
@@ -146,28 +55,154 @@ public record ChoreoTraj(
         new Pose2d(3.61148, 0.64334, Rotation2d.fromRadians(3.14159)),
         new Pose2d(0.45085, 0.64334, Rotation2d.fromRadians(3.14159))
     );
+    public static final ChoreoTraj LRebound = new ChoreoTraj(
+        "LRebound",
+        OptionalInt.empty(),
+        9.5246,
+        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
+        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
+        "LRebound",
+        OptionalInt.of(0),
+        4.53341,
+        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
+        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
+        "LRebound",
+        OptionalInt.of(1),
+        4.99119,
+        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0)),
+        new Pose2d(3.5, 7.43636, Rotation2d.fromRadians(0))
+    );
+    public static final ChoreoTraj CenterPath = new ChoreoTraj(
+        "CenterPath",
+        OptionalInt.empty(),
+        4.79161,
+        new Pose2d(3.53925, 0.66003, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj CenterPath$0 = new ChoreoTraj(
+        "CenterPath",
+        OptionalInt.of(0),
+        2.2359,
+        new Pose2d(3.53925, 0.66003, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj CenterPath$1 = new ChoreoTraj(
+        "CenterPath",
+        OptionalInt.of(1),
+        2.5557100000000004,
+        new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885)),
+        new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
+    );
+    public static final ChoreoTraj RRebound = new ChoreoTraj(
+        "RRebound",
+        OptionalInt.empty(),
+        10.40244,
+        new Pose2d(4.42036, 0.49733, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(0.45085, 0.64334, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
+        "RRebound",
+        OptionalInt.of(0),
+        4.94788,
+        new Pose2d(4.42036, 0.49733, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(4.41148, 0.64334, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
+        "RRebound",
+        OptionalInt.of(1),
+        4.034940000000001,
+        new Pose2d(4.41148, 0.64334, Rotation2d.fromRadians(0)),
+        new Pose2d(4.41148, 0.64334, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
+        "RRebound",
+        OptionalInt.of(2),
+        1.41962,
+        new Pose2d(4.41148, 0.64334, Rotation2d.fromRadians(0)),
+        new Pose2d(0.45085, 0.64334, Rotation2d.fromRadians(0))
+    );
+    public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
+        "FourMeterTest",
+        OptionalInt.empty(),
+        2.23064,
+        new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
+        new Pose2d(5, 0.53702, Rotation2d.fromRadians(0))
+    );
+    public static final ChoreoTraj FourMeterSpinTest = new ChoreoTraj(
+        "FourMeterSpinTest",
+        OptionalInt.empty(),
+        2.22895,
+        new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
+        new Pose2d(5, 0.53702, Rotation2d.fromRadians(3.14159))
+    );
+    public static final ChoreoTraj RRebound_NEW = new ChoreoTraj(
+        "RRebound_NEW",
+        OptionalInt.empty(),
+        12.8723,
+        new Pose2d(4.44576, 0.48716, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(0.46744, 0.66523, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_NEW$0 = new ChoreoTraj(
+        "RRebound_NEW",
+        OptionalInt.of(0),
+        3.88228,
+        new Pose2d(4.44576, 0.48716, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(3.07695, 2.54649, Rotation2d.fromRadians(3.14159))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_NEW$1 = new ChoreoTraj(
+        "RRebound_NEW",
+        OptionalInt.of(1),
+        7.261940000000001,
+        new Pose2d(3.07695, 2.54649, Rotation2d.fromRadians(3.14159)),
+        new Pose2d(3.08052, 2.53698, Rotation2d.fromRadians(3.14159))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_NEW$2 = new ChoreoTraj(
+        "RRebound_NEW",
+        OptionalInt.of(2),
+        1.7280799999999985,
+        new Pose2d(3.08052, 2.53698, Rotation2d.fromRadians(3.14159)),
+        new Pose2d(0.46744, 0.66523, Rotation2d.fromRadians(0))
+    );
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-        Map.entry("CenterPath", CenterPath),
-        Map.entry("CenterPath$0", CenterPath$0),
-        Map.entry("CenterPath$1", CenterPath$1),
-        Map.entry("FourMeterSpinTest", FourMeterSpinTest),
-        Map.entry("FourMeterTest", FourMeterTest),
+        Map.entry("RRebound_Bump", RRebound_Bump),
+        Map.entry("RRebound_Bump$0", RRebound_Bump$0),
+        Map.entry("RRebound_Bump$1", RRebound_Bump$1),
+        Map.entry("RRebound_Bump$2", RRebound_Bump$2),
         Map.entry("LRebound", LRebound),
         Map.entry("LRebound$0", LRebound$0),
         Map.entry("LRebound$1", LRebound$1),
+        Map.entry("CenterPath", CenterPath),
+        Map.entry("CenterPath$0", CenterPath$0),
+        Map.entry("CenterPath$1", CenterPath$1),
         Map.entry("RRebound", RRebound),
         Map.entry("RRebound$0", RRebound$0),
         Map.entry("RRebound$1", RRebound$1),
         Map.entry("RRebound$2", RRebound$2),
-        Map.entry("RRebound_Bump", RRebound_Bump),
-        Map.entry("RRebound_Bump$0", RRebound_Bump$0),
-        Map.entry("RRebound_Bump$1", RRebound_Bump$1),
-        Map.entry("RRebound_Bump$2", RRebound_Bump$2)
+        Map.entry("FourMeterTest", FourMeterTest),
+        Map.entry("FourMeterSpinTest", FourMeterSpinTest),
+        Map.entry("RRebound_NEW", RRebound_NEW),
+        Map.entry("RRebound_NEW$0", RRebound_NEW$0),
+        Map.entry("RRebound_NEW$1", RRebound_NEW$1),
+        Map.entry("RRebound_NEW$2", RRebound_NEW$2)
     );
 
     /**
