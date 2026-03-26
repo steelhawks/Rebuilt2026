@@ -92,6 +92,7 @@ public final class Autos {
         autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName(ChoreoTraj.FourMeterTest.name()));
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
         autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
+        autoChooser.addOption("Right Rebound OP Auton", rightReboundOP().cmd().withName(ChoreoTraj.RRebound_NEW.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
 
@@ -200,6 +201,59 @@ public final class Autos {
                     .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(5.0)),
                 back.cmd(),
                 ShootingCommands.shoot()));
+
+        return routine;
+    }
+
+    public static AutoRoutine rightReboundOP() {
+        AutoRoutine routine = factory.newRoutine("Right Rebound OP");
+
+        AutoTrajectory trenchToMidToBump = ChoreoTraj.RRebound_NEW$0.asAutoTraj(routine);
+        AutoTrajectory bumpToTrench = ChoreoTraj.RRebound_NEW$1.asAutoTraj(routine);
+        AutoTrajectory trenchToMidToBumpRebound = ChoreoTraj.RRebound_NEW$2.asAutoTraj(routine);
+        AutoTrajectory bumpToOutpost = ChoreoTraj.RRebound_NEW$3.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                trenchToMidToBump.resetOdometry(),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                trenchToMidToBump.spawnCmd()
+            )
+        );
+
+        trenchToMidToBump.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        bumpToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        trenchToMidToBumpRebound.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        bumpToOutpost.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchToMidToBump.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToMidToBump),
+                bumpToTrench.spawnCmd()
+            )
+        );
+
+        bumpToTrench.active().whileTrue(ShootingCommands.shoot());
+        bumpToOutpost.active().whileTrue(ShootingCommands.shoot());
+        bumpToOutpost.done().whileTrue(ShootingCommands.shoot());
+
+        bumpToTrench.done()
+            .onTrue(
+                Commands.sequence(
+                    s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                    trenchToMidToBumpRebound.spawnCmd()
+                )
+            );
+
+        trenchToMidToBumpRebound.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToMidToBumpRebound),
+                bumpToOutpost.spawnCmd()
+            )
+        );
 
         return routine;
     }

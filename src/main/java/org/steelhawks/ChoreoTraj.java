@@ -165,14 +165,22 @@ public record ChoreoTraj(
     public static final ChoreoTraj RRebound_NEW$1 = new ChoreoTraj(
         "RRebound_NEW",
         OptionalInt.of(1),
-        7.261940000000001,
+        3.1644900000000002,
         new Pose2d(3.07695, 2.54649, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(3.08052, 2.53698, Rotation2d.fromRadians(3.14159))
+        new Pose2d(4.12574, 0.6472, Rotation2d.fromRadians(0))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj RRebound_NEW$2 = new ChoreoTraj(
         "RRebound_NEW",
         OptionalInt.of(2),
+        4.09745,
+        new Pose2d(4.12574, 0.6472, Rotation2d.fromRadians(0)),
+        new Pose2d(3.08052, 2.53698, Rotation2d.fromRadians(3.14159))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_NEW$3 = new ChoreoTraj(
+        "RRebound_NEW",
+        OptionalInt.of(3),
         1.7280799999999985,
         new Pose2d(3.08052, 2.53698, Rotation2d.fromRadians(3.14159)),
         new Pose2d(0.46744, 0.66523, Rotation2d.fromRadians(0))
@@ -202,7 +210,8 @@ public record ChoreoTraj(
         Map.entry("RRebound_NEW", RRebound_NEW),
         Map.entry("RRebound_NEW$0", RRebound_NEW$0),
         Map.entry("RRebound_NEW$1", RRebound_NEW$1),
-        Map.entry("RRebound_NEW$2", RRebound_NEW$2)
+        Map.entry("RRebound_NEW$2", RRebound_NEW$2),
+        Map.entry("RRebound_NEW$3", RRebound_NEW$3)
     );
 
     /**
