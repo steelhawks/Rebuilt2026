@@ -38,7 +38,6 @@ public class ShooterStructure {
     public record MovingShotSolution(
         double exitVelocity,
         double hoodAngleRad,
-        double flywheelSpeed,
         Rotation2d turretAngle,
         Translation3d virtualTarget,
         double timeOfFlight
@@ -367,7 +366,6 @@ public class ShooterStructure {
             return new MovingShotSolution(
                 shootingFlywheelVelocityMap.get(virtualDist),
                 shootingHoodAngleMap.get(virtualDist).getRadians(),
-                shootingFlywheelVelocityMap.get(virtualDist),
                 Rotation2d.fromRadians(turretRelativeAngle),
                 virtualTarget,
                 tGuess
