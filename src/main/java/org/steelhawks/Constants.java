@@ -89,6 +89,11 @@ public final class Constants {
         return ROBOT_TYPE;
     }
 
+    public static final class SOTMConstants {
+        public static final int MAX_ITERATIONS = 5;
+        public static final double TIME_TOLERANCE = 0.01;
+    }
+
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(34.0);

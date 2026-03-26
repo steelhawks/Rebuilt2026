@@ -228,8 +228,8 @@ public class RobotState {
             hubCenter,
             robotVelocity,
             getRotation(),
-            5,
-            0.01
+            Constants.SOTMConstants.MAX_ITERATIONS,
+            Constants.SOTMConstants.TIME_TOLERANCE
         );
     }
 
