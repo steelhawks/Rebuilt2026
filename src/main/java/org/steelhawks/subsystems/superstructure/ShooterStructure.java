@@ -339,7 +339,7 @@ public class ShooterStructure {
             double timeTolerance
         ) {
             Translation3d virtualTarget = actualTarget;
-            double tGuess = shootingTimeOfFlightMap.get(distanceToTarget(actualTarget));
+            double tGuess = shootingTimeOfFlightMap.get(distanceToTarget(actualTarget)); // need to fix to use calculateTimeOfFlight to be able to use switcher
             double virtualDist = distanceToTarget(actualTarget);
 
             for (int i = 0; i < maxIterations; i++) {
