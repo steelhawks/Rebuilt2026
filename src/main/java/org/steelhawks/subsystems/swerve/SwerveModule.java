@@ -15,6 +15,7 @@ import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsLastYear;
+import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class SwerveModule {
@@ -75,6 +76,7 @@ public class SwerveModule {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Swerve/Module" + index, inputs);
+        BatteryUtil.recordCurrentUsage(inputs.driveCurrentAmps + inputs.turnCurrentAmps);
 
         // calculate positions for odometry
         int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together

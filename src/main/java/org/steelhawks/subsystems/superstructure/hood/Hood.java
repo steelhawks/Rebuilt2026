@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -59,6 +60,7 @@ public class Hood extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Hood", inputs);
+        BatteryUtil.recordCurrentUsage(inputs.supplyCurrentAmps);
 
         if (!isHomed && Toggles.Hood.isEnabled.get()) {
             io.runOpenLoop(homingVolts, false);
