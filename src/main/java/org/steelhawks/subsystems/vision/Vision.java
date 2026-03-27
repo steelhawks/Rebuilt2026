@@ -79,6 +79,16 @@ public class Vision extends SubsystemBase {
         return false;
     }
 
+    public boolean anyCameraHasAllowedTags() {
+        for (int i = 0; i < io.length; i++) {
+            if (cameraHasAllowedTag(i)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }

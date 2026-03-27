@@ -34,7 +34,7 @@ public class RobotContainer {
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
-    private final CommandXboxController driver =
+    public static final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
     public RobotContainer() {
