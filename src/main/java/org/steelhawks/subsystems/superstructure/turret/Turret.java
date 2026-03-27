@@ -340,7 +340,8 @@ public class Turret extends SubsystemBase {
                         MathUtil.clamp(setpoint.position, constants.minRotation().getRadians(), constants.maxRotation().getRadians()),
                         0.0);
             }
-            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble());
+            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble())
+                && Maths.epsilonEquals(setpoint.position, goal.position, tolerance.getAsDouble());
             if (atGoal) {
                 io.stop();
             } else {
