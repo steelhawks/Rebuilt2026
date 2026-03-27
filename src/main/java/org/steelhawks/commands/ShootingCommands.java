@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
-import org.steelhawks.commands.vibrators.StacattoVibrationController;
+import org.steelhawks.commands.rumble.StacattoVibrationController;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.vision.Vision;
 import org.steelhawks.subsystems.vision.VisionConstants;
@@ -30,8 +30,8 @@ public class ShootingCommands {
 
             new StacattoVibrationController(RobotContainer.driver)
                 .repeatedly()
-                .until(RobotContainer.s_Vision::anyCameraHasAllowedTags)
-                .onlyIf(() -> !RobotContainer.s_Vision.anyCameraHasAllowedTags()),
+                .until(RobotContainer.s_Vision::hasStableTag)
+                .onlyIf(() -> !RobotContainer.s_Vision.hasStableTag()),
 
             Commands.sequence(
                 Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),

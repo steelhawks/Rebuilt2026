@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.vision;
 import static org.steelhawks.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,6 +30,8 @@ public class Vision extends SubsystemBase {
     private final boolean useQuestNav;
 
     private final QuestNavImpl questNav;
+    private final Debouncer stableTagDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
+    private boolean tagStable = false;
 
     public Vision() {
         this(false);
@@ -79,14 +82,8 @@ public class Vision extends SubsystemBase {
         return false;
     }
 
-    public boolean anyCameraHasAllowedTags() {
-        for (int i = 0; i < io.length; i++) {
-            if (cameraHasAllowedTag(i)) {
-                return true;
-            }
-        }
-
-        return false;
+    public boolean hasStableTag() {
+        return tagStable;
     }
 
     public Rotation2d getTargetX(int cameraIndex) {
@@ -118,6 +115,8 @@ public class Vision extends SubsystemBase {
         List<Pose3d> allRobotPoses = new LinkedList<>();
         List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
         List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+
+        boolean hasAllowedTag = false;
 
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
             if (!Toggles.Vision.camerasEnabled.get(io[cameraIndex].getName()).get()) {
@@ -151,6 +150,8 @@ public class Vision extends SubsystemBase {
                 }
                 continue;
             }
+
+            hasAllowedTag = true;
 
             for (var observation : inputs[cameraIndex].poseObservations) {
                 boolean rejectPose =
@@ -261,6 +262,8 @@ public class Vision extends SubsystemBase {
                 }
             }
         }
+
+        tagStable = stableTagDebouncer.calculate(hasAllowedTag);
 
         LoopTimeUtil.record("Vision");
 
