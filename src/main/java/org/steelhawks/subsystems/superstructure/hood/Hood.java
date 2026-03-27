@@ -52,7 +52,7 @@ public class Hood extends SubsystemBase {
 
     @AutoLogOutput(key = "Hood/IsStalling")
     private boolean isStalling() {
-        return homingDebouncer.calculate(Math.abs(inputs.torqueCurrentAmps) > 60.0);
+        return homingDebouncer.calculate(Math.abs(inputs.torqueCurrentAmps) > 50.0);
     }
 
     @Override
