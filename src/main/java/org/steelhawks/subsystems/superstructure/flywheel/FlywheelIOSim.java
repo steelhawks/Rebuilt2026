@@ -12,12 +12,7 @@ import org.steelhawks.Constants;
 public class FlywheelIOSim implements FlywheelIO {
 
     private final DCMotorSim left_motor;
-    private final DCMotorSim right_motor;
-
-    private double feedforward = 0.0;
-    private double targetVelocity = 0.0;
-    private double velocityVoltage = 0.0;
-    private double velocityVoltageTorque = 0.0;
+    private final DCMotorSim right_motor;;
 
     private final PIDController pidController;
 
@@ -124,4 +119,5 @@ public class FlywheelIOSim implements FlywheelIO {
         inputs.statorCurrent = right_motor.getCurrentDrawAmps();
         inputs.tempCelsius = right_motor.getCurrentDrawAmps() * 0.1;
     }
+
 }

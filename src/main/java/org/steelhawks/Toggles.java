@@ -63,5 +63,7 @@ public interface Toggles {
                 new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
                 new LoggedNetworkBoolean("Toggles/Turret/ToggleCurrentOverride", false);
+        LoggedNetworkBoolean toggleHomingVoltageOverride =
+                new LoggedNetworkBoolean("Toggles/Turret/ToggleHomingVoltageOverride", false);
     }
 }
