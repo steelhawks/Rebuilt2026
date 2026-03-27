@@ -116,7 +116,7 @@ public class ShooterStructure {
 
     public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH) {
         // rearranged 0.5*g*t^2 - v*sin(theta)*t + deltaH = 0
-        if (Toggles.useLUT.get()) {
+        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
             return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
         }
         double a = 0.5 * G;
@@ -158,14 +158,13 @@ public class ShooterStructure {
             return calculateShot(target, predictedTarget, false);
         }
 
-        public static ProjectileData
-        calculateShot(
+        public static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch
         ) {
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
-            double x_dist = MathUtil.clamp(distanceToTarget(actualTarget), minShootDistance, maxShootDistance);
+            double x_dist = MathUtil.clamp(distanceToTarget(predictedTarget), minShootDistance, maxShootDistance);
             if (Toggles.useLUT.getAsBoolean()) {
                 return new ProjectileData(
                     shootingFlywheelVelocityMap.get(x_dist),
@@ -338,8 +337,16 @@ public class ShooterStructure {
             double timeTolerance
         ) {
             Translation3d virtualTarget = actualTarget;
-            double tGuess = shootingTimeOfFlightMap.get(distanceToTarget(actualTarget)); // need to fix to use calculateTimeOfFlight to be able to use switcher
-            double virtualDist = distanceToTarget(actualTarget);
+            double virtualDist = MathUtil.clamp(
+                distanceToTarget(actualTarget), minShootDistance, maxShootDistance);
+
+            var projectile = Static.calculateShot(actualTarget, virtualTarget, false);
+//            double v = shootingFlywheelVelocityMap.get(virtualDist);
+//            double theta = shootingHoodAngleMap.get(virtualDist).getRadians();
+            double v = projectile.exitVelocity();
+            double theta = projectile.hoodAngle();
+            double deltaH = actualTarget.getZ() - turretHeightAboveField();
+            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
 
             for (int i = 0; i < maxIterations; i++) {
                 virtualTarget = new Translation3d(
@@ -347,9 +354,12 @@ public class ShooterStructure {
                     actualTarget.getY() - robotVelocity.getY() * tGuess,
                     actualTarget.getZ());
                 virtualDist = MathUtil.clamp(
-                    distanceToTarget(virtualTarget),
-                    minShootDistance, maxShootDistance);
-                double newTof = shootingTimeOfFlightMap.get(virtualDist);
+                    distanceToTarget(virtualTarget), minShootDistance, maxShootDistance);
+
+                v = projectile.exitVelocity();
+                theta = projectile.hoodAngle();
+                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+
                 if (Math.abs(newTof - tGuess) < timeTolerance) break;
                 tGuess = newTof;
             }
