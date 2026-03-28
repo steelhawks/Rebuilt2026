@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.*;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.PhoenixUtil;
 
+import java.util.Arrays;
 import java.util.Queue;
 
 
@@ -51,6 +52,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Timestamp inputs from Phoenix thread
     private final Queue<Double> timestampQueue;
+    private final double[] timestampBuffer = new double[50];
+    private final double[] drivePositionBuffer = new double[50];
+    private final Rotation2d[] turnPositionBuffer = new Rotation2d[50];
 
     // drive motor inputs
     private final StatusSignal<Angle> drivePosition;
@@ -202,14 +206,12 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        // Check all signals
         boolean driveStatus =
             BaseStatusSignal.isAllGood(drivePosition, driveVelocity, driveAppliedVolts, driveSupplyCurrent);
         boolean turnStatus =
             BaseStatusSignal.isAllGood(turnMagnetBad, turnPosition, turnVelocity, turnAppliedVolts, turnSupplyCurrent);
         boolean turnEncoderStatus = BaseStatusSignal.isAllGood(turnAbsolutePosition);
 
-        // drive inputs
         inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus);
         inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
         inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
@@ -217,7 +219,6 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.driveCurrentAmps = driveSupplyCurrent.getValueAsDouble();
         inputs.driveTempCelsius = driveTemp.getValueAsDouble();
 
-        // turn inputs
         inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus);
         inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus);
         inputs.turnMagnetGood = !turnMagnetBad.getValue();
@@ -228,20 +229,22 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.turnCurrentAmps = turnSupplyCurrent.getValueAsDouble();
         inputs.turnTempCelsius = turnTemp.getValueAsDouble();
 
-        // odometry inputs
-        inputs.odometryTimestamps =
-            timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryDrivePositionsRad =
-            drivePositionQueue.stream()
-                .mapToDouble(Units::rotationsToRadians)
-                .toArray();
-        inputs.odometryTurnPositions =
-            turnPositionQueue.stream()
-                .map(Rotation2d::fromRotations)
-                .toArray(Rotation2d[]::new);
-        timestampQueue.clear();
+        // Drain queues without streams
+        int sampleCount = 0;
+        while (!timestampQueue.isEmpty() && sampleCount < timestampBuffer.length) {
+            timestampBuffer[sampleCount] = timestampQueue.poll();
+            double driveRot = drivePositionQueue.isEmpty() ? 0.0 : drivePositionQueue.poll();
+            drivePositionBuffer[sampleCount] = Units.rotationsToRadians(driveRot);
+            double turnRot = turnPositionQueue.isEmpty() ? 0.0 : turnPositionQueue.poll();
+            turnPositionBuffer[sampleCount] = Rotation2d.fromRotations(turnRot);
+            sampleCount++;
+        }
         drivePositionQueue.clear();
         turnPositionQueue.clear();
+
+        inputs.odometryTimestamps = Arrays.copyOf(timestampBuffer, sampleCount);
+        inputs.odometryDrivePositionsRad = Arrays.copyOf(drivePositionBuffer, sampleCount);
+        inputs.odometryTurnPositions = Arrays.copyOf(turnPositionBuffer, sampleCount);
     }
 
     @Override
