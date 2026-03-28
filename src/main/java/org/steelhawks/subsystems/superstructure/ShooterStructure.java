@@ -239,15 +239,15 @@ public class ShooterStructure {
             return new ProjectileData(v0, theta, predictedTarget);
         }
 
-        public ProjectileData calculateFerryShot(Translation3d actualTarget) {
-            double x = distanceToTarget(actualTarget);
+        public static ProjectileData calculateFerryShot(Translation2d actualTarget) {
+            double x = distanceToTarget(new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
             double y = -turretHeightAboveField(); // ferry shot is on the ground so simplfiies to this from 0 - turret_height
 
             double theta = Math.PI / 4.0;
             double cos = Math.cos(theta);
             double v0 = Math.sqrt((G * x * x / 2) * (cos * cos * (x * Math.tan(theta) - y)));
 
-            return new ProjectileData(v0, theta, actualTarget);
+            return new ProjectileData(v0, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
         }
     }
 

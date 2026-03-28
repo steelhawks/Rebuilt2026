@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotType;
+import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
@@ -121,9 +122,12 @@ public class Flywheel extends SubsystemBase {
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                 switch (RobotState.getInstance().getShootingState()) {
                     case NOTHING -> {
-                        double mps = ShooterStructure.Static.calculateShot(
-                            hubCenter, hubCenter,
-                            Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
+                        double mps = RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
+                            ? ShooterStructure.Static.calculateShot(hubCenter, hubCenter, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity()
+                            : ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
+                            FieldConstants.getClosestPointOnLine(
+                                FieldConstants.Ferrying.START_LINE,
+                                FieldConstants.Ferrying.END_LINE))).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
                             setTargetVelocity(rps * constants.idleMultiplier());
@@ -139,9 +143,12 @@ public class Flywheel extends SubsystemBase {
                         }
                     }
                     case SHOOTING_STATIONARY -> {
-                        double mps = ShooterStructure.Static.calculateShot(
-                            hubCenter, hubCenter,
-                            Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
+                        double mps = RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
+                            ? ShooterStructure.Static.calculateShot(hubCenter, hubCenter, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity()
+                            : ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
+                            FieldConstants.getClosestPointOnLine(
+                                FieldConstants.Ferrying.START_LINE,
+                                FieldConstants.Ferrying.END_LINE))).exitVelocity();
                         double rps = ShooterStructure.linearToAngularVelocity(
                             stationaryHoodVelocityFactor * mps, constants.flywheelRadius());
                         setTargetVelocity(rps);
