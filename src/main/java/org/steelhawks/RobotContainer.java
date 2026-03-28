@@ -2,6 +2,7 @@ package org.steelhawks;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
@@ -17,6 +18,7 @@ import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
+import org.steelhawks.util.AllianceFlip;
 
 public class RobotContainer {
 
@@ -71,6 +73,14 @@ public class RobotContainer {
 
         new Trigger(() -> true)
             .whileTrue(TeleopSwerve.overrideState());
+
+        new Trigger(() -> {
+            double x = RobotState.getInstance().getEstimatedPose().getX();
+            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
+            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+        })
+            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY)))
+            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB)));
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
