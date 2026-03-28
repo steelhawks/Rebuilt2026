@@ -163,6 +163,11 @@ public class Vision extends SubsystemBase {
 
                 double stdDevFactor =
                     Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
+                if (observation.tagCount() == 1) stdDevFactor *= 3.0;
+                boolean hasHubTag = Arrays.stream(inputs[cameraIndex].tagIds)
+                    .anyMatch(VisionConstants.HUB_TAG_IDS::contains);
+                if (!hasHubTag) stdDevFactor *= NON_HUB_STDDEV_FACTOR;
+
                 double linearStdDev = LINEAR_STD_DEV_BASELINE * stdDevFactor;
                 double angularStdDev = ANGULAR_STD_DEV_BASELINE * stdDevFactor;
 
