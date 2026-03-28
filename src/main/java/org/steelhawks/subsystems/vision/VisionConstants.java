@@ -187,19 +187,19 @@ public class VisionConstants {
             new Factors.StdDevFactors(8.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
-//        new CameraConfig(
-//            "ardu-middle-right",
-//            new Transform3d(
-//                Units.inchesToMeters(0.012), // 0.012 up
-//                Units.inchesToMeters(-12.724), // 12.724 to the right
-//                Units.inchesToMeters(20.677),
-//                new Rotation3d(
-//                    Units.degreesToRadians(0.0),
-//                    Units.degreesToRadians(-30.0),
-//                    Units.degreesToRadians(-90.0))),
-//            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
-//            CameraType.PHOTON
-//        ),
+        new CameraConfig(
+            "ardu-middle-right",
+            new Transform3d(
+                Units.inchesToMeters(0.012), // 0.012 up
+                Units.inchesToMeters(-12.724), // 12.724 to the right
+                Units.inchesToMeters(20.677),
+                new Rotation3d(
+                    Units.degreesToRadians(0.0),
+                    Units.degreesToRadians(-30.0),
+                    Units.degreesToRadians(-90.0))),
+            new Factors.StdDevFactors(3.0), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
         new CameraConfig(
             "ardu-middle-left",
             new Transform3d(
@@ -223,7 +223,7 @@ public class VisionConstants {
                 Units.degreesToRadians(0.0),
                 Units.degreesToRadians(-30.0),
                 Units.degreesToRadians(-135.0))),
-            new Factors.StdDevFactors(1.0), // TODO: tune stddev factors
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
@@ -236,7 +236,7 @@ public class VisionConstants {
                 Units.degreesToRadians(0.0),
                 Units.degreesToRadians(-30),
                 Units.degreesToRadians(-225))),
-            new Factors.StdDevFactors(1.0), // TODO: tune stddev factors
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
             CameraType.PHOTON
         )
 //        new CameraConfig(
@@ -249,7 +249,7 @@ public class VisionConstants {
 //                    0.0,
 //                    0.0,
 //                    Units.degreesToRadians(15.0))),
-//            new Factors.StdDevFactors(0.8), // TODO: tune stddev factors
+//            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
 //            CameraType.LIMELIGHT
 //        )
     };
