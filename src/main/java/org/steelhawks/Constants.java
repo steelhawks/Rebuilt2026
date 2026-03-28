@@ -95,6 +95,7 @@ public final class Constants {
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(30.0 + (3.125 * 2.0));
+        public static final Transform3d ROBOT_TO_TURRET = new Transform3d(Units.inchesToMeters(13.5 - 2.5), 0.0, Units.inchesToMeters(24.0), new Rotation3d(0.0, 0.0, Math.PI));
     }
 
     public static final class OIConstants {

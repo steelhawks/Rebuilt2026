@@ -35,4 +35,6 @@ public interface TurretIO {
     default void setTurretPosition(double position) {}
 
     default void setTurretPID(double kP, double kI, double kD) {}
+
+    default void runTurretPivot(double setpoint, double output) {}
 }

@@ -1,9 +1,7 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -15,10 +13,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.opencv.core.Mat;
-import org.steelhawks.BuilderConstants;
-import org.steelhawks.FieldConstants;
-import org.steelhawks.Robot;
-import org.steelhawks.Toggles;
+import org.steelhawks.*;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOInputsAutoLogged;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -102,18 +97,29 @@ public class Turret extends SubsystemBase {
     }
 
 
-
     // Helper Functions
+
+
     private double angleToHub(Pose2d pose) {
         Translation2d hub = AllianceFlip.apply(FieldConstants.HUB_CENTER_3D.toTranslation2d());
-        Translation2d toHub = hub.minus(pose.getTranslation());
+        var turretTranslation = new Pose3d(pose).transformBy(Constants.RobotConstants.ROBOT_TO_TURRET).toPose2d().getTranslation();
+        var direction = hub.minus(turretTranslation);
+        var findRelativeAngle = direction.getAngle().getRotations();
 
-        return new Rotation2d(toHub.getX(), toHub.getY()).minus(pose.getRotation()).getRotations();
+        /*
+        * Write the best turret angle, then implement that with relative Angle and direction, return that as a double */
+
+        return Units.degreesToRotations(0.0);
     }
 
-    private double angleOfTurret() {
-        return Units.degreesToRadians(0.0);
+    private double turretAngle(double targetAngle) {
+        return Units.degreesToRotations(targetAngle);
     }
+
+    private double currentAngle() {
+        return inputs.encoderPosition.getRotations();
+    }
+
 
 
     private TrapezoidProfile buildProfile() {
@@ -205,10 +211,9 @@ public class Turret extends SubsystemBase {
                 case IDLE ->  {
                     if (!atGoal()) {
                         io.stopTurret();
-                        profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(Math.PI, 0.0));
-                        desiredRotation = new Rotation2d(Math.PI);
-                        goal.position = desiredRotation.getRadians();
-                        io.setTurretPosition(desiredRotation.getRadians());
+                        double acceleration = (setpoint.velocity - inputs.velocityRadPerSec.getRotations()) / Constants.UPDATE_LOOP_DT;
+                        double feedforward = kS.getAsDouble() * Math.signum(setpoint.velocity) + kA.getAsDouble() * acceleration;
+                        io.runTurretPivot(setpoint.position, feedforward);
                     }
                     turretState = TurretState.HOMED;
                 }
@@ -223,6 +228,8 @@ public class Turret extends SubsystemBase {
                     // Constantly rotate unless hit dead zone.
                     if (setpoint.position > goal.position || setpoint.position > inputs.encoderPosition.getRadians()) {
                        turretState =  TurretState.DEAD_ZONE;
+                    } else {
+
                     }
                 }
                 case DEAD_ZONE -> {

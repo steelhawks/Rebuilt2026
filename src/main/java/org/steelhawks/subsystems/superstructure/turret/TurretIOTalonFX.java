@@ -152,4 +152,11 @@ public class TurretIOTalonFX implements TurretIO {
         turretConfig.Slot0.kD = kD;
     }
 
+    @Override
+    public void runTurretPivot(double setpoint, double output) {
+        turret.setControl(
+                positionTorqueCurrentFOC.withPosition(setpoint).withFeedForward(output)
+        );
+
+    }
 }
