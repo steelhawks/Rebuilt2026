@@ -16,6 +16,7 @@ import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
+import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -279,7 +280,7 @@ public class Turret extends SubsystemBase {
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                     var sol = RobotState.getInstance().getMovingShotSolution();
-                    if (sol != null) {
+                    if (sol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {
                         desiredRotation = findBestTurretAngle(
                             sol.turretAngle().getRadians(),
                             getPosition().getRadians());

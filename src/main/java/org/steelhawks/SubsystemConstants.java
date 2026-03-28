@@ -150,7 +150,29 @@ public class SubsystemConstants {
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 20.0, 0.0, 0.0, 21.05158, 0.11667, 20.0, 1.0, 50, 1.61, Units.inchesToMeters(2.0), (1.0 / 1.0));
+                5, 6, 0.85, 15.0, 0.0, 0.0, 8.86249, 0.16195, 20.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
+
+//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 9.70379 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.19390 ﻿
+
+//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.93642 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.20165 ﻿
+
+//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.53312 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.15897 ﻿
+//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.13426 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.17007 ﻿
+
+//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.86249 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.16195 ﻿
+
+
+
 
         public static final TurretConstants TURRET =
             new TurretConstants(

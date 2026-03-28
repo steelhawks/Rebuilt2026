@@ -67,6 +67,7 @@ public class Intake extends SubsystemBase {
                     MAX_ACCEL_METERS_PER_SEC_SQ.get()));
     }
 
+    @AutoLogOutput(key = "Intake/AtGoal")
     public boolean atGoal() {
         return atGoal;
     }

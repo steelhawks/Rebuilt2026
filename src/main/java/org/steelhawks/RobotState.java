@@ -36,7 +36,7 @@ public class RobotState {
                     Rotation2d.fromDegrees(0.0),
                 () -> RobotContainer.s_Intake == null ? 0.0 : RobotContainer.s_Intake.getPosition()));
 
-    private static final double movingVelocityThreshold = 0.5; // m/s
+    private static final double movingVelocityThreshold = 0.1; // m/s
     private static final double poseBufferSizeSec = 2.0;
     private static final double intakeExtensionBufferSizeSec = 2.0;
     private static final double objectMaxAgeSec = 1.0;
@@ -188,13 +188,14 @@ public class RobotState {
             Logger.recordOutput("ShooterState/ModeChange",
                 shootingState.name() + " -> " + state.name());
             shootingState = state;
-            Logger.recordOutput("ShooterState/CurrentMode", state.name());
+//            Logger.recordOutput("ShooterState/CurrentMode", state.name());
             if (state != ShootingState.SHOOTING) {
                 lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
             }
         }
     }
 
+    @AutoLogOutput(key = "ShooterState/CurrentMode")
     public ShootingState getShootingState() {
         if (shootingState == ShootingState.NOTHING) {
             return ShootingState.NOTHING;
@@ -203,13 +204,14 @@ public class RobotState {
             currentChassisSpeeds.vxMetersPerSecond,
             currentChassisSpeeds.vyMetersPerSecond);
         if (shootingState == ShootingState.SHOOTING) {
-            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
-                ? movingVelocityThreshold * 0.5
-                : movingVelocityThreshold;
-            lastDerivedShootingState = linearVelocity > threshold
-                ? ShootingState.SHOOTING_MOVING
-                : ShootingState.SHOOTING_STATIONARY;
-            return lastDerivedShootingState;
+//            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
+//                ? movingVelocityThreshold * 0.5
+//                : movingVelocityThreshold;
+//            lastDerivedShootingState = linearVelocity > threshold
+//                ? ShootingState.SHOOTING_MOVING
+//                : ShootingState.SHOOTING_STATIONARY;
+//            return lastDerivedShootingState;
+            return ShootingState.SHOOTING_MOVING;
         }
         return shootingState;
     }
@@ -253,55 +255,55 @@ public class RobotState {
             updateMovingShot();
         }
 
-        if (DriverStation.isDisabled()) {
-            timer.stop();
-        }
-        if (autoStarted.update(DriverStation.isAutonomous())) {
-            shiftState = ShiftState.AUTO;
-            initialActiveHub = null;
-            activeHub = null;
-            timer.stop();
-            timer.reset();
-            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
-        }
-        if (matchStarted.update(!Robot.isFirstRun())) {
-            timer.start();
-        }
-        if (teleopStarted.update(DriverStation.isTeleop())) {
-            shiftState = ShiftState.TRANSITION;
-            String gameData = DriverStation.getGameSpecificMessage();
-            if (gameData.isEmpty()) {
-                initialActiveHub = Alliance.Blue;
-            } else {
-                initialActiveHub = (gameData.charAt(0) == 'B') ? Alliance.Red : Alliance.Blue;
-                Logger.recordOutput("RobotState/GameData", gameData);
-            }
-            activeHub = initialActiveHub;
-            Logger.recordOutput("RobotState/InitialActiveHub", initialActiveHub.name());
-            timer.restart();
-            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
-        }
-
-        if (DriverStation.isTeleop() && timer.isRunning()) {
-            if (timer.advanceIfElapsed(shiftState.time)) {
-                if (shiftState != ShiftState.END_GAME) {
-                    shiftState = ShiftState.values()[shiftState.ordinal() + 1];
-                    if (isShift()) {
-                        activeHub = (activeHub == Alliance.Blue) ? Alliance.Red : Alliance.Blue;
-                    }
-                    timer.restart();
-                    Logger.recordOutput("RobotState/ShiftState", shiftState.name());
-                    Logger.recordOutput("RobotState/ActiveHub", activeHub != null ? activeHub.name() : "BOTH");
-                }
-            }
-        }
-        if (currentAimState == AimState.MANUAL) {
-            return;
-        }
-        AimState desiredMode = calculateDesiredMode();
-        if (desiredMode != currentAimState) {
-            setAimState(desiredMode);
-        }
+//        if (DriverStation.isDisabled()) {
+//            timer.stop();
+//        }
+//        if (autoStarted.update(DriverStation.isAutonomous())) {
+//            shiftState = ShiftState.AUTO;
+//            initialActiveHub = null;
+//            activeHub = null;
+//            timer.stop();
+//            timer.reset();
+//            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
+//        }
+//        if (matchStarted.update(!Robot.isFirstRun())) {
+//            timer.start();
+//        }
+//        if (teleopStarted.update(DriverStation.isTeleop())) {
+//            shiftState = ShiftState.TRANSITION;
+//            String gameData = DriverStation.getGameSpecificMessage();
+//            if (gameData.isEmpty()) {
+//                initialActiveHub = Alliance.Blue;
+//            } else {
+//                initialActiveHub = (gameData.charAt(0) == 'B') ? Alliance.Red : Alliance.Blue;
+//                Logger.recordOutput("RobotState/GameData", gameData);
+//            }
+//            activeHub = initialActiveHub;
+//            Logger.recordOutput("RobotState/InitialActiveHub", initialActiveHub.name());
+//            timer.restart();
+//            Logger.recordOutput("RobotState/ShiftState", shiftState.name());
+//        }
+//
+//        if (DriverStation.isTeleop() && timer.isRunning()) {
+//            if (timer.advanceIfElapsed(shiftState.time)) {
+//                if (shiftState != ShiftState.END_GAME) {
+//                    shiftState = ShiftState.values()[shiftState.ordinal() + 1];
+//                    if (isShift()) {
+//                        activeHub = (activeHub == Alliance.Blue) ? Alliance.Red : Alliance.Blue;
+//                    }
+//                    timer.restart();
+//                    Logger.recordOutput("RobotState/ShiftState", shiftState.name());
+//                    Logger.recordOutput("RobotState/ActiveHub", activeHub != null ? activeHub.name() : "BOTH");
+//                }
+//            }
+//        }
+//        if (currentAimState == AimState.MANUAL) {
+//            return;
+//        }
+//        AimState desiredMode = calculateDesiredMode();
+//        if (desiredMode != currentAimState) {
+//            setAimState(desiredMode);
+//        }
     }
 
     private AimState calculateDesiredMode() {

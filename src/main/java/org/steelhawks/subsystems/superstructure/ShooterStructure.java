@@ -116,9 +116,9 @@ public class ShooterStructure {
 
     public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH) {
         // rearranged 0.5*g*t^2 - v*sin(theta)*t + deltaH = 0
-        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
-            return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
-        }
+//        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
+//            return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
+//        }
         double a = 0.5 * G;
         double b = -v * Math.sin(theta);
         double c = deltaH;
@@ -346,7 +346,7 @@ public class ShooterStructure {
             double v = projectile.exitVelocity();
             double theta = projectile.hoodAngle();
             double deltaH = actualTarget.getZ() - turretHeightAboveField();
-            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+            double tGuess = calculateTimeOfFlight(v * SubsystemConstants.OmegaBot.FLYWHEEL.stationaryHoodVelocityFactor(), theta, virtualDist, deltaH);
 
             for (int i = 0; i < maxIterations; i++) {
                 virtualTarget = new Translation3d(
@@ -355,10 +355,13 @@ public class ShooterStructure {
                     actualTarget.getZ());
                 virtualDist = MathUtil.clamp(
                     distanceToTarget(virtualTarget), minShootDistance, maxShootDistance);
+                Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
+                Logger.recordOutput("SOTM/VirtualDistance", virtualDist);
 
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
                 double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+                Logger.recordOutput("SOTM/TOF", newTof);
 
                 if (Math.abs(newTof - tGuess) < timeTolerance) break;
                 tGuess = newTof;
@@ -374,8 +377,10 @@ public class ShooterStructure {
             double turretRelativeAngle = MathUtil.angleModulus(
                 fieldRelativeAngle - robotHeading.getRadians() - turretMountYaw);
             return new MovingShotSolution(
-                shootingFlywheelVelocityMap.get(virtualDist),
-                shootingHoodAngleMap.get(virtualDist).getRadians(),
+//                shootingFlywheelVelocityMap.get(virtualDist),
+//                shootingHoodAngleMap.get(virtualDist).getRadians(),
+                v,
+                theta,
                 Rotation2d.fromRadians(turretRelativeAngle),
                 virtualTarget,
                 tGuess
