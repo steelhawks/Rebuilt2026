@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -79,8 +80,10 @@ public class RobotContainer {
             double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
             return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
         })
-            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY)))
-            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB)));
+            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY))
+                .alongWith(s_Matrix.scrollingTextCommand("FERRY MODE", Color.WHITE, 5)))
+            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB))
+                .alongWith(s_Matrix.scrollingTextCommand("HUB MODE", Color.WHITE, 5)));
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
