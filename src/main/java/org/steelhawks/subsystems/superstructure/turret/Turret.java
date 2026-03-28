@@ -1,17 +1,26 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.opencv.core.Mat;
 import org.steelhawks.BuilderConstants;
+import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOInputsAutoLogged;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.function.Supplier;
@@ -46,6 +55,16 @@ public class Turret extends SubsystemBase {
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
+
+    private static final Translation2d BLUE_HUB = new Translation2d(
+            Units.inchesToMeters(121.30),   // 3.081m from blue wall
+            Units.inchesToMeters(158.845)   // 4.035m — field centerline
+    );
+
+    private static final Translation2d RED_HUB = new Translation2d(
+            Units.inchesToMeters(529.92),   // 651.22 - 121.30, mirrored
+            Units.inchesToMeters(158.845)
+    );
 
 
     enum TurretState {
@@ -82,8 +101,19 @@ public class Turret extends SubsystemBase {
 
     }
 
-    // Helper Functions
 
+
+    // Helper Functions
+    private double angleToHub(Pose2d pose) {
+        Translation2d hub = AllianceFlip.apply(FieldConstants.HUB_CENTER_3D.toTranslation2d());
+        Translation2d toHub = hub.minus(pose.getTranslation());
+
+        return new Rotation2d(toHub.getX(), toHub.getY()).minus(pose.getRotation()).getRotations();
+    }
+
+    private double angleOfTurret() {
+        return Units.degreesToRadians(0.0);
+    }
 
 
     private TrapezoidProfile buildProfile() {
@@ -166,9 +196,8 @@ public class Turret extends SubsystemBase {
 
 
         Steps:
-            Modify the TurretState and code currently relating to the state
-            Create the TrackingState
-            Start Helper Functions for calculating angles and turret dead zones
+            Create Helper functions to find angle to hub, find current angle of turret, dead zone manager function.
+            Implement functions in both tracking and dead zone
         */
 
         if (shouldRun) {
@@ -201,7 +230,7 @@ public class Turret extends SubsystemBase {
                 }
             }
             desiredRotation = Rotation2d.fromRadians(
-                    Math.clamp(desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
+                    MathUtil.clamp(desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
 
         }
     }
