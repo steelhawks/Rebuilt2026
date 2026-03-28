@@ -18,10 +18,29 @@ import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIOPhoton;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionSim;
 import org.steelhawks.util.LoggedTunableNumber;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class VisionConstants {
 
     public static LoggedTunableNumber baselineDropOdomFactor
-        = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.1);
+        = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.8);
+
+    public static final double NON_HUB_STDDEV_FACTOR = 2.0;
+
+    // Basic filtering thresholds
+    public static final double MAX_AMBIGUITY = 0.2; // sas 0.3
+    public static final double MAX_ZERROR = 0.75;
+
+    // Standard deviation baselines, for 1 meter distance and 1 tag
+    // (Adjusted automatically based on distance and # of tags)
+    public static final double LINEAR_STD_DEV_BASELINE = 0.1; // Meters was 0.02
+    public static final double ANGULAR_STD_DEV_BASELINE = 0.3; // Radians was 0.06
+
+    // Multipliers to apply for MegaTag 2 observations
+    public static final double LINEAR_STD_DEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve
+    public static final double ANGULAR_STD_DEV_MEGATAG2_FACTOR =
+        Double.POSITIVE_INFINITY; // No rotation data available
 
     // AprilTag layout
     public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
@@ -46,6 +65,13 @@ public class VisionConstants {
     public static final int[] ALL_ALLOWED_TAGS = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
     };
+
+    public static final Set<Integer> HUB_TAG_IDS = new HashSet<>();
+
+    static {
+        for (int id : BLUE_HUB_ONLY) HUB_TAG_IDS.add(id);
+        for (int id : RED_HUB_ONLY) HUB_TAG_IDS.add(id);
+    }
 
     public interface Factors {
         default Double[] getFactors() {
@@ -438,19 +464,4 @@ public class VisionConstants {
         }
         return io;
     }
-
-    // Basic filtering thresholds
-    public static double MAX_AMBIGUITY = 0.3;
-    public static double MAX_ZERROR = 0.75;
-
-    // Standard deviation baselines, for 1 meter distance and 1 tag
-    // (Adjusted automatically based on distance and # of tags)
-    public static double LINEAR_STD_DEV_BASELINE = 0.02; // Meters
-    public static double ANGULAR_STD_DEV_BASELINE = 0.06; // Radians
-
-    // Multipliers to apply for MegaTag 2 observations
-    public static double LINEAR_STD_DEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve
-    public static double ANGULAR_STD_DEV_MEGATAG2_FACTOR =
-        Double.POSITIVE_INFINITY; // No rotation data available
-
 }
