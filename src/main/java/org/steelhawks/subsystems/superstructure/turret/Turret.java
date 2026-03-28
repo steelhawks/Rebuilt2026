@@ -18,6 +18,8 @@ import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOInputsAutoLog
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
@@ -105,22 +107,81 @@ public class Turret extends SubsystemBase {
         var turretTranslation = new Pose3d(pose).transformBy(Constants.RobotConstants.ROBOT_TO_TURRET).toPose2d().getTranslation();
         var direction = hub.minus(turretTranslation);
         var findRelativeAngle = direction.getAngle().getRotations();
+        double turretRelativeAngle = MathUtil.angleModulus(
+                findRelativeAngle - pose.getRotation().getRadians());
+        desiredRotation = turretAngle(turretRelativeAngle, inputs.position.getRotations());
 
-        /*
-        * Write the best turret angle, then implement that with relative Angle and direction, return that as a double */
-
-        return Units.degreesToRotations(0.0);
+        return desiredRotation.getRotations();
     }
 
-    private double turretAngle(double targetAngle) {
-        return Units.degreesToRotations(targetAngle);
+    private void dead_zone(double currentAngle) {
+
     }
 
-    private double currentAngle() {
-        return inputs.encoderPosition.getRotations();
+    private Rotation2d turretAngle(double targetAngle, double currentAngle) {
+        targetAngle = MathUtil.angleModulus(targetAngle);
+        double bestAngle = currentAngle;
+        double smallestMove = Double.POSITIVE_INFINITY;
+        double[] candidates = {
+                targetAngle,
+                targetAngle + 2 * Math.PI,
+                targetAngle - 2 * Math.PI,
+        };
+        for (double candidate : candidates) {
+            if (candidate >= constants.minRotation().getRadians() && candidate <= constants.maxRotation().getRadians()) {
+                double move = Math.abs(candidate - currentAngle);
+                if (move < smallestMove) {
+                    smallestMove = candidate;
+                    bestAngle = candidate;
+                }
+            }
+        }
+
+        if (smallestMove == Double.POSITIVE_INFINITY) {
+            bestAngle = MathUtil.clamp(targetAngle,
+                    constants.minRotation().getRadians(),
+                    constants.maxRotation().getRadians());
+        }
+
+        return Rotation2d.fromRadians(bestAngle);
     }
 
+    private double createTrajectory(Translation2d target2d, Translation3d target3d) {
+        List<Translation3d> trajectoryPoints = new ArrayList<>();
+        int numPoints = 50;
+        var robot = getPose();
+        var turretTranslation = new Pose3d(robot)
+                .transformBy(Constants.RobotConstants.ROBOT_TO_TURRET)
+                .toPose2d()
+                .getTranslation();
+        var direction = target2d.minus(turretTranslation);
+        double fieldRelativeAngle = direction.getAngle().getRadians();
+        /* shooter structure, for now skip everything here */
+//        var projectileData = ShooterStructure.Static.calculateShot(target3d, target3d);
+//        if (projectileData == null) {
+//            return new ArrayList<>();
+//        }
+//        double launchAngle = projectileData.hoodAngle();
+//        double timeOfFlight = ShooterStructure.calculateTimeofFlight(
+//                projectileData.exitVelocity(),
+//                launchAngle,
+//                turretTranslation.getDistance(target2d)
+//        );
+//
+//        for (int i = 0; i <= numPoints; i++) {
+//            double t = (timeOfFlight / numPoints) * i;
+//            double x = projectileData.exitVelocity() * Math.cos(launchAngle) * t;
+//            double y = projectileData.exitVelocity() * Math.sin(launchAngle) * t
+//                    - 0.5 * 9.81 * t * t;
+//            // to field relative
+//            double fieldX = turretTranslation.getX() + x * Math.cos(fieldRelativeAngle);
+//            double fieldY = turretTranslation.getY() + x * Math.sin(fieldRelativeAngle);
+//            double fieldZ = Constants.RobotConstants.ROBOT_TO_TURRET.getZ() + y;
+//            trajectoryPoints.add(new Translation3d(fieldX, fieldY, fieldZ));
+//        }
 
+        return Units.degreesToRadians(fieldRelativeAngle);
+    }
 
     private TrapezoidProfile buildProfile() {
         return new TrapezoidProfile(
@@ -130,6 +191,10 @@ public class Turret extends SubsystemBase {
 
     public boolean atGoal() {
         return Math.abs(inputs.position.getRotations() - goal.position) < POSITION_TOLERANCE_ROTATIONS;
+    }
+
+    private Pose2d getPose() {
+        return poseSupplier != null ? poseSupplier.get() : new Pose2d();
     }
 
     @Override
@@ -224,12 +289,17 @@ public class Turret extends SubsystemBase {
                     turretState = TurretState.TRACKING;
                 }
                 case TRACKING -> {
-                    // TRACKING STATE SWITCH CASE FOR HUB AND NO HUB DATA. CONSTANTLY CHECK FOR EVERYTHING.
-                    // Constantly rotate unless hit dead zone.
-                    if (setpoint.position > goal.position || setpoint.position > inputs.encoderPosition.getRadians()) {
+                    if (inputs.position.getRotations() >= constants.maxRotation().getRotations() && inputs.position.getRotations() <= constants.minRotation().getRotations()) {
                        turretState =  TurretState.DEAD_ZONE;
                     } else {
+                        switch (trackingState) {
+                            case HUB -> {
 
+                            }
+                            case NO_HUB ->  {
+                            }
+                            default -> io.stopTurret();
+                        }
                     }
                 }
                 case DEAD_ZONE -> {
