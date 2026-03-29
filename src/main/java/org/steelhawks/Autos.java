@@ -280,7 +280,7 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
                 ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                ShootingCommands.shoot().until(() -> s_Indexer.emptyFuel()),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -291,7 +291,7 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
                 ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                ShootingCommands.shoot().until(() -> s_Indexer.emptyFuel()),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
@@ -321,7 +321,7 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
                 ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -332,7 +332,7 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
                 ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(() -> !s_Indexer.hasBalls()),
+                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );

@@ -47,7 +47,7 @@ public class TurretIOTalonFX implements TurretIO {
         encoderConfig = new CANcoderConfiguration();
         encoderConfig.MagnetSensor.MagnetOffset = constants.encoderOffset().getRotations();
         encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        PhoenixUtil.tryUntilOk(5, () -> encoder.getConfigurator().apply(encoderConfig)); // encoder first
+        PhoenixUtil.tryUntilOk(5, () -> encoder.getConfigurator().apply(encoderConfig));
 
         motor = new TalonFX(constants.turretId(), bus);
         motorConfig = new TalonFXConfiguration();
@@ -58,12 +58,12 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot0.kD = constants.kD();
         motorConfig.ClosedLoopGeneral.ContinuousWrap = false;
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID(); // set before apply
+        motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
         motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
         motorConfig.CurrentLimits.StatorCurrentLimit = 40.0;
         motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig)); // one apply at the end
+        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
         position = motor.getPosition();

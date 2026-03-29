@@ -172,7 +172,7 @@ public class RobotConfig {
 
         return switch (Constants.getRobot()) {
             case OMEGABOT -> new Builder()
-                .withLEDMatrix(true)
+                .withLEDMatrix(false)
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)

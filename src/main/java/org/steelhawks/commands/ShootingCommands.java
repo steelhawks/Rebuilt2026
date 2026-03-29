@@ -16,10 +16,10 @@ public class ShootingCommands {
     public static Command shoot() {
         return Commands.sequence(
             Commands.runOnce(() ->
-                RobotState.getInstance().setAimState(ShootingState.SHOOTING)),
+                RobotState.getInstance().setShootingState(ShootingState.SHOOTING)),
             Commands.runOnce(() -> {
                 if (AllianceFlip.shouldFlip()
-                    && RobotState.getInstance().getShooterMode().equals(RobotState.ShooterMode.TO_HUB)
+                    && RobotState.getInstance().getAimState().equals(RobotState.AimState.TO_HUB)
                 ) {
                     Vision.whitelistTagIds(VisionConstants.RED_HUB_ONLY);
                 } else {
@@ -31,10 +31,14 @@ public class ShootingCommands {
                 Commands.waitUntil(RobotContainer.s_Turret::atGoal),
                 Commands.waitUntil(RobotContainer.s_Hood::atGoal),
                 RobotContainer.s_Indexer.feed()
-                    .deadlineFor(RobotContainer.s_Intake.agitate()).repeatedly())
+                    .deadlineFor(
+                        Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
+                            .andThen(Commands.waitSeconds(0.3))
+                            .andThen(RobotContainer.s_Intake.agitate()))
+                    .repeatedly())
             .repeatedly())
             .finallyDo(() -> {
-                RobotState.getInstance().setAimState(ShootingState.NOTHING);
+                RobotState.getInstance().setShootingState(ShootingState.NOTHING);
                 Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
                 CommandScheduler.getInstance().schedule(
                     RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));

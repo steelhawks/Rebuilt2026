@@ -69,11 +69,12 @@ public class GyroIOPigeon2 implements GyroIO {
 
         Logger.recordOutput("Swerve/Gyro/AccelerationInGs", Math.hypot(inputs.accelerationXInGs, inputs.accelerationYInGs));
 
-        inputs.odometryYawTimestamps =
-            yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryYawPositions =
-            yawPositionQueue.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
-        yawTimestampQueue.clear();
-        yawPositionQueue.clear();
+        int sampleCount = yawTimestampQueue.size();
+        inputs.odometryYawTimestamps = new double[sampleCount];
+        inputs.odometryYawPositions = new Rotation2d[sampleCount];
+        for (int i = 0; i < sampleCount; i++) {
+            inputs.odometryYawTimestamps[i] = yawTimestampQueue.poll();
+            inputs.odometryYawPositions[i] = Rotation2d.fromDegrees(yawPositionQueue.poll());
+        }
     }
 }

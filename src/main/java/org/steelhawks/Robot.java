@@ -237,7 +237,9 @@ public class Robot extends LoggedRobot {
         if (DriverStation.isDisabled()) {
             Autos.pollTuningMode();
         }
-        Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
+        if (DriverStation.isEnabled()) {
+            Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
+        }
     }
 
     private void visualizeFieldConstants() {

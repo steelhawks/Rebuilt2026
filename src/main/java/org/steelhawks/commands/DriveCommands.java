@@ -69,7 +69,7 @@ public class DriveCommands {
         return Commands.run(
             () -> {
                 Translation2d linearVelocity;
-                if (RobotState.getInstance().getAimState() == ShootingState.NOTHING) {
+                if (RobotState.getInstance().getShootingState() == ShootingState.NOTHING) {
                     linearVelocity =
                         getLinearVelocityFromJoysticks(
                             Toggles.rateLimitSwerveEnabled.get()
@@ -79,7 +79,7 @@ public class DriveCommands {
                                 ? joystickLimiter.calculate(ySupplier.getAsDouble())
                                 : ySupplier.getAsDouble());
                     lastVelocity = linearVelocity;
-                } else if (RobotState.getInstance().getAimState() == ShootingState.SHOOTING_MOVING) {
+                } else if (RobotState.getInstance().getShootingState() == ShootingState.SHOOTING_MOVING) {
                     double x = xSupplier.getAsDouble();
                     double y = ySupplier.getAsDouble();
                     double magnitude = Math.hypot(x, y);

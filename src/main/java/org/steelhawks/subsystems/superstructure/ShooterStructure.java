@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.superstructure;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
@@ -35,6 +36,13 @@ public class ShooterStructure {
     private static final double maxFerryDistance;
 
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
+    public record MovingShotSolution(
+        double exitVelocity,
+        double hoodAngleRad,
+        Rotation2d turretAngle,
+        Translation3d virtualTarget,
+        double timeOfFlight
+    ) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
 
@@ -107,8 +115,19 @@ public class ShooterStructure {
         return data == null || Double.isNaN(data.exitVelocity()) || Double.isNaN(data.hoodAngle());
     }
 
-    public static double calculateTimeofFlight(double exitVelocity, double pivotAngle, double distanceToTravel) {
-        return distanceToTravel / (exitVelocity * Math.cos(pivotAngle));
+    public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH) {
+        // rearranged 0.5*g*t^2 - v*sin(theta)*t + deltaH = 0
+//        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
+//            return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
+//        }
+        double a = 0.5 * G;
+        double b = -v * Math.sin(theta);
+        double c = deltaH;
+        double discriminant = b * b - 4 * a * c;
+        if (discriminant < 0) return Double.NaN;
+        double t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+        double t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        return (t1 > 0) ? t1 : t2;
     }
 
     public static double angularToLinearVelocity(double angularVelocityRadPerSec, double radius) {
@@ -120,11 +139,19 @@ public class ShooterStructure {
     }
 
     public static double distanceToTarget(Translation3d target) {
-        var turretTranslation = new Pose3d(RobotState.getInstance().getEstimatedPose())
+        return distanceToTarget(target, getTurretTranslation());
+    }
+
+    private static double distanceToTarget(Translation3d target, Translation2d turretXY) {
+        return turretXY.getDistance(target.toTranslation2d());
+    }
+
+    /** Computes the turret's field-frame XY position from the current estimated pose. */
+    static Translation2d getTurretTranslation() {
+        return new Pose3d(RobotState.getInstance().getEstimatedPose())
             .transformBy(RobotConstants.ROBOT_TO_TURRET)
             .toPose2d()
             .getTranslation();
-        return turretTranslation.getDistance(target.toTranslation2d());
     }
 
     /**
@@ -140,14 +167,24 @@ public class ShooterStructure {
             return calculateShot(target, predictedTarget, false);
         }
 
-        public static ProjectileData
-        calculateShot(
+        public static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch
+        ) {
+            return calculateShot(actualTarget, predictedTarget, isFixedPitch, -1.0);
+        }
+
+        /**
+         * Same as {@link #calculateShot} but accepts a pre-computed distance to avoid
+         * recomputing the Pose3d turret transform chain. Pass -1 to compute it fresh.
+         */
+        static ProjectileData calculateShot(
+            Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch, double precomputedDist
         ) {
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
-            double x_dist = MathUtil.clamp(distanceToTarget(actualTarget), minShootDistance, maxShootDistance);
+            double rawDist = precomputedDist >= 0 ? precomputedDist : distanceToTarget(predictedTarget);
+            double x_dist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
             if (Toggles.useLUT.getAsBoolean()) {
                 return new ProjectileData(
                     shootingFlywheelVelocityMap.get(x_dist),
@@ -157,9 +194,12 @@ public class ShooterStructure {
             double y_dist = predictedTarget
                 .getMeasureZ()
                 .minus(RobotConstants.ROBOT_TO_TURRET.getMeasureZ()).in(Meters);
+            // When actualTarget == predictedTarget (the SOTM loop case), r simplifies to FUNNEL_RADIUS
+            // Use precomputedDist to avoid a second distanceToTarget() call
+            double actualDist = precomputedDist >= 0 ? precomputedDist : distanceToTarget(actualTarget);
             double r = FieldConstants.Hub.FUNNEL_RADIUS
                 * x_dist
-                / distanceToTarget(actualTarget);
+                / actualDist;
             double h = FieldConstants.Hub.FUNNEL_HEIGHT + FieldConstants.Hub.DISTANCE_ABOVE_FUNNEL_TO_CLEAR;
             double A1 = x_dist * x_dist;
             double B1 = x_dist;
@@ -221,95 +261,76 @@ public class ShooterStructure {
             return new ProjectileData(v0, theta, predictedTarget);
         }
 
-        public ProjectileData calculateFerryShot(Translation3d actualTarget) {
-            double x = distanceToTarget(actualTarget);
+        public static ProjectileData calculateFerryShot(Translation2d actualTarget) {
+            double x = distanceToTarget(new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
             double y = -turretHeightAboveField(); // ferry shot is on the ground so simplfiies to this from 0 - turret_height
 
             double theta = Math.PI / 4.0;
             double cos = Math.cos(theta);
             double v0 = Math.sqrt((G * x * x / 2) * (cos * cos * (x * Math.tan(theta) - y)));
 
-            return new ProjectileData(v0, theta, actualTarget);
+            return new ProjectileData(v0, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
         }
     }
 
     public static class Moving {
-
-        private static final int MAX_ITERATIONS = 5;
-        private static final double CONVERGENCE_THRESHOLD = 0.01; // meters
-
-        /**
-         * Calculates shot parameters for shooting while moving (stationary target).
-         *
-         * @param actualTarget The actual target to score at.
-         * @param isFixedPitch Whether this is a fixed pitch shooter.
-         * @return ProjectileData or kNoSolution.
-         */
-        public static ProjectileData calculateMovingShot(
+        
+        public static MovingShotSolution solveMovingShot(
             Translation3d actualTarget,
-            boolean isFixedPitch
+            Translation3d robotVelocity,
+            Rotation2d robotHeading,
+            int maxIterations,
+            double timeTolerance
         ) {
-            return calculateMovingShot(actualTarget, new Translation3d(), isFixedPitch);
-        }
-
-        /**
-         * Calculates shot parameters for shooting while moving (moving target).
-         * <p>
-         * Uses iterative time-of-flight prediction to find where to aim.
-         *
-         * @param actualTarget   The actual target to score at.
-         * @param targetVelocity The velocity the target is moving at.
-         * @param isFixedPitch   Whether this is a fixed pitch shooter.
-         * @return ProjectileData or kNoSolution.
-         */
-        public static ProjectileData calculateMovingShot(
-            Translation3d actualTarget,
-            Translation3d targetVelocity,
-            boolean isFixedPitch
-        ) {
-            Translation3d robotVelocity = new Translation3d(
-                RobotContainer.s_Swerve.getChassisSpeeds().vxMetersPerSecond,
-                RobotContainer.s_Swerve.getChassisSpeeds().vyMetersPerSecond,
-                0.0);
-
-            Translation3d predictedTarget = actualTarget;
-            ProjectileData solution = kNoSolution;
-
-            for (int i = 0; i < MAX_ITERATIONS; i++) {
-                solution = Static.calculateShot(actualTarget, predictedTarget, isFixedPitch);
-
-//                 Fixed: properly check kNoSolution instead of null
-                if (isNoSolution(solution)) {
-                    Logger.recordOutput("Shooter/Moving/ShotImpossible", true);
-                    return kNoSolution;
-                }
-
-                double distance = distanceToTarget(predictedTarget);
-                double tof = calculateTimeofFlight(solution.exitVelocity(), solution.hoodAngle(), distance);
-
-                Translation3d relativeVelocity = targetVelocity.minus(robotVelocity);
-                Translation3d newPredictedTarget = actualTarget.plus(relativeVelocity.times(tof));
-
-                double error = predictedTarget.getDistance(newPredictedTarget);
-
-                Logger.recordOutput("Shooter/Moving/IterationError_" + i, error);
-                Logger.recordOutput("Shooter/Moving/HoodAngle_" + i, Math.toDegrees(solution.hoodAngle()));
-                Logger.recordOutput("Shooter/Moving/ExitVelocity_" + i, solution.exitVelocity());
-
-                if (error < CONVERGENCE_THRESHOLD) {
-                    Logger.recordOutput("Shooter/Moving/ConvergedIterations", i + 1);
+            Translation2d turretXY = getTurretTranslation();
+            Translation2d fieldRelativeVelocity =
+                new Translation2d(robotVelocity.getX(), robotVelocity.getY()).rotateBy(robotHeading);
+            double deltaH = actualTarget.getZ() - turretHeightAboveField();
+            double velX = fieldRelativeVelocity.getX();
+            double velY = fieldRelativeVelocity.getY();
+            Translation3d virtualTarget = actualTarget;
+            double rawDist = turretXY.getDistance(actualTarget.toTranslation2d());
+            double virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
+            var projectile = Static.calculateShot(actualTarget, actualTarget, false, rawDist);
+            double v = projectile.exitVelocity();
+            double theta = projectile.hoodAngle();
+            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+            int convergedAt = maxIterations;
+            for (int i = 0; i < maxIterations; i++) {
+                virtualTarget = new Translation3d(
+                    actualTarget.getX() - velX * tGuess,
+                    actualTarget.getY() - velY * tGuess,
+                    actualTarget.getZ());
+                rawDist = turretXY.getDistance(virtualTarget.toTranslation2d());
+                virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
+                projectile = Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
+                v = projectile.exitVelocity();
+                theta = projectile.hoodAngle();
+                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+                if (Math.abs(newTof - tGuess) < timeTolerance) {
+                    convergedAt = i + 1;
+                    tGuess = newTof;
                     break;
                 }
-
-                predictedTarget = newPredictedTarget;
+                tGuess = newTof;
             }
 
-            Logger.recordOutput("Shooter/Moving/FinalPredictedTarget",
-                new double[]{predictedTarget.getX(), predictedTarget.getY(), predictedTarget.getZ()});
-            Logger.recordOutput("Shooter/Moving/FinalHoodAngleDeg", Math.toDegrees(solution.hoodAngle()));
-            Logger.recordOutput("Shooter/Moving/FinalExitVelocity", solution.exitVelocity());
+            // Log once after convergence — not inside the hot loop.
+            Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
+            Logger.recordOutput("SOTM/VirtualDistance", virtualDist);
+            Logger.recordOutput("SOTM/TOF", tGuess);
+            Logger.recordOutput("SOTM/ExitVelocity", v);
+            Logger.recordOutput("SOTM/HoodAngleDeg", Math.toDegrees(theta));
+            Logger.recordOutput("SOTM/ConvergedIterations", convergedAt);
 
-            return solution;
+            double fieldRelativeAngle = Math.atan2(
+                virtualTarget.getY() - turretXY.getY(),
+                virtualTarget.getX() - turretXY.getX());
+            double turretMountYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+            double turretRelativeAngle = MathUtil.angleModulus(
+                fieldRelativeAngle - robotHeading.getRadians() - turretMountYaw);
+            Logger.recordOutput("SOTM/TurretRelativeAngleDeg", Math.toDegrees(turretRelativeAngle));
+            return new MovingShotSolution(v, theta, Rotation2d.fromRadians(turretRelativeAngle), virtualTarget, tGuess);
         }
     }
 }

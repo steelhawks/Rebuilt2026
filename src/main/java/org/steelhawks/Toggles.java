@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
+import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,8 @@ public interface Toggles {
 
     LoggedNetworkBoolean useLUT =
         new LoggedNetworkBoolean("Toggles/LUT", false);
+    LoggedNetworkBoolean useKinematicsTOF =
+        new LoggedNetworkBoolean("Toggles/KinematicsTOF", true);
 
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =
