@@ -40,7 +40,7 @@ public class ObjectVision extends SubsystemBase {
     private final LinkedList<CoralPose> coralPoses = new LinkedList<>();
 
     // cache this comparator, since we use it in the same way each loop
-    private static final Comparator<ObjectVisionIO.ObjectObservation> TIMESTANP_COMPARATOR =
+    private static final Comparator<ObjectVisionIO.ObjectObservation> TIMESTAMP_COMPARATOR =
         Comparator.comparingDouble(ObjectVisionIO.ObjectObservation::timestamp);
 
     public ObjectVision() {
@@ -146,7 +146,7 @@ public class ObjectVision extends SubsystemBase {
         }
 
         // sort observations list
-        allObservations.sort(TIMESTANP_COMPARATOR);
+        allObservations.sort(TIMESTAMP_COMPARATOR);
         for (ObjectVisionIO.ObjectObservation o : allObservations) {
             // add coral observation if it meets the specified threshold
             if (o.confidence() > confidenceThreshold.get()) {
