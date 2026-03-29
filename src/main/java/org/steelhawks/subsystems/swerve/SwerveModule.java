@@ -37,7 +37,11 @@ public class SwerveModule {
         TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constants;
 
-    private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
+    private static final int MAX_ODOMETRY_SAMPLES = 20;
+    private final SwerveModulePosition[] odometryPositions = new SwerveModulePosition[MAX_ODOMETRY_SAMPLES];
+
+    private final SwerveModuleState cachedState = new SwerveModuleState();
+    private final SwerveModulePosition cachedPosition = new SwerveModulePosition();
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
@@ -70,21 +74,25 @@ public class SwerveModule {
             new Alert(
                 "Disconnected turn encoder on module " + index + ".",
                 AlertType.kError);
+
+        for (int i = 0; i < MAX_ODOMETRY_SAMPLES; i++) {
+            odometryPositions[i] = new SwerveModulePosition();
+        }
     }
 
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Swerve/Module" + index, inputs);
 
-        // calculate positions for odometry
-        int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-        if (odometryPositions.length != sampleCount) {
-            odometryPositions = new SwerveModulePosition[sampleCount];
-        }
+        cachedState.speedMetersPerSecond = inputs.driveVelocityRadPerSec * constants.WheelRadius;
+        cachedState.angle = inputs.turnPosition;
+        cachedPosition.distanceMeters = inputs.drivePositionRad * constants.WheelRadius;
+        cachedPosition.angle = inputs.turnPosition;
+
+        int sampleCount = inputs.odometryTimestamps.length;
         for (int i = 0; i < sampleCount; i++) {
-            double positionMeters = inputs.odometryDrivePositionsRad[i] * constants.WheelRadius;
-            Rotation2d angle = inputs.odometryTurnPositions[i];
-            odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
+            odometryPositions[i].distanceMeters = inputs.odometryDrivePositionsRad[i] * constants.WheelRadius;
+            odometryPositions[i].angle = inputs.odometryTurnPositions[i];
         }
 
         // Update alerts
@@ -177,14 +185,14 @@ public class SwerveModule {
      * Returns the module position (turn angle and drive position).
      */
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(getPositionMeters(), getAngle());
+        return cachedPosition;
     }
 
     /**
      * Returns the module state (turn angle and drive velocity).
      */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(getVelocityMetersPerSec(), getAngle());
+        return cachedState;
     }
 
     /**

@@ -279,12 +279,22 @@ public class ShooterStructure {
             Translation3d actualTarget,
             Translation3d robotVelocity,
             Rotation2d robotHeading,
+            double chassisOmegaRadPerSec,
             int maxIterations,
             double timeTolerance
         ) {
             Translation2d turretXY = getTurretTranslation();
+            // add turrets tangential velocity from chassis rotation.
+            // for a point at (dx, dy) in robot frame rotating at omega rad/s:
+            //v = (-omega*dy, omega*dx) cross product
+            double turretDx = RobotConstants.ROBOT_TO_TURRET.getX();
+            double turretDy = RobotConstants.ROBOT_TO_TURRET.getY();
             Translation2d fieldRelativeVelocity =
-                new Translation2d(robotVelocity.getX(), robotVelocity.getY()).rotateBy(robotHeading);
+                new Translation2d(
+                    robotVelocity.getX() + (-chassisOmegaRadPerSec * turretDy),
+                    robotVelocity.getY() + (chassisOmegaRadPerSec * turretDx))
+                .rotateBy(robotHeading);
+
             double deltaH = actualTarget.getZ() - turretHeightAboveField();
             double velX = fieldRelativeVelocity.getX();
             double velY = fieldRelativeVelocity.getY();
@@ -315,7 +325,6 @@ public class ShooterStructure {
                 tGuess = newTof;
             }
 
-            // Log once after convergence — not inside the hot loop.
             Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
             Logger.recordOutput("SOTM/VirtualDistance", virtualDist);
             Logger.recordOutput("SOTM/TOF", tGuess);
