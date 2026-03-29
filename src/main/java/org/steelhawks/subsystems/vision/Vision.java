@@ -124,7 +124,9 @@ public class Vision extends SubsystemBase {
             if (cameraEnabled[i]) {
                 final int idx = i;
                 futures[idx] = visionExecutor.submit(() -> {
-                    io[idx].updateInputs(inputs[idx]);
+                    VisionIOInputsAutoLogged fresh = new VisionIOInputsAutoLogged();
+                    io[idx].updateInputs(fresh);
+                    inputs[idx] = fresh; // atomic reference store — safe per JLS §17.7
                     return null;
                 });
             }

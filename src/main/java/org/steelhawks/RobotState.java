@@ -247,6 +247,9 @@ public class RobotState {
     }
 
     public void periodic() {
+        Logger.recordOutput("RobotState/PoseEstimation/PoseEstimation", poseEstimator.getEstimatedPosition());
+        Logger.recordOutput("RobotState/PoseEstimation/Odometry", wheelOdometry.getPoseMeters());
+
         // sotm update
         ShootingState currentShootingState = getShootingState();
         if (currentShootingState == ShootingState.SHOOTING_MOVING
