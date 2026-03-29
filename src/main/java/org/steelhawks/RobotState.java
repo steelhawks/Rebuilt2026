@@ -403,11 +403,8 @@ public class RobotState {
         }
         Pose2d estimatedPose = poseEstimator.updateWithTime(
             observation.timestamp(), gyroRotation, observation.wheelPositions());
-        Pose2d wheelOnlyPose = wheelOdometry.update(
-            gyroRotation, observation.wheelPositions());
+        wheelOdometry.update(gyroRotation, observation.wheelPositions());
         poseBuffer.addSample(observation.timestamp(), estimatedPose);
-        Logger.recordOutput("RobotState/EstimatedPose", estimatedPose);
-        Logger.recordOutput("RobotState/WheelOdometryPose", wheelOnlyPose);
     }
 
     public void addVisionObservation(VisionObservation observation) {
