@@ -44,7 +44,7 @@ public class RobotContainer {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
 
-//        s_Matrix = config.createLEDMatrix().orElse(null);
+        s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
         s_Vision = config.createVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
@@ -66,7 +66,7 @@ public class RobotContainer {
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
-//        LEDCommands.configureTriggers(driver.leftTrigger());
+        LEDCommands.configureTriggers(driver.leftTrigger());
     }
 
     private void configureDriver() {
@@ -100,7 +100,8 @@ public class RobotContainer {
             .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
-                .whileTrue(ShootingCommands.shoot());
+                .whileTrue(ShootingCommands.shoot()
+                    .alongWith(s_Matrix.plasmaCommand(150)));
 
         driver.rightTrigger()
             .whileTrue(
