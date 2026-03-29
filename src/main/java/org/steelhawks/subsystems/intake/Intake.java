@@ -67,6 +67,7 @@ public class Intake extends SubsystemBase {
                     MAX_ACCEL_METERS_PER_SEC_SQ.get()));
     }
 
+    @AutoLogOutput(key = "Intake/AtGoal")
     public boolean atGoal() {
         return atGoal;
     }
@@ -124,8 +125,8 @@ public class Intake extends SubsystemBase {
                 io.setPosition(IntakeConstants.State.INTAKE.getPosition());
                 io.stopRack();
                 isZeroed = true;
-                goal = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
-                setpoint = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
+                goal = new TrapezoidProfile.State(IntakeConstants.State.INTAKE.getPosition(), 0.0);
+                setpoint = new TrapezoidProfile.State(IntakeConstants.State.INTAKE.getPosition(), 0.0);
                 Logger.recordOutput("Intake/Zeroed", true);
             }
         }

@@ -89,6 +89,11 @@ public final class Constants {
         return ROBOT_TYPE;
     }
 
+    public static final class SOTMConstants {
+        public static final int MAX_ITERATIONS = 5;
+        public static final double TIME_TOLERANCE = 0.01;
+    }
+
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
         public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(34.0);
@@ -170,79 +175,6 @@ public final class Constants {
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
     }
 
-    /**
-     * Automatically returns the correct constant based on which robot type it is running on.
-     * This utility does not send the simulation value for replay mode, making replay mode work properly.
-     *
-     * @param hawkrider The HawkRider constant value
-     * @param alpha The Alpha constant value
-     * @param omega The Omega constant value
-     * @param sim The simulation constant value
-     * @return The correct constant
-     */
-    public static <T> T value(T hawkrider, T alpha, T chassis, T omega, T sim) {
-        return switch (Constants.getRobot()) {
-            case ALPHABOT -> alpha;
-            case CHASSIS -> chassis;
-            case OMEGABOT -> omega;
-            case LAST_YEAR -> hawkrider;
-            case SIMBOT -> sim;
-            default -> null;
-        };
-    }
-
-    /**
-     * Automatically returns the correct constant based on which robot type it is running on.
-     * This utility does not send the simulation value for replay mode, making replay mode work properly.
-     *
-     * @param hawkrider The HawkRider constant value
-     * @param alpha The Alpha constant value
-     * @param omega The Omega constant value
-     * @return The correct constant
-     */
-    public static <T> T value(T hawkrider, T alpha, T chassis, T omega) {
-        return switch (Constants.getRobot()) {
-            case ALPHABOT -> alpha;
-            case CHASSIS -> chassis;
-            case OMEGABOT, SIMBOT -> omega;
-            case LAST_YEAR -> hawkrider;
-            default -> null;
-        };
-    }
-
-    /**
-     * Automatically returns the correct constant based on which robot type it is running on.
-     * This utility does not send the simulation value for replay mode, making replay mode work properly.
-     * In SIMBOT, the omega constant is used.
-     *
-     * @param alpha The Alpha constant value
-     * @param omega The Omega constant value
-     * @return The correct constant
-     */
-    public static <T> T value(T alpha, T omega) {
-        return switch (Constants.getRobot()) {
-            case ALPHABOT -> alpha;
-            case OMEGABOT, SIMBOT -> omega;
-            default -> null;
-        };
-    }
-
-    /**
-     * Automatically returns the correct constant based on which robot type it is running on.
-     * This utility does not send the simulation value for replay mode, making replay mode work properly.
-     *
-     * @param omega The Omega constant value
-     * @param sim The sim constant value
-     * @return The correct constant
-     */
-    public static <T> T omega(T omega, T sim) {
-        return switch (Constants.getRobot()) {
-            case OMEGABOT -> omega;
-            case SIMBOT -> sim;
-            default -> null;
-        };
-    }
-
     public static double omega(double omega, double sim) {
         return switch (Constants.getRobot()) {
             case OMEGABOT -> omega;
@@ -267,35 +199,6 @@ public final class Constants {
             Logger.recordOutput("Debug/" + key, obj.toString());
         }
         return obj;
-    }
-
-    /**
-     * Automatically returns a Transform3d that correctly converts the Onshape coordinate system into the WPILib coordinate system.
-     * <br>
-     * <br>
-     * Learn more <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html">here</a> about the WPILib coordinate system.
-     * @param x From Onshape
-     * @param y From Onshape
-     * @param z From Onshape
-     * @param roll From Onshape
-     * @param pitch From Onshape
-     * @param yaw From Onshape
-     * @return The WPILib coordinate system ready Transform3d
-     */
-    public static Transform3d fromOnshapeCoordinates(
-        double x, double y, double z,
-        double roll, double pitch, double yaw
-    ) {
-        return new Transform3d(
-            Units.inchesToMeters(y),
-            Units.inchesToMeters(-x),
-            Units.inchesToMeters(-z),
-            new Rotation3d(
-                Units.degreesToRadians(roll),
-                Units.degreesToRadians(pitch),
-                Units.degreesToRadians(yaw)
-            )
-        );
     }
 
     /**

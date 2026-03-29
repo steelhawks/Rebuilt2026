@@ -54,7 +54,13 @@ public class Boundary {
     public BooleanSupplier isActive(Mode mode) {
         return switch (mode) {
             case CENTER_ONLY -> () -> boundary.get().contains(poseSupplier.get().getTranslation());
-            case PERIMETER -> () -> footprint.getPoints(poseSupplier.get()).stream().anyMatch(boundary.get()::contains);
+            case PERIMETER -> () -> {
+                Rectangle2d b = boundary.get();
+                for (Translation2d pt : footprint.getPoints(poseSupplier.get())) {
+                    if (b.contains(pt)) return true;
+                }
+                return false;
+            };
         };
     }
 
@@ -109,14 +115,19 @@ public class Boundary {
      */
     public void log(String key) {
         Pose2d robotPose = poseSupplier.get();
+        Rectangle2d b = boundary.get();
 
         Logger.recordOutput(key + "/boundary", getBoundaryCorners());
 
         List<Translation2d> footprintPoints = footprint.getPoints(robotPose);
         Logger.recordOutput(key + "/footprint", footprintPoints.toArray(new Translation2d[0]));
 
-        Logger.recordOutput(key + "/centerActive", boundary.get().contains(robotPose.getTranslation()));
-        Logger.recordOutput(key + "/perimeterActive", footprintPoints.stream().anyMatch(boundary.get()::contains));
+        Logger.recordOutput(key + "/centerActive", b.contains(robotPose.getTranslation()));
+        boolean perimeterActive = false;
+        for (Translation2d pt : footprintPoints) {
+            if (b.contains(pt)) { perimeterActive = true; break; }
+        }
+        Logger.recordOutput(key + "/perimeterActive", perimeterActive);
     }
 
     private Translation2d[] getBoundaryCorners() {

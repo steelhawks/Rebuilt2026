@@ -78,7 +78,9 @@ public class SwerveModule {
 
         // calculate positions for odometry
         int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-        odometryPositions = new SwerveModulePosition[sampleCount];
+        if (odometryPositions.length != sampleCount) {
+            odometryPositions = new SwerveModulePosition[sampleCount];
+        }
         for (int i = 0; i < sampleCount; i++) {
             double positionMeters = inputs.odometryDrivePositionsRad[i] * constants.WheelRadius;
             Rotation2d angle = inputs.odometryTurnPositions[i];

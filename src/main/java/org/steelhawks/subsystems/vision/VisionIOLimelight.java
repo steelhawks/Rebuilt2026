@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import org.steelhawks.RobotState.PoseObservation;
 import org.steelhawks.RobotState.PoseObservationType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -72,15 +72,15 @@ public class VisionIOLimelight implements VisionIO {
                     new Rotation2d(), new Rotation2d(), -1);
         }
 
-        // Update orientation for MegaTag 2
+        // Update orientation for MegaTag 2.
+        // NT4 publishers are thread-safe; a slightly stale heading <= 20ms is acceptable
+        // for MegaTag 2 disambiguation and far outweighs the cost of NT.flush().
         orientationPublisher.accept(
             new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
-        NetworkTableInstance.getDefault()
-            .flush(); // Increases network traffic but recommended by Limelight
 
         // Read new pose observations from NetworkTables
         Set<Integer> tagIds = new HashSet<>();
-        List<PoseObservation> poseObservations = new LinkedList<>();
+        List<PoseObservation> poseObservations = new ArrayList<>();
         for (var rawSample : megatag1Subscriber.readQueue()) {
             if (rawSample.value.length == 0) continue;
             for (int i = 11; i < rawSample.value.length; i += 7) {

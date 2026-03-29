@@ -76,8 +76,6 @@ public class FieldConstants {
         public static final double TRENCH_START_X = Units.inchesToMeters(182.11 - (TRENCH_WIDTH / 2.0));
         public static final double TRENCH_END_X = Units.inchesToMeters(182.11 + (TRENCH_WIDTH / 2.0));
 
-
-
         // reference is from driver station blue alliance
         public static final double EXTRUDE_OFFSET = Units.inchesToMeters(50.0);
         public static final Rectangle2d TRENCH_RIGHT_TRIGGER_BOX =
