@@ -113,8 +113,10 @@ public class Turret extends SubsystemBase {
     }
 
     private boolean checkIfAtDeadZone() {
-        return inputs.position.getRotations() >= constants.maxRotation().getRotations() ||
-                inputs.position.getRotations() <= constants.minRotation().getRotations();
+        double position = inputs.position.getRadians(); // in real life encoderPosition
+        double min = constants.minRotation().getRadians();
+        double max = constants.maxRotation().getRadians();
+        return position < min || position > max;
     }
 
 
@@ -205,14 +207,17 @@ public class Turret extends SubsystemBase {
 
         final boolean shouldRun = Toggles.Turret.isEnabled.get();
 
-        if (shouldRun) {
-            if (turretState != TurretState.HOMED) {
-                profile = new  TrapezoidProfile(new TrapezoidProfile.Constraints(Math.PI, 0.0));
-                desiredRotation = new Rotation2d(Math.PI);
-                goal.position = desiredRotation.getRadians();
-                turretState = TurretState.HOMED;
-            }
+        if (shouldRun && turretState == TurretState.IDLE) { // Should be if  driver station is enabled and Turret is enabled
+            profile = new  TrapezoidProfile(new TrapezoidProfile.Constraints(Math.PI, 0.0));
+            desiredRotation = new Rotation2d(Math.PI);
+            goal.position = desiredRotation.getRadians();
+            turretState = TurretState.HOMED;
+            return;
         }
+
+
+        Logger.recordOutput("Turret/ShouldRun", shouldRun);
+        Logger.recordOutput("Turret/Goal", goal);
 
         if (Toggles.tuningMode.getAsBoolean()) {
 
@@ -228,6 +233,7 @@ public class Turret extends SubsystemBase {
                 if (tuningVolts == null) {
                     tuningVolts = new LoggedTunableNumber("Turret/TuningVolts", 0.0);
                 }
+
                 io.runOpenLoop(tuningVolts.getAsDouble(), false);
             }
 
@@ -270,7 +276,7 @@ public class Turret extends SubsystemBase {
             Tuning Volts test.
         */
 
-        if (shouldRun) {
+        if (shouldRun) { // Should be if driver station is enabled as well as Turret enabled, and robot state pose starts changing.
             switch (turretState) {
                 case IDLE ->  {
                     if (!atGoal()) {
@@ -286,10 +292,13 @@ public class Turret extends SubsystemBase {
                     io.setTurretPosition(goal.position);
                     io.stopTurret();
                     turretState = TurretState.TRACKING;
+                    Logger.recordOutput("Turret/StateAtHomed", turretState);
                 }
                 case TRACKING -> {
                     if (checkIfAtDeadZone()) {
-                       turretState =  TurretState.DEAD_ZONE;
+                        turretState =  TurretState.DEAD_ZONE;
+                        boolean isDeadzone = turretState == TurretState.DEAD_ZONE;
+                        Logger.recordOutput("Turret/Deadzone", isDeadzone);
                     } else {
                         switch (trackingState) {
                             case HUB -> {
@@ -311,6 +320,9 @@ public class Turret extends SubsystemBase {
                     io.runTurretPivot(next.position, feedforward);
                     setpoint.position = next.position;
                     setpoint.velocity = next.velocity;
+
+                    boolean isDeadZone = turretState == TurretState.DEAD_ZONE;
+                    Logger.recordOutput("Turret/StateAtDeadZone", isDeadZone);
 
                     if (!checkIfAtDeadZone()) {
                         turretState = TurretState.TRACKING;
