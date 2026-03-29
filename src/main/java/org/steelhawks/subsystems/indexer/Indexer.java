@@ -92,8 +92,8 @@ public class Indexer extends SubsystemBase {
     }
 
     @AutoLogOutput(key = "Indexer/HasBalls")
-    public boolean hasBalls() {
-        return beamDebouncer.calculate(beamInputs.detected);
+    public boolean emptyFuel() {
+        return !beamDebouncer.calculate(beamInputs.detected);
 //        return beamInputs.detected;
     }
 
