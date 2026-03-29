@@ -10,7 +10,6 @@ package org.steelhawks.util;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.Toggles;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -110,8 +109,16 @@ public class LoggedTunableNumber implements DoubleSupplier {
      */
     public static void ifChanged(
         int id, Consumer<double[]> action, LoggedTunableNumber... tunableNumbers) {
-        if (Arrays.stream(tunableNumbers).anyMatch(tunableNumber -> tunableNumber.hasChanged(id))) {
-            action.accept(Arrays.stream(tunableNumbers).mapToDouble(LoggedTunableNumber::get).toArray());
+        boolean anyChanged = false;
+        for (LoggedTunableNumber n : tunableNumbers) {
+            if (n.hasChanged(id)) anyChanged = true;
+        }
+        if (anyChanged) {
+            double[] values = new double[tunableNumbers.length];
+            for (int i = 0; i < tunableNumbers.length; i++) {
+                values[i] = tunableNumbers[i].get();
+            }
+            action.accept(values);
         }
     }
 
