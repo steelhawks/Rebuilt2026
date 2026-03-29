@@ -150,7 +150,7 @@ public class SubsystemConstants {
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 15.0, 0.0, 0.0, 8.86249, 0.16195, 20.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
+                5, 6, 0.85, 15.0, 0.0, 0.0, 8.86249, 0.16195, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
 //        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
 //            ﻿﻿﻿﻿﻿﻿ 	kS: 9.70379 ﻿

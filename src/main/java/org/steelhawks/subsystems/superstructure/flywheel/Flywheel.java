@@ -136,7 +136,10 @@ public class Flywheel extends SubsystemBase {
                         var sol = RobotState.getInstance().getMovingShotSolution();
                         if (sol != null) {
                             double rps = ShooterStructure.linearToAngularVelocity(
-                                redBullF1Constant * sol.exitVelocity(),
+                                redBullF1Constant * sol.exitVelocity()
+                                     * (DriverStation.isAutonomous()
+                                        ? 1.06
+                                        : 1.0),
                                 constants.flywheelRadius());
                             setTargetVelocity(rps);
                         }
