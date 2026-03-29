@@ -10,10 +10,8 @@ import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.LoggedTunableNumber;
-import org.steelhawks.util.VirtualSubsystem;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ObjectVision extends SubsystemBase {
 
@@ -30,6 +28,9 @@ public class ObjectVision extends SubsystemBase {
     private final ObjectVisionIO[] io;
     private final ObjectVisionIOInputsAutoLogged[] inputs;
 
+    private static int loopCounter = 0;
+    private static int FIELD_OBJECT_LOG_INTERVAL = 5; // (10 Hz)
+
     record CoralPose(
         Translation2d translation, double timestamp
     ) {}
@@ -37,6 +38,10 @@ public class ObjectVision extends SubsystemBase {
     private final FieldObject2d coralObjects = FieldConstants.FIELD_2D.getObject("Corals");
     private final ArrayList<ObjectVisionIO.ObjectObservation> allObservations = new ArrayList<>();
     private final LinkedList<CoralPose> coralPoses = new LinkedList<>();
+
+    // cache this comparator, since we use it in the same way each loop
+    private static final Comparator<ObjectVisionIO.ObjectObservation> TIMESTANP_COMPARATOR =
+        Comparator.comparingDouble(ObjectVisionIO.ObjectObservation::timestamp);
 
     public ObjectVision() {
         this.io = VisionConstants.getObjIO();
@@ -132,15 +137,23 @@ public class ObjectVision extends SubsystemBase {
 
     @Override
     public void periodic() {
+        allObservations.clear();
+
         for (int i = 0; i < inputs.length; i++) {
             io[i].updateInputs(inputs[i]);
             Logger.processInputs("ObjectVision/" + io[i].getName(), inputs[i]);
             allObservations.addAll(Arrays.asList(inputs[i].observations));
         }
-        allObservations.stream()
-            .filter(o -> o.confidence() >= confidenceThreshold.get())
-            .sorted(Comparator.comparingDouble(ObjectVisionIO.ObjectObservation::timestamp))
-            .forEach(this::addCoralObservationToPose);
+
+        // sort observations list
+        allObservations.sort(TIMESTANP_COMPARATOR);
+        for (ObjectVisionIO.ObjectObservation o : allObservations) {
+            // add coral observation if it meets the specified threshold
+            if (o.confidence() > confidenceThreshold.get()) {
+                addCoralObservationToPose(o);
+            }
+        }
+
         List<RobotState.DetectedObject> detectedObjects = new ArrayList<>();
         double timestamp = Timer.getFPGATimestamp();
         for (CoralPose coral : coralPoses) {
@@ -159,13 +172,21 @@ public class ObjectVision extends SubsystemBase {
             ));
         }
         RobotState.getInstance().addObjectDetections(detectedObjects, timestamp);
-        coralPoses.forEach(o ->
-            Logger.recordOutput("FuelDetections/Detection", new Pose2d(o.translation, new Rotation2d())));
-        coralObjects.setPoses(
-            coralPoses.stream()
-                .map(coral -> new Pose2d(coral.translation, new Rotation2d()))
-                .collect(Collectors.toList()));
-        allObservations.clear();
+
+        // update field stuff after a certain interval to avoid clogging NT
+        if (loopCounter > FIELD_OBJECT_LOG_INTERVAL) {
+            ArrayList<Pose2d> coralFieldPoses = new ArrayList<>();
+            for (CoralPose pose : coralPoses) {
+                Pose2d currentCoralPose2d = new Pose2d(pose.translation, new Rotation2d());
+                Logger.recordOutput("FuelDetections/Detection", currentCoralPose2d);
+                coralFieldPoses.add(currentCoralPose2d);
+            }
+
+            coralObjects.setPoses(coralFieldPoses);
+            loopCounter = 0;
+        } else {
+            loopCounter++;
+        }
     }
 
 
