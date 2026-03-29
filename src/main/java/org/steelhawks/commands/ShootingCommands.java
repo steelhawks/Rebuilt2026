@@ -31,7 +31,11 @@ public class ShootingCommands {
                 Commands.waitUntil(RobotContainer.s_Turret::atGoal),
                 Commands.waitUntil(RobotContainer.s_Hood::atGoal),
                 RobotContainer.s_Indexer.feed()
-                    .deadlineFor(RobotContainer.s_Intake.agitate()).repeatedly())
+                    .deadlineFor(
+                        Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
+                            .andThen(Commands.waitSeconds(0.3))
+                            .andThen(RobotContainer.s_Intake.agitate()))
+                    .repeatedly())
             .repeatedly())
             .finallyDo(() -> {
                 RobotState.getInstance().setShootingState(ShootingState.NOTHING);
