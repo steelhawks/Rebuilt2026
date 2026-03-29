@@ -1,7 +1,6 @@
 package org.steelhawks.subsystems.superstructure.turret;
 
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;

@@ -1,5 +1,6 @@
     package org.steelhawks;
 
+    import edu.wpi.first.math.geometry.Pose2d;
     import org.steelhawks.Constants.*;
     import org.steelhawks.generated.*;
     import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
@@ -7,6 +8,8 @@
     import org.steelhawks.subsystems.intake.*;
     import org.steelhawks.subsystems.led.LEDMatrix;
     import org.steelhawks.subsystems.led.LEDStrip;
+    import org.steelhawks.subsystems.superstructure.turret.Turret;
+    import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
     import org.steelhawks.subsystems.swerve.*;
     import org.steelhawks.subsystems.vision.*;
     import org.steelhawks.subsystems.vision.Vision.VisionConsumer;
@@ -14,6 +17,7 @@
 
     import java.util.Objects;
     import java.util.Optional;
+    import java.util.function.Supplier;
 
     public class RobotConfig {
         // Feature flags
@@ -25,9 +29,12 @@
         public final boolean hasShooter;// hasFlywheel on main
         public final boolean hasIntake;
         public final boolean hasFlywheel;
+        public final boolean hasTurret;
 
         private final BuilderConstants.IntakeConstants intakeConstants;
         private final BuilderConstants.FlywheelConstants flywheelConstants;
+        private final BuilderConstants.TurretConstants turretConstants;
+
 
         // Subsystem factory
         private final SubsystemFactory factory;
@@ -43,6 +50,8 @@
             this.intakeConstants = builder.intakeConstants;
             this.hasFlywheel = builder.hasFlywheel;
             this.flywheelConstants = builder.flywheelConstants;
+            this.turretConstants = builder.turretConstants;
+            this.hasTurret = builder.hasTurret;
             this.factory = Objects.requireNonNull(builder.factory, "Factory cannot be null");
         }
 
@@ -94,6 +103,12 @@
             return Optional.ofNullable(factory.createFlywheel(flywheelConstants));
         }
 
+        public Optional<Turret> createTurret(Supplier<Pose2d> pose2dSupplier) {
+            if (!hasFlywheel) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(factory.createTurret(turretConstants, pose2dSupplier));
+        }
         public static RobotConfig getConfig() {
             if (Constants.getMode() == Mode.REPLAY) {
                 return getReplayConfig();
@@ -101,6 +116,7 @@
 
             return switch (Constants.getRobot()) {
                 case OMEGABOT -> new Builder()
+                        .withTurret(false, BuilderConstants.OmegaBot.TURRET)
                         .withFlywheel(true, BuilderConstants.OmegaBot.FLYWHEEL)
                         .withShooter(true)
                     .withLEDMatrix(true)
@@ -113,6 +129,7 @@
 
                 case ALPHABOT -> new Builder()
                         .withFlywheel(true, BuilderConstants.OmegaBot.FLYWHEEL)
+                        .withTurret(false, BuilderConstants.OmegaBot.TURRET)
                     .withLEDMatrix(true)
                     .withVision(true)
                     .withObjectVision(false)
@@ -123,6 +140,7 @@
 
                 case LAST_YEAR -> new Builder()
                         .withFlywheel(true, BuilderConstants.OmegaBot.FLYWHEEL)
+                        .withTurret(false, BuilderConstants.OmegaBot.TURRET)
                     .withLEDMatrix(true)
                     .withVision(true)
                     .withObjectVision(false)
@@ -133,6 +151,7 @@
                     .build();
 
                 case SIMBOT -> new Builder()
+                        .withTurret(true, BuilderConstants.OmegaBot.TURRET)
                         .withFlywheel(true, BuilderConstants.OmegaBot.FLYWHEEL)
                     .withLEDMatrix(true)
                     .withVision(true)
@@ -153,6 +172,7 @@
                     .withAutos(true)
                         .withIntake(true, BuilderConstants.OmegaBot.INTAKE)
                         .withFlywheel(true, BuilderConstants.OmegaBot.FLYWHEEL)
+                        .withTurret(true, BuilderConstants.OmegaBot.TURRET)
                     .withFactory(new ReplayFactory()).withShooter(true)
                     .build();
 
@@ -163,6 +183,7 @@
                     .withObjectVision(false)
                     .withAutos(true)
                         .withFlywheel(true, BuilderConstants.OmegaBot.FLYWHEEL)
+                        .withTurret(true, BuilderConstants.OmegaBot.TURRET)
                     .withFactory(new ReplayFactory()).withShooter(true)
                     .build();
             };
@@ -178,10 +199,12 @@
             private boolean hasShooter = false;
             private boolean hasIntake = false;
             private boolean hasFlywheel = false;
+            private boolean hasTurret = false;
             private SubsystemFactory factory = null;
 
             private BuilderConstants.IntakeConstants intakeConstants;
             private BuilderConstants.FlywheelConstants flywheelConstants;
+            private BuilderConstants.TurretConstants turretConstants;
 
             public Builder withLEDMatrix(boolean enabled) {
                 this.hasLEDMatrix = enabled;
@@ -223,6 +246,12 @@
             public Builder withFlywheel(boolean enabled, BuilderConstants.FlywheelConstants flywheelConstants) {
                 this.hasFlywheel = enabled;
                 this.flywheelConstants = flywheelConstants;
+                return this;
+            }
+
+            public Builder withTurret(boolean enabled, BuilderConstants.TurretConstants turretConstants) {
+                this.hasTurret = enabled;
+                this.turretConstants = turretConstants;
                 return this;
             }
 
@@ -342,6 +371,8 @@
             ObjectVision createObjectVision();
             Intake createIntake(BuilderConstants.IntakeConstants c);
             Flywheel createFlywheel(BuilderConstants.FlywheelConstants f);
+
+            Turret createTurret(BuilderConstants.TurretConstants t, Supplier<Pose2d> pose2dSupplier);
             /*
              SuperStructure createSuperStructure();
              Intake createIntake();
@@ -441,6 +472,11 @@
                 return null;
             }
 
+            @Override
+            public Turret createTurret(BuilderConstants.TurretConstants t, Supplier<Pose2d> pose2dSupplier) {
+                return null;
+            }
+
 
         }
 
@@ -533,6 +569,10 @@
                 return null;
             }
 
+            @Override
+            public Turret createTurret(BuilderConstants.TurretConstants t, Supplier<Pose2d> pose2dSupplier) {
+                return null;
+            }
 
         }
 
@@ -626,6 +666,11 @@
                 return null;
             }
 
+            @Override
+            public Turret createTurret(BuilderConstants.TurretConstants t, Supplier<Pose2d> pose2dSupplier) {
+                return null;
+            }
+
 
         }
 
@@ -671,6 +716,11 @@
             @Override
             public Flywheel createFlywheel(BuilderConstants.FlywheelConstants f) {
                 return new Flywheel(new FlywheelIOSim(f), f);
+            }
+
+            @Override
+            public Turret createTurret(BuilderConstants.TurretConstants t, Supplier<Pose2d> pose2dSupplier) {
+                return new Turret(new TurretIOSim(t), pose2dSupplier, t);
             }
 
         }
@@ -721,6 +771,11 @@
 
             @Override
             public Flywheel createFlywheel(BuilderConstants.FlywheelConstants f) {
+                return null;
+            }
+
+            @Override
+            public Turret createTurret(BuilderConstants.TurretConstants t, Supplier<Pose2d> pose2dSupplier) {
                 return null;
             }
 

@@ -12,7 +12,7 @@ public class TurretIOSim implements TurretIO {
     private final PIDController pidController;
     private final DCMotorSim turretMotor;
 
-    // private final TurretVisualizer turretVisualizer
+    // private final TurretVisualizer turretVisualizer;
 
     private double feedfoward = 0.0;
     private double goalPosition = 0.0;

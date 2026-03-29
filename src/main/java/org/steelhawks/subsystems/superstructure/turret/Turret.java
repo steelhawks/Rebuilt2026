@@ -2,19 +2,11 @@ package org.steelhawks.subsystems.superstructure.turret;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
-import org.opencv.core.Mat;
 import org.steelhawks.*;
-import org.steelhawks.subsystems.superstructure.flywheel.FlywheelIOInputsAutoLogged;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -46,22 +38,12 @@ public class Turret extends SubsystemBase {
 
     private Rotation2d desiredRotation = new Rotation2d();
     private LoggedTunableNumber homingVolts;
-    private Supplier<Pose2d> poseSupplier;
+    private final Supplier<Pose2d> poseSupplier;
 
-    private BuilderConstants.TurretConstants constants;
+    private final BuilderConstants.TurretConstants constants;
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
-
-    private static final Translation2d BLUE_HUB = new Translation2d(
-            Units.inchesToMeters(121.30),   // 3.081m from blue wall
-            Units.inchesToMeters(158.845)   // 4.035m — field centerline
-    );
-
-    private static final Translation2d RED_HUB = new Translation2d(
-            Units.inchesToMeters(529.92),   // 651.22 - 121.30, mirrored
-            Units.inchesToMeters(158.845)
-    );
 
 
     enum TurretState {
@@ -114,9 +96,27 @@ public class Turret extends SubsystemBase {
         return desiredRotation.getRotations();
     }
 
-    private void dead_zone(double currentAngle) {
+    private double dead_zone(double currentAngle) { // current Angle in Radians
+       boolean isAtDeadZone =  checkIfAtDeadZone();
+       double targetAngle = 0;
+       if (isAtDeadZone) {
+           double distToMax = Math.abs(currentAngle - constants.maxRotation().getRadians());
+           double distToMin = Math.abs(currentAngle - constants.minRotation().getRadians());
 
+           if (distToMin < distToMax) {
+               targetAngle =  constants.minRotation().getRadians() + Units.degreesToRadians(5.0);
+           } else {
+               targetAngle =  constants.maxRotation().getRadians() - Units.degreesToRadians(5.0);
+           }
+       }
+        return isAtDeadZone ? targetAngle : angleToHub(getPose());
     }
+
+    private boolean checkIfAtDeadZone() {
+        return inputs.position.getRotations() >= constants.maxRotation().getRotations() ||
+                inputs.position.getRotations() <= constants.minRotation().getRotations();
+    }
+
 
     private Rotation2d turretAngle(double targetAngle, double currentAngle) {
         targetAngle = MathUtil.angleModulus(targetAngle);
@@ -175,9 +175,9 @@ public class Turret extends SubsystemBase {
 //                    - 0.5 * 9.81 * t * t;
 //            // to field relative
 //            double fieldX = turretTranslation.getX() + x * Math.cos(fieldRelativeAngle);
-//            double fieldY = turretTranslation.getY() + x * Math.sin(fieldRelativeAngle);
+//            double fieldy = turretTranslation.getY() + x * Math.sin(fieldRelativeAngle);
 //            double fieldZ = Constants.RobotConstants.ROBOT_TO_TURRET.getZ() + y;
-//            trajectoryPoints.add(new Translation3d(fieldX, fieldY, fieldZ));
+//            trajectoryPoints.add(new Translation3d(fieldX, fieldy, fieldZ));
 //        }
 
         return Units.degreesToRadians(fieldRelativeAngle);
@@ -267,8 +267,7 @@ public class Turret extends SubsystemBase {
 
 
         Steps:
-            Create Helper functions to find angle to hub, find current angle of turret, dead zone manager function.
-            Implement functions in both tracking and dead zone
+            Tuning Volts test.
         */
 
         if (shouldRun) {
@@ -289,7 +288,7 @@ public class Turret extends SubsystemBase {
                     turretState = TurretState.TRACKING;
                 }
                 case TRACKING -> {
-                    if (inputs.position.getRotations() >= constants.maxRotation().getRotations() && inputs.position.getRotations() <= constants.minRotation().getRotations()) {
+                    if (checkIfAtDeadZone()) {
                        turretState =  TurretState.DEAD_ZONE;
                     } else {
                         switch (trackingState) {
@@ -303,6 +302,19 @@ public class Turret extends SubsystemBase {
                     }
                 }
                 case DEAD_ZONE -> {
+                    goal.position = dead_zone(inputs.position.getRadians());
+                    goal.velocity = 0.0;
+
+                    TrapezoidProfile.State next = profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
+                    double acceleration = (next.velocity - setpoint.velocity) / Constants.UPDATE_LOOP_DT;
+                    double feedforward = kS.getAsDouble() * Math.signum(next.velocity) +  kA.getAsDouble() * acceleration;
+                    io.runTurretPivot(next.position, feedforward);
+                    setpoint.position = next.position;
+                    setpoint.velocity = next.velocity;
+
+                    if (!checkIfAtDeadZone()) {
+                        turretState = TurretState.TRACKING;
+                    }
 
                 }
             }

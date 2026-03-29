@@ -11,6 +11,7 @@ import org.steelhawks.subsystems.led.LEDMatrix;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.led.LEDStrip;
+import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -26,6 +27,7 @@ public class RobotContainer {
     public static ObjectVision s_ObjVision = null;
     public static Intake s_Intake = null;
     public static Flywheel s_Flywheel = null;
+    public static Turret s_Turret = null;
 
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -45,6 +47,7 @@ public class RobotContainer {
         s_ObjVision = config.hasObjectVision ? config.createObjectVision().orElseThrow() : null;
         s_Intake = config.hasIntake ? config.createIntake().orElseThrow() : null;
         s_Flywheel = config.hasFlywheel ? config.createFlywheel().orElseThrow() : null;
+        s_Turret = config.hasTurret ? config.createTurret(RobotState.getInstance()::getEstimatedPose).orElseThrow() : null;
 
         if (config.hasAutos) {
             Autos.init();
@@ -72,9 +75,5 @@ public class RobotContainer {
         ).withName("Flywheel.spinUp");
     }
 
-    private void configureDriver() {
-        if (Constants.getMode() == Mode.SIM) {
-
-        }
-    }
+    private void configureDriver() {}
 }

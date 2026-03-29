@@ -77,7 +77,7 @@ public class Robot extends LoggedRobot {
     @SuppressWarnings("resource")
     public Robot() {
         VisionConstants.APRIL_TAG_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide); // apriltag field layout is slow, so invoke it to warmup even though blue is default
-        SignalLogger.enableAutoLogging(false); // dont log when on fms
+        SignalLogger.enableAutoLogging(false); // don't log when on fms
         LiveWindow.disableAllTelemetry();
         for (int i = 5800; i < 5810; i++) {
             PortForwarder.add(i, "10.26.1.11", i);

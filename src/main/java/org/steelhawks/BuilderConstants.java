@@ -33,7 +33,7 @@ public class BuilderConstants {
                 4,
                 2/1);
 
-        public static final TurretConstants TURRET = new TurretConstants(4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.064697265625));
+        public static final TurretConstants TURRET = new TurretConstants(4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 1.0 / 1.0 , Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.064697265625));
 
     }
 
