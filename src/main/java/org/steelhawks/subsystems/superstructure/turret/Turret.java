@@ -55,6 +55,9 @@ public class Turret extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
+    private int trajectoryLoopCounter = 0;
+    private static final int TRAJECTORY_LOG_INTERVAL = 5; // log trajectory every 5 loops (~10Hz)
+
     private double manualGoalRad = 0.0;
     private Rotation2d desiredRotation = new Rotation2d();
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
@@ -284,8 +287,10 @@ public class Turret extends SubsystemBase {
                         desiredRotation = findBestTurretAngle(
                             sol.turretAngle().getRadians(),
                             getPosition().getRadians());
-                        var trajectory = createTrajectory(hubCenter, sol.virtualTarget().toTranslation2d());
-                        Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+                        if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                            var trajectory = createTrajectory(hubCenter, sol.virtualTarget().toTranslation2d());
+                            Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+                        }
                     } else {
                         // fallback aim directly at hub with no velocity compensation
                         var turretTranslation = new Pose3d(robot)
@@ -320,8 +325,10 @@ public class Turret extends SubsystemBase {
                     double turretRelativeAngle = MathUtil.angleModulus(
                         fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    var trajectory = createTrajectory(ferryGoal3d, ferryGoal2d);
-                    Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                    if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                        var trajectory = createTrajectory(ferryGoal3d, ferryGoal2d);
+                        Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                    }
                 }
             }
             desiredRotation =
@@ -363,6 +370,7 @@ public class Turret extends SubsystemBase {
             Logger.recordOutput("Turret/GoalPosition", 0.0);
             Logger.recordOutput("Turret/GoalVelocity", 0.0);
         }
+        trajectoryLoopCounter++;
         LoopTimeUtil.record("Turret");
     }
 

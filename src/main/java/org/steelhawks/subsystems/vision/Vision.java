@@ -13,9 +13,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.steelhawks.*;
-
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.RobotState.PoseObservationType;
 import org.steelhawks.util.LoopTimeUtil;
@@ -104,10 +106,10 @@ public class Vision extends SubsystemBase {
             Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
         }
 
-        List<Pose3d> allTagPoses = new LinkedList<>();
-        List<Pose3d> allRobotPoses = new LinkedList<>();
-        List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-        List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+        List<Pose3d> allTagPoses = new ArrayList<>();
+        List<Pose3d> allRobotPoses = new ArrayList<>();
+        List<Pose3d> allRobotPosesAccepted = new ArrayList<>();
+        List<Pose3d> allRobotPosesRejected = new ArrayList<>();
 
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
             if (!Toggles.Vision.camerasEnabled.get(io[cameraIndex].getName()).get()) {
@@ -116,10 +118,10 @@ public class Vision extends SubsystemBase {
 
             disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
-            List<Pose3d> tagPoses = new LinkedList<>();
-            List<Pose3d> robotPoses = new LinkedList<>();
-            List<Pose3d> robotPosesAccepted = new LinkedList<>();
-            List<Pose3d> robotPosesRejected = new LinkedList<>();
+            List<Pose3d> tagPoses = new ArrayList<>();
+            List<Pose3d> robotPoses = new ArrayList<>();
+            List<Pose3d> robotPosesAccepted = new ArrayList<>();
+            List<Pose3d> robotPosesRejected = new ArrayList<>();
 
             // Only log tags that are whitelisted
             for (int tagId : inputs[cameraIndex].tagIds) {
@@ -164,8 +166,13 @@ public class Vision extends SubsystemBase {
                 double stdDevFactor =
                     Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
                 if (observation.tagCount() == 1) stdDevFactor *= 3.0;
-                boolean hasHubTag = Arrays.stream(inputs[cameraIndex].tagIds)
-                    .anyMatch(VisionConstants.HUB_TAG_IDS::contains);
+                boolean hasHubTag = false;
+                for (int tagId : inputs[cameraIndex].tagIds) {
+                    if (VisionConstants.HUB_TAG_IDS.contains(tagId)) {
+                        hasHubTag = true;
+                        break;
+                    }
+                }
                 if (!hasHubTag) stdDevFactor *= NON_HUB_STDDEV_FACTOR;
 
                 double linearStdDev = LINEAR_STD_DEV_BASELINE * stdDevFactor;
@@ -244,7 +251,7 @@ public class Vision extends SubsystemBase {
 
                 for (int i = 0; i < cameraConfigs.length; i++) {
                     Pose3d cameraPose = cameraPoses[i];
-                    List<Pose3d> cameraRays = new LinkedList<>();
+                    List<Pose3d> cameraRays = new ArrayList<>();
                     for (int tagId : inputs[i].tagIds) {
                         var tagPose = APRIL_TAG_LAYOUT.getTagPose(tagId);
                         if (tagPose.isPresent()) {
