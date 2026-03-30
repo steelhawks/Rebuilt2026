@@ -36,7 +36,7 @@ public record ChoreoTraj(
         "RRebound_Bump",
         OptionalInt.of(0),
         4.51196,
-        new Pose2d(4.42874, 0.63297, Rotation2d .fromRadians(0)),
+        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
         new Pose2d(3.25507, 2.45254, Rotation2d.fromRadians(0.7854))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
@@ -101,37 +101,6 @@ public record ChoreoTraj(
         new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885)),
         new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
     );
-    public static final ChoreoTraj Krish_RRebound = new ChoreoTraj(
-        "Krish_RRebound",
-        OptionalInt.empty(),
-        9.95613,
-        new Pose2d(4.437, 0.62408, Rotation2d.fromRadians(0)),
-        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj Krish_RRebound$0 = new ChoreoTraj(
-        "Krish_RRebound",
-        OptionalInt.of(0),
-        4.34744,
-        new Pose2d(4.437, 0.62408, Rotation2d.fromRadians(0)),
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj Krish_RRebound$1 = new ChoreoTraj(
-        "Krish_RRebound",
-        OptionalInt.of(1),
-        4.96924,
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj Krish_RRebound$2 = new ChoreoTraj(
-        "Krish_RRebound",
-        OptionalInt.of(2),
-        0.6394500000000001,
-        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
-    );
     public static final ChoreoTraj RRebound = new ChoreoTraj(
         "RRebound",
         OptionalInt.empty(),
@@ -177,6 +146,37 @@ public record ChoreoTraj(
         new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
         new Pose2d(5, 0.53702, Rotation2d.fromRadians(3.14159))
     );
+    public static final ChoreoTraj RRebound_copy1 = new ChoreoTraj(
+        "RRebound_copy1",
+        OptionalInt.empty(),
+        12.05724,
+        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
+        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_copy1$0 = new ChoreoTraj(
+        "RRebound_copy1",
+        OptionalInt.of(0),
+        5.23883,
+        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_copy1$1 = new ChoreoTraj(
+        "RRebound_copy1",
+        OptionalInt.of(1),
+        6.19591,
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj RRebound_copy1$2 = new ChoreoTraj(
+        "RRebound_copy1",
+        OptionalInt.of(2),
+        0.6225000000000005,
+        new Pose2d(3, 0.64334, Rotation2d.fromRadians(0)),
+        new Pose2d(1.87434, 1.44066, Rotation2d.fromRadians(-0.55431))
+    );
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -193,16 +193,16 @@ public record ChoreoTraj(
         Map.entry("CenterPath", CenterPath),
         Map.entry("CenterPath$0", CenterPath$0),
         Map.entry("CenterPath$1", CenterPath$1),
-        Map.entry("Krish_RRebound", Krish_RRebound),
-        Map.entry("Krish_RRebound$0", Krish_RRebound$0),
-        Map.entry("Krish_RRebound$1", Krish_RRebound$1),
-        Map.entry("Krish_RRebound$2", Krish_RRebound$2),
         Map.entry("RRebound", RRebound),
         Map.entry("RRebound$0", RRebound$0),
         Map.entry("RRebound$1", RRebound$1),
         Map.entry("RRebound$2", RRebound$2),
         Map.entry("FourMeterTest", FourMeterTest),
-        Map.entry("FourMeterSpinTest", FourMeterSpinTest)
+        Map.entry("FourMeterSpinTest", FourMeterSpinTest),
+        Map.entry("RRebound_copy1", RRebound_copy1),
+        Map.entry("RRebound_copy1$0", RRebound_copy1$0),
+        Map.entry("RRebound_copy1$1", RRebound_copy1$1),
+        Map.entry("RRebound_copy1$2", RRebound_copy1$2)
     );
 
     /**

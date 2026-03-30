@@ -94,6 +94,7 @@ public final class Autos {
         autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
+        autoChooser.addOption("Right Rebound Copy Auton", RRebound_copy().cmd().withName(ChoreoTraj.RRebound_copy1.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -282,6 +283,17 @@ public final class Autos {
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
+
+        return routine;
+    }
+
+    public static AutoRoutine RRebound_copy() {
+        AutoRoutine routine = factory.newRoutine("Right Rebound Copy Auton");
+
+        AutoTrajectory trenchToMidTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToReboundTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+
+
 
         return routine;
     }
