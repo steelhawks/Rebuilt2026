@@ -30,12 +30,19 @@ public class ShootingCommands {
                 Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
                 Commands.waitUntil(RobotContainer.s_Turret::atGoal),
                 Commands.waitUntil(RobotContainer.s_Hood::atGoal),
-                RobotContainer.s_Indexer.feed()
-                    .deadlineFor(
-                        Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
-                            .andThen(Commands.waitSeconds(0.3))
-                            .andThen(RobotContainer.s_Intake.agitate()))
-                    .repeatedly())
+                Commands.either(
+                    Commands.sequence(
+                        RobotContainer.s_Indexer.outtake().withTimeout(0.3),
+                        RobotContainer.s_Indexer.feed().withTimeout(0.2)
+                    ).repeatedly().until(() -> !RobotContainer.s_Indexer.isJammed()),
+                    RobotContainer.s_Indexer.feed()
+                        .deadlineFor(
+                            Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
+                                .andThen(Commands.waitSeconds(0.3))
+                                .andThen(RobotContainer.s_Intake.agitate()))
+                        .until(RobotContainer.s_Indexer::isJammed),
+                    RobotContainer.s_Indexer::isJammed
+                ).repeatedly())
             .repeatedly())
             .finallyDo(() -> {
                 RobotState.getInstance().setShootingState(ShootingState.NOTHING);
@@ -45,14 +52,4 @@ public class ShootingCommands {
             });
     }
 
-    private static Command jamRecovery() {
-        return Commands.waitUntil(RobotContainer.s_Indexer::isJammed)
-            .andThen(
-                Commands.sequence(
-                    RobotContainer.s_Indexer.outtake().withTimeout(0.3),
-                    RobotContainer.s_Indexer.feed().withTimeout(0.2))
-                .repeatedly()
-                    .until(() -> !RobotContainer.s_Indexer.isJammed()))
-            .repeatedly();
-    }
 }
