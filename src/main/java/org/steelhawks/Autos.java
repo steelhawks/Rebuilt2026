@@ -19,6 +19,7 @@ import org.steelhawks.commands.align.SwerveDriveAlignment;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public final class Autos {
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
     private static final Intake s_Intake = RobotContainer.s_Intake;
     private static final Indexer s_Indexer = RobotContainer.s_Indexer;
+    private static final Hood s_Hood = RobotContainer.s_Hood;
 
     private static final LoggedDashboardChooser<Command> autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser");
@@ -293,7 +295,36 @@ public final class Autos {
         AutoTrajectory trenchToMidTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
 
+        routine.active().onTrue(
+                Commands.sequence(
+                        s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                        s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
+                )
+        );
 
+        trenchToMidTrench.active().whileTrue(s_Intake.runIntake());
+        trenchToReboundTrench.active().whileTrue(s_Intake.runIntake());
+
+        trenchToMidTrench.done().onTrue(
+                Commands.sequence(
+                        Commands.runOnce(s_Swerve::stopWithX),
+                        recoverToTrajectoryEnd(trenchToMidTrench),
+                        ShootingCommands.shoot().withTimeout(2.0),
+                        ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                        RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                        trenchToReboundTrench.spawnCmd()
+                )
+        );
+
+        trenchToReboundTrench.done().onTrue(
+                Commands.sequence(
+                        Commands.runOnce(s_Swerve::stopWithX),
+                        recoverToTrajectoryEnd(trenchToReboundTrench),
+                        ShootingCommands.shoot().withTimeout(2.0),
+                        ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                        s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+                )
+        );
 
         return routine;
     }
