@@ -292,13 +292,14 @@ public final class Autos {
     public static AutoRoutine RRebound_copy() {
         AutoRoutine routine = factory.newRoutine("Right Rebound Copy Auton");
 
-        AutoTrajectory trenchToMidTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
-        AutoTrajectory trenchToReboundTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToMidTrench = ChoreoTraj.RRebound_copy1$0.asAutoTraj(routine);
+        AutoTrajectory trenchToReboundTrench = ChoreoTraj.RRebound_copy1$1.asAutoTraj(routine);
 
         routine.active().onTrue(
                 Commands.sequence(
                         s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                        s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
+                        s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                        trenchToMidTrench.spawnCmd()
                 )
         );
 
