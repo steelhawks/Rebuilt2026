@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
@@ -102,7 +103,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 			spindexer2Temperature = spindexerMotor2.getDeviceTemp();
 
 			BaseStatusSignal.setUpdateFrequencyForAll(
-				50,
+				1000,
 				spindexer2Velocity,
 				spindexer2Voltage,
 				spindexer2Current,
@@ -122,12 +123,17 @@ public class IndexerIOTalonFX implements IndexerIO {
 
 		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
 		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            1000,
+            spindexer1Velocity,
+            spindexer1Voltage,
+            spindexer1TorqueCurrent
+            );
+
 		BaseStatusSignal.setUpdateFrequencyForAll(
 		50,
-			spindexer1Velocity,
-			spindexer1Voltage,
 			spindexer1Current,
-			spindexer1TorqueCurrent,
 			feederVelocity,
 			feederVoltage,
 			feederCurrent,

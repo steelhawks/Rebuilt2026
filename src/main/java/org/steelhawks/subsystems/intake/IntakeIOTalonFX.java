@@ -135,9 +135,13 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeDutyCycleOut = new DutyCycleOut(0.0).withEnableFOC(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
+            1000,
+            rightPosition, rightVelocity, rightVoltage, rightTorqueCurrent, leftPosition, leftVelocity, leftVoltage, leftTorqueCurrent
+        );
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
             100,
-            leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp,
-            rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp,
+            leftCurrent, leftTemp, rightCurrent, rightTemp,
             intakePosition, intakeVelocity, intakeVoltage, intakeCurrent, intakeTorqueCurrent, intakeTemp);
         PhoenixUtil.registerSignals(
             bus,

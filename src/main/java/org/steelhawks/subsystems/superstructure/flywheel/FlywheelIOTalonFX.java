@@ -73,7 +73,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            100, position, velocity);
+            1000, position, velocity, voltage, torqueCurrent);
         PhoenixUtil.registerSignals(
             bus,
             position, velocity, voltage, current, torqueCurrent, temp);
