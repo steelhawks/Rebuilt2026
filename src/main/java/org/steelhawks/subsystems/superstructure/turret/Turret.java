@@ -297,12 +297,10 @@ public class Turret extends SubsystemBase {
                 case TRACKING -> {
                     if (checkIfAtDeadZone()) {
                         turretState =  TurretState.DEAD_ZONE;
-                        boolean isDeadzone = turretState == TurretState.DEAD_ZONE;
-                        Logger.recordOutput("Turret/Deadzone", isDeadzone);
                     } else {
                         switch (trackingState) {
                             case HUB -> {
-
+                                    
                             }
                             case NO_HUB ->  {
                             }
