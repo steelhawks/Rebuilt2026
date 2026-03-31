@@ -18,10 +18,7 @@ import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.util.AllianceFlip;
-import org.steelhawks.util.LoggedTunableNumber;
-import org.steelhawks.util.LoopTimeUtil;
-import org.steelhawks.util.Maths;
+import org.steelhawks.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -188,6 +185,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
+        BatteryUtil.recordCurrentUsage("Turret", inputs.supplyCurrentAmps);
         if (Constants.getRobot().equals(RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             Logger.recordOutput("Turret/IsHomed", true);
