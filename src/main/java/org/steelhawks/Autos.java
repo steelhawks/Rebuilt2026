@@ -97,6 +97,7 @@ public final class Autos {
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Right Rebound Copy Auton", RRebound_copy().cmd().withName(ChoreoTraj.RRebound_copy1.name()));
+        autoChooser.addOption("Kepler", Kepler().cmd().withName(ChoreoTraj.KeplerTest.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -326,6 +327,59 @@ public final class Autos {
                         s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
                 )
         );
+
+        return routine;
+    }
+
+    public static AutoRoutine Kepler() {
+        AutoRoutine routine = factory.newRoutine("KeplerTest");
+
+        AutoTrajectory trenchToMid = ChoreoTraj.KeplerTest$0.asAutoTraj(routine);
+        AutoTrajectory midFerry = ChoreoTraj.KeplerTest$1.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot = ChoreoTraj.KeplerTest$2.asAutoTraj(routine);
+
+        routine.active().onTrue(
+                Commands.sequence(
+                        s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                        trenchToMid.spawnCmd()
+                )
+        );
+
+        trenchToMid.done().onTrue(
+                Commands.sequence(
+                        Commands.runOnce(s_Swerve::stopWithX),
+                        ShootingCommands.shoot().withTimeout(2.0),
+                        ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                        RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                        recoverToTrajectoryEnd(trenchToMid),
+                        midFerry.spawnCmd()
+                )
+        );
+
+        midFerry.done().onTrue(
+                Commands.sequence(
+                        s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED),
+                        RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                        recoverToTrajectoryEnd(midFerry),
+                        trenchToShoot.spawnCmd()
+                )
+        );
+
+        trenchToShoot.active().whileTrue(
+                Commands.sequence(
+                        s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                        ShootingCommands.shoot().withTimeout(2.0),
+                        ShootingCommands.shoot().until(s_Indexer::emptyFuel)
+                )
+        );
+
+        trenchToShoot.done().onTrue(
+                Commands.sequence(
+                        Commands.runOnce(s_Swerve::stopWithX),
+                        recoverToTrajectoryEnd(trenchToShoot)
+                )
+        );
+
 
         return routine;
     }
