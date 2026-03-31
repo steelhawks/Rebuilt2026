@@ -87,7 +87,7 @@ public class Flywheel extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
-        BatteryUtil.recordCurrentUsage(inputs.supplyCurrentAmps);
+        BatteryUtil.recordCurrentUsage("Flywheel", inputs.supplyCurrentAmps);
 
         nearTargetVelocity =
             setpointDebouncer.calculate(

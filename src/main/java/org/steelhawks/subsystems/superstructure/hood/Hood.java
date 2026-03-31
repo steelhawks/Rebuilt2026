@@ -60,7 +60,7 @@ public class Hood extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Hood", inputs);
-        BatteryUtil.recordCurrentUsage(inputs.supplyCurrentAmps);
+        BatteryUtil.recordCurrentUsage("Hood", inputs.supplyCurrentAmps);
 
         if (!isHomed && Toggles.Hood.isEnabled.get()) {
             io.runOpenLoop(homingVolts, false);

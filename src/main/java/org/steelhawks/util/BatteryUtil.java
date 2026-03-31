@@ -18,8 +18,9 @@ public class BatteryUtil {
         loopTotalCurrent = 0;
     }
 
-    public static void recordCurrentUsage(double currentAmps) {
+    public static void recordCurrentUsage(String device, double currentAmps) {
         loopTotalCurrent += currentAmps;
+        Logger.recordOutput("BatteryUtil/Devices/" + device, currentAmps);
     }
 
     public static void integrateAndLogTotal() {

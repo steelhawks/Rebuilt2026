@@ -63,8 +63,9 @@ public class Indexer extends SubsystemBase {
         Logger.processInputs("Indexer/Spindexer/Inputs", spindexerInputs);
         Logger.processInputs("Indexer/Feeder/Inputs", feederInputs);
         Logger.processInputs("Indexer/Beam/Inputs", beamInputs);
-        BatteryUtil.recordCurrentUsage(feederInputs.currentAmps);
+        BatteryUtil.recordCurrentUsage("Feeder", feederInputs.currentAmps);
         BatteryUtil.recordCurrentUsage(
+            "Spindexer",
             spindexerInputs.motor1CurrentAmps + spindexerInputs.motor2CurrentAmps
         );
         if (Toggles.tuningMode.get()) {

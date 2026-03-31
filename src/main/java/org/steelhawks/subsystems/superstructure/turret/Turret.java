@@ -207,7 +207,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
-        BatteryUtil.recordCurrentUsage(inputs.supplyCurrentAmps);
+        BatteryUtil.recordCurrentUsage("Turret", inputs.supplyCurrentAmps);
         if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             Logger.recordOutput("Turret/IsHomed", true);

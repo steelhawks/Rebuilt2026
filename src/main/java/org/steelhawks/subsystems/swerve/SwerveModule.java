@@ -76,7 +76,7 @@ public class SwerveModule {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Swerve/Module" + index, inputs);
-        BatteryUtil.recordCurrentUsage(inputs.driveCurrentAmps + inputs.turnCurrentAmps);
+        BatteryUtil.recordCurrentUsage("Module" + index, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
 
         // calculate positions for odometry
         int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together

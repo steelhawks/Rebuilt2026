@@ -106,6 +106,7 @@ public class Intake extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
         BatteryUtil.recordCurrentUsage(
+            "Intake",
             inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps + inputs.leftTorqueCurrentAmps + inputs.rightTorqueCurrentAmps
         );
 
