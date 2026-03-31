@@ -94,6 +94,7 @@ public final class Autos {
         autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
+        autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -280,6 +281,67 @@ public final class Autos {
                 ShootingCommands.shoot().withTimeout(2.0),
                 ShootingCommands.shoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine rightOP() {
+        AutoRoutine routine = factory.newRoutine("Right OP Auton");
+
+        AutoTrajectory trenchPickUpCrossBump1 = ChoreoTraj.OPAuton$0.asAutoTraj(routine);
+        AutoTrajectory shootingSection1 = ChoreoTraj.OPAuton$1.asAutoTraj(routine);
+        AutoTrajectory trenchPickUpCrossBump2 = ChoreoTraj.OPAuton$2.asAutoTraj(routine);
+        AutoTrajectory shootingSection2 = ChoreoTraj.OPAuton$3.asAutoTraj(routine);
+        AutoTrajectory finalRebound = ChoreoTraj.OPAuton$4.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                trenchPickUpCrossBump1.spawnCmd()
+            )
+        );
+
+        trenchPickUpCrossBump1.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        trenchPickUpCrossBump2.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        finalRebound.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchPickUpCrossBump1.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchPickUpCrossBump1),
+                shootingSection1.spawnCmd()
+            )
+        );
+
+        shootingSection1.active().whileTrue(ShootingCommands.shoot());
+        shootingSection2.active().whileTrue(ShootingCommands.shoot());
+
+        shootingSection1.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootingSection1),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchPickUpCrossBump2.spawnCmd()
+            )
+        );
+
+        trenchPickUpCrossBump2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchPickUpCrossBump2),
+                shootingSection2.spawnCmd()
+            )
+        );
+
+        shootingSection2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootingSection2),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                finalRebound.spawnCmd()
             )
         );
 
