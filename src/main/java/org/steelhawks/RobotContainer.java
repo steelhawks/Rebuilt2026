@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
@@ -80,25 +81,26 @@ public class RobotContainer {
             double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
             return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
         })
-            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.FERRY))
-                .alongWith(s_Matrix.scrollingTextCommand("FERRY MODE", Color.WHITE, 5)))
-            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setShooterMode(RobotState.ShooterMode.TO_HUB))
-                .alongWith(s_Matrix.scrollingTextCommand("HUB MODE", Color.WHITE, 5)));
+            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
+            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(new VibrateController(driver));
 
-        driver.povUp().onTrue(
-            s_Flywheel.incrementVelocityFactor(0.03));
+//        driver.povUp().onTrue(
+//            s_Flywheel.incrementVelocityFactor(0.03));
+//
+//        driver.povDown().onTrue(
+//            s_Flywheel.incrementVelocityFactor(-0.03));
 
-        driver.povDown().onTrue(
-            s_Flywheel.incrementVelocityFactor(-0.03));
+        driver.povLeft()
+            .whileTrue(s_Indexer.outtake());
 
         driver.rightBumper()
             .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
-                .whileTrue(ShootingCommands.shoot());
+            .whileTrue(ShootingCommands.shoot());
 
         driver.rightTrigger()
             .whileTrue(

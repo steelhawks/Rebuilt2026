@@ -14,7 +14,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
-import org.steelhawks.RobotState.ShooterMode;
+import org.steelhawks.Constants.RobotType;
+import org.steelhawks.RobotState.AimState;
+import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -53,6 +55,9 @@ public class Turret extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
+    private int trajectoryLoopCounter = 0;
+    private static final int TRAJECTORY_LOG_INTERVAL = 5; // log trajectory every 5 loops (~10Hz)
+
     private double manualGoalRad = 0.0;
     private Rotation2d desiredRotation = new Rotation2d();
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
@@ -85,7 +90,7 @@ public class Turret extends SubsystemBase {
                 new TrapezoidProfile.Constraints(
                     maxVelocityRadPerSec.getAsDouble(),
                     maxAccelerationRadPerSecSq.getAsDouble()));
-        isHomed = Constants.getRobot().equals(Constants.RobotType.OMEGABOT);
+        isHomed = Constants.getRobot().equals(RobotType.OMEGABOT);
     }
 
     private Pose2d getPose() {
@@ -135,38 +140,6 @@ public class Turret extends SubsystemBase {
         return Rotation2d.fromRadians(bestAngle);
     }
 
-    private Translation3d predictInterceptPoint(Translation3d actualTarget) {
-        Translation3d robotVelocity = new Translation3d(
-            RobotContainer.s_Swerve.getChassisSpeeds().vxMetersPerSecond,
-            RobotContainer.s_Swerve.getChassisSpeeds().vyMetersPerSecond,
-            0.0);
-        Translation3d predictedTarget = actualTarget;
-        int maxIterations = 5;
-        double convergenceThreshold = 0.01;
-        for (int i = 0; i < maxIterations; i++) {
-            var turretTranslation = new Pose3d(getPose())
-                .transformBy(RobotConstants.ROBOT_TO_TURRET)
-                .toPose2d()
-                .getTranslation();
-            ShooterStructure.ProjectileData solution = ShooterStructure.Static.calculateShot(actualTarget, predictedTarget);
-            if (solution == null || Double.isNaN(solution.exitVelocity())) break;
-            double distance = turretTranslation.getDistance(predictedTarget.toTranslation2d());
-            double tof = ShooterStructure.calculateTimeofFlight(
-                solution.exitVelocity(),
-                solution.hoodAngle(),
-                distance);
-            Translation3d newPredictedTarget = actualTarget.minus(robotVelocity.times(tof)); // it was minus and it seemed to work better
-            double error = predictedTarget.getDistance(newPredictedTarget);
-            Logger.recordOutput("Turret/Moving/IterationError_" + i, error);
-            if (error < convergenceThreshold) break;
-
-            predictedTarget = newPredictedTarget;
-        }
-        Logger.recordOutput("Turret/Moving/PredictedTarget",
-            new double[]{predictedTarget.getX(), predictedTarget.getY(), predictedTarget.getZ()});
-        return predictedTarget;
-    }
-
     private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
         List<Translation3d> trajectoryPoints = new ArrayList<>();
         int numPoints = 50;
@@ -182,11 +155,16 @@ public class Turret extends SubsystemBase {
             return new ArrayList<>();
         }
         double launchAngle = projectileData.hoodAngle();
-        double timeOfFlight = ShooterStructure.calculateTimeofFlight(
+//        double timeOfFlight = ShooterStructure.calculateTimeOfFlight(
+//            projectileData.exitVelocity(),
+//            launchAngle,
+//            turretTranslation.getDistance(target2d)
+//        );
+        double timeOfFlight = ShooterStructure.calculateTimeOfFlight(
             projectileData.exitVelocity(),
             launchAngle,
-            turretTranslation.getDistance(target2d)
-        );
+            turretTranslation.getDistance(target2d),
+            target3d.getZ() - RobotConstants.ROBOT_TO_TURRET.getZ());
 
         for (int i = 0; i <= numPoints; i++) {
             double t = (timeOfFlight / numPoints) * i;
@@ -210,7 +188,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
-        if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
+        if (Constants.getRobot().equals(RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             Logger.recordOutput("Turret/IsHomed", true);
             io.setPosition(0);
@@ -238,9 +216,9 @@ public class Turret extends SubsystemBase {
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && !isManual
-                && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
+                && ((isHomed && isZeroed) || Constants.getRobot().equals(RobotType.SIMBOT))
                 && Toggles.Turret.isEnabled.get()
-                && (inputs.connected && inputs.encoderConnected) // add check to make sure it only checks for omega
+                && (inputs.connected && (inputs.encoderConnected || Constants.getRobot().equals(RobotType.ALPHABOT))) // add check to make sure it only checks for omega
                 && !Toggles.Turret.toggleVoltageOverride.get()
                 && !Toggles.Turret.toggleCurrentOverride.get()
                 && (getPosition().getRadians() <= constants.maxRotation().getRadians()
@@ -298,44 +276,59 @@ public class Turret extends SubsystemBase {
         }
         if (shouldRun) {
             if (Toggles.shooterTuningMode.get()) {
-                RobotState.getInstance().setShooterMode(ShooterMode.TO_HUB);
+                RobotState.getInstance().setAimState(AimState.TO_HUB);
             }
-            switch (RobotState.getInstance().getShooterMode()) {
+            switch (RobotState.getInstance().getAimState()) {
                 case TO_HUB -> {
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-                    var predictedHub = predictInterceptPoint(hubCenter);
-                    var turretTranslation = new Pose3d(robot)
-                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
-                        .toPose2d()
-                        .getTranslation();
-                    var direction = predictedHub.toTranslation2d().minus(turretTranslation);
-                    double fieldRelativeAngle = direction.getAngle().getRadians();
-                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
-                    double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
-                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    var trajectory = createTrajectory(hubCenter, predictedHub.toTranslation2d());
-                    Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+                    var sol = RobotState.getInstance().getMovingShotSolution();
+                    if (sol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {
+                        desiredRotation = findBestTurretAngle(
+                            sol.turretAngle().getRadians(),
+                            getPosition().getRadians());
+                        if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                            var trajectory = createTrajectory(hubCenter, sol.virtualTarget().toTranslation2d());
+                            Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+                        }
+                    } else {
+                        // fallback aim directly at hub with no velocity compensation
+                        var turretTranslation = new Pose3d(robot)
+                            .transformBy(RobotConstants.ROBOT_TO_TURRET)
+                            .toPose2d()
+                            .getTranslation();
+                        double fieldRelativeAngle = Math.atan2(
+                            hubCenter.getY() - turretTranslation.getY(),
+                            hubCenter.getX() - turretTranslation.getX());
+                        double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+                        double turretRelativeAngle = MathUtil.angleModulus(
+                            fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
+                        desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                    }
                 }
                 case FERRY -> {
                     var robot = getPose();
                     var ferryGoal2d = AllianceFlip.apply(
-                        FieldConstants.getClosestPointOnLine(FieldConstants.Ferrying.START_LINE, FieldConstants.Ferrying.END_LINE));
+                        FieldConstants.getClosestPointOnLine(
+                            FieldConstants.Ferrying.START_LINE,
+                            FieldConstants.Ferrying.END_LINE));
                     var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
-                    var predictedFerry = predictInterceptPoint(ferryGoal3d);
                     var turretTranslation = new Pose3d(robot)
                         .transformBy(RobotConstants.ROBOT_TO_TURRET)
                         .toPose2d()
                         .getTranslation();
-                    var direction = predictedFerry.toTranslation2d().minus(turretTranslation);
-                    double fieldRelativeAngle = direction.getAngle().getRadians();
+                    // Ferry doesn't use SOTM solution, aim directly
+                    double fieldRelativeAngle = Math.atan2(
+                        ferryGoal2d.getY() - turretTranslation.getY(),
+                        ferryGoal2d.getX() - turretTranslation.getX());
                     double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
                     double turretRelativeAngle = MathUtil.angleModulus(
                         fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                     desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    var trajectory = createTrajectory(ferryGoal3d, predictedFerry.toTranslation2d());
-                    Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                    if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                        var trajectory = createTrajectory(ferryGoal3d, ferryGoal2d);
+                        Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                    }
                 }
             }
             desiredRotation =
@@ -355,8 +348,7 @@ public class Turret extends SubsystemBase {
                         MathUtil.clamp(setpoint.position, constants.minRotation().getRadians(), constants.maxRotation().getRadians()),
                         0.0);
             }
-            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble())
-                && Maths.epsilonEquals(setpoint.position, goal.position, tolerance.getAsDouble());
+            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble());
             if (atGoal) {
                 io.stop();
             } else {
@@ -378,6 +370,7 @@ public class Turret extends SubsystemBase {
             Logger.recordOutput("Turret/GoalPosition", 0.0);
             Logger.recordOutput("Turret/GoalVelocity", 0.0);
         }
+        trajectoryLoopCounter++;
         LoopTimeUtil.record("Turret");
     }
 
@@ -400,7 +393,7 @@ public class Turret extends SubsystemBase {
                             MathUtil.clamp(
                                 rotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians())), this),
                 Commands.none(),
-                () -> RobotState.getInstance().getShooterMode().equals(ShooterMode.MANUAL))
+                () -> RobotState.getInstance().getAimState().equals(AimState.MANUAL))
             .withName("Set Desired State");
     }
 

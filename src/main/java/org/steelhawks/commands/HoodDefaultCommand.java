@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
+import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.util.AllianceFlip;
@@ -19,13 +20,27 @@ public class HoodDefaultCommand extends Command {
 
     @Override
     public void execute() {
-        var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-        if (RobotState.getInstance().getAimState().equals(RobotState.ShootingState.NOTHING)) {
-            s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(80.0));
-        } else if (RobotState.getInstance().getAimState().equals(RobotState.ShootingState.SHOOTING_STATIONARY)) {
-            s_Hood.setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
-        }  else if (RobotState.getInstance().getAimState().equals(RobotState.ShootingState.SHOOTING_MOVING)) {
-            s_Hood.setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Moving.calculateMovingShot(hubCenter, false).hoodAngle()));
+        if (Toggles.shooterTuningMode.get()) return;
+        var sol = RobotState.getInstance().getMovingShotSolution();
+        switch (RobotState.getInstance().getShootingState()) {
+            case NOTHING -> s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(80.0));
+            case SHOOTING_STATIONARY -> {
+                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+                s_Hood.setDesiredPosition(Rotation2d.fromRadians(
+                    ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+            }
+            case SHOOTING_MOVING -> {
+                if (RobotState.getInstance().getAimState().equals(RobotState.AimState.FERRY)) {
+                    s_Hood.setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
+                        FieldConstants.getClosestPointOnLine(
+                            FieldConstants.Ferrying.START_LINE,
+                            FieldConstants.Ferrying.END_LINE))).hoodAngle()));
+                    return;
+                }
+                if (sol != null) {
+                    s_Hood.setDesiredPosition(Rotation2d.fromRadians(sol.hoodAngleRad()));
+                }
+            }
         }
     }
 }

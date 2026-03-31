@@ -5,8 +5,8 @@ import static org.steelhawks.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
@@ -42,7 +42,7 @@ public class VisionIOPhoton implements VisionIO {
 
         // Read new camera observations
         Set<Short> tagIds = new HashSet<>();
-        List<PoseObservation> poseObservations = new LinkedList<>();
+        List<PoseObservation> poseObservations = new ArrayList<>();
         for (var result : camera.getAllUnreadResults()) {
             // Update latest target observation
             if (result.hasTargets()) {

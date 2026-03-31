@@ -4,6 +4,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +17,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotType;
+import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
@@ -48,13 +50,17 @@ public class Flywheel extends SubsystemBase {
     private boolean nearTargetVelocity = false;
     private double targetVelocityRadPerSec = 0.0;
 
+    private double cachedStationaryMps = Double.NaN;
+    private double cachedStationaryDist = Double.NaN;
+    private static final double IDLE_SHOT_CACHE_THRESHOLD = 0.01; // meters
+
     private static LoggedTunableNumber kP;
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
     private static LoggedTunableNumber kV;
 
-    private static double stationaryHoodVelocityFactor;
+    private static double redBullF1Constant;
 
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
@@ -67,7 +73,7 @@ public class Flywheel extends SubsystemBase {
         kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
-        stationaryHoodVelocityFactor = constants.stationaryHoodVelocityFactor();
+        redBullF1Constant = constants.stationaryHoodVelocityFactor();
         velocityTolerance =
             new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         routine =
@@ -114,43 +120,41 @@ public class Flywheel extends SubsystemBase {
                 io.setPID(kP.get(), kI.get(), kD.get());
             }, kP, kI, kD);
         }
-
         if (shouldRun) {
             if (!Toggles.shooterTuningMode.get()) {
-                Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getAimState().name());
+                Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getShootingState().name());
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-                switch (RobotState.getInstance().getAimState()) {
+                switch (RobotState.getInstance().getShootingState()) {
                     case NOTHING -> {
-                        double mps = ShooterStructure.Static.calculateShot(
-                            hubCenter, hubCenter,
-                            Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
+                        double mps = getStationaryExitVelocityMps(hubCenter);
                         double rps = ShooterStructure.linearToAngularVelocity(mps, constants.flywheelRadius());
                         if (Math.abs(rps - targetVelocityRadPerSec) > 0.5) {
                             setTargetVelocity(rps * constants.idleMultiplier());
                         }
                     }
                     case SHOOTING_MOVING -> {
-                        double mps = ShooterStructure.Moving.calculateMovingShot(
-                            hubCenter,
-                            Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
-                        double rps = ShooterStructure.linearToAngularVelocity(stationaryHoodVelocityFactor * mps, constants.flywheelRadius());
-                        setTargetVelocity(rps);
+                        var sol = RobotState.getInstance().getMovingShotSolution();
+                        if (sol != null) {
+                            double rps = ShooterStructure.linearToAngularVelocity(
+                                redBullF1Constant * sol.exitVelocity()
+                                     * (DriverStation.isAutonomous()
+                                        ? 1.06
+                                        : 1.0),
+                                constants.flywheelRadius());
+                            setTargetVelocity(rps);
+                        }
                     }
                     case SHOOTING_STATIONARY -> {
-                        double mps = ShooterStructure.Static.calculateShot(
-                            hubCenter, hubCenter,
-                            Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
+                        double mps = getStationaryExitVelocityMps(hubCenter);
                         double rps = ShooterStructure.linearToAngularVelocity(
-                            stationaryHoodVelocityFactor * mps, constants.flywheelRadius());
+                            redBullF1Constant * mps, constants.flywheelRadius());
                         setTargetVelocity(rps);
                     }
                 }
             }
-
             double feedforward = kS.get() + kV.get() * targetVelocityRadPerSec;
             io.runFlywheel(targetVelocityRadPerSec, feedforward, true);
         }
-
         Logger.recordOutput("Flywheel/TargetVelocity", targetVelocityRadPerSec);
     }
 
@@ -159,9 +163,20 @@ public class Flywheel extends SubsystemBase {
         return nearTargetVelocity;
     }
 
-    ///////////////////////
-    /* COMMAND FACTORIES */
-    ///////////////////////
+    private double getStationaryExitVelocityMps(Translation3d hubCenter) {
+        if (!RobotState.getInstance().getAimState().equals(AimState.TO_HUB)) {
+            return ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
+                FieldConstants.getClosestPointOnLine(
+                    FieldConstants.Ferrying.START_LINE,
+                    FieldConstants.Ferrying.END_LINE))).exitVelocity();
+        }
+        double currentDist = ShooterStructure.distanceToTarget(hubCenter);
+        if (Double.isNaN(cachedStationaryDist) || Math.abs(currentDist - cachedStationaryDist) > IDLE_SHOT_CACHE_THRESHOLD) {
+            cachedStationaryMps = ShooterStructure.Static.calculateShot(hubCenter, hubCenter, Constants.getRobot().equals(RobotType.ALPHABOT)).exitVelocity();
+            cachedStationaryDist = currentDist;
+        }
+        return cachedStationaryMps;
+    }
 
     public void setTargetVelocity(double velocityRadPerSec) {
         if (Toggles.shooterTuningMode.get()) return;
@@ -176,11 +191,16 @@ public class Flywheel extends SubsystemBase {
         targetVelocityRadPerSec = velocityRadPerSec;
     }
 
-    public Command testfire() {
+    ///////////////////////
+    /* COMMAND FACTORIES */
+    ///////////////////////
+
+    public Command simFire() {
         return Commands.defer(() ->
             Commands.runOnce(
                 () -> {
-                    var t = ShooterStructure.Moving.calculateMovingShot(FieldConstants.Hub.HUB_CENTER_3D, false);
+                    var sol = RobotState.getInstance().getMovingShotSolution();
+                    if (sol == null) return;
 
                     RebuiltFuelOnFly fuelOnFly = new RebuiltFuelOnFly(
                         RobotState.getInstance().getEstimatedPose().getTranslation(),
@@ -188,22 +208,21 @@ public class Flywheel extends SubsystemBase {
                         RobotContainer.s_Swerve.getChassisSpeeds(),
                         RobotContainer.s_Turret.getRotation().plus(Rotation2d.kPi),
                         Meters.of(Constants.RobotConstants.ROBOT_TO_TURRET.getZ()),
-                        MetersPerSecond.of(t.exitVelocity()),
-                        Radians.of(t.hoodAngle())
+                        MetersPerSecond.of(sol.exitVelocity()),
+                        Radians.of(sol.hoodAngleRad())
                     );
-                    fuelOnFly
-                        .withProjectileTrajectoryDisplayCallBack(
-                            (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileSuccessfulShot", pose3ds.toArray(Pose3d[]::new)),
-                            (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileUnsuccessfulShot", pose3ds.toArray(Pose3d[]::new))
-                        );
+                    fuelOnFly.withProjectileTrajectoryDisplayCallBack(
+                        (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileSuccessfulShot", pose3ds.toArray(Pose3d[]::new)),
+                        (pose3ds) -> Logger.recordOutput("Flywheel/FuelProjectileUnsuccessfulShot", pose3ds.toArray(Pose3d[]::new))
+                    );
                     SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
                 }
             ), Set.of(this));
     }
 
     public Command shooting() {
-        return Commands.run(() -> RobotState.getInstance().setAimState(ShootingState.SHOOTING))
-            .finallyDo(() -> RobotState.getInstance().setAimState(ShootingState.NOTHING));
+        return Commands.run(() -> RobotState.getInstance().setShootingState(ShootingState.SHOOTING))
+            .finallyDo(() -> RobotState.getInstance().setShootingState(ShootingState.NOTHING));
     }
 
     public Command setTargetVelocityCmd(double velocityRadPerSec) {
@@ -218,8 +237,8 @@ public class Flywheel extends SubsystemBase {
 
     public Command incrementVelocityFactor(double increment) {
         return Commands.runOnce(() -> {
-            stationaryHoodVelocityFactor += increment;
-            Logger.recordOutput("Flywheel/VelocityFactor", stationaryHoodVelocityFactor);
+            redBullF1Constant += increment;
+            Logger.recordOutput("Flywheel/VelocityFactor", redBullF1Constant);
         });
     }
 

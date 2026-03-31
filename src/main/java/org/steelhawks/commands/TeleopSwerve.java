@@ -85,15 +85,15 @@ public class TeleopSwerve extends Command {
             .onTrue(Commands.runOnce(() -> Logger.recordOutput("AlignDebug/Trench/InTrigger", true)));
         RobotState.getInstance().getBumpTrigger()
             .onTrue(setDriveState(DriveState.BUMP_ALIGN));
-        RobotState.getInstance().getSOTMTrigger().onTrue(
-            setDriveState(DriveState.LOCK_SOTM)
-                .alongWith(Commands.runOnce(() -> {
-                    sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians();
-                    var chassisSpeeds = s_Swerve.getChassisSpeeds();
-                    sotmSpeedSnapshotNormalized = Math.max(0.3, Math.hypot(
-                        chassisSpeeds.vxMetersPerSecond,
-                        chassisSpeeds.vyMetersPerSecond) / s_Swerve.getMaxLinearSpeedMetersPerSec());
-                })));
+//        RobotState.getInstance().getSOTMTrigger().onTrue(
+//            setDriveState(DriveState.LOCK_SOTM)
+//                .alongWith(Commands.runOnce(() -> {
+//                    sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians();
+//                    var chassisSpeeds = s_Swerve.getChassisSpeeds();
+//                    sotmSpeedSnapshotNormalized = Math.max(0.3, Math.hypot(
+//                        chassisSpeeds.vxMetersPerSecond,
+//                        chassisSpeeds.vyMetersPerSecond) / s_Swerve.getMaxLinearSpeedMetersPerSec());
+//                })));
         RobotState.getInstance().getSOTMTrigger().negate().and(RobotState.getInstance().getTrenchTrigger().negate()).and(RobotState.getInstance().getBumpTrigger().negate())
             .onTrue(setDriveState(DriveState.NORMAL));
 
