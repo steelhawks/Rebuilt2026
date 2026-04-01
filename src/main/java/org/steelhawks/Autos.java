@@ -358,7 +358,7 @@ public final class Autos {
 
         midFerry.done().onTrue(
                 Commands.sequence(
-                        s_Intake.setDesiredStateCommand(IntakeConstants.State.RETRACTED),
+                        s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME),
                         RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                         recoverToTrajectoryEnd(midFerry),
                         trenchToShoot.spawnCmd()
