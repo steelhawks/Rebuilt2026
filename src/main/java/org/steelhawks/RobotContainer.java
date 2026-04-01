@@ -47,7 +47,7 @@ public class RobotContainer {
         s_ObjVision = config.hasObjectVision ? config.createObjectVision().orElseThrow() : null;
         s_Intake = config.hasIntake ? config.createIntake().orElseThrow() : null;
         s_Flywheel = config.hasFlywheel ? config.createFlywheel().orElseThrow() : null;
-        s_Turret = config.hasTurret ? config.createTurret(RobotState.getInstance()::getEstimatedPose).orElseThrow() : null;
+        s_Turret = config.hasTurret ? config.createTurret(s_Swerve::getPose).orElseThrow() : null;
 
         if (config.hasAutos) {
             Autos.init();

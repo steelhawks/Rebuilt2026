@@ -18,7 +18,6 @@ public class Turret extends SubsystemBase {
     private TurretIO io;
     private final TurretIOInputsAutoLogged inputs;
     private TurretState turretState =  TurretState.IDLE;
-    private TrackingState trackingState = TrackingState.NO_HUB;
 
     private static final double POSITION_TOLERANCE_ROTATIONS = 0.01;
 
@@ -51,11 +50,6 @@ public class Turret extends SubsystemBase {
         HOMED,
         TRACKING,
         DEAD_ZONE
-    }
-
-    enum TrackingState {
-        HUB,
-        NO_HUB
     }
 
 
@@ -192,7 +186,7 @@ public class Turret extends SubsystemBase {
     }
 
     public boolean atGoal() {
-        return Math.abs(inputs.position.getRotations() - goal.position) < POSITION_TOLERANCE_ROTATIONS;
+        return Math.abs(inputs.position.getRadians() - goal.position) < Units.rotationsToRadians(POSITION_TOLERANCE_ROTATIONS);
     }
 
     private Pose2d getPose() {
@@ -207,10 +201,13 @@ public class Turret extends SubsystemBase {
 
         final boolean shouldRun = Toggles.Turret.isEnabled.get();
 
-        if (shouldRun && turretState == TurretState.IDLE) { // Should be if  driver station is enabled and Turret is enabled
-            profile = new  TrapezoidProfile(new TrapezoidProfile.Constraints(Math.PI, 0.0));
+        if (shouldRun && turretState == TurretState.IDLE) { // Should be if driver station is enabled and Turret is enabled
+            profile = buildProfile();
             desiredRotation = new Rotation2d(Math.PI);
             goal.position = desiredRotation.getRadians();
+            // Initialize setpoint to current turret position to avoid jump
+            setpoint.position = inputs.position.getRadians();
+            setpoint.velocity = inputs.velocityRadPerSec.getRadians();
             turretState = TurretState.HOMED;
             return;
         }
@@ -288,24 +285,41 @@ public class Turret extends SubsystemBase {
                     turretState = TurretState.HOMED;
                 }
                 case HOMED -> {
-                    // check if it's homed
-                    io.setTurretPosition(goal.position);
-                    io.stopTurret();
-                    turretState = TurretState.TRACKING;
-                    Logger.recordOutput("Turret/StateAtHomed", turretState);
+                    // Wait until turret reaches the homed position before transitioning to tracking
+                    if (atGoal()) {
+                        turretState = TurretState.TRACKING;
+                        Logger.recordOutput("Turret/StateAtHomed", turretState);
+                    } else {
+                        // Run PID to reach the homed position
+                        io.setTurretPosition(goal.position);
+                    }
                 }
                 case TRACKING -> {
                     if (checkIfAtDeadZone()) {
                         turretState =  TurretState.DEAD_ZONE;
                     } else {
-                        switch (trackingState) {
-                            case HUB -> {
-                                    
-                            }
-                            case NO_HUB ->  {
-                            }
-                            default -> io.stopTurret();
+                        // Ensure profile has valid constraints for tracking
+                        if (maxVelocity.get() <= 0) {
+                            profile = buildProfile();
                         }
+
+                        // Initialize setpoint from current turret position if needed
+                        if (setpoint.position == 0 && inputs.position.getRadians() != 0) {
+                            setpoint.position = inputs.position.getRadians();
+                            setpoint.velocity = inputs.velocityRadPerSec.getRadians();
+                        }
+
+                        // Continuously track the hub by updating desired rotation
+                        double targetRotations = angleToHub(getPose());
+                        goal.position = targetRotations;
+                        goal.velocity = 0.0;
+
+                        TrapezoidProfile.State next = profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
+                        double acceleration = (next.velocity - setpoint.velocity) / Constants.UPDATE_LOOP_DT;
+                        double feedforward = kS.getAsDouble() * Math.signum(next.velocity) + kA.getAsDouble() * acceleration;
+                        io.runTurretPivot(next.position, feedforward);
+                        setpoint.position = next.position;
+                        setpoint.velocity = next.velocity;
                     }
                 }
                 case DEAD_ZONE -> {
