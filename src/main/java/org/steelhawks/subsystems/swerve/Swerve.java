@@ -521,6 +521,28 @@ public class Swerve extends SubsystemBase {
         runVelocity(speeds);
     }
 
+    public void followTrajectory(SwerveSample sample, boolean flipY) {
+        SwerveSample flipped = sample;
+        if (flipY) {
+            double flippedY = FieldConstants.FIELD_WIDTH - sample.y;
+            double flippedHeading = Math.PI - sample.heading;
+            double flippedVy = -sample.vy;
+            double flippedOmega = -sample.omega;
+
+            flipped = new SwerveSample(
+                sample.t,
+                sample.x, flippedY,
+                flippedHeading,
+                sample.vx, flippedVy,
+                sample.ax, sample.ay,
+                flippedOmega, sample.alpha,
+                sample.moduleForcesX(),
+                sample.moduleForcesY() // might need negating too, check SwerveSample API
+            );
+        }
+        followTrajectory(flipped);
+    }
+
     public void runVelocity(ChassisSpeeds speeds) {
         final double speedMetersPerSec = getMaxLinearSpeedMetersPerSec();
 

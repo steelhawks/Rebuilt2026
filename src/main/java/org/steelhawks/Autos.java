@@ -1,8 +1,10 @@
 package org.steelhawks;
 
+import choreo.Choreo;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import choreo.trajectory.SwerveSample;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -36,20 +38,32 @@ public final class Autos {
     private static final LoggedDashboardChooser<Command> autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser");
 
+    private static final Choreo.TrajectoryLogger<SwerveSample> trajLogger = (trajectory, starting) -> {
+        Pose2d[] poses = Arrays.stream(trajectory.getPoses())
+            .map(AllianceFlip::apply)
+            .toArray(Pose2d[]::new);
+        FieldConstants.FIELD_2D.getObject("Path").setPoses(List.of(poses));
+        Logger.recordOutput("Odometry/Trajectory", poses);
+    };
+
     private static final AutoFactory factory =
         new AutoFactory(
             RobotState.getInstance()::getEstimatedPose,
             s_Swerve::setPose,
-            s_Swerve::followTrajectory,
+            (SwerveSample sample) -> s_Swerve.followTrajectory(sample, false),
             true,
             s_Swerve,
-            ((trajectory, starting) -> {
-                Pose2d[] poses = Arrays.stream(trajectory.getPoses())
-                    .map(AllianceFlip::apply)
-                    .toArray(Pose2d[]::new);
-                FieldConstants.FIELD_2D.getObject("Path").setPoses(List.of(poses));
-                Logger.recordOutput("Odometry/Trajectory", poses);
-            })
+            trajLogger
+        );
+
+    private static final AutoFactory flippedFactory =
+        new AutoFactory(
+            RobotState.getInstance()::getEstimatedPose,
+            s_Swerve::setPose,
+            (SwerveSample sample) -> s_Swerve.followTrajectory(sample, true),
+            true,
+            s_Swerve,
+            trajLogger
         );
 
     public enum Misalignment {
@@ -204,8 +218,8 @@ public final class Autos {
         return routine;
     }
 
-    public static AutoRoutine rightRebound() {
-        AutoRoutine routine = factory.newRoutine("Right Rebound Auton");
+    public static AutoRoutine rebound(boolean isLeft) {
+        AutoRoutine routine = (isLeft ? flippedFactory : factory).newRoutine((isLeft ? "Left" : "Right") + " Rebound Auton");
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
@@ -246,43 +260,11 @@ public final class Autos {
     }
 
     public static AutoRoutine leftRebound() {
-        AutoRoutine routine = factory.newRoutine("Left Rebound Auton");
-
-        AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
-        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.LRebound$1.asAutoTraj(routine);
-
-        routine.active().onTrue(
-            Commands.sequence(
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                trenchToMidToTrench.spawnCmd()
-            )
-        );
-
-        trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
-        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
-
-        trenchToMidToTrench.done().onTrue(
-            Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToReboundToTrench.spawnCmd()
-            )
-        );
-
-        trenchToReboundToTrench.done().onTrue(
-            Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
-                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
-            )
-        );
-
-        return routine;
+        return rebound(true);
     }
+
+    public static AutoRoutine rightRebound() {
+        return rebound(true);
+    }
+
 }
