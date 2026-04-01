@@ -37,6 +37,7 @@ public class StacattoVibrationController extends Command {
         this.pulseTime = pulseTime;
         this.pauseTime = pauseTime;
         this.duration = duration;
+        setName("StacattoVibrationController");
     }
 
     public StacattoVibrationController(CommandGenericHID... controllers) {

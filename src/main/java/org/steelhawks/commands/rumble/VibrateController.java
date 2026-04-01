@@ -25,6 +25,7 @@ public class VibrateController extends Command {
         this.controllers = controllers;
         this.intensity = intensity;
         this.seconds = seconds;
+        setName("VibrateController");
     }
 
     public VibrateController(double intensity, CommandGenericHID... controllers) {

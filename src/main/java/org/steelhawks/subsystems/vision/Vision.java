@@ -4,6 +4,7 @@ import static org.steelhawks.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,7 +31,8 @@ public class Vision extends SubsystemBase {
     private final boolean useQuestNav;
 
     private final QuestNavImpl questNav;
-    private final Debouncer stableTagDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kBoth);
+    private final Debouncer stableTagDebouncer =
+        new Debouncer(0.1, DebounceType.kFalling);
     private boolean tagStable = false;
 
     public Vision() {

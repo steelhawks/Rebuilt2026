@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.commands.*;
-import org.steelhawks.commands.rumble.VibrateController;
+import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
@@ -34,12 +34,13 @@ public class RobotContainer {
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
-    public static final CommandXboxController driver =
+    private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
+        RumbleAPI.register(driver);
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
@@ -68,13 +69,13 @@ public class RobotContainer {
 
     private void configureDriver() {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
-            .onTrue(new VibrateController(driver).repeatedly());
+            .whileTrue(RumbleAPI.steady().repeatedly());
 
         new Trigger(() -> true)
             .whileTrue(TeleopSwerve.overrideState());
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
-            .onTrue(new VibrateController(driver));
+            .onTrue(RumbleAPI.steady());
 
         driver.povUp().onTrue(
             s_Flywheel.incrementVelocityFactor(0.03));
@@ -86,7 +87,7 @@ public class RobotContainer {
             .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
-                .whileTrue(ShootingCommands.shoot());
+            .whileTrue(ShootingCommands.shoot());
 
         driver.rightTrigger()
             .whileTrue(
