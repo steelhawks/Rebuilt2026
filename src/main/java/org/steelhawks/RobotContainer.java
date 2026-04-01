@@ -99,8 +99,11 @@ public class RobotContainer {
         driver.rightBumper()
             .whileTrue(s_Intake.outtakeIntake());
 
-        driver.leftBumper()
+        driver.leftTrigger()
             .whileTrue(ShootingCommands.shootWhileIntaking());
+
+        driver.leftBumper()
+            .whileTrue(ShootingCommands.shoot());
 
         driver.rightTrigger()
             .whileTrue(
