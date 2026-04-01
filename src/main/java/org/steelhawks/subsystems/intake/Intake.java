@@ -31,6 +31,7 @@ public class Intake extends SubsystemBase {
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
+    private boolean isRollersRunning = false;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
     private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
@@ -278,9 +279,18 @@ public class Intake extends SubsystemBase {
             .finallyDo(() -> io.setPosition(IntakeConstants.State.HOME.getPosition()));
     }
 
+    public boolean isRollersRunning() {
+        return isRollersRunning;
+    }
+
     public Command runIntake() {
         return Commands.run(
-            () -> io.runIntake(constants.intakeSpeed()), this).finallyDo(io::stopIntake);
+                () -> io.runIntake(constants.intakeSpeed()), this)
+            .beforeStarting(() -> isRollersRunning = true)
+            .finallyDo(() -> {
+                isRollersRunning = false;
+                io.stopIntake();
+            });
     }
 
     public Command outtakeIntake() {
@@ -290,12 +300,12 @@ public class Intake extends SubsystemBase {
 
     public Command agitate() {
         return Commands.sequence(
-                setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                Commands.waitUntil(this::atGoal),
-                setDesiredStateCommand(IntakeConstants.State.HOME),
-                Commands.waitUntil(() -> atGoal() || isStalling()))
-            .repeatedly()
-            .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
+            setDesiredStateCommand(IntakeConstants.State.INTAKE),
+            Commands.waitUntil(this::atGoal),
+            setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION),
+            Commands.waitUntil(() -> atGoal() || isStalling()))
+        .repeatedly()
+        .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
     }
 
     public Command zeroIntake() {

@@ -13,6 +13,13 @@ import org.steelhawks.util.AllianceFlip;
 
 public class ShootingCommands {
 
+    public static Command shootWhileIntaking() {
+        return shoot()
+            .alongWith(
+                RobotContainer.s_Intake.runIntake()
+                    .alongWith(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
+    }
+
     public static Command shoot() {
         return Commands.sequence(
             Commands.runOnce(() ->
@@ -34,7 +41,8 @@ public class ShootingCommands {
                     .deadlineFor(
                         Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
                             .andThen(Commands.waitSeconds(0.3))
-                            .andThen(RobotContainer.s_Intake.agitate()))
+                            .andThen(RobotContainer.s_Intake.agitate()
+                        .onlyWhile(() -> !RobotContainer.s_Intake.isRollersRunning())))
                     .repeatedly())
             .repeatedly())
             .finallyDo(() -> {

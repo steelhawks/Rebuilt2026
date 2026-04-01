@@ -100,7 +100,7 @@ public class RobotContainer {
             .whileTrue(s_Intake.outtakeIntake());
 
         driver.leftBumper()
-            .whileTrue(ShootingCommands.shoot());
+            .whileTrue(ShootingCommands.shootWhileIntaking());
 
         driver.rightTrigger()
             .whileTrue(
