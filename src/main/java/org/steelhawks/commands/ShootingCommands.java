@@ -28,9 +28,9 @@ public class ShootingCommands {
                 if (AllianceFlip.shouldFlip()
                     && RobotState.getInstance().getAimState().equals(RobotState.AimState.TO_HUB)
                 ) {
-                    Vision.whitelistTagIds(VisionConstants.RED_HUB_ONLY);
+                    Vision.whitelistTagIds(VisionConstants.RED_TAGS);
                 } else {
-                    Vision.whitelistTagIds(VisionConstants.BLUE_HUB_ONLY);
+                    Vision.whitelistTagIds(VisionConstants.BLUE_TAGS);
                 }
             }),
             Commands.sequence(
