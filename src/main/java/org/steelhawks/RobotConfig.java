@@ -815,7 +815,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOSim(), new BeamIO() {}, c); }
+        public Indexer createIndexer(IndexerConstants c) { return new Indexer(new IndexerIOSim(c), new BeamIO() {}, c); }
     }
 
     private static class ReplayFactory implements SubsystemFactory {
