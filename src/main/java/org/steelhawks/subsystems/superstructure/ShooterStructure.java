@@ -11,6 +11,7 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
+import org.steelhawks.RobotState.AimState;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -282,6 +283,7 @@ public class ShooterStructure {
             int maxIterations,
             double timeTolerance
         ) {
+            boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
             Translation2d turretXY = getTurretTranslation();
             Translation2d fieldRelativeVelocity =
                 new Translation2d(robotVelocity.getX(), robotVelocity.getY()).rotateBy(robotHeading);
@@ -291,7 +293,10 @@ public class ShooterStructure {
             Translation3d virtualTarget = actualTarget;
             double rawDist = turretXY.getDistance(actualTarget.toTranslation2d());
             double virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
-            var projectile = Static.calculateShot(actualTarget, actualTarget, false, rawDist);
+            var projectile =
+                isFerry
+                    ? Static.calculateFerryShot(actualTarget.toTranslation2d())
+                    : Static.calculateShot(actualTarget, actualTarget, false, rawDist);
             double v = projectile.exitVelocity();
             double theta = projectile.hoodAngle();
             double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
@@ -303,7 +308,9 @@ public class ShooterStructure {
                     actualTarget.getZ());
                 rawDist = turretXY.getDistance(virtualTarget.toTranslation2d());
                 virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
-                projectile = Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
+                projectile = isFerry
+                    ? Static.calculateFerryShot(virtualTarget.toTranslation2d())
+                    : Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
                 double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
