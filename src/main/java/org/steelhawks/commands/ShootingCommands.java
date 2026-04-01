@@ -17,7 +17,9 @@ public class ShootingCommands {
         return shoot()
             .alongWith(
                 RobotContainer.s_Intake.runIntake()
-                    .alongWith(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
+                    .alongWith(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)))
+            .beforeStarting(RobotContainer.s_Swerve.toggleLowGear())
+            .finallyDo(() -> CommandScheduler.getInstance().schedule(RobotContainer.s_Swerve.toggleNormal()));
     }
 
     public static Command shoot() {
