@@ -162,6 +162,7 @@ tasks.register("replayWatch", JavaExec) {
 }
 repositories {
     mavenCentral()
+    maven { url "https://frcmaven.wpi.edu/release" }
 }
 kotlin {
     jvmToolchain(17)

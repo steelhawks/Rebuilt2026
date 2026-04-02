@@ -10,21 +10,21 @@ import org.steelhawks.SubsystemConstants;
 public class IndexerIOSim implements IndexerIO {
     private DCMotorSim indexerMotor1;
     private DCMotorSim indexerMotor2;
-    private DCMotorSim feederMotor;
+    private final DCMotorSim feederMotor;
 
 
     public IndexerIOSim(SubsystemConstants.IndexerConstants c) {
         indexerMotor1 = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                        DCMotor.getKrakenX44(1),
+                        DCMotor.getKrakenX60(1),
                         0.001,
                         1.0
                 ),
                 DCMotor.getKrakenX44(1)
         );
-        indexerMotor1 = new DCMotorSim(
+        indexerMotor2 = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                        DCMotor.getKrakenX44(1),
+                        DCMotor.getKrakenX60(1),
                         0.001,
                         1.0
                 ),
@@ -32,7 +32,7 @@ public class IndexerIOSim implements IndexerIO {
         );
         feederMotor = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                        DCMotor.getKrakenX44(1),
+                        DCMotor.getKrakenX60(1),
                         0.001,
                         1.0
                 ),

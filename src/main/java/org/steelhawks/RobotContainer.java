@@ -80,6 +80,7 @@ public class RobotContainer {
             double x = RobotState.getInstance().getEstimatedPose().getX();
             double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
             return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
@@ -108,6 +109,9 @@ public class RobotContainer {
         driver.rightTrigger()
             .whileTrue(
                 s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
+
+        driver.a().whileTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+        driver.b().whileTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
 
         driver.x()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
