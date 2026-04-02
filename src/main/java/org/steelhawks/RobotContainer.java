@@ -113,6 +113,9 @@ public class RobotContainer {
         driver.a().onTrue(
                 s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
         );
+        driver.b().onTrue(
+                s_Intake.runIntake()
+        );
 
         driver.x()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
