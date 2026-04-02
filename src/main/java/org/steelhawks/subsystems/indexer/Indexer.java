@@ -103,21 +103,21 @@ public class Indexer extends SubsystemBase {
 //        return beamInputs.detected;
     }
 
-    public Command runSpindexer() {
-        return Commands.runEnd(
-            () -> io.runSpindexer(IndexerState.RUNNING.spindexerOutput),
-            io::stopSpindexer,
-            this)
-        .onlyIf(this::shouldRun);
-    }
-
-    public Command runFeeder() {
-        return Commands.runEnd(
-            () -> io.runFeeder(IndexerState.RUNNING.feederOutput),
-            io::stopFeeder,
-            this)
-        .onlyIf(this::shouldRun);
-    }
+//    public Command runSpindexer() {
+//        return Commands.runEnd(
+//            () -> io.runSpindexer(IndexerState.RUNNING.spindexerOutput),
+//            io::stopSpindexer,
+//            this)
+//        .onlyIf(this::shouldRun);
+//    }
+//
+//    public Command runFeeder() {
+//        return Commands.runEnd(
+//            () -> io.runFeeder(IndexerState.RUNNING.feederOutput),
+//            io::stopFeeder,
+//            this)
+//        .onlyIf(this::shouldRun);
+//    }
 
     public Command feed() {
         return Commands.runEnd(

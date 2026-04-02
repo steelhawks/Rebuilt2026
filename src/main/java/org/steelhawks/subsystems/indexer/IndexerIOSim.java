@@ -8,8 +8,8 @@ import org.steelhawks.Constants;
 import org.steelhawks.SubsystemConstants;
 
 public class IndexerIOSim implements IndexerIO {
-    private DCMotorSim indexerMotor1;
-    private DCMotorSim indexerMotor2;
+    private final DCMotorSim indexerMotor1;
+    private final DCMotorSim indexerMotor2;
     private final DCMotorSim feederMotor;
 
 
