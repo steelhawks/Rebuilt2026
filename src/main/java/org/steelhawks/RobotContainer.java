@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -111,10 +112,10 @@ public class RobotContainer {
                 s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
 
         driver.a().onTrue(
-                s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)
+                s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(70.0))
         );
         driver.b().onTrue(
-                s_Intake.runIntake()
+                s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(0))
         );
 
         driver.x()
