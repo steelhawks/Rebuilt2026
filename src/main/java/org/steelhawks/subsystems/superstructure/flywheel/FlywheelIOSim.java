@@ -48,23 +48,31 @@ public class FlywheelIOSim implements FlywheelIO {
         leftMotorSim.update(Constants.UPDATE_LOOP_DT);
         rightMotorSim.update(Constants.UPDATE_LOOP_DT);
 
-        inputs.connected = true;
-        inputs.positionRad = leftMotorSim.getAngularPositionRad();
-        inputs.velocityRadPerSec = leftMotorSim.getAngularVelocityRadPerSec();
-        inputs.appliedVolts = leftMotorSim.getInputVoltage();
-        inputs.supplyCurrentAmps = leftMotorSim.getCurrentDrawAmps();
-        inputs.torqueCurrentAmps = leftMotorSim.getTorqueNewtonMeters() / DCMotor.getKrakenX44(1).KtNMPerAmp;
-        inputs.tempCelsius = inputs.supplyCurrentAmps * 0.1;
+        inputs.leftConnected = true;
+        inputs.leftPositionRad = leftMotorSim.getAngularPositionRad();
+        inputs.leftVelocityRadPerSec = leftMotorSim.getAngularVelocityRadPerSec();
+        inputs.leftAppliedVolts = leftMotorSim.getInputVoltage();
+        inputs.leftSupplyCurrentAmps = leftMotorSim.getCurrentDrawAmps();
+        inputs.leftTorqueCurrentAmps = leftMotorSim.getTorqueNewtonMeters() / DCMotor.getKrakenX44(1).KtNMPerAmp;
+        inputs.leftTempCelsius = inputs.leftSupplyCurrentAmps * 0.1;
+
+        inputs.rightConnected = true;
+        inputs.rightPositionRad = rightMotorSim.getAngularPositionRad();
+        inputs.rightVelocityRadPerSec = rightMotorSim.getAngularVelocityRadPerSec();
+        inputs.rightAppliedVolts = rightMotorSim.getInputVoltage();
+        inputs.rightSupplyCurrentAmps = rightMotorSim.getCurrentDrawAmps();
+        inputs.rightTorqueCurrentAmps = rightMotorSim.getCurrentDrawAmps() / DCMotor.getKrakenX44(1).KtNMPerAmp;
+        inputs.leftTempCelsius = inputs.rightSupplyCurrentAmps * 0.1;
 
         if (enablePid) {
             double volts = 0;
 
             if (useTorqueCurrent) {
-                double pid = velocityController.calculate(inputs.velocityRadPerSec, velocitySetpoint);
+                double pid = velocityController.calculate(inputs.leftVelocityRadPerSec, velocitySetpoint);
                 double commandedCurrent = pid + feedforward;
                 volts = currentToVolts(commandedCurrent);
             } else {
-                double pid = velocityController.calculate(inputs.velocityRadPerSec, velocitySetpoint);
+                double pid = velocityController.calculate(inputs.leftVelocityRadPerSec, velocitySetpoint);
                 volts = pid + feedforward;
             }
 
