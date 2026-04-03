@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.vision;
 
+import static org.steelhawks.Constants.RobotType.*;
 import static org.steelhawks.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.VecBuilder;
@@ -124,6 +125,17 @@ public class Vision extends SubsystemBase {
             cameraEnabled[i] = Toggles.Vision.camerasEnabled.get(io[i].getName()).get();
         }
 
+        // Advance the sim world on the main thread before handing off to worker threads.
+        // VisionIOPhotonSim.updateSim() calls visionSim.update() exactly once per loop
+        // (timestamp-guarded); non-sim IO implementations do nothing here.
+        if (Constants.getRobot().equals(SIMBOT)) {
+            for (int i = 0; i < io.length; i++) {
+                if (cameraEnabled[i]) {
+                    io[i].updateSim();
+                }
+            }
+        }
+
         // Submit updateInputs() for each enabled camera to the thread pool
         // Each camera writes only to its own inputs[i] object so there is no sharing
         // Future.get() provides a happens before guarantee before processInputs() below
@@ -135,7 +147,7 @@ public class Vision extends SubsystemBase {
                 futures[idx] = visionExecutor.submit(() -> {
                     VisionIOInputsAutoLogged fresh = new VisionIOInputsAutoLogged();
                     io[idx].updateInputs(fresh);
-                    inputs[idx] = fresh; // atomic reference store — safe per JLS §17.7
+                    inputs[idx] = fresh; // atomic reference store
                     return null;
                 });
             }
@@ -147,7 +159,7 @@ public class Vision extends SubsystemBase {
                 try {
                     futures[i].get(15, TimeUnit.MILLISECONDS);
                 } catch (Exception e) {
-                    // Camera timed out or threw stale inputs, will be re logged from last cycle.
+                    // Camera timed out or threw stale inputs, will be relogged from last cycle.
                     DriverStation.reportWarning("Vision camera " + i + " update timed out: " + e.getMessage(), false);
                 }
             }
