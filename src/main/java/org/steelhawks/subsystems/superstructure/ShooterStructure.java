@@ -292,7 +292,7 @@ public class ShooterStructure {
             Translation2d fieldRelativeVelocity =
                 new Translation2d(
                     robotVelocity.getX() + (-chassisOmegaRadPerSec * turretDy),
-                    robotVelocity.getY() + (chassisOmegaRadPerSec * turretDx))
+                    robotVelocity.getY() + (chassisOmegaRadPerSec * turretDx)) // omega could be negative
                 .rotateBy(robotHeading);
 
             double deltaH = actualTarget.getZ() - turretHeightAboveField();
