@@ -357,7 +357,6 @@ public class Turret extends SubsystemBase {
                     setpoint.position,
                     kS.getAsDouble() * Math.signum(setpoint.velocity)
                         + kA.getAsDouble() * acceleration
-                        - kS.getAsDouble() * Math.signum(RobotContainer.s_Swerve.getChassisSpeeds().omegaRadiansPerSecond)
                 );
             }
             Logger.recordOutput("Turret/SetpointPosition", setpoint.position);
