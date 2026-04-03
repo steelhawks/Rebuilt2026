@@ -308,6 +308,21 @@ public class Intake extends SubsystemBase {
         .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
     }
 
+    public Command feed() {
+        return Commands.runOnce(() ->
+            profile = new TrapezoidProfile(
+                new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SEC.get() * 0.3,
+                MAX_ACCEL_METERS_PER_SEC_SQ.get() * 0.3)))
+        .andThen(setDesiredStateCommand(IntakeConstants.State.HOME))
+        .andThen(Commands.waitUntil(this::atGoal))
+        .finallyDo(() ->
+            profile = new TrapezoidProfile(
+                new TrapezoidProfile.Constraints(
+                    MAX_VELOCITY_METERS_PER_SEC.get(),
+                    MAX_ACCEL_METERS_PER_SEC_SQ.get())));
+    }
+
     public Command zeroIntake() {
         return Commands.runOnce(() -> {
             isZeroed = false;

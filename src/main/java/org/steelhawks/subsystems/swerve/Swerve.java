@@ -39,7 +39,6 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.steelhawks.*;
 import org.steelhawks.Constants.*;
 
-import java.sql.SQLOutput;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
@@ -58,7 +57,7 @@ import org.steelhawks.util.SwerveDriveController;
 
 public class Swerve extends SubsystemBase {
 
-    private static final double SLOW_SPEED_MULTIPLIER = 0.3;
+    private static final double SLOW_SPEED_MULTIPLIER = 0.45;
     private static final double SPEED_MULTIPLIER = 1.0;
     private boolean isPathfinding = false;
     private boolean requestSlowMode = false;
@@ -832,6 +831,14 @@ public class Swerve extends SubsystemBase {
     // Command Factories
     public Command toggleMultiplier() {
         return Commands.runOnce(() -> requestSlowMode = !requestSlowMode);
+    }
+
+    public Command toggleLowGear() {
+        return Commands.runOnce(() -> requestSlowMode = true);
+    }
+
+    public Command toggleNormal() {
+        return Commands.runOnce(() -> requestSlowMode = false);
     }
 
     public Command zeroHeading() {

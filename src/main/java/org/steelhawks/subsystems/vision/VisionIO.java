@@ -21,6 +21,9 @@ public interface VisionIO {
 
     default void updateInputs(VisionIOInputs inputs) {}
 
+    /** Called on the main thread once per loop before updateInputs() futures are submitted. */
+    default void updateSim() {}
+
     default String getName() {
         return "";
     }

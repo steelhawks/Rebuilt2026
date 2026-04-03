@@ -1,4 +1,4 @@
-package org.steelhawks.commands;
+package org.steelhawks.commands.rumble;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,6 +25,7 @@ public class VibrateController extends Command {
         this.controllers = controllers;
         this.intensity = intensity;
         this.seconds = seconds;
+        setName("VibrateController");
     }
 
     public VibrateController(double intensity, CommandGenericHID... controllers) {
