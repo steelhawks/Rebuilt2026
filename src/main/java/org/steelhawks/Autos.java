@@ -264,7 +264,7 @@ public final class Autos {
     }
 
     public static AutoRoutine rightRebound() {
-        return rebound(true);
+        return rebound(false);
     }
 
 }
