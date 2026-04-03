@@ -52,7 +52,7 @@ public class ShootingCommands {
                     .deadlineFor(
                         Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
                             .andThen(Commands.waitSeconds(0.3))
-                            .andThen(RobotContainer.s_Intake.agitate()
+                            .andThen(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME)
                         .onlyWhile(() -> !RobotContainer.s_Intake.isRollersRunning())))
                     .repeatedly())
             .repeatedly())
