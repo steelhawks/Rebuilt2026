@@ -302,6 +302,10 @@ public class Turret extends SubsystemBase {
                         double turretRelativeAngle = MathUtil.angleModulus(
                             fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                         desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                        if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                            var trajectory = createTrajectory(hubCenter, hubCenter.toTranslation2d());
+                            Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+                        }
                     }
                 }
                 case FERRY -> {
