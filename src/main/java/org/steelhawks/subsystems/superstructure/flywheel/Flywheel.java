@@ -93,12 +93,12 @@ public class Flywheel extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
-        BatteryUtil.recordCurrentUsage("Flywheel", inputs.supplyCurrentAmps);
+        BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps);
         redBullConstant = Toggles.useLUT.get() ? 1.0 : constants.stationaryHoodVelocityFactor();
 
         nearTargetVelocity =
             setpointDebouncer.calculate(
-                Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
+                Maths.epsilonEquals(inputs.leftVelocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -262,7 +262,7 @@ public class Flywheel extends SubsystemBase {
                     () -> {
                         double current = timer.get() * FF_RAMP_RATE;
                         io.runFlywheelOpenLoop(current, true);
-                        velocitySamples.add(inputs.velocityRadPerSec);
+                        velocitySamples.add(inputs.leftVelocityRadPerSec);
                         currentSamples.add(current);
                     },
                     this)
