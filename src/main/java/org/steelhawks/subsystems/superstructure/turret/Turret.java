@@ -306,10 +306,7 @@ public class Turret extends SubsystemBase {
                 }
                 case FERRY -> {
                     var robot = getPose();
-                    var ferryGoal2d = AllianceFlip.apply(
-                        FieldConstants.getClosestPointOnLine(
-                            FieldConstants.Ferrying.START_LINE,
-                            FieldConstants.Ferrying.END_LINE));
+                    var ferryGoal2d = ShooterStructure.Static.calculateFerryShotSetpoint();
                     var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
                     var ferrySol = RobotState.getInstance().getMovingShotSolution();
                     if (ferrySol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {

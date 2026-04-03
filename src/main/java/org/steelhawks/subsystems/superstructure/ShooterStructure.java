@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.RobotState.AimState;
+import org.steelhawks.util.AllianceFlip;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -44,6 +45,7 @@ public class ShooterStructure {
         Translation3d virtualTarget,
         double timeOfFlight
     ) {}
+    public record FerryShotSolution(ProjectileData shotData, Rotation2d turretAngle) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
 
@@ -268,9 +270,75 @@ public class ShooterStructure {
 
             double theta = Math.PI / 4.0;
             double cos = Math.cos(theta);
-            double v0 = Math.sqrt((G * x * x / 2) * (cos * cos * (x * Math.tan(theta) - y)));
+//            double v0 = Math.sqrt((G * x * x / 2) * (cos * cos * (x * Math.tan(theta) - y)));
+            double v0 = Math.sqrt((G * x * x) * (2 * cos * cos * (x * Math.tan(theta) - y)));
 
             return new ProjectileData(v0, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
+        }
+
+        /**
+         *
+         * Do not AllianceFlip this, it is already in the correct field frame.
+         * @return
+         */
+        public static Translation2d calculateFerryShotSetpoint() {
+            Translation2d R = getTurretTranslation();
+            double rx = R.getX();
+            double ry = R.getY();
+            double fx = AllianceFlip.applyX(FieldConstants.Ferrying.START_LINE.getX());
+            Translation3d H = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+            double hx = H.getX();
+            double hy = H.getY();
+            Translation2d T = AllianceFlip
+                .apply(FieldConstants.getClosestPointOnLine(
+                    FieldConstants.Ferrying.START_LINE,
+                    FieldConstants.Ferrying.END_LINE));
+            double ty = T.getY();
+            double r = FieldConstants.Hub.FUNNEL_RADIUS + FieldConstants.Hub.FERRY_CLEARANCE_FACTOR;
+
+            double dx = fx - rx;
+            double vx = hx - rx;
+            double vy = hy - ry;
+            double RH2 = vx * vx + vy * vy;
+
+            // handle edges
+            // check if original ferry point is even obstructed at all, if not just skip and send
+            double RT = Math.hypot(dx, ty - ry);
+            double dist = Math.abs(dx * (hy - ry) - (ty - ry) * (hx - rx)) / RT;
+            if (dist >= r) {
+                return T;
+            }
+            // robot is inside exclusion zone, impossible to ferry
+            if (RH2 <= r * r) {
+                Logger.recordOutput("Ferrying/Blocked", true);
+                return T;
+            }
+
+            // continue to solve quadratic
+            final double A = vx * vx - r * r;
+            final double B = -2 * dx * vx * vy;
+            final double C = dx * dx * (vy * vy - r * r);
+            double discriminant = B * B - 4.0 * A * C;
+
+            double sqrtDiscriminant = Math.sqrt(discriminant);
+            double dy1 = (-B + sqrtDiscriminant) / (2.0 * A);
+            double dy2 = (-B - sqrtDiscriminant) / (2.0 * A);
+
+            // pick the root that is on the same side of the hub as original T???
+            double dy = (Math.abs(dy1 - (ty - ry)) <= Math.abs(dy2 - (ty - ry))) ? dy1 : dy2;
+            double ty_prime = ry + dy;
+
+            double minY = Math.min(
+                AllianceFlip.applyY(FieldConstants.Ferrying.START_LINE.getY()),
+                AllianceFlip.applyY(FieldConstants.Ferrying.END_LINE.getY()));
+            double maxY = Math.max(
+                AllianceFlip.applyY(FieldConstants.Ferrying.START_LINE.getY()),
+                AllianceFlip.applyY(FieldConstants.Ferrying.END_LINE.getY()));
+            ty_prime = MathUtil.clamp(ty_prime, minY, maxY);
+
+            Logger.recordOutput("Ferry/SetpointY", ty_prime);
+            Logger.recordOutput("Ferry/ObstructionDist", dist);
+            return new Translation2d(fx, ty_prime);
         }
     }
 
