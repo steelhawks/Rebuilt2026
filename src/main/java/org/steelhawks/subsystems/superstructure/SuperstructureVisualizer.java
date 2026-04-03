@@ -1,5 +1,6 @@
 package org.steelhawks.subsystems.superstructure;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
@@ -66,12 +67,12 @@ public class SuperstructureVisualizer {
 
     public void update() {
         double turret = turretRad.get();
-        double hood = hoodRad.get();
+        double hood = Math.toDegrees(hoodRad.get());
         Pose2d robot = robotPoseSupplier.get();
 
         // Mechanism2d
         turretLigament.setAngle(new Rotation2d(turret + Math.PI / 2));
-        hoodLigament.setAngle(new Rotation2d(-hood));
+            hoodLigament.setAngle(Rotation2d.fromDegrees(MathUtil.clamp(hood, 30.00, 80.00)));
         Logger.recordOutput("Superstructure/Mechanism2d", mechanism);
 
         Translation2d turretOffset = new Translation2d(TURRET_X, TURRET_Y);

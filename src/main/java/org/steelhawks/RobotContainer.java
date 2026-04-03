@@ -112,10 +112,7 @@ public class RobotContainer {
                 s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
 
         driver.a().onTrue(
-                s_Turret.setDesiredRotation(Rotation2d.fromDegrees(200.0))
-        );
-        driver.b().onTrue(
-                s_Turret.setDesiredRotation(Rotation2d.fromDegrees(0))
+               s_Indexer.feed()
         );
 
         driver.x()
