@@ -40,7 +40,7 @@ public class Flywheel extends SubsystemBase {
 
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
-        new Debouncer(0.3, DebounceType.kBoth);
+        new Debouncer(0.3, DebounceType.kRising);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;

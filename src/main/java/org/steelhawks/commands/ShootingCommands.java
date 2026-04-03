@@ -45,9 +45,10 @@ public class ShootingCommands {
                     .onlyIf(() -> !RobotContainer.s_Vision.hasStableTag())),
 
             Commands.sequence(
-                Commands.waitUntil(RobotContainer.s_Flywheel::isReadyToShoot),
-                Commands.waitUntil(RobotContainer.s_Turret::atGoal),
-                Commands.waitUntil(RobotContainer.s_Hood::atGoal),
+                Commands.waitUntil(() ->
+                    RobotContainer.s_Flywheel.isReadyToShoot()
+                        && RobotContainer.s_Turret.atGoal()
+                        && RobotContainer.s_Hood.atGoal()),
                 RobotContainer.s_Indexer.feed()
                     .deadlineFor(
                         Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
