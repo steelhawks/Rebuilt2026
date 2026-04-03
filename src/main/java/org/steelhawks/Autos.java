@@ -226,6 +226,19 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                Commands.defer(() -> {
+                    if (isLeft) {
+                        Pose2d bluePose = trenchToMidToTrench.getInitialPose()
+                            .orElse(Pose2d.kZero);
+                        Pose2d flipped = new Pose2d(
+                            bluePose.getX(),
+                            FieldConstants.FIELD_WIDTH - bluePose.getY(),
+                            new Rotation2d(Math.PI - bluePose.getRotation().getRadians()));
+                        return Commands.runOnce(() -> s_Swerve.setPose(AllianceFlip.apply(flipped)));
+                    } else {
+                        return trenchToMidToTrench.resetOdometry();
+                    }
+                }, Set.of()),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
