@@ -66,12 +66,17 @@ public class LEDCommands {
         return Commands.sequence(
             s_Matrix.clearCommand(),
             Commands.waitSeconds(0.3),
-            Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("CHANGE", Color.RED)), s_Matrix),
+            Commands.runOnce(() -> s_Matrix.playAnimation(
+                new LEDMatrix.StaticText("CHANGE", Color.RED)), s_Matrix),
             Commands.waitSeconds(1.0),
-            s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5),
-            Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("BATTERY", Color.RED)), s_Matrix),
+            Commands.runOnce(() -> s_Matrix.playAnimation(
+                AnimationLibrary.lightningBolt()), s_Matrix),
+            Commands.waitSeconds(0.8),
+            Commands.runOnce(() -> s_Matrix.playAnimation(
+                new LEDMatrix.StaticText("BATTERY", Color.RED)), s_Matrix),
             Commands.waitSeconds(1.0)
-        ).repeatedly(); // add lightening bolt symbol
+        ).repeatedly()
+            .ignoringDisable(true);
     }
 
     public static Command runTechnicianWizard() {
