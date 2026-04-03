@@ -124,6 +124,8 @@ public class Hood extends SubsystemBase {
             io.runHoodPosition(
                 setpoint, 0.0);
         }
+
+
     }
 
     @AutoLogOutput(key = "Hood/AtGoal")

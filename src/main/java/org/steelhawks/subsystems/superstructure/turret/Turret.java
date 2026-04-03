@@ -205,7 +205,7 @@ public class Turret extends SubsystemBase {
                 io.setPosition(-Math.PI / 2);
                 io.stop();
                 isZeroed = true;
-                // sync setpoint to new position immediately, so turret doesnt violently snap like we've been seeing
+                // sync setpoint to new position immediately, so turret doesn't violently snap like we've been seeing
                 setpoint = new TrapezoidProfile.State(Math.PI, 0.0);
                 desiredRotation = Rotation2d.fromRadians(Math.PI);
                 Logger.recordOutput("Turret/Zeroed", true);
