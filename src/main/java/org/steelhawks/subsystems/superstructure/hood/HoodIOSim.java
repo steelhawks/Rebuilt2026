@@ -8,7 +8,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.steelhawks.Constants;
 import org.steelhawks.SubsystemConstants;
-
+//TODO: Fix hood sim not moving to correct angle when shooting, as that's what happens on the real bot, and also check mechanism2d for hood
 public class HoodIOSim implements HoodIO {
 
     private final HoodVisualizer visualizer;
