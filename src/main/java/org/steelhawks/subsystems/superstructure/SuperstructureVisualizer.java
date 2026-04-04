@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -69,10 +70,11 @@ public class SuperstructureVisualizer {
         double turret = turretRad.get();
         double hood = Math.toDegrees(hoodRad.get());
         Pose2d robot = robotPoseSupplier.get();
+        Logger.recordOutput("HoodVisualizer", hoodRad.get());
 
         // Mechanism2d
         turretLigament.setAngle(new Rotation2d(turret + Math.PI / 2));
-            hoodLigament.setAngle(Rotation2d.fromDegrees(MathUtil.clamp(hood, 30.00, 80.00)));
+        hoodLigament.setAngle(Rotation2d.fromDegrees(hoodRad.get()));
         Logger.recordOutput("Superstructure/Mechanism2d", mechanism);
 
         Translation2d turretOffset = new Translation2d(TURRET_X, TURRET_Y);

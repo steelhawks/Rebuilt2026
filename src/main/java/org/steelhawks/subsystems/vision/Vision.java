@@ -1,8 +1,10 @@
 package org.steelhawks.subsystems.vision;
 
+import static org.steelhawks.Constants.RobotType.*;
 import static org.steelhawks.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -40,6 +42,8 @@ public class Vision extends SubsystemBase {
     private final boolean useQuestNav;
 
     private final QuestNavImpl questNav;
+    private final Debouncer stableTagDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
+    private boolean tagStable = false;
 
     public Vision() {
         this(false);
@@ -90,6 +94,10 @@ public class Vision extends SubsystemBase {
         return false;
     }
 
+    public boolean hasStableTag() {
+        return tagStable;
+    }
+
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
@@ -115,6 +123,15 @@ public class Vision extends SubsystemBase {
             cameraEnabled[i] = Toggles.Vision.camerasEnabled.get(io[i].getName()).get();
         }
 
+
+        if (Constants.getRobot().equals(SIMBOT)) {
+            for (int i = 0; i < io.length; i++) {
+                if (cameraEnabled[i]) {
+                    io[i].updateSim();
+                }
+            }
+        }
+
         // Submit updateInputs() for each enabled camera to the thread pool
         // Each camera writes only to its own inputs[i] object so there is no sharing
         // Future.get() provides a happens before guarantee before processInputs() below
@@ -126,7 +143,7 @@ public class Vision extends SubsystemBase {
                 futures[idx] = visionExecutor.submit(() -> {
                     VisionIOInputsAutoLogged fresh = new VisionIOInputsAutoLogged();
                     io[idx].updateInputs(fresh);
-                    inputs[idx] = fresh; // atomic reference store — safe per JLS §17.7
+                    inputs[idx] = fresh; // atomic reference store
                     return null;
                 });
             }
@@ -136,9 +153,13 @@ public class Vision extends SubsystemBase {
         for (int i = 0; i < io.length; i++) {
             if (futures[i] != null) {
                 try {
-                    futures[i].get(15, TimeUnit.MILLISECONDS);
+                    if (Constants.getRobot().equals(SIMBOT)) {
+                        futures[i].get(50, TimeUnit.MILLISECONDS);
+                    } else {
+                        futures[i].get(15, TimeUnit.MILLISECONDS);
+                    }
                 } catch (Exception e) {
-                    // Camera timed out or threw stale inputs, will be re logged from last cycle.
+                    // Camera timed out or threw stale inputs, will be relogged from last cycle.
                     DriverStation.reportWarning("Vision camera " + i + " update timed out: " + e.getMessage(), false);
                 }
             }

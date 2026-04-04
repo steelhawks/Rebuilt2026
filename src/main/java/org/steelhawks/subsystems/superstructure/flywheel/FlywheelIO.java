@@ -6,13 +6,21 @@ public interface FlywheelIO {
 
     @AutoLog
     class FlywheelIOInputs {
-        public boolean connected = false;
-        public double positionRad = 0.0;
-        public double velocityRadPerSec = 0.0;
-        public double appliedVolts = 0.0;
-        public double supplyCurrentAmps = 0.0;
-        public double torqueCurrentAmps = 0.0;
-        public double tempCelsius = 0.0;
+        public boolean leftConnected = false;
+        public double leftPositionRad = 0.0;
+        public double leftVelocityRadPerSec = 0.0;
+        public double leftAppliedVolts = 0.0;
+        public double leftSupplyCurrentAmps = 0.0;
+        public double leftTorqueCurrentAmps = 0.0;
+        public double leftTempCelsius = 0.0;
+
+        public boolean rightConnected = false;
+        public double rightPositionRad = 0.0;
+        public double rightVelocityRadPerSec = 0.0;
+        public double rightAppliedVolts = 0.0;
+        public double rightSupplyCurrentAmps = 0.0;
+        public double rightTorqueCurrentAmps = 0.0;
+        public double rightTempCelsius = 0.0;
     }
 
     default void updateInputs(FlywheelIOInputs inputs) {}
@@ -25,3 +33,4 @@ public interface FlywheelIO {
 
     default void stop() {}
 }
+    

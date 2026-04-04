@@ -50,21 +50,21 @@ public class FlywheelIOSim implements FlywheelIO {
 
         inputs.connected = true;
         inputs.positionRad = leftMotorSim.getAngularPositionRad();
-        inputs.velocityRadPerSec = leftMotorSim.getAngularVelocityRadPerSec();
+        inputs.leftVelocityRadPerSec = leftMotorSim.getAngularVelocityRadPerSec();
         inputs.appliedVolts = leftMotorSim.getInputVoltage();
         inputs.supplyCurrentAmps = leftMotorSim.getCurrentDrawAmps();
         inputs.torqueCurrentAmps = leftMotorSim.getTorqueNewtonMeters() / DCMotor.getKrakenX44(1).KtNMPerAmp;
-        inputs.tempCelsius = inputs.supplyCurrentAmps * 0.1;
+        inputs.leftTempCelsius = inputs.supplyCurrentAmps * 0.1;
 
         if (enablePid) {
             double volts = 0;
 
             if (useTorqueCurrent) {
-                double pid = velocityController.calculate(inputs.velocityRadPerSec, velocitySetpoint);
+                double pid = velocityController.calculate(inputs.leftVelocityRadPerSec, velocitySetpoint);
                 double commandedCurrent = pid + feedforward;
                 volts = currentToVolts(commandedCurrent);
             } else {
-                double pid = velocityController.calculate(inputs.velocityRadPerSec, velocitySetpoint);
+                double pid = velocityController.calculate(inputs.leftVelocityRadPerSec, velocitySetpoint);
                 volts = pid + feedforward;
             }
 

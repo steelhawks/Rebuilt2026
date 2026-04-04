@@ -6,9 +6,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.SubsystemConstants;
 //TODO: Fix hood sim not moving to correct angle when shooting, as that's what happens on the real bot, and also check mechanism2d for hood
+
+
 public class HoodIOSim implements HoodIO {
 
     private final HoodVisualizer visualizer;
@@ -32,7 +35,8 @@ public class HoodIOSim implements HoodIO {
                 constants.reduction()),
             DCMotor.getKrakenX44Foc(1));
         visualizer = new HoodVisualizer(hoodMotor::getAngularPositionRad);
-        hoodMotor.setAngle(constants.maxAngle().getRadians());
+        hoodMotor.setAngle(constants.maxAngle().getDegrees());
+        Logger.recordOutput("hoodMotorPositionInit", new Rotation2d(hoodMotor.getAngularPositionRad()));
     }
 
     private double currentToVolts(double current) {
@@ -48,6 +52,7 @@ public class HoodIOSim implements HoodIO {
 
         inputs.motorConnected = true;
         inputs.motorPositionDeg = new Rotation2d(hoodMotor.getAngularPositionRad());
+        Logger.recordOutput("hoodMotorPositionUpdate", new Rotation2d(hoodMotor.getAngularPositionRad()));
         inputs.motorVelocityDegPerSec = hoodMotor.getAngularVelocityRadPerSec();
         inputs.appliedVolts = hoodMotor.getInputVoltage();
         inputs.supplyCurrentAmps = hoodMotor.getCurrentDrawAmps();
@@ -61,8 +66,16 @@ public class HoodIOSim implements HoodIO {
 
         if (pidEnabled) {
             double torqueCurrent = controller.calculate(inputs.motorPositionDeg.getRadians(), desiredPositionRad) + ff;
-            hoodMotor.setInputVoltage(
-                MathUtil.clamp(currentToVolts(torqueCurrent), -MAX_VOLTS, MAX_VOLTS));
+            double voltage = MathUtil.clamp(currentToVolts(torqueCurrent), -MAX_VOLTS, MAX_VOLTS);
+
+            double pos = hoodMotor.getAngularPositionRad();
+            double minRad = Math.toRadians(30);
+            double maxRad = Math.toRadians(80);
+            if ((pos >= maxRad && voltage > 0) || (pos <= minRad && voltage < 0)) {
+                voltage = 0;
+            }
+
+            hoodMotor.setInputVoltage(voltage);
         }
         visualizer.update();
     }

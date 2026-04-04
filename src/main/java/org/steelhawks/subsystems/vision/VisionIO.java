@@ -24,4 +24,6 @@ public interface VisionIO {
     default String getName() {
         return "";
     }
+
+    default void updateSim() {}
 }

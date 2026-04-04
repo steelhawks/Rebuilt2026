@@ -5,6 +5,8 @@ import static org.steelhawks.subsystems.vision.VisionConstants.APRIL_TAG_LAYOUT;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.function.Supplier;
+
+import edu.wpi.first.wpilibj.Timer;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -15,6 +17,8 @@ public class VisionIOPhotonSim extends VisionIOPhoton {
 
     private final Supplier<Pose2d> poseSupplier;
     private final PhotonCameraSim cameraSim;
+
+    private static double lastUpdateTimestamp = Double.NEGATIVE_INFINITY;
 
     /**
      * Creates a new VisionIOPhotonVisionSim.
@@ -41,7 +45,17 @@ public class VisionIOPhotonSim extends VisionIOPhoton {
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        visionSim.update(poseSupplier.get());
         super.updateInputs(inputs);
     }
+
+    @Override
+    public void updateSim() {
+        double now = Timer.getFPGATimestamp();
+        if (now != lastUpdateTimestamp) {
+            lastUpdateTimestamp = now;
+            visionSim.update(poseSupplier.get());
+        }
+    }
+
+
 }

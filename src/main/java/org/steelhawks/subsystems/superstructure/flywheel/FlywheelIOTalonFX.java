@@ -11,11 +11,17 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import org.steelhawks.RobotConfig;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
 public class FlywheelIOTalonFX implements FlywheelIO {
+
+    private final StatusSignal<Angle> leftPosition;
+    private final StatusSignal<AngularVelocity> leftVelocity;
+    private final StatusSignal<Voltage> leftVoltage;
+    private final StatusSignal<Current> leftCurrent;
+    private final StatusSignal<Current> leftTorqueCurrent;
+    private final StatusSignal<Temperature> leftTemp;
 
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
@@ -34,6 +40,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
     public FlywheelIOTalonFX(CANBus bus, SubsystemConstants.FlywheelConstants constants) {
         leftMotor = new TalonFX(constants.leftMotorId(), bus);
+        rightMotor = new TalonFX(constants.rightMotorId(), bus);
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -47,14 +54,20 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.Slot0.kD = constants.kD();
         PhoenixUtil.tryUntilOk(5, () -> leftMotor.getConfigurator().apply(config));
 
-        position = leftMotor.getPosition();
-        velocity = leftMotor.getVelocity();
-        voltage = leftMotor.getMotorVoltage();
-        current = leftMotor.getSupplyCurrent();
-        torqueCurrent = leftMotor.getTorqueCurrent();
-        temp = leftMotor.getDeviceTemp();
+        leftPosition = leftMotor.getPosition();
+        leftVelocity = leftMotor.getVelocity();
+        leftVoltage = leftMotor.getMotorVoltage();
+        leftCurrent = leftMotor.getSupplyCurrent();
+        leftTorqueCurrent = leftMotor.getTorqueCurrent();
+        leftTemp = leftMotor.getDeviceTemp();
 
-        rightMotor = new TalonFX(constants.rightMotorId(), bus);
+        position = rightMotor.getPosition();
+        velocity = rightMotor.getVelocity();
+        voltage = rightMotor.getMotorVoltage();
+        current = rightMotor.getSupplyCurrent();
+        torqueCurrent = rightMotor.getTorqueCurrent();
+        temp = rightMotor.getDeviceTemp();
+
         var rightConfig = new TalonFXConfiguration();
         rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         rightConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -73,21 +86,29 @@ public class FlywheelIOTalonFX implements FlywheelIO {
 
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            1000, position, velocity, voltage, torqueCurrent);
+            1000, position, velocity, voltage, torqueCurrent, leftPosition, leftCurrent, leftTorqueCurrent, leftVoltage);
         PhoenixUtil.registerSignals(
             bus,
-            position, velocity, voltage, current, torqueCurrent, temp);
+            position, velocity, voltage, current, torqueCurrent, temp, leftPosition, leftCurrent, leftTorqueCurrent, leftVoltage, leftTemp);
     }
 
     @Override
     public void updateInputs(FlywheelIOInputs inputs) {
-        inputs.connected = BaseStatusSignal.isAllGood(position, velocity, voltage, current, torqueCurrent, temp);
-        inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());
-        inputs.velocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
-        inputs.appliedVolts = voltage.getValueAsDouble();
-        inputs.supplyCurrentAmps = current.getValueAsDouble();
-        inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
-        inputs.tempCelsius = temp.getValueAsDouble();
+        inputs.leftConnected = BaseStatusSignal.isAllGood(leftPosition, leftCurrent, leftTorqueCurrent, leftVoltage, leftTemp);
+        inputs.leftPositionRad = Units.rotationsToRadians(position.getValueAsDouble());
+        inputs.leftVelocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
+        inputs.leftAppliedVolts = voltage.getValueAsDouble();
+        inputs.leftSupplyCurrentAmps = current.getValueAsDouble();
+        inputs.leftTorqueCurrentAmps = torqueCurrent.getValueAsDouble();
+        inputs.leftTempCelsius = temp.getValueAsDouble();
+
+        inputs.rightConnected = BaseStatusSignal.isAllGood(position, velocity, voltage, current, torqueCurrent, temp);
+        inputs.rightPositionRad = Units.rotationsToRadians(position.getValueAsDouble());
+        inputs.rightVelocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
+        inputs.rightAppliedVolts = voltage.getValueAsDouble();
+        inputs.rightSupplyCurrentAmps = current.getValueAsDouble();
+        inputs.rightTorqueCurrentAmps = torqueCurrent.getValueAsDouble();
+        inputs.rightTempCelsius = temp.getValueAsDouble();
     }
 
     @Override
