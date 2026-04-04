@@ -181,6 +181,10 @@ public class Flywheel extends SubsystemBase {
         return cachedStationaryMps;
     }
 
+    public double getStatorCurrentAmps() {
+        return inputs.leftTorqueCurrentAmps;
+    }
+
     public void setTargetVelocity(double velocityRadPerSec) {
         if (Toggles.shooterTuningMode.get()) return;
         if (Double.isNaN(velocityRadPerSec) || Double.isInfinite(velocityRadPerSec)) {
