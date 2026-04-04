@@ -78,7 +78,7 @@ public class Hood extends SubsystemBase {
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
-                && (inputs.motorConnected && inputs.cancoderConnected)
+                && inputs.motorConnected
                 && Toggles.Hood.isEnabled.get()
                 && !Toggles.Hood.voltageOverride.get()
                 && !Toggles.Hood.currentOverride.get()
