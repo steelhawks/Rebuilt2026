@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -55,9 +56,9 @@ public class HoodIOTalonFX implements HoodIO {
 
         motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
 
-        motorConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
+        motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.hoodCurrent;
         motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-        motorConfig.CurrentLimits.StatorCurrentLimit = 60.0;
+        motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.hoodCurrent;
         motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         motorConfig.MotionMagic.MotionMagicCruiseVelocity = constants.maxVelocity();

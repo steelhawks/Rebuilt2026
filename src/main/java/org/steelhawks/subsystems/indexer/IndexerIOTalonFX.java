@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -58,8 +59,10 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-		spindexerConfig.CurrentLimits.SupplyCurrentLimit = 30.0;
+		spindexerConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.spindexerCurrent;
 		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        spindexerConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.spindexerCurrent;
+        spindexerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
 		PhoenixUtil.tryUntilOk(5, () -> spindexerMotor.getConfigurator().apply(spindexerConfig));
 		PhoenixUtil.tryUntilOk(5, spindexerMotor::optimizeBusUtilization);
@@ -69,8 +72,10 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-		feederConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
+		feederConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.feederCurrent;
 		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        feederConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.feederCurrent;
+        feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);
@@ -128,8 +133,7 @@ public class IndexerIOTalonFX implements IndexerIO {
             1000,
             spindexer1Velocity,
             spindexer1Voltage,
-            spindexer1TorqueCurrent
-            );
+            spindexer1TorqueCurrent);
 
 		BaseStatusSignal.setUpdateFrequencyForAll(
 		50,

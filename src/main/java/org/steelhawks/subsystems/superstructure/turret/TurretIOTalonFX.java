@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -61,7 +62,9 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
         motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
-        motorConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+        motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.turretCurrent;
+        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.turretCurrent;
         motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);

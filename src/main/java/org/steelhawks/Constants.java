@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
