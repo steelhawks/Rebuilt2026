@@ -320,6 +320,9 @@ public class ShooterStructure {
             final double C = dx * dx * (vy * vy - r * r);
             double discriminant = B * B - 4.0 * A * C;
 
+            if (discriminant < 0) {
+                return T;
+            }
             double sqrtDiscriminant = Math.sqrt(discriminant);
             double dy1 = (-B + sqrtDiscriminant) / (2.0 * A);
             double dy2 = (-B - sqrtDiscriminant) / (2.0 * A);
