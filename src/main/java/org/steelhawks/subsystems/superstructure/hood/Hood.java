@@ -65,13 +65,13 @@ public class Hood extends SubsystemBase {
         if (!isHomed && Toggles.Hood.isEnabled.get()) {
             io.runOpenLoop(homingVolts, false);
             isHomed = isStalling();
-            Logger.recordOutput("Intake/IsHomed", isHomed);
+            Logger.recordOutput("Hood/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
                 io.setPosition(Rotation2d.fromDegrees(80.0));
                 io.stop();
                 isZeroed = true;
-                Logger.recordOutput("Intake/Zeroed", true);
+                Logger.recordOutput("Hood/Zeroed", true);
             }
         }
 
