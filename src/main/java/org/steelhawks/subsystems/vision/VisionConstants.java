@@ -162,61 +162,74 @@ public class VisionConstants {
 
     private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
         new CameraConfig(
-            "ardu-front-right",
+            "ardu-west",
             new Transform3d(
-                Units.inchesToMeters(3.062), // 3.062 up
-                Units.inchesToMeters(-12.332), // 12.332 to the right
-                Units.inchesToMeters(20.782),
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-30.0),
-                    Units.degreesToRadians(-45.0))),
-            new Factors.StdDevFactors(3.0), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
-        new CameraConfig(
-            "ardu-front-left",
-            new Transform3d(
-                Units.inchesToMeters(3.062), // 3.062 up
-                Units.inchesToMeters(12.332), // 12.332 to the left
-                Units.inchesToMeters(20.782),
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-30.0),
-                    Units.degreesToRadians(45.0))),
-            new Factors.StdDevFactors(8.0), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
-        new CameraConfig(
-            "ardu-middle-right",
-            new Transform3d(
-                Units.inchesToMeters(0.012), // 0.012 up
-                Units.inchesToMeters(-12.724), // 12.724 to the right
-                Units.inchesToMeters(20.677),
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-30.0),
-                    Units.degreesToRadians(-90.0))),
-            new Factors.StdDevFactors(3.0), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
-        new CameraConfig(
-            "ardu-middle-left",
-            new Transform3d(
-                Units.inchesToMeters(0.013), // 0.013 up
-                Units.inchesToMeters(12.728), // 12.728 to the left
+                Units.inchesToMeters(-10.207), // 12.728 to the left
+                Units.inchesToMeters(12.728), // 10.207 down
                 Units.inchesToMeters(20.679),
-                new Rotation3d(
-                    Units.degreesToRadians(0.0),
-                    Units.degreesToRadians(-30.0),
-                    Units.degreesToRadians(90.0))),
-            new Factors.StdDevFactors(4.5), // TODO: tune stddev factors
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(90.0))),
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
         new CameraConfig(
-        "ardu-back-right",
+            "ardu-northeast",
             new Transform3d(
-                Units.inchesToMeters(-13.333), // 12.333 to the right
+                Units.inchesToMeters(-11.639), // 10.669 to the left
+                Units.inchesToMeters(10.669), // 11.639 down
+                Units.inchesToMeters(20.774),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(-45.0))),
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-southwest",
+            new Transform3d(
+                Units.inchesToMeters(-13.303), // 12.333 to the left
+                Units.inchesToMeters(12.333), // 13.303 down
+                Units.inchesToMeters(20.774),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(-225.0))),
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-east",
+            new Transform3d(
+                Units.inchesToMeters(-10.207), // 12.716 to the left
+                Units.inchesToMeters(-12.716), // 10.207 down
+                Units.inchesToMeters(20.679),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(-90.0))),
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-northwest",
+            new Transform3d(
+                    Units.inchesToMeters(-11.669), // 10.676 to the right
+                    Units.inchesToMeters(-10.676), // 11.669 down
+                    Units.inchesToMeters(20.773),
+            new Rotation3d(
+                Units.degreesToRadians(0.0),
+                Units.degreesToRadians(-30.0),
+                Units.degreesToRadians(45.0))),
+            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
+            CameraType.PHOTON
+        ),
+        new CameraConfig(
+            "ardu-southeast",
+            new Transform3d(
+                Units.inchesToMeters(-13.333), // 12.339 to the right
                 Units.inchesToMeters(-12.339), // 13.333 down
                 Units.inchesToMeters(20.774),
             new Rotation3d(
@@ -226,29 +239,16 @@ public class VisionConstants {
             new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
-        new CameraConfig(
-            "ardu-back-left",
-            new Transform3d(
-                Units.inchesToMeters(-13.303), // 12.333 to the left
-                Units.inchesToMeters(12.333), // 13.303 down
-                Units.inchesToMeters(20.774),
-            new Rotation3d(
-                Units.degreesToRadians(0.0),
-                Units.degreesToRadians(-30),
-                Units.degreesToRadians(-225))),
-            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
-            CameraType.PHOTON
-        )
 //        new CameraConfig(
 //        "limelight-intake",
 //            new Transform3d(
-//                Units.inchesToMeters(13.818), // 13.818 up
-//                0.0, // in the vertical middle
-//                Units.inchesToMeters(19.735),
+//                Units.inchesToMeters(-12.099), // 8.312 to the right
+//                Units.inchesToMeters(-8.312), // 12.099 down
+//                Units.inchesToMeters(18.785),
 //                new Rotation3d(
-//                    0.0,
-//                    0.0,
-//                    Units.degreesToRadians(15.0))),
+//                    Units.degreesToRadians(0.0),
+//                    Units.degreesToRadians(-30.0),
+//                    Units.degreesToRadians(0.0))),
 //            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
 //            CameraType.LIMELIGHT
 //        )
