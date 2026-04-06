@@ -10,6 +10,7 @@ import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.beam.BeamIO;
 import org.steelhawks.subsystems.beam.BeamIOInputsAutoLogged;
+import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Indexer extends SubsystemBase {
@@ -21,7 +22,7 @@ public class Indexer extends SubsystemBase {
     private LoggedTunableNumber tuningSpindexerVolts;
     private LoggedTunableNumber tuningFeederVolts;
 
-    private Debouncer beamDebouncer;
+    private final Debouncer beamDebouncer;
 
     public enum IndexerState {
         RUNNING(1.0, 1.0),
@@ -62,6 +63,11 @@ public class Indexer extends SubsystemBase {
         Logger.processInputs("Indexer/Spindexer/Inputs", spindexerInputs);
         Logger.processInputs("Indexer/Feeder/Inputs", feederInputs);
         Logger.processInputs("Indexer/Beam/Inputs", beamInputs);
+        BatteryUtil.recordCurrentUsage("Feeder", feederInputs.currentAmps);
+        BatteryUtil.recordCurrentUsage(
+            "Spindexer",
+            spindexerInputs.motor1CurrentAmps + spindexerInputs.motor2CurrentAmps
+        );
         if (Toggles.tuningMode.get()) {
             if (Toggles.Indexer.toggleSpindexerVoltageOverride.get()) {
                 if (tuningSpindexerVolts == null) {
@@ -91,10 +97,9 @@ public class Indexer extends SubsystemBase {
             || feederInputs.torqueCurrentAmps >= FEEDER_JAM_CURRENT.get();
     }
 
-    @AutoLogOutput(key = "Indexer/HasBalls")
+    @AutoLogOutput(key = "Indexer/HopperEmpty")
     public boolean emptyFuel() {
         return !beamDebouncer.calculate(beamInputs.detected);
-//        return beamInputs.detected;
     }
 
     public Command runSpindexer() {

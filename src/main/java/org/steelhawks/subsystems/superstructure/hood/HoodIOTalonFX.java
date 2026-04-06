@@ -3,18 +3,16 @@ package org.steelhawks.subsystems.superstructure.hood;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -23,7 +21,6 @@ import static org.steelhawks.util.PhoenixUtil.tryUntilOk;
 public class HoodIOTalonFX implements HoodIO {
 
     private final TalonFX hoodMotor;
-    private final CANcoder cancoder;
 
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
@@ -32,12 +29,7 @@ public class HoodIOTalonFX implements HoodIO {
     private final StatusSignal<Current> torqueCurrent;
     private final StatusSignal<Temperature> deviceTemp;
 
-    private final StatusSignal<Angle> cancoderPosition;
-    private final StatusSignal<AngularVelocity> cancoderVelocity;
-    private final StatusSignal<Voltage> cancoderVoltage;
-
     private final TalonFXConfiguration motorConfig;
-    private final CANcoderConfiguration cancoderConfig;
 
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final MotionMagicVoltage motionMagicVoltage;
@@ -45,14 +37,12 @@ public class HoodIOTalonFX implements HoodIO {
 
     public HoodIOTalonFX(CANBus bus, SubsystemConstants.HoodConstants constants) {
         hoodMotor = new TalonFX(constants.motorId(), bus);
-        cancoder = new CANcoder(constants.cancoderId(), bus);
 
         torqueCurrentFOC = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
         motionMagicVoltage = new MotionMagicVoltage(0.0).withUpdateFreqHz(0.0);
         voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
         motorConfig = new TalonFXConfiguration();
-        cancoderConfig = new CANcoderConfiguration();
 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -66,19 +56,15 @@ public class HoodIOTalonFX implements HoodIO {
 
         motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
 
-        motorConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
+        motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.hoodCurrent;
         motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-        motorConfig.CurrentLimits.StatorCurrentLimit = 60.0;
+        motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.hoodCurrent;
         motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         motorConfig.MotionMagic.MotionMagicCruiseVelocity = constants.maxVelocity();
         motorConfig.MotionMagic.MotionMagicAcceleration = constants.maxAcceleration();
 
         tryUntilOk(5, () -> hoodMotor.getConfigurator().apply(motorConfig));
-
-        cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        cancoderConfig.MagnetSensor.MagnetOffset = constants.magOffset().getRotations();
-        tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         position = hoodMotor.getPosition();
         velocity = hoodMotor.getVelocity();
@@ -87,23 +73,15 @@ public class HoodIOTalonFX implements HoodIO {
         torqueCurrent = hoodMotor.getTorqueCurrent();
         deviceTemp = hoodMotor.getDeviceTemp();
 
-        cancoderPosition = cancoder.getPosition();
-        cancoderVelocity = cancoder.getVelocity();
-        cancoderVoltage = cancoder.getSupplyVoltage();
-
         BaseStatusSignal.setUpdateFrequencyForAll(
             100,
             position,
-            velocity,
-            cancoderPosition,
-            cancoderVelocity,
-            cancoderVoltage);
+            velocity);
 
         PhoenixUtil.registerSignals(
             bus,
-            position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp,
-            cancoderPosition, cancoderVelocity, cancoderVoltage);
-        tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(hoodMotor, cancoder));
+            position, velocity, appliedVolts, supplyCurrent, torqueCurrent, deviceTemp);
+        tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(hoodMotor));
     }
 
     @Override
@@ -116,11 +94,6 @@ public class HoodIOTalonFX implements HoodIO {
         inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
         inputs.tempCelsius = deviceTemp.getValueAsDouble();
-
-        inputs.cancoderConnected =
-            BaseStatusSignal.isAllGood(cancoderPosition, cancoderVelocity, cancoderVoltage);
-        inputs.cancoderPositionDeg = Rotation2d.fromRotations(cancoderPosition.getValueAsDouble());
-        inputs.cancoderVelocityDegPerSec = Units.rotationsToDegrees(cancoderVelocity.getValueAsDouble());
     }
 
     @Override

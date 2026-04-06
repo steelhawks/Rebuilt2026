@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -59,24 +60,25 @@ public class Hood extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Hood", inputs);
+        BatteryUtil.recordCurrentUsage("Hood", inputs.supplyCurrentAmps);
 
         if (!isHomed && Toggles.Hood.isEnabled.get()) {
             io.runOpenLoop(homingVolts, false);
             isHomed = isStalling();
-            Logger.recordOutput("Intake/IsHomed", isHomed);
+            Logger.recordOutput("Hood/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
                 io.setPosition(Rotation2d.fromDegrees(80.0));
                 io.stop();
                 isZeroed = true;
-                Logger.recordOutput("Intake/Zeroed", true);
+                Logger.recordOutput("Hood/Zeroed", true);
             }
         }
 
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
-                && (inputs.motorConnected && inputs.cancoderConnected)
+                && inputs.motorConnected
                 && Toggles.Hood.isEnabled.get()
                 && !Toggles.Hood.voltageOverride.get()
                 && !Toggles.Hood.currentOverride.get()

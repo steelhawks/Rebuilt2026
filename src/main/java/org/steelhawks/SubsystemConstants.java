@@ -101,38 +101,38 @@ public class SubsystemConstants {
             new LUTConstants(
                 0.0, Double.MAX_VALUE,
                 0.0, Double.MAX_VALUE,
-                new double[][]{
+                new double[][]{ // Shooting ToF
                     {1.210, 1},
                     {1.870, 1},
                     {2.290, 1},
                     {2.920, 1},
                     {3.590, 1}
                 },
-                new double[][]{
+                new double[][]{ // Shooting Velocity
                     {1.210, 10.0},
                     {1.870, 10.5},
                     {2.290, 10.7},
                     {2.920, 11},
                     {3.590, 12}
                 },
-                new double[][]{
+                new double[][]{ // Shooting Hood Angle
                     {1.210, 80.0},
                     {1.870, 75.0},
                     {2.290, 70.0},
                     {2.920, 65.0},
                     {3.590, 63.0}
                 },
-                new double[][]{
+                new double[][]{ // Ferry ToF
                     {1.75, 14.8},
                     {2.12, 15.0},
                     {3.16, 18.8}
                 },
-                new double[][]{
+                new double[][]{ // Ferry Velocity
                     {1.75, 14.8},
                     {2.12, 15.0},
                     {3.16, 18.8}
                 },
-                new double[][]{
+                new double[][]{ // Ferry Hood Angle
                     {1.75, 14.8},
                     {2.12, 15.0},
                     {3.16, 18.8}

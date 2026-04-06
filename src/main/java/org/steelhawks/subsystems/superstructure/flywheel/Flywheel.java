@@ -22,6 +22,7 @@ import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
+import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
 
@@ -60,7 +61,7 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kS;
     private static LoggedTunableNumber kV;
 
-    private static double redBullF1Constant;
+    private static double redBullConstant;
 
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
@@ -73,7 +74,7 @@ public class Flywheel extends SubsystemBase {
         kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
-        redBullF1Constant = constants.stationaryHoodVelocityFactor();
+        redBullConstant = constants.stationaryHoodVelocityFactor();
         velocityTolerance =
             new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         routine =
@@ -92,10 +93,12 @@ public class Flywheel extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
+        BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
+        redBullConstant = Toggles.useLUT.get() ? 1.0 : constants.stationaryHoodVelocityFactor();
 
         nearTargetVelocity =
             setpointDebouncer.calculate(
-                Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
+                Maths.epsilonEquals((inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0, targetVelocityRadPerSec, velocityTolerance.get()));
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -136,7 +139,7 @@ public class Flywheel extends SubsystemBase {
                         var sol = RobotState.getInstance().getMovingShotSolution();
                         if (sol != null) {
                             double rps = ShooterStructure.linearToAngularVelocity(
-                                redBullF1Constant * sol.exitVelocity()
+                                redBullConstant * sol.exitVelocity()
                                      * (DriverStation.isAutonomous()
                                         ? 1.06
                                         : 1.0),
@@ -147,7 +150,7 @@ public class Flywheel extends SubsystemBase {
                     case SHOOTING_STATIONARY -> {
                         double mps = getStationaryExitVelocityMps(hubCenter);
                         double rps = ShooterStructure.linearToAngularVelocity(
-                            redBullF1Constant * mps, constants.flywheelRadius());
+                            redBullConstant * mps, constants.flywheelRadius());
                         setTargetVelocity(rps);
                     }
                 }
@@ -176,6 +179,10 @@ public class Flywheel extends SubsystemBase {
             cachedStationaryDist = currentDist;
         }
         return cachedStationaryMps;
+    }
+
+    public double getStatorCurrentAmps() {
+        return inputs.leftTorqueCurrentAmps;
     }
 
     public void setTargetVelocity(double velocityRadPerSec) {
@@ -237,8 +244,8 @@ public class Flywheel extends SubsystemBase {
 
     public Command incrementVelocityFactor(double increment) {
         return Commands.runOnce(() -> {
-            redBullF1Constant += increment;
-            Logger.recordOutput("Flywheel/VelocityFactor", redBullF1Constant);
+            redBullConstant += increment;
+            Logger.recordOutput("Flywheel/VelocityFactor", redBullConstant);
         });
     }
 
@@ -259,7 +266,7 @@ public class Flywheel extends SubsystemBase {
                     () -> {
                         double current = timer.get() * FF_RAMP_RATE;
                         io.runFlywheelOpenLoop(current, true);
-                        velocitySamples.add(inputs.velocityRadPerSec);
+                        velocitySamples.add((inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0);
                         currentSamples.add(current);
                     },
                     this)

@@ -212,6 +212,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         LoopTimeUtil.reset();
+        BatteryUtil.reset();
 
         PhoenixUtil.refreshAll();
         LoopTimeUtil.record("PhoenixUtil");
@@ -223,6 +224,9 @@ public class Robot extends LoggedRobot {
         }
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
+
+        BatteryUtil.integrateAndLogTotal();
+        LoopTimeUtil.record("BatteryUtil");
 
         if (Constants.getRobot() == SIMBOT || Toggles.debugMode.get()) {
             visualizeFieldConstants();

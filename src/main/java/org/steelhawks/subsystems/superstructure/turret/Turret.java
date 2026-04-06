@@ -4,9 +4,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,27 +20,30 @@ import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.util.AllianceFlip;
-import org.steelhawks.util.LoggedTunableNumber;
-import org.steelhawks.util.LoopTimeUtil;
-import org.steelhawks.util.Maths;
+import org.steelhawks.util.*;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
-    public static LoggedTunableNumber kS;
-    public static LoggedTunableNumber kA;
-    public static LoggedTunableNumber kP;
-    public static LoggedTunableNumber kI;
-    public static LoggedTunableNumber kD; // 35
+    private final static double FF_RAMP_RATE = 2.0; // 2 AMPS per sec
+
+    private final LoggedTunableNumber kS;
+    private final LoggedTunableNumber kA;
+    private final LoggedTunableNumber kV;
+    private final LoggedTunableNumber kP;
+    private final LoggedTunableNumber kI;
+    private final LoggedTunableNumber kD; // 35
 
     private static LoggedTunableNumber maxVelocityRadPerSec;
     private static LoggedTunableNumber maxAccelerationRadPerSecSq;
     private static LoggedTunableNumber manualIncrement;
-    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Units.degreesToRadians(5.0));
+    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Units.degreesToRadians(3.0));
 
     private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
@@ -78,6 +83,7 @@ public class Turret extends SubsystemBase {
         kI = new LoggedTunableNumber("Turret/kI", constants.kI());
         kD = new LoggedTunableNumber("Turret/kD", constants.kD());
         kS = new LoggedTunableNumber("Turret/kS", constants.kS());
+        kV = new LoggedTunableNumber("Turret/kV", 0.0);
         kA = new LoggedTunableNumber("Turret/kA", constants.kA());
         maxVelocityRadPerSec =
             new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", constants.maxVelocityRadPerSec());
@@ -140,6 +146,36 @@ public class Turret extends SubsystemBase {
         return Rotation2d.fromRadians(bestAngle);
     }
 
+    private double calculateTurretVelocityFF(Translation2d target2d) {
+        // ((v x r_hat_perpendicular) / |r|) - robot_omega
+        if (target2d == null) {
+            return 0.0;
+        }
+        var robot = getPose();
+        var turretPos = new Pose3d(robot)
+            .transformBy(RobotConstants.ROBOT_TO_TURRET)
+            .toPose2d()
+            .getTranslation();
+        var chassisSpeeds =
+            ChassisSpeeds.fromRobotRelativeSpeeds(
+                RobotContainer.s_Swerve.getChassisSpeeds(),
+                RobotState.getInstance().getRotation());
+        double omegaRobot = chassisSpeeds.omegaRadiansPerSecond;
+        // velocity of shooter = linear velocity + (omega * r_offset)
+        Translation2d robotToTurret = turretPos.minus(robot.getTranslation());
+        double turretVx = chassisSpeeds.vxMetersPerSecond - omegaRobot * robotToTurret.getY();
+        double turretVy = chassisSpeeds.vyMetersPerSecond + omegaRobot * robotToTurret.getX();
+        Translation2d turretVelocity = new Translation2d(turretVx, turretVy);
+
+        Translation2d mrR = target2d.minus(turretPos); // r vector from turret to target
+        double distance = mrR.getNorm();
+        Translation2d rHat = mrR.div(distance);
+        Translation2d rHatPerpendicular = rHat.rotateBy(Rotation2d.kCCW_Pi_2);
+
+        double tangentialVelocity = turretVelocity.dot(rHatPerpendicular);
+        return (tangentialVelocity / distance) - omegaRobot;
+    }
+
     private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
         List<Translation3d> trajectoryPoints = new ArrayList<>();
         int numPoints = 50;
@@ -188,6 +224,7 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Turret", inputs);
+        BatteryUtil.recordCurrentUsage("Turret", inputs.supplyCurrentAmps);
         if (Constants.getRobot().equals(RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             Logger.recordOutput("Turret/IsHomed", true);
@@ -275,6 +312,7 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
+            Translation2d velocityTargetFF = null;
             if (Toggles.shooterTuningMode.get()) {
                 RobotState.getInstance().setAimState(AimState.TO_HUB);
             }
@@ -284,6 +322,7 @@ public class Turret extends SubsystemBase {
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                     var sol = RobotState.getInstance().getMovingShotSolution();
                     if (sol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {
+                        velocityTargetFF = sol.virtualTarget().toTranslation2d();
                         desiredRotation = findBestTurretAngle(
                             sol.turretAngle().getRadians(),
                             getPosition().getRadians());
@@ -293,6 +332,7 @@ public class Turret extends SubsystemBase {
                         }
                     } else {
                         // fallback aim directly at hub with no velocity compensation
+                        velocityTargetFF = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER);
                         var turretTranslation = new Pose3d(robot)
                             .transformBy(RobotConstants.ROBOT_TO_TURRET)
                             .toPose2d()
@@ -313,6 +353,7 @@ public class Turret extends SubsystemBase {
                             FieldConstants.Ferrying.START_LINE,
                             FieldConstants.Ferrying.END_LINE));
                     var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
+                    velocityTargetFF = ferryGoal3d.toTranslation2d();
                     var turretTranslation = new Pose3d(robot)
                         .transformBy(RobotConstants.ROBOT_TO_TURRET)
                         .toPose2d()
@@ -356,6 +397,7 @@ public class Turret extends SubsystemBase {
                 io.runPivot(
                     setpoint.position,
                     kS.getAsDouble() * Math.signum(setpoint.velocity)
+                        + kV.getAsDouble() * calculateTurretVelocityFF(velocityTargetFF)
                         + kA.getAsDouble() * acceleration
                 );
             }
@@ -410,5 +452,48 @@ public class Turret extends SubsystemBase {
                 this.joystickAxis = joystickAxis;
             }),
             () -> isManual);
+    }
+
+    public Command feedforwardCharacterization() {
+        List<Double> velocitySamples = new LinkedList<>();
+        List<Double> currentSamples = new LinkedList<>();
+        Timer timer = new Timer();
+        return Commands.sequence(
+            // Reset data
+            Commands.runOnce(
+                () -> {
+                    velocitySamples.clear();
+                    currentSamples.clear();
+                    timer.restart();
+                }),
+            // Accelerate and gather data
+            Commands.run(
+                    () -> {
+                        double current = timer.get() * FF_RAMP_RATE;
+                        io.runOpenLoop(current, true);
+                        velocitySamples.add(inputs.velocityRadPerSec.getRadians());
+                        currentSamples.add(current);
+                    },
+                    this)
+                .finallyDo(
+                    () -> {
+                        int n = velocitySamples.size();
+                        double sumX = 0.0;
+                        double sumY = 0.0;
+                        double sumXY = 0.0;
+                        double sumX2 = 0.0;
+                        for (int i = 0; i < n; i++) {
+                            sumX += velocitySamples.get(i);
+                            sumY += currentSamples.get(i);
+                            sumXY += velocitySamples.get(i) * currentSamples.get(i);
+                            sumX2 += velocitySamples.get(i) * velocitySamples.get(i);
+                        }
+                        double kS = (sumY * sumX2 - sumX * sumXY) / (n * sumX2 - sumX * sumX);
+                        double kV = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                        NumberFormat formatter = new DecimalFormat("#0.00000");
+                        System.out.println("********** Flywheel FF Characterization Results **********");
+                        System.out.println("\tkS: " + formatter.format(kS));
+                        System.out.println("\tkV: " + formatter.format(kV));
+                    }));
     }
 }

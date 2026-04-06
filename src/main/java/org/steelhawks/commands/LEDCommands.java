@@ -1,6 +1,7 @@
 package org.steelhawks.commands;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -9,8 +10,7 @@ import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.anim.AnimationLibrary;
 
-import static org.steelhawks.Robot.RobotState.AUTON;
-import static org.steelhawks.Robot.RobotState.TELEOP;
+import static org.steelhawks.Robot.RobotState.*;
 
 public class LEDCommands {
 
@@ -60,6 +60,23 @@ public class LEDCommands {
             case Y_BACKWARD -> LEDMatrix.DirectionalArrow.Direction.DOWN;
             case MULTIPLE, NONE -> LEDMatrix.DirectionalArrow.Direction.NONE;
         };
+    }
+
+    public static Command badBattery() {
+        return Commands.sequence(
+            s_Matrix.clearCommand(),
+            Commands.waitSeconds(0.3),
+            Commands.runOnce(() -> s_Matrix.playAnimation(
+                new LEDMatrix.StaticText("CHANGE", Color.RED)), s_Matrix),
+            Commands.waitSeconds(1.0),
+            Commands.runOnce(() -> s_Matrix.playAnimation(
+                AnimationLibrary.lightningBolt()), s_Matrix),
+            Commands.waitSeconds(0.8),
+            Commands.runOnce(() -> s_Matrix.playAnimation(
+                new LEDMatrix.StaticText("BATTERY", Color.RED)), s_Matrix),
+            Commands.waitSeconds(1.0)
+        ).repeatedly()
+            .ignoringDisable(true);
     }
 
     public static Command runTechnicianWizard() {
@@ -170,11 +187,19 @@ public class LEDCommands {
     private static class LEDTriggers {
 
         private LEDTriggers(Trigger toggleMatchData) {
-            Trigger runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled()).debounce(1)
+            Trigger badBattery =
+                new Trigger(
+                    () -> Robot.getState().equals(DISABLED)
+                        && RobotController.getBatteryVoltage() <= Constants.RobotConstants.BAD_BATTERY_THRESHOLD)
+                    .whileTrue(badBattery());
+
+            Trigger runTechnicianScreen = new Trigger(() -> Robot.isFirstRun() && DriverStation.isDisabled())
+                .and(badBattery.negate()).debounce(1)
                 .whileTrue(runTechnicianWizard())
                 .onFalse(s_Matrix.clearCommand());
 
             Trigger runRainbowLEDs = new Trigger(() -> !Robot.isFirstRun() && DriverStation.isDisabled())
+                .and(badBattery.negate())
                 .whileTrue(s_Matrix.rainbowWaveCommand(10))
                 .onFalse(s_Matrix.clearCommand());
 
@@ -197,6 +222,8 @@ public class LEDCommands {
                     .and(warn10Seconds.negate())
                     .and(toggleMatchData.negate())
                 .whileTrue(s_Matrix.fireCommand(15, 20));
+
+
         }
     }
 }

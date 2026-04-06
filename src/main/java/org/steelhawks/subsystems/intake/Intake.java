@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 
 public class Intake extends SubsystemBase {
@@ -30,6 +31,7 @@ public class Intake extends SubsystemBase {
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
+    private boolean isRollersRunning = false;
 
     private final Debouncer homingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kRising);
     private final Debouncer twistingDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
@@ -105,6 +107,10 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
+        BatteryUtil.recordCurrentUsage(
+            "Intake",
+            inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps + inputs.leftTorqueCurrentAmps + inputs.rightTorqueCurrentAmps
+        );
 
         if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
@@ -273,9 +279,18 @@ public class Intake extends SubsystemBase {
             .finallyDo(() -> io.setPosition(IntakeConstants.State.HOME.getPosition()));
     }
 
+    public boolean isRollersRunning() {
+        return isRollersRunning;
+    }
+
     public Command runIntake() {
         return Commands.run(
-            () -> io.runIntake(constants.intakeSpeed()), this).finallyDo(io::stopIntake);
+                () -> io.runIntake(constants.intakeSpeed()), this)
+            .beforeStarting(() -> isRollersRunning = true)
+            .finallyDo(() -> {
+                isRollersRunning = false;
+                io.stopIntake();
+            });
     }
 
     public Command outtakeIntake() {
@@ -285,12 +300,27 @@ public class Intake extends SubsystemBase {
 
     public Command agitate() {
         return Commands.sequence(
-                setDesiredStateCommand(IntakeConstants.State.INTAKE),
-                Commands.waitUntil(this::atGoal),
-                setDesiredStateCommand(IntakeConstants.State.HOME),
-                Commands.waitUntil(() -> atGoal() || isStalling()))
-            .repeatedly()
-            .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
+            setDesiredStateCommand(IntakeConstants.State.INTAKE),
+            Commands.waitUntil(this::atGoal),
+            setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION),
+            Commands.waitUntil(() -> atGoal() || isStalling()))
+        .repeatedly()
+        .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
+    }
+
+    public Command feed() {
+        return Commands.runOnce(() ->
+            profile = new TrapezoidProfile(
+                new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SEC.get() * 0.3,
+                MAX_ACCEL_METERS_PER_SEC_SQ.get() * 0.3)))
+        .andThen(setDesiredStateCommand(IntakeConstants.State.HOME))
+        .andThen(Commands.waitUntil(this::atGoal))
+        .finallyDo(() ->
+            profile = new TrapezoidProfile(
+                new TrapezoidProfile.Constraints(
+                    MAX_VELOCITY_METERS_PER_SEC.get(),
+                    MAX_ACCEL_METERS_PER_SEC_SQ.get())));
     }
 
     public Command zeroIntake() {

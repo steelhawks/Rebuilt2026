@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
+import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.Color;
@@ -43,6 +44,7 @@ public class RobotContainer {
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
+        RumbleAPI.register(driver);
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
@@ -71,7 +73,7 @@ public class RobotContainer {
 
     private void configureDriver() {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
-            .onTrue(new VibrateController(driver).repeatedly());
+            .whileTrue(RumbleAPI.steady().repeatedly());
 
         new Trigger(() -> true)
             .whileTrue(TeleopSwerve.overrideState());
@@ -85,7 +87,7 @@ public class RobotContainer {
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
-            .onTrue(new VibrateController(driver));
+            .onTrue(RumbleAPI.steady());
 
 //        driver.povUp().onTrue(
 //            s_Flywheel.incrementVelocityFactor(0.03));
@@ -98,6 +100,9 @@ public class RobotContainer {
 
         driver.rightBumper()
             .whileTrue(s_Intake.outtakeIntake());
+
+        driver.leftTrigger()
+            .whileTrue(ShootingCommands.shootWhileIntaking());
 
         driver.leftBumper()
             .whileTrue(ShootingCommands.shoot());

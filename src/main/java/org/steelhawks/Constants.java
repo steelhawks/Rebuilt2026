@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
@@ -42,7 +41,7 @@ public final class Constants {
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.OMEGABOT;
+    private static final RobotType ROBOT = RobotType.SIMBOT;
 
     /**
      * The robot type.
