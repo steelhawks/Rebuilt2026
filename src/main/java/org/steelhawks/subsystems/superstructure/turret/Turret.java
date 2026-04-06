@@ -147,7 +147,7 @@ public class Turret extends SubsystemBase {
     }
 
     private double calculateTurretVelocityFF(Translation2d target2d) {
-        // ((v * r_hat_perpendicular) / |r|) - robot_omega
+        // ((v x r_hat_perpendicular) / |r|) - robot_omega
         if (target2d == null) {
             return 0.0;
         }
