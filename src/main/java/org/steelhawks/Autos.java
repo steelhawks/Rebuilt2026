@@ -392,4 +392,42 @@ public final class Autos {
 
         return routine;
     }
+
+    public static AutoRoutine middleDepotAuton() {
+        AutoRoutine routine = factory.newRoutine("Middle Depot Auton");
+
+        AutoTrajectory moveToShootPose = ChoreoTraj.MiddleDepotAuton$0.asAutoTraj(routine);
+        AutoTrajectory intakeFromDepot = ChoreoTraj.MiddleDepotAuton$1.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                moveToShootPose.spawnCmd()
+            )
+        );
+
+        moveToShootPose.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        intakeFromDepot.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        moveToShootPose.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(moveToShootPose),
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel),
+                intakeFromDepot.spawnCmd()
+            )
+        );
+
+        intakeFromDepot.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(intakeFromDepot),
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel)
+            )
+        );
+
+        return routine;
+    }
 }

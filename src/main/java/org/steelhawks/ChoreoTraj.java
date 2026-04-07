@@ -178,6 +178,27 @@ public record ChoreoTraj(
 	    new Pose2d(3.611, 0.643, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(0.451, 0.643, Rotation2d.fromRadians(3.142))
 	);
+	public static final ChoreoTraj MiddleDepotAuton = new ChoreoTraj(
+	    "MiddleDepotAuton",
+	    OptionalInt.empty(),
+	    3.4495,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton$0 = new ChoreoTraj(
+	    "MiddleDepotAuton",
+	    OptionalInt.of(0),
+	    0.54955,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton$1 = new ChoreoTraj(
+	    "MiddleDepotAuton",
+	    OptionalInt.of(1),
+	    2.89995,
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
 	public static final ChoreoTraj NotSoOPAuton = new ChoreoTraj(
 	    "NotSoOPAuton",
 	    OptionalInt.empty(),
@@ -234,6 +255,9 @@ public record ChoreoTraj(
 		Map.entry("RRebound_Bump$0", RRebound_Bump$0),
 		Map.entry("RRebound_Bump$1", RRebound_Bump$1),
 		Map.entry("RRebound_Bump$2", RRebound_Bump$2),
+		Map.entry("MiddleDepotAuton", MiddleDepotAuton),
+		Map.entry("MiddleDepotAuton$0", MiddleDepotAuton$0),
+		Map.entry("MiddleDepotAuton$1", MiddleDepotAuton$1),
 		Map.entry("NotSoOPAuton", NotSoOPAuton),
 		Map.entry("NotSoOPAuton$0", NotSoOPAuton$0),
 		Map.entry("NotSoOPAuton$1", NotSoOPAuton$1),
