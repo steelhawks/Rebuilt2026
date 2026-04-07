@@ -187,19 +187,19 @@ public class VisionConstants {
             new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
-        new CameraConfig(
-            "ov9281-southwest",
-            new Transform3d(
-                Units.inchesToMeters(-13.303), // 12.333 to the left
-                Units.inchesToMeters(12.333), // 13.303 down
-                Units.inchesToMeters(20.774),
-            new Rotation3d(
-                Units.degreesToRadians(0.0),
-                Units.degreesToRadians(-30.0),
-                Units.degreesToRadians(-225.0))),
-            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
+//        new CameraConfig(
+//            "ov9281-southwest",
+//            new Transform3d(
+//                Units.inchesToMeters(-13.303), // 12.333 to the left
+//                Units.inchesToMeters(12.333), // 13.303 down
+//                Units.inchesToMeters(20.774),
+//            new Rotation3d(
+//                Units.degreesToRadians(0.0),
+//                Units.degreesToRadians(-30.0),
+//                Units.degreesToRadians(-225.0))),
+//            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
+//            CameraType.PHOTON
+//        ),
         new CameraConfig(
             "ov9281-east",
             new Transform3d(
