@@ -178,6 +178,34 @@ public record ChoreoTraj(
 	    new Pose2d(3.611, 0.643, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(0.451, 0.643, Rotation2d.fromRadians(3.142))
 	);
+	public static final ChoreoTraj NotSoOPAuton = new ChoreoTraj(
+	    "NotSoOPAuton",
+	    OptionalInt.empty(),
+	    15.38965,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj NotSoOPAuton$0 = new ChoreoTraj(
+	    "NotSoOPAuton",
+	    OptionalInt.of(0),
+	    4.74605,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
+	);
+	public static final ChoreoTraj NotSoOPAuton$1 = new ChoreoTraj(
+	    "NotSoOPAuton",
+	    OptionalInt.of(1),
+	    6.68402,
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
+	);
+	public static final ChoreoTraj NotSoOPAuton$2 = new ChoreoTraj(
+	    "NotSoOPAuton",
+	    OptionalInt.of(2),
+	    3.959579999999999,
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
+	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -205,7 +233,11 @@ public record ChoreoTraj(
 		Map.entry("RRebound_Bump", RRebound_Bump),
 		Map.entry("RRebound_Bump$0", RRebound_Bump$0),
 		Map.entry("RRebound_Bump$1", RRebound_Bump$1),
-		Map.entry("RRebound_Bump$2", RRebound_Bump$2)
+		Map.entry("RRebound_Bump$2", RRebound_Bump$2),
+		Map.entry("NotSoOPAuton", NotSoOPAuton),
+		Map.entry("NotSoOPAuton$0", NotSoOPAuton$0),
+		Map.entry("NotSoOPAuton$1", NotSoOPAuton$1),
+		Map.entry("NotSoOPAuton$2", NotSoOPAuton$2)
     );
 
     /**

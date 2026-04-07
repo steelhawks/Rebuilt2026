@@ -95,6 +95,7 @@ public final class Autos {
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
+        autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.NotSoOPAuton.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -342,6 +343,50 @@ public final class Autos {
                 recoverToTrajectoryEnd(shootingSection2),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 finalRebound.spawnCmd()
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine rightNotSoOP() {
+        AutoRoutine routine = factory.newRoutine("Right Not So OP Auton");
+
+        AutoTrajectory firstPass = ChoreoTraj.NotSoOPAuton$0.asAutoTraj(routine);
+        AutoTrajectory secondPass = ChoreoTraj.NotSoOPAuton$1.asAutoTraj(routine);
+        AutoTrajectory thirdPass = ChoreoTraj.NotSoOPAuton$2.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                firstPass.spawnCmd()
+            )
+        );
+
+        firstPass.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        secondPass.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        thirdPass.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        firstPass.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(firstPass),
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                secondPass.spawnCmd()
+            )
+        );
+
+        secondPass.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(secondPass),
+                ShootingCommands.shoot().withTimeout(2.0),
+                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                thirdPass.spawnCmd()
             )
         );
 
