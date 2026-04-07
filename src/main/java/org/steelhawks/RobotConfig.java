@@ -5,6 +5,7 @@ import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.led.LEDStrip;
 import org.steelhawks.subsystems.shooter.Shooter;
+import org.steelhawks.subsystems.shooter.ShooterIO_TalonFX;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.Vision.VisionConsumer;

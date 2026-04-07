@@ -18,6 +18,8 @@ public class ShooterConstants extends SubsystemBase {
     public static final double TOLERANCE = 1.0;
     public static final double GEAR_REDUCTION = 2.0;
     public static final double FLYWHEEL_RADIUS = Units.inchesToMeters(2.0);
+    public static final double SHOOTER_HEIGHT = Units.inchesToMeters(11.7);
+    public static final double SHOOTER_ANGLE = Units.degreesToRadians(45); //unknown
 
     public static final double MAX_RPM = 0.0;
     public static final double MAX_VELOCITY_ROTPERSEC = MAX_RPM / 60;

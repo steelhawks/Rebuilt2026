@@ -17,6 +17,12 @@ public class FieldConstants {
 
     public static final Field2d FIELD_2D = new Field2d();
 
+    public static final int HUB_HEIGHT = 48; //inches
+    public static final int HUB_WIDTH = 41;
+    public static final int HUB_FUNNEL_HEIGHT = 24;
+    public static final int HUB_FUNNEL_WIDTH = 24;
+    public static final int HUB_HEIGHT_TO_CLEAR_FUNNEL = 21;
+
     public static AprilTag getAprilTag(int id) {
         return new AprilTag(id, VisionConstants.APRIL_TAG_LAYOUT.getTagPose(id).get());
     }
