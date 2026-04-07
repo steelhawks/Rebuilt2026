@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -75,16 +76,13 @@ public class RobotContainer {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .whileTrue(RumbleAPI.steady().repeatedly());
 
-        new Trigger(() -> true)
-            .whileTrue(TeleopSwerve.overrideState());
-
-        new Trigger(() -> {
-            double x = RobotState.getInstance().getEstimatedPose().getX();
-            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
-            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
-        })
-            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
-            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
+//        new Trigger(() -> {
+//            double x = RobotState.getInstance().getEstimatedPose().getX();
+//            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
+//            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+//        })
+//            .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
+//            .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
         driver.povLeft().onTrue(s_Swerve.zeroHeading())
             .onTrue(RumbleAPI.steady());
@@ -95,26 +93,33 @@ public class RobotContainer {
 //        driver.povDown().onTrue(
 //            s_Flywheel.incrementVelocityFactor(-0.03));
 
-        driver.povLeft()
-            .whileTrue(s_Indexer.outtake());
-
-        driver.rightBumper()
-            .whileTrue(s_Intake.outtakeIntake());
-
-        driver.leftTrigger()
-            .whileTrue(ShootingCommands.shootWhileIntaking());
-
-        driver.leftBumper()
-            .whileTrue(ShootingCommands.shoot());
-
-        driver.rightTrigger()
-            .whileTrue(
-                s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
+//        driver.povLeft()
+//            .whileTrue(s_Indexer.outtake());
+//
+//        driver.rightBumper()
+//            .whileTrue(s_Intake.outtakeIntake());
+//
+//        driver.leftTrigger()
+//            .whileTrue(ShootingCommands.shootWhileIntaking());
+//
+//        driver.leftBumper()
+//            .whileTrue(ShootingCommands.shoot());
+//
+//        driver.rightTrigger()
+//            .whileTrue(
+//                s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
+//
+//        driver.x()
+//            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+//
+//        driver.y()
+//            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
 
         driver.x()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kPi));
         driver.y()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kZero));
+        driver.a()
+            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kPi.div(2.0)));
     }
 }

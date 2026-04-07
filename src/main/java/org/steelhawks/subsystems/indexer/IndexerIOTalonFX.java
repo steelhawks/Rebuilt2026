@@ -108,7 +108,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 			spindexer2Temperature = spindexerMotor2.getDeviceTemp();
 
 			BaseStatusSignal.setUpdateFrequencyForAll(
-				1000,
+				100,
 				spindexer2Velocity,
 				spindexer2Voltage,
 				spindexer2Current,
@@ -130,7 +130,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            1000,
+            100,
             spindexer1Velocity,
             spindexer1Voltage,
             spindexer1TorqueCurrent);

@@ -138,7 +138,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeDutyCycleOut = new DutyCycleOut(0.0).withEnableFOC(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            1000,
+            50,
             rightPosition, rightVelocity, rightVoltage, rightTorqueCurrent, leftPosition, leftVelocity, leftVoltage, leftTorqueCurrent
         );
 

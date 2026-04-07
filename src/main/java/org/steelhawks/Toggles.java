@@ -67,7 +67,7 @@ public interface Toggles {
 
     interface Flywheel {
         LoggedNetworkBoolean isEnabled =
-        new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", true);
+        new LoggedNetworkBoolean("Toggles/Flywheel/IsEnabled", false);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Flywheel/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
@@ -78,7 +78,7 @@ public interface Toggles {
 
     interface Turret {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Turret/IsEnabled", false);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
@@ -87,7 +87,7 @@ public interface Toggles {
 
     interface Intake {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", false);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Intake/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
@@ -107,7 +107,7 @@ public interface Toggles {
 
     interface Hood {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Hood/IsEnabled", true);
+            new LoggedNetworkBoolean("Toggles/Hood/IsEnabled", false);
         LoggedNetworkBoolean disableBrakeMode =
             new LoggedNetworkBoolean("Toggles/Hood/DisableBrakeMode", true);
         LoggedNetworkBoolean currentOverride =
