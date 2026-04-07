@@ -308,7 +308,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() { return new Shooter(); }
+        public Shooter createShooter() { return new Shooter(new ShooterIO_TalonFX()); }
     }
 
     // AlphaBot factory
@@ -365,7 +365,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() { return new Shooter(); }
+        public Shooter createShooter() { return new Shooter(new ShooterIO_TalonFX()); }
     }
 
     // Last year robot factory
@@ -422,7 +422,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() { return new Shooter(); }
+        public Shooter createShooter() { return null; }
     }
 
     // SimBot factory
@@ -460,7 +460,7 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() { return new Shooter(); }
+        public Shooter createShooter() { return new Shooter(new ShooterIO_TalonFX()); }
     }
 
     // Replay factory
@@ -496,6 +496,6 @@ public class RobotConfig {
         }
 
         @Override
-        public Shooter createShooter() { return new Shooter(); }
+        public Shooter createShooter() { return new Shooter(new ShooterIO_TalonFX()); }
     }
 }
