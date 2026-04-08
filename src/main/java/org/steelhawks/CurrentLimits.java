@@ -9,7 +9,7 @@ public interface CurrentLimits {
         double intakePositionCurrent = 20.0;
         double intakeRollersCurrent = 20.0;
         double spindexerCurrent = 20.0;
-        double feederCurrent = 20.0;
+        double feederCurrent = 40.0;
     }
 
     interface StatorLimit {
@@ -21,7 +21,7 @@ public interface CurrentLimits {
         double intakePositionCurrent = 40.0;
         double intakeRollersCurrent = 40.0;
         double spindexerCurrent = 40.0;
-        double feederCurrent = 30.0;
+        double feederCurrent = 80.0;
 
     }
 }

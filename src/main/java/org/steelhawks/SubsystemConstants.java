@@ -150,33 +150,30 @@ public class SubsystemConstants {
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 15.0, 0.0, 0.0, 8.86249, 0.16195, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
+                5, 6, 0.85, 15.0, 0.0, 0.0, 6.94627, 0.04831, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 9.70379 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.19390 ﻿
-
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.93642 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.20165 ﻿
-
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.53312 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.15897 ﻿
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.13426 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.17007 ﻿
-
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.86249 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.16195 ﻿
-
-
+//    ﻿﻿﻿﻿﻿﻿﻿﻿Warning ﻿﻿ 44000 ﻿﻿ DS Return Key Disable ﻿﻿ Driver Station ﻿﻿﻿
+//            ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 7.44627 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.04831
 
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.27490234375));
+                4, 9, 1500.0, 0.0, 0.0, 13.57013, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(-0.044677734375));
+
+        // Turret Characterization Results
+        // kS: 13.18095
+        // kV: 1.99614
+
+        // kS: 15.17513
+        // kv: 1.71165
+
+        // kS: 10.67311
+        // kv: 2.54928 omg cheesy poofs
+
+        // kS: 13.57013
+        // kv: 1.92354
 
         public static final HoodConstants HOOD =
             new HoodConstants(
