@@ -401,9 +401,9 @@ public class RobotState {
     }
 
     public void addOdometryObservation(OdometryObservation observation) {
-        if (observation.gyroAngle().isPresent()) {
-            gyroRotation = observation.gyroAngle().get();
-            rawGyroRotation = observation.gyroAngle().get();
+        if (observation.gyroAngle() != null) {
+            gyroRotation = observation.gyroAngle();
+            rawGyroRotation = observation.gyroAngle();
         }
         Pose2d estimatedPose = poseEstimator.updateWithTime(
             observation.timestamp(), gyroRotation, observation.wheelPositions());
@@ -513,7 +513,7 @@ public class RobotState {
     private record TimestampedObjectList(double timestamp, List<DetectedObject> objects) {}
 
     public record OdometryObservation(
-        double timestamp, SwerveModulePosition[] wheelPositions, Optional<Rotation2d> gyroAngle) {}
+        double timestamp, SwerveModulePosition[] wheelPositions, Rotation2d gyroAngle) {}
 
     public record VisionObservation(
         double timestamp,

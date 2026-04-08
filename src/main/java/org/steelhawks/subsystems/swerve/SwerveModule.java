@@ -34,6 +34,8 @@ public class SwerveModule {
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
+    private final String loggerKey;
+    private final String batteryKey;
     private final SwerveModuleConstants<
         TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constants;
@@ -55,6 +57,8 @@ public class SwerveModule {
         this.io = io;
         this.index = index;
         this.constants = constants;
+        this.loggerKey = "Swerve/Module" + index;
+        this.batteryKey = "Module" + index;
 
         drivekP.initDefault(constants.DriveMotorGains.kP);
         drivekI.initDefault(constants.DriveMotorGains.kI);
@@ -83,8 +87,8 @@ public class SwerveModule {
 
     public void periodic() {
         io.updateInputs(inputs);
-        Logger.processInputs("Swerve/Module" + index, inputs);
-        BatteryUtil.recordCurrentUsage("Module" + index, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
+        Logger.processInputs(loggerKey, inputs);
+        BatteryUtil.recordCurrentUsage(batteryKey, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
 
         cachedState.speedMetersPerSecond = inputs.driveVelocityRadPerSec * constants.WheelRadius;
         cachedState.angle = inputs.turnPosition;

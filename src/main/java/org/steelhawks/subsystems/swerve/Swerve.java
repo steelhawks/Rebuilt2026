@@ -40,7 +40,6 @@ import org.steelhawks.*;
 import org.steelhawks.Constants.*;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -59,6 +58,7 @@ public class Swerve extends SubsystemBase {
 
     private static final double SLOW_SPEED_MULTIPLIER = 0.45;
     private static final double SPEED_MULTIPLIER = 1.0;
+    private static final SwerveModuleState[] EMPTY_MODULE_STATES = new SwerveModuleState[0];
     private boolean isPathfinding = false;
     private boolean requestSlowMode = false;
 
@@ -469,8 +469,8 @@ public class Swerve extends SubsystemBase {
             for (var module : swerveModules) {
                 module.stop();
             }
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[]{});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[]{});
+            Logger.recordOutput("SwerveStates/Setpoints", EMPTY_MODULE_STATES);
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", EMPTY_MODULE_STATES);
         }
 
         processOdometryObservations();
@@ -514,7 +514,7 @@ public class Swerve extends SubsystemBase {
                 new RobotState.OdometryObservation(
                     sampleTimestamps[i],
                     odometryPositionsBuffer,
-                    gyroInputs.connected ? Optional.of(rawGyroRotation) : Optional.empty()
+                    gyroInputs.connected ? rawGyroRotation : null
                 )
             );
         }
