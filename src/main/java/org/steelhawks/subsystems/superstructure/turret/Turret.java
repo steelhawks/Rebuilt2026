@@ -31,7 +31,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
-    private final static double FF_RAMP_RATE = 2.0; // 2 AMPS per sec
+    private final static double FF_RAMP_RATE = 5.0; // 2 AMPS per sec
 
     private final LoggedTunableNumber kS;
     private final LoggedTunableNumber kA;

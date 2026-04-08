@@ -162,7 +162,7 @@ public class VisionConstants {
 
     private static final CameraConfig[] OMEGA_CAMERA_CONFIG = {
         new CameraConfig(
-            "ardu-west",
+            "ov2311-west",
             new Transform3d(
                 Units.inchesToMeters(-10.207), // 12.728 to the left
                 Units.inchesToMeters(12.728), // 10.207 down
@@ -175,7 +175,7 @@ public class VisionConstants {
             CameraType.PHOTON
         ),
         new CameraConfig(
-            "ardu-northeast",
+            "ov2311-northeast",
             new Transform3d(
                 Units.inchesToMeters(-11.639), // 10.669 to the left
                 Units.inchesToMeters(10.669), // 11.639 down
@@ -187,21 +187,21 @@ public class VisionConstants {
             new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
             CameraType.PHOTON
         ),
+//        new CameraConfig(
+//            "ov9281-southwest",
+//            new Transform3d(
+//                Units.inchesToMeters(-13.303), // 12.333 to the left
+//                Units.inchesToMeters(12.333), // 13.303 down
+//                Units.inchesToMeters(20.774),
+//            new Rotation3d(
+//                Units.degreesToRadians(0.0),
+//                Units.degreesToRadians(-30.0),
+//                Units.degreesToRadians(-225.0))),
+//            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
+//            CameraType.PHOTON
+//        ),
         new CameraConfig(
-            "ardu-southwest",
-            new Transform3d(
-                Units.inchesToMeters(-13.303), // 12.333 to the left
-                Units.inchesToMeters(12.333), // 13.303 down
-                Units.inchesToMeters(20.774),
-            new Rotation3d(
-                Units.degreesToRadians(0.0),
-                Units.degreesToRadians(-30.0),
-                Units.degreesToRadians(-225.0))),
-            new Factors.StdDevFactors(2.0), // TODO: tune stddev factors
-            CameraType.PHOTON
-        ),
-        new CameraConfig(
-            "ardu-east",
+            "ov9281-east",
             new Transform3d(
                 Units.inchesToMeters(-10.207), // 12.716 to the left
                 Units.inchesToMeters(-12.716), // 10.207 down
@@ -214,7 +214,7 @@ public class VisionConstants {
             CameraType.PHOTON
         ),
         new CameraConfig(
-            "ardu-northwest",
+            "ov2311-northwest",
             new Transform3d(
                     Units.inchesToMeters(-11.669), // 10.676 to the right
                     Units.inchesToMeters(-10.676), // 11.669 down
@@ -227,7 +227,7 @@ public class VisionConstants {
             CameraType.PHOTON
         ),
         new CameraConfig(
-            "ardu-southeast",
+            "ov9281-southeast",
             new Transform3d(
                 Units.inchesToMeters(-13.333), // 12.339 to the right
                 Units.inchesToMeters(-12.339), // 13.333 down
