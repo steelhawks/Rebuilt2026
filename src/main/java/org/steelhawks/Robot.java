@@ -206,7 +206,6 @@ public class Robot extends LoggedRobot {
         }
         // ENABLE ONLY IF YOU KNOW WHAT YOU ARE DOING
 //        Threads.setCurrentThreadPriority(true, 10);
-        CanBridge.runTCP();
     }
 
     @Override
