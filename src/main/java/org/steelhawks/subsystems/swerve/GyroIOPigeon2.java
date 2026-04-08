@@ -15,7 +15,6 @@ import org.steelhawks.RobotConfig.CANBusList;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.util.PhoenixUtil;
 
-import java.util.Queue;
 
 public class GyroIOPigeon2 implements GyroIO {
 
@@ -25,8 +24,8 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<Angle> yaw;
     private final StatusSignal<LinearAcceleration> accelerationX;
     private final StatusSignal<LinearAcceleration> accelerationY;
-    private final Queue<Double> yawPositionQueue;
-    private final Queue<Double> yawTimestampQueue;
+    private final DoubleRingBuffer yawPositionQueue;
+    private final DoubleRingBuffer yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity;
 
     public GyroIOPigeon2(int pigeon2Id, CANBus canBus) {
