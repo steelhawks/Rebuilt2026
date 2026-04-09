@@ -19,7 +19,7 @@ public interface CurrentLimits {
         double hoodCurrent = 60.0;
         double turretCurrent = 40.0;
         double intakePositionCurrent = 40.0;
-        double intakeRollersCurrent = 40.0;
+        double intakeRollersCurrent = 80.0;
         double spindexerCurrent = 40.0;
         double feederCurrent = 80.0;
 

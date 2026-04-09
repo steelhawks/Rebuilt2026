@@ -74,6 +74,7 @@ public class Turret extends SubsystemBase {
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
+    private final LoggedTunableNumber constantForceFF = new LoggedTunableNumber("Turret/ConstantForceFF", 40.0);
 
     public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
@@ -83,7 +84,7 @@ public class Turret extends SubsystemBase {
         kI = new LoggedTunableNumber("Turret/kI", constants.kI());
         kD = new LoggedTunableNumber("Turret/kD", constants.kD());
         kS = new LoggedTunableNumber("Turret/kS", constants.kS());
-        kV = new LoggedTunableNumber("Turret/kV", 1.92354);
+        kV = new LoggedTunableNumber("Turret/kV", 1.92354 * 1.1);
         kA = new LoggedTunableNumber("Turret/kA", constants.kA());
         maxVelocityRadPerSec =
             new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", constants.maxVelocityRadPerSec());
@@ -148,33 +149,32 @@ public class Turret extends SubsystemBase {
 
     private double calculateTurretVelocityFF(Translation2d target2d) {
         // ((v x r_hat_perpendicular) / |r|) - robot_omega
-//        if (target2d == null) {
-//            return 0.0;
-//        }
-//        var robot = getPose();
-//        var turretPos = new Pose3d(robot)
-//            .transformBy(RobotConstants.ROBOT_TO_TURRET)
-//            .toPose2d()
-//            .getTranslation();
-//        var chassisSpeeds =
-//            ChassisSpeeds.fromRobotRelativeSpeeds(
-//                RobotContainer.s_Swerve.getChassisSpeeds(),
-//                RobotState.getInstance().getRotation());
-//        double omegaRobot = chassisSpeeds.omegaRadiansPerSecond;
-//        // velocity of shooter = linear velocity + (omega * r_offset)
-//        Translation2d robotToTurret = turretPos.minus(robot.getTranslation());
-//        double turretVx = chassisSpeeds.vxMetersPerSecond - omegaRobot * robotToTurret.getY();
-//        double turretVy = chassisSpeeds.vyMetersPerSecond + omegaRobot * robotToTurret.getX();
-//        Translation2d turretVelocity = new Translation2d(turretVx, turretVy);
-//
-//        Translation2d mrR = target2d.minus(turretPos); // r vector from turret to target
-//        double distance = mrR.getNorm();
-//        Translation2d rHat = mrR.div(distance);
-//        Translation2d rHatPerpendicular = rHat.rotateBy(Rotation2d.kCCW_Pi_2);
-//
-//        double tangentialVelocity = turretVelocity.dot(rHatPerpendicular);
-//        return (tangentialVelocity / distance) - omegaRobot;
-        return 0.0;
+        if (target2d == null) {
+            return 0.0;
+        }
+        var robot = getPose();
+        var turretPos = new Pose3d(robot)
+            .transformBy(RobotConstants.ROBOT_TO_TURRET)
+            .toPose2d()
+            .getTranslation();
+        var chassisSpeeds =
+            ChassisSpeeds.fromRobotRelativeSpeeds(
+                RobotContainer.s_Swerve.getChassisSpeeds(),
+                RobotState.getInstance().getRotation());
+        double omegaRobot = chassisSpeeds.omegaRadiansPerSecond;
+        // velocity of shooter = linear velocity + (omega * r_offset)
+        Translation2d robotToTurret = turretPos.minus(robot.getTranslation());
+        double turretVx = chassisSpeeds.vxMetersPerSecond - omegaRobot * robotToTurret.getY();
+        double turretVy = chassisSpeeds.vyMetersPerSecond + omegaRobot * robotToTurret.getX();
+        Translation2d turretVelocity = new Translation2d(turretVx, turretVy);
+
+        Translation2d mrR = target2d.minus(turretPos); // r vector from turret to target
+        double distance = mrR.getNorm();
+        Translation2d rHat = mrR.div(distance);
+        Translation2d rHatPerpendicular = rHat.rotateBy(Rotation2d.kCCW_Pi_2);
+
+        double tangentialVelocity = turretVelocity.dot(rHatPerpendicular);
+        return (tangentialVelocity / distance) - omegaRobot;
     }
 
     private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
@@ -395,8 +395,16 @@ public class Turret extends SubsystemBase {
                 io.stop();
             } else {
                 double acceleration = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
-                double constantForceSpringFF = getPosition().getRadians() <= 1.510971 || getPosition().getRadians() >= 2.494253
-                    ? 10.0 : 0.0;
+                boolean springPullsNegative = getPosition().getRadians() <= -0.984816; // spring resists CCW
+                boolean springPullsPositive = getPosition().getRadians() >= 1.810097;  // spring resists CW
+
+                double constantForceSpringFF = 0.0;
+                if (springPullsNegative) {
+                    constantForceSpringFF = constantForceFF.getAsDouble(); // need positive torque to fight spring
+                } else if (springPullsPositive) {
+                    constantForceSpringFF = -constantForceFF.getAsDouble(); // need negative torque to fight spring
+                }
+                Logger.recordOutput("Turret/ForceSpringActive", springPullsNegative || springPullsPositive);
                 io.runPivot(
                     setpoint.position,
                     kS.getAsDouble() * Math.signum(setpoint.velocity)

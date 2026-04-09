@@ -127,6 +127,7 @@ public final class Autos {
             autoChooser.addOption("Flywheel (Quasistatic Backward)", RobotContainer.s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
             autoChooser.addOption("Turret (Quick Characterizer)", RobotContainer.s_Turret.feedforwardCharacterization());
+            autoChooser.addOption("Hood (Quick Characterizer)", RobotContainer.s_Hood.feedforwardCharacterization());
             tuningOptionsAdded = true;
         }
     }

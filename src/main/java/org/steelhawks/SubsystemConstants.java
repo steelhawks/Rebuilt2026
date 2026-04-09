@@ -150,7 +150,7 @@ public class SubsystemConstants {
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 15.0, 0.0, 0.0, 6.94627, 0.04831, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
+                5, 6, 0.85, 10.0, 0.0, 0.0, 6.94627, 0.02, 5.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
 //    ﻿﻿﻿﻿﻿﻿﻿﻿Warning ﻿﻿ 44000 ﻿﻿ DS Return Key Disable ﻿﻿ Driver Station ﻿﻿﻿
 //            ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
@@ -159,7 +159,7 @@ public class SubsystemConstants {
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 1500.0, 0.0, 0.0, 13.57013, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(-0.044677734375));
+                4, 9, 5000.0, 0.0, 200.0, 13.6, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.485049), Rotation2d.fromRadians(3.402369), Rotation2d.fromRotations(-0.146240234375));
         // Turret Characterization Results
         // kS: 13.18095
         // kV: 1.99614
@@ -189,7 +189,12 @@ public class SubsystemConstants {
 
         public static final HoodConstants HOOD =
             new HoodConstants(
-                    7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 4.0);
+                    7, 8, 110.0, 0.0, 0.0, 0.42170, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 4.0);
+
+//        ﻿﻿﻿﻿﻿﻿ ********** Hood FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: -0.42170 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.02385 ﻿
+
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(

@@ -36,7 +36,7 @@ public class Vision extends SubsystemBase {
 
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
-    private final Alert[] disconnectedAlerts;
+//    private final Alert[] disconnectedAlerts;
 
     private static final Set<Integer> allowedTagIds = new HashSet<>();
     private final boolean useQuestNav;
@@ -65,12 +65,12 @@ public class Vision extends SubsystemBase {
             inputs[i] = new VisionIOInputsAutoLogged();
         }
 
-        this.disconnectedAlerts = new Alert[io.length];
-        for (int i = 0; i < inputs.length; i++) {
-            disconnectedAlerts[i] =
-                new Alert(
-                    "Vision camera " + i + " is disconnected.", AlertType.kWarning);
-        }
+//        this.disconnectedAlerts = new Alert[io.length];
+//        for (int i = 0; i < inputs.length; i++) {
+//            disconnectedAlerts[i] =
+//                new Alert(
+//                    "Vision camera " + i + " is disconnected.", AlertType.kWarning);
+//        }
         whitelistTagIds(ALL_ALLOWED_TAGS);
     }
 
@@ -165,7 +165,7 @@ public class Vision extends SubsystemBase {
                 continue;
             }
 
-            disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
+//            disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
             List<Pose3d> tagPoses = new ArrayList<>();
             List<Pose3d> robotPoses = new ArrayList<>();

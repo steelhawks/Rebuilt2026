@@ -28,6 +28,7 @@ public class ShootingCommands {
         return Commands.sequence(
             Commands.runOnce(() ->
                 RobotState.getInstance().setShootingState(ShootingState.SHOOTING)),
+            Commands.runOnce(() -> RobotContainer.s_Indexer.resetBeamState()),
             Commands.runOnce(() -> {
                 if (AllianceFlip.shouldFlip()
                     && RobotState.getInstance().getAimState().equals(RobotState.AimState.TO_HUB)
@@ -50,28 +51,28 @@ public class ShootingCommands {
                         && RobotContainer.s_Turret.atGoal()
                         && RobotContainer.s_Hood.atGoal()),
                 RobotContainer.s_Indexer.feed()
-                    .deadlineFor(
+                    .alongWith(
                         Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
                             .andThen(Commands.waitSeconds(0.3))
                             .andThen(RobotContainer.s_Intake.feed()
-                        .onlyWhile(() -> !RobotContainer.s_Intake.isRollersRunning())))
+                                .onlyIf(() -> !RobotContainer.s_Intake.isRollersRunning())))
                     .repeatedly())
-            .repeatedly())
-            .finallyDo(() -> {
-                RobotState.getInstance().setShootingState(ShootingState.NOTHING);
-                Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
-                CommandScheduler.getInstance().schedule(
-                    RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
-            });
+                .repeatedly())
+        .finallyDo(() -> {
+            RobotState.getInstance().setShootingState(ShootingState.NOTHING);
+            Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
+            CommandScheduler.getInstance().schedule(
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+        });
     }
 
     private static Command jamRecovery() {
         return Commands.waitUntil(RobotContainer.s_Indexer::isJammed)
             .andThen(
                 Commands.sequence(
-                    RobotContainer.s_Indexer.outtake().withTimeout(0.3),
-                    RobotContainer.s_Indexer.feed().withTimeout(0.2))
-                .repeatedly()
+                        RobotContainer.s_Indexer.outtake().withTimeout(0.3),
+                        RobotContainer.s_Indexer.feed().withTimeout(0.2))
+                    .repeatedly()
                     .until(() -> !RobotContainer.s_Indexer.isJammed()))
             .repeatedly();
     }

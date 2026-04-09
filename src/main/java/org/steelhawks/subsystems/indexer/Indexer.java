@@ -97,9 +97,19 @@ public class Indexer extends SubsystemBase {
             || feederInputs.torqueCurrentAmps >= FEEDER_JAM_CURRENT.get();
     }
 
+    private boolean beamHasEverDetected = false;
+
     @AutoLogOutput(key = "Indexer/HopperEmpty")
     public boolean emptyFuel() {
-        return !beamDebouncer.calculate(beamInputs.detected);
+        boolean detected = beamInputs.detected;
+        if (detected) beamHasEverDetected = true;
+        if (!beamHasEverDetected) return false; // never seen fuel yet, don't report empty
+        return !beamDebouncer.calculate(detected);
+    }
+
+    public void resetBeamState() {
+//        beamDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kFalling);
+        beamHasEverDetected = false;
     }
 
     public Command runSpindexer() {

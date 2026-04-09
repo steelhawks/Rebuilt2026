@@ -81,7 +81,7 @@ public class RobotState {
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
     private ShootingState lastDerivedShootingState = ShootingState.SHOOTING_STATIONARY;
-    private AimState currentAimState = AimState.MANUAL;
+    private AimState currentAimState = AimState.TO_HUB;
     private ShootingState shootingState = ShootingState.NOTHING;
     private ShiftState shiftState = ShiftState.AUTO;
 

@@ -63,9 +63,9 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
         motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
         motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.turretCurrent;
-        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
         motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.turretCurrent;
-        motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        motorConfig.CurrentLimits.StatorCurrentLimitEnable = false;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
