@@ -9,8 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,16 +27,17 @@ import org.steelhawks.RobotState.PoseObservationType;
 import org.steelhawks.util.LoopTimeUtil;
 
 public class Vision extends SubsystemBase {
-    // 2 threads matches RoboRIO 2's dual-core CPU lets updateInputs() calls for
+    // 2 threads matches RoboRIO 2s dual-core CPU lets updateInputs() calls for
     // all cameras run in parallel while the main thread is blocked on Future.get().
     private static final ExecutorService visionExecutor =
         Executors.newFixedThreadPool(2);
 
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
-    // Double-buffer per camera: worker writes to backBuffer, main thread swaps with inputs[]
+    // Double-buffer per camera: worker writes ONLY to backBuffers[i].
+    // Main thread swaps after Future.get() guarantees the worker is done.
+    // This eliminates the data race that was corrupting inputs[] mid-read.
     private final VisionIOInputsAutoLogged[] backBuffers;
-//    private final Alert[] disconnectedAlerts;
 
     private static final Set<Integer> allowedTagIds = new HashSet<>();
     private final boolean useQuestNav;
@@ -64,17 +63,11 @@ public class Vision extends SubsystemBase {
 
         this.inputs = new VisionIOInputsAutoLogged[io.length];
         this.backBuffers = new VisionIOInputsAutoLogged[io.length];
-        for (int i = 0; i < inputs.length; i++) {
+        for (int i = 0; i < io.length; i++) {
             inputs[i] = new VisionIOInputsAutoLogged();
             backBuffers[i] = new VisionIOInputsAutoLogged();
         }
 
-//        this.disconnectedAlerts = new Alert[io.length];
-//        for (int i = 0; i < inputs.length; i++) {
-//            disconnectedAlerts[i] =
-//                new Alert(
-//                    "Vision camera " + i + " is disconnected.", AlertType.kWarning);
-//        }
         whitelistTagIds(ALL_ALLOWED_TAGS);
     }
 
@@ -87,8 +80,8 @@ public class Vision extends SubsystemBase {
 
     /**
      * Returns true if at least one of the tags currently seen by this camera is whitelisted.
-     * This is used to gate pose observations — if a camera is only seeing tags from the
-     * opposing alliance, we reject all of its observations to prevent pose corruption.
+     * Used to gate pose observations — if a camera only sees opposing alliance tags,
+     * all of its observations are rejected to prevent pose corruption.
      */
     private boolean cameraHasAllowedTag(int cameraIndex) {
         for (int tagId : inputs[cameraIndex].tagIds) {
@@ -121,16 +114,16 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Determine which cameras are enabled before submitting to worker threads
-        // (Toggles reads NT values — must happen on the main thread).
+        // Read toggle state on the main thread before handing off to workers.
+        // NT value reads are not thread-safe; do this once and pass the result in.
         boolean[] cameraEnabled = new boolean[io.length];
         for (int i = 0; i < io.length; i++) {
             cameraEnabled[i] = Toggles.Vision.camerasEnabled.get(io[i].getName()).get();
         }
 
-        // Submit updateInputs() for each enabled camera to the thread pool
-        // Each camera writes only to its own inputs[i] object so there is no sharing
-        // Future.get() provides a happens before guarantee before processInputs() below
+        // Submit updateInputs() for each enabled camera to the thread pool.
+        // Workers write ONLY to backBuffers[idx] inputs[] is never touched
+        // off the main thread, eliminating the previous data race.
         @SuppressWarnings("unchecked")
         Future<Void>[] futures = new Future[io.length];
         for (int i = 0; i < io.length; i++) {
@@ -138,23 +131,26 @@ public class Vision extends SubsystemBase {
                 final int idx = i;
                 futures[idx] = visionExecutor.submit(() -> {
                     io[idx].updateInputs(backBuffers[idx]);
-                    // Swap back-buffer into inputs[] — atomic reference store per JLS §17.7
-                    VisionIOInputsAutoLogged tmp = inputs[idx];
-                    inputs[idx] = backBuffers[idx];
-                    backBuffers[idx] = tmp;
                     return null;
                 });
             }
         }
 
-        // Wait for all cameras to finish log on the main thread (required by AK).
+        // Wait for each camera, then swap on the main thread.
+        // Future.get() provides a happens before guarantee, so the swap is safe
+        // and inputs[] is always consistent when processInputs() is called below.
         for (int i = 0; i < io.length; i++) {
             if (futures[i] != null) {
                 try {
                     futures[i].get(15, TimeUnit.MILLISECONDS);
+                    // Swap only after the worker is confirmed done
+                    VisionIOInputsAutoLogged tmp = inputs[i];
+                    inputs[i] = backBuffers[i];
+                    backBuffers[i] = tmp;
                 } catch (Exception e) {
-                    // Camera timed out or threw stale inputs, will be re logged from last cycle.
-                    DriverStation.reportWarning("Vision camera " + i + " update timed out: " + e.getMessage(), false);
+                    // Timed out or threw keep stale inputs from last cycle
+                    DriverStation.reportWarning(
+                        "Vision camera " + i + " update timed out: " + e.getMessage(), false);
                 }
             }
             Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
@@ -167,11 +163,10 @@ public class Vision extends SubsystemBase {
         boolean hasAllowedTag = false;
 
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
-            if (!Toggles.Vision.camerasEnabled.get(io[cameraIndex].getName()).get()) {
+            // Use the snapshot taken at the top of periodic() do not rerad NT here
+            if (!cameraEnabled[cameraIndex]) {
                 continue;
             }
-
-//            disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
             List<Pose3d> tagPoses = new ArrayList<>();
             List<Pose3d> robotPoses = new ArrayList<>();
@@ -186,9 +181,6 @@ public class Vision extends SubsystemBase {
             }
 
             // Gate the entire camera's pose observations if it sees no whitelisted tags.
-            // Without this check, the whitelist only filtered tag logging but still allowed
-            // pose observations solved from opposing alliance tags to enter the estimator,
-            // corrupting the robot's field position and causing bad shots at competition.
             if (!cameraHasAllowedTag(cameraIndex)) {
                 if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
                     Logger.recordOutput("Vision/Camera" + cameraIndex + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
@@ -222,6 +214,7 @@ public class Vision extends SubsystemBase {
                 double stdDevFactor =
                     Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
                 if (observation.tagCount() == 1) stdDevFactor *= 3.0;
+
                 boolean hasHubTag = false;
                 for (int tagId : inputs[cameraIndex].tagIds) {
                     if (VisionConstants.HUB_TAG_IDS.contains(tagId)) {
@@ -282,7 +275,7 @@ public class Vision extends SubsystemBase {
             allRobotPosesRejected.addAll(robotPosesRejected);
         }
 
-        // Log summary poses and camera debug info
+        // Log summary poses
         if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
             Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
             Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
@@ -321,11 +314,14 @@ public class Vision extends SubsystemBase {
                 }
             }
         }
+
         tagStable = stableTagDebouncer.calculate(hasAllowedTag);
         LoopTimeUtil.record("Vision");
 
         if (questNav != null) {
-            if (DriverStation.isDisabled() && Robot.isFirstRun() && Constants.loggedValue("RobotPosesEmpty", !allRobotPosesAccepted.isEmpty())) {
+            if (DriverStation.isDisabled()
+                && Robot.isFirstRun()
+                && Constants.loggedValue("RobotPosesEmpty", !allRobotPosesAccepted.isEmpty())) {
                 questNav.setPose(allRobotPosesAccepted.get(0).toPose2d());
             }
             questNav.periodic(allRobotPoses);
