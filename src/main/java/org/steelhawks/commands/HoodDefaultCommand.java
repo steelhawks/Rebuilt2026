@@ -27,16 +27,12 @@ public class HoodDefaultCommand extends Command {
             case SHOOTING_STATIONARY -> {
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                 s_Hood.setDesiredPosition(Rotation2d.fromRadians(
-                    ShooterStructure.Static.calculateShot(hubCenter, hubCenter).hoodAngle()));
+                    (RobotState.getInstance().getAimState().equals(RobotState.AimState.TO_HUB)
+                        ? ShooterStructure.Static.calculateShot(hubCenter, hubCenter)
+                        : ShooterStructure.Static.calculateFerryShot(
+                            ShooterStructure.Static.calculateFerryShotSetpoint())).hoodAngle()));
             }
             case SHOOTING_MOVING -> {
-                if (RobotState.getInstance().getAimState().equals(RobotState.AimState.FERRY)) {
-                    s_Hood.setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
-                        FieldConstants.getClosestPointOnLine(
-                            FieldConstants.Ferrying.START_LINE,
-                            FieldConstants.Ferrying.END_LINE))).hoodAngle()));
-                    return;
-                }
                 if (sol != null) {
                     s_Hood.setDesiredPosition(Rotation2d.fromRadians(sol.hoodAngleRad()));
                 }

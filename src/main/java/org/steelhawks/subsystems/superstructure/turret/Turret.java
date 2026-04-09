@@ -345,31 +345,42 @@ public class Turret extends SubsystemBase {
                         double turretRelativeAngle = MathUtil.angleModulus(
                             fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
                         desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                        if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                            var trajectory = createTrajectory(hubCenter, hubCenter.toTranslation2d());
+                            Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
+                        }
                     }
                 }
                 case FERRY -> {
                     var robot = getPose();
-                    var ferryGoal2d = AllianceFlip.apply(
-                        FieldConstants.getClosestPointOnLine(
-                            FieldConstants.Ferrying.START_LINE,
-                            FieldConstants.Ferrying.END_LINE));
+                    var ferryGoal2d = ShooterStructure.Static.calculateFerryShotSetpoint();
                     var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
                     velocityTargetFF = ferryGoal3d.toTranslation2d();
-                    var turretTranslation = new Pose3d(robot)
-                        .transformBy(RobotConstants.ROBOT_TO_TURRET)
-                        .toPose2d()
-                        .getTranslation();
-                    // Ferry doesn't use SOTM solution, aim directly
-                    double fieldRelativeAngle = Math.atan2(
-                        ferryGoal2d.getY() - turretTranslation.getY(),
-                        ferryGoal2d.getX() - turretTranslation.getX());
-                    double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
-                    double turretRelativeAngle = MathUtil.angleModulus(
-                        fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
-                    desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
-                    if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
-                        var trajectory = createTrajectory(ferryGoal3d, ferryGoal2d);
-                        Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                    var ferrySol = RobotState.getInstance().getMovingShotSolution();
+                    if (ferrySol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {
+                        desiredRotation = findBestTurretAngle(
+                            ferrySol.turretAngle().getRadians(),
+                            getPosition().getRadians());
+                        if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                            var trajectory = createTrajectory(ferryGoal3d, ferrySol.virtualTarget().toTranslation2d());
+                            Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                        }
+                    } else {
+                        var turretTranslation = new Pose3d(robot)
+                            .transformBy(RobotConstants.ROBOT_TO_TURRET)
+                            .toPose2d()
+                            .getTranslation();
+                        double fieldRelativeAngle = Math.atan2(
+                            ferryGoal2d.getY() - turretTranslation.getY(),
+                            ferryGoal2d.getX() - turretTranslation.getX());
+                        double turretMountingYaw = RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+                        double turretRelativeAngle = MathUtil.angleModulus(
+                            fieldRelativeAngle - robot.getRotation().getRadians() - turretMountingYaw);
+                        desiredRotation = findBestTurretAngle(turretRelativeAngle, getPosition().getRadians());
+                        if (trajectoryLoopCounter % TRAJECTORY_LOG_INTERVAL == 0) {
+                            var trajectory = createTrajectory(ferryGoal3d, ferryGoal2d);
+                            Logger.recordOutput("Turret/FerryTrajectory", trajectory.toArray(new Translation3d[0]));
+                        }
                     }
                 }
             }
