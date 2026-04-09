@@ -20,7 +20,6 @@ import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;
-import org.steelhawks.util.Maths;
 import org.steelhawks.util.geometry.Boundary;
 import org.steelhawks.util.geometry.RobotFootprint;
 
@@ -222,21 +221,13 @@ public class RobotState {
     }
 
     public void updateMovingShot() {
-        var target =
-            getAimState().equals(AimState.TO_HUB)
-                ? AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)
-                : AllianceFlip.apply(
-                    Maths.fromTranslation2dWithZ(
-                        FieldConstants.getClosestPointOnLine(
-                            FieldConstants.Ferrying.START_LINE,
-                            FieldConstants.Ferrying.END_LINE),
-                        0.0));
+        var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
         Translation3d robotVelocity = new Translation3d(
             currentChassisSpeeds.vxMetersPerSecond,
             currentChassisSpeeds.vyMetersPerSecond,
             0.0);
         movingShotSolution = ShooterStructure.Moving.solveMovingShot(
-            target,
+            hubCenter,
             robotVelocity,
             getRotation(),
             currentChassisSpeeds.omegaRadiansPerSecond,
