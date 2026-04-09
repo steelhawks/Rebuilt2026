@@ -9,6 +9,7 @@ import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.util.ClassPreloader;
@@ -256,6 +257,21 @@ public class Robot extends LoggedRobot {
         if (DriverStation.isEnabled()) {
             Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
         }
+
+        var projectileData = ShooterStructure.Static.calculateShot(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D), AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D));
+        var turretTranslation = new Pose3d(org.steelhawks.RobotState.getInstance().getEstimatedPose())
+            .transformBy(Constants.RobotConstants.ROBOT_TO_TURRET)
+            .toPose2d()
+            .getTranslation();
+        double launchAngle = projectileData.hoodAngle();
+        double timeOfFlight = ShooterStructure.calculateTimeOfFlight(
+            projectileData.exitVelocity(),
+            launchAngle,
+            turretTranslation.getDistance(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER)),
+            AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D).getZ() - Constants.RobotConstants.ROBOT_TO_TURRET.getZ());
+        Logger.recordOutput("Turret/ProjectileData/Velocity", projectileData.exitVelocity());
+        Logger.recordOutput("Turret/ProjectileData/AngleDeg", Math.toDegrees(projectileData.hoodAngle()));
+        Logger.recordOutput("Turret/ProjectileData/TimeOfFlight",  timeOfFlight);
     }
 
     private void visualizeFieldConstants() {

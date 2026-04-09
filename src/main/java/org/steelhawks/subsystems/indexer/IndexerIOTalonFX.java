@@ -50,7 +50,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 	private StatusSignal<Temperature> spindexer2Temperature = null;
 
 	public IndexerIOTalonFX(CANBus canBus, SubsystemConstants.IndexerConstants constants) {
-        spindexerMotor = new TalonFX(constants.spindexerMotor1Id(), canBus);
+        spindexerMotor = new TalonFX(2, canBus);
         feederMotor = new TalonFX(constants.feederId(), canBus);
 
 		spindexerConfig = new TalonFXConfiguration();
@@ -94,7 +94,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederTemp = feederMotor.getDeviceTemp();
 
 		if (constants.spindexerMotor2Id().isPresent()) {
-			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus);
+			spindexerMotor2 = new TalonFX(1, canBus);
 			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Aligned));
 			PhoenixUtil.tryUntilOk(5, () -> spindexerMotor2.getConfigurator().apply(spindexerConfig));
 			PhoenixUtil.tryUntilOk(5, spindexerMotor2::optimizeBusUtilization);
