@@ -104,7 +104,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj NotSoOPAuton = new ChoreoTraj(
 	    "NotSoOPAuton",
 	    OptionalInt.empty(),
-	    15.88088,
+	    15.67423,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
 	);
@@ -118,14 +118,14 @@ public record ChoreoTraj(
 	public static final ChoreoTraj NotSoOPAuton$1 = new ChoreoTraj(
 	    "NotSoOPAuton",
 	    OptionalInt.of(1),
-	    7.25494,
+	    7.048289999999999,
 	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
 	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
 	);
 	public static final ChoreoTraj NotSoOPAuton$2 = new ChoreoTraj(
 	    "NotSoOPAuton",
 	    OptionalInt.of(2),
-	    3.9250999999999987,
+	    3.9251000000000005,
 	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
 	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
 	);
