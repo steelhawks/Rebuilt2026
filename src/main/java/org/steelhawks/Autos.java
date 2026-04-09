@@ -93,6 +93,7 @@ public final class Autos {
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
         autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
+        autoChooser.addOption("Right Double Rebound Auton", rightDoubleRebound().cmd().withName(ChoreoTraj.RDoubleRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
         autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.NotSoOPAuton.name()));
@@ -249,6 +250,48 @@ public final class Autos {
 
         return routine;
     }
+
+    public static AutoRoutine rightDoubleRebound() {
+        AutoRoutine routine = factory.newRoutine("Right Double Rebound Auton");
+
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.RDoubleRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RDoubleRebound$1.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                trenchToMidToTrench.spawnCmd()
+            )
+        );
+
+        trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchToMidToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToMidToTrench),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToReboundToTrench.spawnCmd()
+            )
+        );
+
+        trenchToReboundToTrench.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToReboundToTrench),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+            )
+        );
+
+        return routine;
+    }
+
 
     public static AutoRoutine leftRebound() {
         AutoRoutine routine = factory.newRoutine("Left Rebound Auton");

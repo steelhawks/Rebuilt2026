@@ -48,7 +48,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj FourMeterSpinTest = new ChoreoTraj(
 	    "FourMeterSpinTest",
 	    OptionalInt.empty(),
-	    2.19923,
+	    2.22895,
 	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
 	    new Pose2d(5, 0.537, Rotation2d.fromRadians(3.142))
 	);
@@ -227,6 +227,27 @@ public record ChoreoTraj(
 	    new Pose2d(3.611, 0.643, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(0.451, 0.643, Rotation2d.fromRadians(3.142))
 	);
+	public static final ChoreoTraj RDoubleRebound = new ChoreoTraj(
+	    "RDoubleRebound",
+	    OptionalInt.empty(),
+	    11.1932,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(3, 0.643, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj RDoubleRebound$0 = new ChoreoTraj(
+	    "RDoubleRebound",
+	    OptionalInt.of(0),
+	    5.23836,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(3, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RDoubleRebound$1 = new ChoreoTraj(
+	    "RDoubleRebound",
+	    OptionalInt.of(1),
+	    5.954839999999999,
+	    new Pose2d(3, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(3, 0.643, Rotation2d.fromRadians(3.142))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -261,7 +282,10 @@ public record ChoreoTraj(
 		Map.entry("RRebound_Bump", RRebound_Bump),
 		Map.entry("RRebound_Bump$0", RRebound_Bump$0),
 		Map.entry("RRebound_Bump$1", RRebound_Bump$1),
-		Map.entry("RRebound_Bump$2", RRebound_Bump$2)
+		Map.entry("RRebound_Bump$2", RRebound_Bump$2),
+		Map.entry("RDoubleRebound", RDoubleRebound),
+		Map.entry("RDoubleRebound$0", RDoubleRebound$0),
+		Map.entry("RDoubleRebound$1", RDoubleRebound$1)
     );
 
     /**

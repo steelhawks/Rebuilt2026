@@ -8,7 +8,7 @@
     {"x":1.3710399866104126, "y":5.964109897613525, "heading":3.141592653589793, "intervals":16, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":0.6873494, "y":5.964109897613525, "heading":3.141592653589793, "intervals":16, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":1.3710399866104126, "y":5.964109897613525, "heading":3.141592653589793, "intervals":25, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":2.817986011505127, "y":4.9697160720825195, "heading":-2.451146502155771, "intervals":40, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":2.817986011505127, "y":4.9697160720825195, "heading":-2.451146502155771, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
