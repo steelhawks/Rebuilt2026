@@ -72,9 +72,9 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
 		feederConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.feederCurrent;
-		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = false;
+		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         feederConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.feederCurrent;
-        feederConfig.CurrentLimits.StatorCurrentLimitEnable = false;
+        feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);

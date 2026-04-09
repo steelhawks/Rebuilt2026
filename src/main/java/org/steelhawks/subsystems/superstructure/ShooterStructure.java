@@ -61,11 +61,11 @@ public class ShooterStructure {
 
         minFerryDistance = c.minFerryDistance();
         maxFerryDistance = c.maxFerryDistance();
-         if (c.shootingTimeOfFlightMap() != null) {
-             for (double[] entry : c.shootingTimeOfFlightMap()) {
-                 shootingTimeOfFlightMap.put(entry[0], entry[1]);
-             }
-         }
+//         if (c.shootingTimeOfFlightMap() != null) {
+//             for (double[] entry : c.shootingTimeOfFlightMap()) {
+//                 shootingTimeOfFlightMap.put(entry[0], entry[1]);
+//             }
+//         }
 //         if (c.shootingFlywheelVelocityMap() != null) {
 //             for (double[] entry : c.shootingFlywheelVelocityMap()) {
 //                 shootingFlywheelVelocityMap.put(entry[0], entry[1]);
@@ -79,7 +79,8 @@ public class ShooterStructure {
         shootingFlywheelVelocityMap.put(3.65, 12.76);
         shootingFlywheelVelocityMap.put(4.03, 13.1);
         shootingFlywheelVelocityMap.put(4.37, 13.3);
-        shootingFlywheelVelocityMap.put(4.82, 13.5);
+        shootingFlywheelVelocityMap.put(4.82, 13.4);
+        shootingFlywheelVelocityMap.put(4.92, 13.5);
         shootingFlywheelVelocityMap.put(5.099, 13.6);
         shootingFlywheelVelocityMap.put(5.36, 13.75);
         shootingFlywheelVelocityMap.put(5.56, 13.8);
@@ -93,23 +94,25 @@ public class ShooterStructure {
         shootingHoodAngleMap.put(4.03, Rotation2d.fromDegrees(68.0));
         shootingHoodAngleMap.put(4.37, Rotation2d.fromDegrees(67.0));
         shootingHoodAngleMap.put(4.82, Rotation2d.fromDegrees(65.0));
+        shootingHoodAngleMap.put(4.92, Rotation2d.fromDegrees(64.0));
         shootingHoodAngleMap.put(5.099, Rotation2d.fromDegrees(63.0));
         shootingHoodAngleMap.put(5.36, Rotation2d.fromDegrees(62.0));
         shootingHoodAngleMap.put(5.56, Rotation2d.fromDegrees(61.0));
         shootingHoodAngleMap.put(5.85, Rotation2d.fromDegrees(59.0));
 
-        shootingTimeOfFlightMap.put(1.39, 1.73);
-        shootingTimeOfFlightMap.put(2.19, 2.28);
-        shootingTimeOfFlightMap.put(2.67, 2.3);
-        shootingTimeOfFlightMap.put(3.2, 2.35);
-        shootingTimeOfFlightMap.put(3.65, 2.78);
-        shootingTimeOfFlightMap.put(4.03, 2.83);
-        shootingTimeOfFlightMap.put(4.37, 2.85);
-        shootingTimeOfFlightMap.put(4.82, 1.26);
-        shootingTimeOfFlightMap.put(5.099, 1.28);
-        shootingTimeOfFlightMap.put(5.36, 1.41);
-        shootingTimeOfFlightMap.put(5.56, 1.73);
-        shootingTimeOfFlightMap.put(5.85, 1.8);
+        shootingTimeOfFlightMap.put(1.44, 1.11);
+        shootingTimeOfFlightMap.put(2.2, 1.19);
+        shootingTimeOfFlightMap.put(2.677, 1.23);
+        shootingTimeOfFlightMap.put(3.207, 1.38);
+        shootingTimeOfFlightMap.put(3.652, 1.41);
+        shootingTimeOfFlightMap.put(4.0318, 1.48);
+        shootingTimeOfFlightMap.put(4.3785, 1.5);
+        shootingTimeOfFlightMap.put(4.827, 1.53); //
+//        shootingTimeOfFlightMap.put(4.92, 1.26);
+        shootingTimeOfFlightMap.put(5.0926, 1.55);
+        shootingTimeOfFlightMap.put(5.362, 1.58);
+        shootingTimeOfFlightMap.put(5.559, 1.59);
+        shootingTimeOfFlightMap.put(5.856, 1.7);
 
          if (c.ferryTimeOfFlightMap() != null) {
              for (double[] entry : c.ferryTimeOfFlightMap()) {
@@ -134,9 +137,9 @@ public class ShooterStructure {
 
     public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH) {
         // rearranged 0.5*g*t^2 - v*sin(theta)*t + deltaH = 0
-//        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
-//            return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
-//        }
+        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
+            return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
+        }
         double a = 0.5 * G;
         double b = -v * Math.sin(theta);
         double c = deltaH;

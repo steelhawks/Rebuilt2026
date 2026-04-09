@@ -116,7 +116,9 @@ public class Robot extends LoggedRobot {
             case REAL -> {
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter());
-                Logger.addDataReceiver(new NT4Publisher());
+                if (!DriverStation.isFMSAttached()) {
+                    Logger.addDataReceiver(new NT4Publisher());
+                }
                 new PowerDistribution(
                     Constants.POWER_DISTRIBUTION_CAN_ID, Constants.PD_MODULE_TYPE); // Enables power distribution logging
             }
@@ -269,9 +271,10 @@ public class Robot extends LoggedRobot {
             launchAngle,
             turretTranslation.getDistance(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER)),
             AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D).getZ() - Constants.RobotConstants.ROBOT_TO_TURRET.getZ());
-        Logger.recordOutput("Turret/ProjectileData/Velocity", projectileData.exitVelocity());
-        Logger.recordOutput("Turret/ProjectileData/AngleDeg", Math.toDegrees(projectileData.hoodAngle()));
-        Logger.recordOutput("Turret/ProjectileData/TimeOfFlight",  timeOfFlight);
+//        Logger.recordOutput("Turret/ProjectileData/Velocity", projectileData.exitVelocity());
+//        Logger.recordOutput("Turret/ProjectileData/AngleDeg", Math.toDegrees(projectileData.hoodAngle()));
+//        Logger.recordOutput("Turret/ProjectileData/TimeOfFlight",  timeOfFlight);
+        Logger.recordOutput("ShooterTuner/Live/DistanceMeters", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
     }
 
     private void visualizeFieldConstants() {

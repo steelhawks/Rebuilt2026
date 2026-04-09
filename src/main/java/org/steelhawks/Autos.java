@@ -200,11 +200,11 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
-                ShootingCommands.shoot().withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(5.0),
                 start.cmd()
                     .alongWith(RobotContainer.s_Intake.runIntake().withTimeout(5.0)),
                 back.cmd(),
-                ShootingCommands.shoot()));
+                ShootingCommands.autonShoot()));
 
         return routine;
     }
@@ -230,8 +230,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -241,8 +241,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
@@ -271,8 +271,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -282,8 +282,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
@@ -320,8 +320,8 @@ public final class Autos {
             )
         );
 
-        shootingSection1.active().whileTrue(ShootingCommands.shoot());
-        shootingSection2.active().whileTrue(ShootingCommands.shoot());
+        shootingSection1.active().whileTrue(ShootingCommands.autonShoot());
+        shootingSection2.active().whileTrue(ShootingCommands.autonShoot());
 
         shootingSection1.done().onTrue(
             Commands.sequence(
@@ -375,8 +375,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(firstPass),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel).withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 secondPass.spawnCmd()
             )
@@ -386,8 +386,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(secondPass),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel).withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 thirdPass.spawnCmd()
             )
@@ -416,8 +416,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(moveToShootPose),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel),
                 intakeFromDepot.spawnCmd()
             )
         );
@@ -426,8 +426,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(intakeFromDepot),
-                ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(RobotContainer.s_Indexer::emptyFuel)
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel)
             )
         );
 

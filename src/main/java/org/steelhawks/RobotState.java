@@ -204,14 +204,14 @@ public class RobotState {
             currentChassisSpeeds.vxMetersPerSecond,
             currentChassisSpeeds.vyMetersPerSecond);
         if (shootingState == ShootingState.SHOOTING) {
-//            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
-//                ? movingVelocityThreshold * 0.5
-//                : movingVelocityThreshold;
-//            lastDerivedShootingState = linearVelocity > threshold
-//                ? ShootingState.SHOOTING_MOVING
-//                : ShootingState.SHOOTING_STATIONARY;
-//            return lastDerivedShootingState;
-            return ShootingState.SHOOTING_MOVING;
+            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
+                ? movingVelocityThreshold * 0.5
+                : movingVelocityThreshold;
+            lastDerivedShootingState = linearVelocity > threshold
+                ? ShootingState.SHOOTING_MOVING
+                : ShootingState.SHOOTING_STATIONARY;
+            return lastDerivedShootingState;
+//            return ShootingState.SHOOTING_MOVING;
         }
         return shootingState;
     }

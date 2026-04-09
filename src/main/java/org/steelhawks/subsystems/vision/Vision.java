@@ -149,8 +149,8 @@ public class Vision extends SubsystemBase {
                     backBuffers[i] = tmp;
                 } catch (Exception e) {
                     // Timed out or threw keep stale inputs from last cycle
-                    DriverStation.reportWarning(
-                        "Vision camera " + i + " update timed out: " + e.getMessage(), false);
+                    System.out.println(
+                        "Vision camera " + i + " update timed out: " + e.getMessage());
                 }
             }
             Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
@@ -275,9 +275,10 @@ public class Vision extends SubsystemBase {
             allRobotPosesRejected.addAll(robotPosesRejected);
         }
 
+        Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
+
         // Log summary poses
         if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
-            Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
             Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
             Logger.recordOutput("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
             Logger.recordOutput("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));

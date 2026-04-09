@@ -24,6 +24,18 @@ public class ShootingCommands {
             .finallyDo(() -> CommandScheduler.getInstance().schedule(RobotContainer.s_Swerve.toggleNormal()));
     }
 
+    public static Command autonShootWhileIntaking() {
+        return Commands.sequence(
+            RobotContainer.s_Indexer.agitateSpindexer().withTimeout(0.4),
+            shootWhileIntaking());
+    }
+
+    public static Command autonShoot() {
+        return Commands.sequence(
+            RobotContainer.s_Indexer.agitateSpindexer().withTimeout(0.4),
+            shoot());
+    }
+
     public static Command shoot() {
         return Commands.sequence(
             Commands.runOnce(() ->
@@ -39,41 +51,30 @@ public class ShootingCommands {
                 }
             }),
 
-            new ScheduleCommand(
-                RumbleAPI.staccato()
-                    .repeatedly()
-                    .until(RobotContainer.s_Vision::hasStableTag)
-                    .onlyIf(() -> !RobotContainer.s_Vision.hasStableTag())),
+//            new ScheduleCommand(
+//                RumbleAPI.staccato()
+//                    .repeatedly()
+//                    .until(RobotContainer.s_Vision::hasStableTag)
+//                    .onlyIf(() -> !RobotContainer.s_Vision.hasStableTag())),
 
             Commands.sequence(
                 Commands.waitUntil(() ->
                     RobotContainer.s_Flywheel.isReadyToShoot()
                         && RobotContainer.s_Turret.atGoal()
                         && RobotContainer.s_Hood.atGoal()),
-                RobotContainer.s_Indexer.feed()
+                RobotContainer.s_Indexer.feedWithJamRecovery()
                     .alongWith(
                         Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
                             .andThen(Commands.waitSeconds(0.3))
                             .andThen(RobotContainer.s_Intake.feed()
                                 .onlyIf(() -> !RobotContainer.s_Intake.isRollersRunning())))
                     .repeatedly())
-                .repeatedly())
+            .repeatedly())
         .finallyDo(() -> {
             RobotState.getInstance().setShootingState(ShootingState.NOTHING);
             Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
             CommandScheduler.getInstance().schedule(
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
         });
-    }
-
-    private static Command jamRecovery() {
-        return Commands.waitUntil(RobotContainer.s_Indexer::isJammed)
-            .andThen(
-                Commands.sequence(
-                        RobotContainer.s_Indexer.outtake().withTimeout(0.3),
-                        RobotContainer.s_Indexer.feed().withTimeout(0.2))
-                    .repeatedly()
-                    .until(() -> !RobotContainer.s_Indexer.isJammed()))
-            .repeatedly();
     }
 }
