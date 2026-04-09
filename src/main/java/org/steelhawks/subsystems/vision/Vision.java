@@ -36,6 +36,8 @@ public class Vision extends SubsystemBase {
 
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
+    // Double-buffer per camera: worker writes to backBuffer, main thread swaps with inputs[]
+    private final VisionIOInputsAutoLogged[] backBuffers;
 //    private final Alert[] disconnectedAlerts;
 
     private static final Set<Integer> allowedTagIds = new HashSet<>();
@@ -61,8 +63,10 @@ public class Vision extends SubsystemBase {
         }
 
         this.inputs = new VisionIOInputsAutoLogged[io.length];
+        this.backBuffers = new VisionIOInputsAutoLogged[io.length];
         for (int i = 0; i < inputs.length; i++) {
             inputs[i] = new VisionIOInputsAutoLogged();
+            backBuffers[i] = new VisionIOInputsAutoLogged();
         }
 
 //        this.disconnectedAlerts = new Alert[io.length];
@@ -133,9 +137,11 @@ public class Vision extends SubsystemBase {
             if (cameraEnabled[i]) {
                 final int idx = i;
                 futures[idx] = visionExecutor.submit(() -> {
-                    VisionIOInputsAutoLogged fresh = new VisionIOInputsAutoLogged();
-                    io[idx].updateInputs(fresh);
-                    inputs[idx] = fresh; // atomic reference store — safe per JLS §17.7
+                    io[idx].updateInputs(backBuffers[idx]);
+                    // Swap back-buffer into inputs[] — atomic reference store per JLS §17.7
+                    VisionIOInputsAutoLogged tmp = inputs[idx];
+                    inputs[idx] = backBuffers[idx];
+                    backBuffers[idx] = tmp;
                     return null;
                 });
             }
@@ -276,11 +282,13 @@ public class Vision extends SubsystemBase {
             allRobotPosesRejected.addAll(robotPosesRejected);
         }
 
-        // Log summary poses
-        Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
-        Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
-        Logger.recordOutput("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
-        Logger.recordOutput("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
+        // Log summary poses and camera debug info
+        if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
+            Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
+            Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
+            Logger.recordOutput("Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
+            Logger.recordOutput("Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
+        }
 
         // Log camera poses and rays from cameras to tags
         if (Toggles.debugMode.get() || RobotBase.isSimulation()) {
