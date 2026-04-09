@@ -115,11 +115,5 @@ public class RobotContainer {
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
 
-//        driver.x()
-//            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kPi));
-//        driver.y()
-//            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kZero));
-//        driver.a()
-//            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kPi.div(2.0)));
     }
 }
