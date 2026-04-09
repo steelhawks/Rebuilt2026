@@ -270,7 +270,7 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
                 ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                ShootingCommands.shoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -281,7 +281,7 @@ public final class Autos {
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
                 ShootingCommands.shoot().withTimeout(2.0),
-                ShootingCommands.shoot().until(s_Indexer::emptyFuel),
+                ShootingCommands.shoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );

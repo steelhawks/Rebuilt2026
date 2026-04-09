@@ -45,9 +45,9 @@ public class SwerveModule {
 
     private final SwerveModuleState cachedState = new SwerveModuleState();
     private final SwerveModulePosition cachedPosition = new SwerveModulePosition();
-    private final Alert driveDisconnectedAlert;
-    private final Alert turnDisconnectedAlert;
-    private final Alert turnEncoderDisconnectedAlert;
+//    private final Alert driveDisconnectedAlert;
+//    private final Alert turnDisconnectedAlert;
+//    private final Alert turnEncoderDisconnectedAlert;
 
     public SwerveModule(
         ModuleIO io,
@@ -68,17 +68,17 @@ public class SwerveModule {
         steerkI.initDefault(constants.SteerMotorGains.kI);
         steerkD.initDefault(constants.SteerMotorGains.kD);
 
-        driveDisconnectedAlert =
-            new Alert(
-                "Disconnected drive motor on module " + index + ".",
-                AlertType.kError);
-        turnDisconnectedAlert =
-            new Alert(
-                "Disconnected turn motor on module " + index + ".", AlertType.kError);
-        turnEncoderDisconnectedAlert =
-            new Alert(
-                "Disconnected turn encoder on module " + index + ".",
-                AlertType.kError);
+//        driveDisconnectedAlert =
+//            new Alert(
+//                "Disconnected drive motor on module " + index + ".",
+//                AlertType.kError);
+//        turnDisconnectedAlert =
+//            new Alert(
+//                "Disconnected turn motor on module " + index + ".", AlertType.kError);
+//        turnEncoderDisconnectedAlert =
+//            new Alert(
+//                "Disconnected turn encoder on module " + index + ".",
+//                AlertType.kError);
 
         for (int i = 0; i < MAX_ODOMETRY_SAMPLES; i++) {
             odometryPositions[i] = new SwerveModulePosition();
@@ -102,9 +102,9 @@ public class SwerveModule {
         }
 
         // Update alerts
-        driveDisconnectedAlert.set(!inputs.driveConnected);
-        turnDisconnectedAlert.set(!inputs.turnConnected);
-        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
+//        driveDisconnectedAlert.set(!inputs.driveConnected);
+//        turnDisconnectedAlert.set(!inputs.turnConnected);
+//        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
 
         if (Toggles.tuningMode.get()) {
             if (Toggles.Swerve.driveOpenLoopOverride.get()) {

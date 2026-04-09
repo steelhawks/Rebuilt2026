@@ -80,8 +80,8 @@ public final class Constants {
 
     public static RobotType getRobot() {
         if (RobotBase.isReal() && ROBOT_TYPE == RobotType.SIMBOT) {
-            new Alert("Invalid robot selected, using omega robot as default.", AlertType.kError)
-                .set(true);
+//            new Alert("Invalid robot selected, using omega robot as default.", AlertType.kError)
+//                .set(true);
             return RobotType.OMEGABOT;
         }
 

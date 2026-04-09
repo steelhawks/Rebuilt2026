@@ -22,7 +22,7 @@ public class Indexer extends SubsystemBase {
     private LoggedTunableNumber tuningSpindexerVolts;
     private LoggedTunableNumber tuningFeederVolts;
 
-    private final Debouncer beamDebouncer;
+    private Debouncer beamDebouncer;
 
     public enum IndexerState {
         RUNNING(1.0, 1.0),
@@ -108,7 +108,7 @@ public class Indexer extends SubsystemBase {
     }
 
     public void resetBeamState() {
-//        beamDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kFalling);
+        beamDebouncer = new Debouncer(BEAM_DEBOUNCE_TIME.get(), Debouncer.DebounceType.kFalling);
         beamHasEverDetected = false;
     }
 

@@ -121,8 +121,8 @@ public class Swerve extends SubsystemBase {
     private final SysIdRoutine driveSysId;
     private final SysIdRoutine turnSysId;
     private final SysIdRoutine angularSysId;
-    private final Alert gyroDisconnectedAlert =
-        new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+//    private final Alert gyroDisconnectedAlert =
+//        new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
     private final SwerveDriveController autonController =
         new SwerveDriveController(
@@ -476,7 +476,7 @@ public class Swerve extends SubsystemBase {
         processOdometryObservations();
         robotState.updateChassisSpeeds(getChassisSpeeds());
         FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
-        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
+//        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
     }
 
