@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import au.grapplerobotics.CanBridge;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
@@ -153,7 +152,21 @@ public class Robot extends LoggedRobot {
             "edu.wpi.first.apriltag.AprilTagFieldLayout",
             "edu.wpi.first.math.estimator.SwerveDrivePoseEstimator",
             "edu.wpi.first.math.VecBuilder",
-            "org.photonvision.PhotonCamera");
+            "org.photonvision.PhotonCamera",
+
+            "com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC",
+            "com.ctre.phoenix6.controls.MotionMagicVoltage",
+            "com.ctre.phoenix6.controls.PositionVoltage",
+            "com.ctre.phoenix6.StatusSignal",
+
+            "edu.wpi.first.math.controller.PIDController",
+            "edu.wpi.first.math.trajectory.TrapezoidProfile",
+            "edu.wpi.first.math.geometry.Pose3d",
+            "edu.wpi.first.math.geometry.Translation3d",
+
+            "edu.wpi.first.networktables.NetworkTableInstance",
+            "edu.wpi.first.networktables.DoubleArrayPublisher"
+        );
 
         // Check for valid swerve config
         var modules =
