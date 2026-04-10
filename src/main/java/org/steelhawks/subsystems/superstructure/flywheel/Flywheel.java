@@ -97,6 +97,7 @@ public class Flywheel extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
         BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
+        Logger.recordOutput("Flywheel/BumpSpeed", bumpUpSpeed);
         redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.38 : 1.0)) : constants.stationaryHoodVelocityFactor();
 
         nearTargetVelocity =
