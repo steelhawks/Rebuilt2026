@@ -41,9 +41,9 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
 
     LoggedNetworkBoolean useLUT =
-        new LoggedNetworkBoolean("Toggles/LUT", true);
+        new LoggedNetworkBoolean("Toggles/LUT", false);
     LoggedNetworkBoolean useKinematicsTOF =
-        new LoggedNetworkBoolean("Toggles/KinematicsTOF", false);
+        new LoggedNetworkBoolean("Toggles/KinematicsTOF", true);
 
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =
