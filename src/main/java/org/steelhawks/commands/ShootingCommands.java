@@ -33,7 +33,10 @@ public class ShootingCommands {
     public static Command autonShoot() {
         return Commands.sequence(
             RobotContainer.s_Indexer.agitateSpindexer().withTimeout(0.4),
-            shoot());
+            shoot()
+                .alongWith(
+                    Commands.waitSeconds(1.5)
+                        .andThen(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME))));
     }
 
     public static Command shoot() {
