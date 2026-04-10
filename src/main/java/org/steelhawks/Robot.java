@@ -116,10 +116,9 @@ public class Robot extends LoggedRobot {
             case REAL -> {
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter());
-//                if (!DriverStation.isFMSAttached()) { // remove to be able to tune in the real field
-//                    Logger.addDataReceiver(new NT4Publisher());
-//                }
-                Logger.addDataReceiver(new NT4Publisher());
+                if (!DriverStation.isFMSAttached()) {
+                    Logger.addDataReceiver(new NT4Publisher());
+                }
                 new PowerDistribution(
                     Constants.POWER_DISTRIBUTION_CAN_ID, Constants.PD_MODULE_TYPE); // Enables power distribution logging
             }

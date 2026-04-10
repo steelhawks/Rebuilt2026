@@ -15,7 +15,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
@@ -62,7 +61,6 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
     private static LoggedTunableNumber kV;
-    private static LoggedNetworkNumber kinematicsVelocityFactor;
 
     private static double redBullConstant;
 
@@ -79,8 +77,6 @@ public class Flywheel extends SubsystemBase {
         kD = new LoggedTunableNumber("Flywheel/kD", constants.kD());
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
-//        kinematicsVelocityFactor = new LoggedTunableNumber("Flywheel/KinematicsVelocityFactor", constants.stationaryHoodVelocityFactor());
-        kinematicsVelocityFactor = new LoggedNetworkNumber("Flywheel/KinematicsVelocityFactor", constants.stationaryHoodVelocityFactor());
         redBullConstant = constants.stationaryHoodVelocityFactor();
         velocityTolerance =
             new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
@@ -102,7 +98,7 @@ public class Flywheel extends SubsystemBase {
         Logger.processInputs("Flywheel", inputs);
         BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
         Logger.recordOutput("Flywheel/BumpSpeed", bumpUpSpeed);
-        redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.28 : 1.0)) : kinematicsVelocityFactor.get();
+        redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.28 : 1.0)) : constants.stationaryHoodVelocityFactor();
 
         nearTargetVelocity =
             setpointDebouncer.calculate(
@@ -148,10 +144,9 @@ public class Flywheel extends SubsystemBase {
                         if (sol != null) {
                             double rps = ShooterStructure.linearToAngularVelocity(
                                 redBullConstant * sol.exitVelocity()
-//                                     * (DriverStation.isAutonomous()
-//                                        ? 1.06
-//                                        : 1.0)
-                                ,
+                                     * (DriverStation.isAutonomous()
+                                        ? 1.06
+                                        : 1.0),
                                 constants.flywheelRadius());
                             setTargetVelocity(rps);
                         }
