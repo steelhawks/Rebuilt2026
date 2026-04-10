@@ -74,7 +74,7 @@ public class Turret extends SubsystemBase {
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
-    private final LoggedTunableNumber constantForceFF = new LoggedTunableNumber("Turret/ConstantForceFF", 40.0);
+    private final LoggedTunableNumber constantForceFF = new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
 
     public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
