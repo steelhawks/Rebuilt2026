@@ -90,11 +90,11 @@ public class RobotContainer {
         driver.povLeft()
             .onTrue(s_Flywheel.toggleBumpUp());
 
-        driver.povUp().onTrue(
-            s_Flywheel.incrementVelocityFactor(0.03));
-
-        driver.povDown().onTrue(
-            s_Flywheel.incrementVelocityFactor(-0.03));
+//        driver.povUp().onTrue(
+//            s_Flywheel.incrementVelocityFactor(0.03));
+//
+//        driver.povDown().onTrue(
+//            s_Flywheel.incrementVelocityFactor(-0.03));
 
         driver.povLeft()
             .whileTrue(s_Indexer.outtake());
