@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
+import org.steelhawks.util.AllianceFlip;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class ShooterTuner {
 
     public void periodic() {
         double activeDistance = useOdomDistance.get()
-            ? ShooterStructure.distanceToTarget(FieldConstants.Hub.HUB_CENTER_3D)
+            ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
             : manualDistance.get();
 
         double currentAmps = RobotContainer.s_Flywheel.getStatorCurrentAmps();

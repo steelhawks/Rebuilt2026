@@ -200,6 +200,8 @@ public class ShooterStructure {
         static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch, double precomputedDist
         ) {
+            Logger.recordOutput("Testing/ActualTarget", actualTarget);
+            Logger.recordOutput("Testing/PredictedTarget", predictedTarget);
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }

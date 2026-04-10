@@ -20,6 +20,7 @@ import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
+import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.BatteryUtil;
@@ -63,6 +64,8 @@ public class Flywheel extends SubsystemBase {
 
     private static double redBullConstant;
 
+    private boolean bumpUpSpeed = false;
+
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
 
@@ -94,7 +97,7 @@ public class Flywheel extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
         BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
-        redBullConstant = Toggles.useLUT.get() ? 1.0 : constants.stationaryHoodVelocityFactor();
+        redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.38 : 1.0)) : constants.stationaryHoodVelocityFactor();
 
         nearTargetVelocity =
             setpointDebouncer.calculate(
@@ -201,6 +204,12 @@ public class Flywheel extends SubsystemBase {
     ///////////////////////
     /* COMMAND FACTORIES */
     ///////////////////////
+
+    public Command toggleBumpUp() {
+        return Commands.runOnce(
+            () -> bumpUpSpeed = !bumpUpSpeed)
+            .alongWith(RumbleAPI.steady(1.0, 1.0));
+    }
 
     public Command simFire() {
         return Commands.defer(() ->
