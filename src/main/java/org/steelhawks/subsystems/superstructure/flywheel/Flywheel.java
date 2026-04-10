@@ -64,7 +64,7 @@ public class Flywheel extends SubsystemBase {
 
     private static double redBullConstant;
 
-    private boolean bumpUpSpeed = true;
+    private boolean bumpUpSpeed = false;
 
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
