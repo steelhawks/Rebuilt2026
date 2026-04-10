@@ -78,8 +78,12 @@ public class RobotContainer {
 
         new Trigger(() -> {
             double x = RobotState.getInstance().getEstimatedPose().getX();
-            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
-            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+            if (AllianceFlip.shouldFlip()) {
+                double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
+                return x <= boundary;
+            } else {
+                return x >= FieldConstants.Trench.TRENCH_END_X;
+            }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
