@@ -89,6 +89,7 @@ public final class Autos {
     }
 
     public static void init() {
+        autoChooser.addOption("No Auton", Commands.none().withName("No Auton"));
         autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName(ChoreoTraj.FourMeterTest.name()));
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
         autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
