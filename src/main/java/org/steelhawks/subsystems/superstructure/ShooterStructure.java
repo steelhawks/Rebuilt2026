@@ -33,7 +33,7 @@ public class ShooterStructure {
         new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
 
     private static final LoggedNetworkNumber lutDistanceOffsetMeters =
-        new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(2.0)); // 2ft, if too short try 3ft or 4ft
+        new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(2.25)); // 2ft, if too short try 3ft or 4ft
 
     private static final double minShootDistance;
     private static final double maxShootDistance;
@@ -205,8 +205,8 @@ public class ShooterStructure {
         public static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch, double precomputedDist
         ) {
-            Logger.recordOutput("Testing/ActualTarget", actualTarget);
-            Logger.recordOutput("Testing/PredictedTarget", predictedTarget);
+//            Logger.recordOutput("Testing/ActualTarget", actualTarget.plus(new Translation3d(lutDistanceOffsetMeters.get(), 0.0, 0.0)));
+//            Logger.recordOutput("Testing/PredictedTarget", predictedTarget.plus(new Translation3d(lutDistanceOffsetMeters.get(), 0.0, 0.0)));
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
