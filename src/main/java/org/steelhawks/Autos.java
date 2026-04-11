@@ -274,8 +274,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+//                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -285,8 +285,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+//                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
