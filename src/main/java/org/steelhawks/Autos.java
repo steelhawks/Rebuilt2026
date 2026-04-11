@@ -98,6 +98,7 @@ public final class Autos {
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
         autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.NotSoOPAuton.name()));
+        autoChooser.addOption("Middle Depot Auton", middleDepotAuton().cmd().withName(ChoreoTraj.MiddleDepotAuton.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -460,8 +461,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(moveToShootPose),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+//                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel),
                 intakeFromDepot.spawnCmd()
             )
         );
@@ -470,8 +471,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(intakeFromDepot),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel)
+                ShootingCommands.autonShoot().withTimeout(5.0)
+//                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel)
             )
         );
 
