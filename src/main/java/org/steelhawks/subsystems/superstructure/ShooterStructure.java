@@ -8,7 +8,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
+import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
 
@@ -29,6 +31,9 @@ public class ShooterStructure {
         new InterpolatingDoubleTreeMap();
     private static final InterpolatingTreeMap<Double, Rotation2d> ferryHoodAngleMap =
         new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
+
+    private static final LoggedNetworkNumber lutDistanceOffsetMeters =
+        new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(2.0)); // 2ft, if too short try 3ft or 4ft
 
     private static final double minShootDistance;
     private static final double maxShootDistance;
@@ -197,7 +202,7 @@ public class ShooterStructure {
          * Same as {@link #calculateShot} but accepts a pre-computed distance to avoid
          * recomputing the Pose3d turret transform chain. Pass -1 to compute it fresh.
          */
-        static ProjectileData calculateShot(
+        public static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch, double precomputedDist
         ) {
             Logger.recordOutput("Testing/ActualTarget", actualTarget);
@@ -208,9 +213,10 @@ public class ShooterStructure {
             double rawDist = precomputedDist >= 0 ? precomputedDist : distanceToTarget(predictedTarget);
             double x_dist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
             if (Toggles.useLUT.getAsBoolean()) {
+                double lutDist = MathUtil.clamp(rawDist + lutDistanceOffsetMeters.get(), minShootDistance, maxShootDistance);
                 return new ProjectileData(
-                    shootingFlywheelVelocityMap.get(x_dist),
-                    shootingHoodAngleMap.get(x_dist).getRadians(),
+                    shootingFlywheelVelocityMap.get(lutDist),
+                    shootingHoodAngleMap.get(lutDist).getRadians(),
                     predictedTarget);
             }
             double y_dist = predictedTarget
