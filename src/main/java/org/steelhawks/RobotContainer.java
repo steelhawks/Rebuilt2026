@@ -91,8 +91,8 @@ public class RobotContainer {
 //        driver.povLeft().onTrue(s_Swerve.zeroHeading())
 //            .onTrue(RumbleAPI.steady());
 
-        driver.povLeft()
-            .onTrue(s_Flywheel.toggleBumpUp());
+//        driver.povLeft()
+//            .onTrue(s_Flywheel.toggleBumpUp());
 
 //        driver.povUp().onTrue(
 //            s_Flywheel.incrementVelocityFactor(0.03));
