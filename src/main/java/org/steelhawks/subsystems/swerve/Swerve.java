@@ -56,7 +56,7 @@ import org.steelhawks.util.SwerveDriveController;
 
 public class Swerve extends SubsystemBase {
 
-    private static final double SLOW_SPEED_MULTIPLIER = 0.45;
+    private static final double SLOW_SPEED_MULTIPLIER = 0.3;
     private static final double SPEED_MULTIPLIER = 1.0;
     private static final SwerveModuleState[] EMPTY_MODULE_STATES = new SwerveModuleState[0];
     private boolean isPathfinding = false;
