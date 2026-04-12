@@ -10,6 +10,14 @@ public interface CurrentLimits {
         double intakeRollersCurrent = 40.0;
         double spindexerCurrent = 20.0;
         double feederCurrent = 40.0;
+
+        boolean flywheelEnabled = true;
+        boolean hoodEnabled = true;
+        boolean turretEnabled = false;
+        boolean intakePositionEnabled = true;
+        boolean intakeRollersEnabled = false;
+        boolean spindexerEnabled = true;
+        boolean feederEnabled = true;
     }
 
     interface StatorLimit {
@@ -23,5 +31,12 @@ public interface CurrentLimits {
         double spindexerCurrent = 40.0;
         double feederCurrent = 80.0;
 
+        boolean flywheelEnabled = true;
+        boolean hoodEnabled = true;
+        boolean turretEnabled = false;
+        boolean intakePositionEnabled = true;
+        boolean intakeRollersEnabled = false;
+        boolean spindexerEnabled = true;
+        boolean feederEnabled = true;
     }
 }

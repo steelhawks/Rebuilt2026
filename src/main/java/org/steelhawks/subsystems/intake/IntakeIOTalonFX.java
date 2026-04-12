@@ -77,9 +77,9 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
 
         leftConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakePositionCurrent;
-        leftConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        leftConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.intakePositionEnabled;
         leftConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.intakePositionCurrent;
-        leftConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        leftConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.intakePositionEnabled;
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
         rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -90,18 +90,18 @@ public class IntakeIOTalonFX implements IntakeIO {
         rightConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
 
         rightConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakePositionCurrent;
-        rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        rightConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.intakePositionEnabled;
         rightConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.intakePositionCurrent;
-        rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        rightConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.intakePositionEnabled;
         tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         intakeConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         intakeConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakeRollersCurrent;
-        intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.intakeRollersEnabled;
         intakeConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.intakeRollersCurrent;
-        intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        intakeConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.intakeRollersEnabled;
 
         tryUntilOk(5, () -> intakeMotor.getConfigurator().apply(intakeConfig));
         tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(leftMotor, rightMotor, intakeMotor));
