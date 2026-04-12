@@ -54,7 +54,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederMotor = new TalonFX(constants.feederId(), canBus);
 
 		spindexerConfig = new TalonFXConfiguration();
-		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
+		spindexerConfig.Feedback.SensorToMechanismRatio = 64.0 / 16.0;
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
