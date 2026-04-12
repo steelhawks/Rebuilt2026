@@ -216,7 +216,9 @@ public final class Autos {
         AutoRoutine routine = factory.newRoutine("Right Rebound Auton");
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
-        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot1 = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory shootToMidToTrench = ChoreoTraj.RRebound$2.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot2 = ChoreoTraj.RRebound$3.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
@@ -227,22 +229,39 @@ public final class Autos {
         );
 
         trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
-        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
 
         trenchToMidToTrench.done().onTrue(
             Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.autonShoot().withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToReboundToTrench.spawnCmd()
+                trenchToShoot1.spawnCmd()
             )
         );
 
-        trenchToReboundToTrench.done().onTrue(
+        trenchToShoot1.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+        trenchToShoot2.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+
+        trenchToShoot1.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToReboundToTrench),
+                recoverToTrajectoryEnd(trenchToShoot1),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                shootToMidToTrench.spawnCmd()
+            )
+        );
+
+        shootToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot2.spawnCmd()
+            )
+        );
+
+        trenchToShoot2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot2),
                 ShootingCommands.autonShoot(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
