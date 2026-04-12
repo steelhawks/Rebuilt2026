@@ -56,7 +56,7 @@ public class Indexer extends SubsystemBase {
         FEEDER_JAM_CURRENT =
             new LoggedTunableNumber("Indexer/Feeder/JamCurrent", 60.0);
         BEAM_DEBOUNCE_TIME =
-            new LoggedTunableNumber("Indexer/Beam/DebounceTime", 1.5);
+            new LoggedTunableNumber("Indexer/Beam/DebounceTime", 0.3);
         FEEDER_STALL_DEBOUNCE =
             new LoggedTunableNumber("Indexer/Feeder/StallDebounceTime", 0.1);
         SPINDEXER_STALL_DEBOUNCE =

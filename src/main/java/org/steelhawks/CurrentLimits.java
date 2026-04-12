@@ -8,7 +8,7 @@ public interface CurrentLimits {
         double turretCurrent = 20.0;
         double intakePositionCurrent = 20.0;
         double intakeRollersCurrent = 40.0;
-        double spindexerCurrent = 20.0;
+        double spindexerCurrent = 40.0;
         double feederCurrent = 40.0;
 
         boolean flywheelEnabled = true;
