@@ -33,7 +33,7 @@ public class ShooterStructure {
         new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Rotation2d::interpolate);
 
     private static final LoggedNetworkNumber lutDistanceOffsetMeters =
-        new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(0.0)); // 2ft, if too short try 3ft or 4ft
+        new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(0.0)); // 1.95ft is what we had on the  field
 
     private static final double minShootDistance;
     private static final double maxShootDistance;
