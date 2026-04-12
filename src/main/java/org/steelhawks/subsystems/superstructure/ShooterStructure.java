@@ -61,8 +61,8 @@ public class ShooterStructure {
 //        minShootDistance = c.minShootDistance();
 //        maxShootDistance = c.maxShootDistance();
 
-        minShootDistance = 1.39;
-        maxShootDistance = 5.85;
+        minShootDistance = 1.2;
+        maxShootDistance = 5.74;
 
         minFerryDistance = c.minFerryDistance();
         maxFerryDistance = c.maxFerryDistance();
