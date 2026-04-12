@@ -233,7 +233,7 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.autonShoot().withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(3.0),
 //                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()

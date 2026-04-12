@@ -88,18 +88,6 @@ public class RobotContainer {
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
-//        driver.povLeft().onTrue(s_Swerve.zeroHeading())
-//            .onTrue(RumbleAPI.steady());
-
-//        driver.povLeft()
-//            .onTrue(s_Flywheel.toggleBumpUp());
-
-//        driver.povUp().onTrue(
-//            s_Flywheel.incrementVelocityFactor(0.03));
-//
-//        driver.povDown().onTrue(
-//            s_Flywheel.incrementVelocityFactor(-0.03));
-
         driver.povRight()
             .whileTrue(s_Indexer.outtake());
 
