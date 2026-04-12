@@ -211,7 +211,6 @@ public class RobotState {
                 ? ShootingState.SHOOTING_MOVING
                 : ShootingState.SHOOTING_STATIONARY;
             return lastDerivedShootingState;
-//            return ShootingState.SHOOTING_MOVING;
         }
         return shootingState;
     }
