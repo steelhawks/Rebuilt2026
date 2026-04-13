@@ -186,7 +186,7 @@ public class LEDCommands {
 
     private static class LEDTriggers {
 
-        private LEDTriggers(Trigger toggleMatchData) {
+        private LEDTriggers(Trigger shootingTrigger) {
             Trigger badBattery =
                 new Trigger(
                     () -> Robot.getState().equals(DISABLED)
@@ -205,24 +205,21 @@ public class LEDCommands {
 
             Trigger warn10Seconds = new Trigger(() -> RobotState.getInstance().isShift() && RobotState.getInstance().timeLeftInShift() < 10.0)
                 .whileTrue(displayTimeLeftInShift())
-//                    .beforeStarting(() -> s_Matrix.setBrightness(1.0)))
-                .onFalse(s_Matrix.clearCommand());
-
-            toggleMatchData
-                .whileTrue(requestMatchDataScreen())
                 .onFalse(s_Matrix.clearCommand());
 
             Trigger isAuton = new Trigger(() -> Robot.getState().equals(AUTON))
                 .whileTrue(s_Matrix.plasmaCommand(100));
-//                    .beforeStarting(() -> s_Matrix.setBrightness(1.0)));
+
+            shootingTrigger
+                .whileTrue(
+                    s_Matrix.rainbowWaveCommand(5));
 
             Trigger isTeleop = new Trigger(() -> Robot.getState().equals(TELEOP))
-                    .and(runTechnicianScreen.negate())
-                    .and(runRainbowLEDs.negate())
-                    .and(warn10Seconds.negate())
-                    .and(toggleMatchData.negate())
+                .and(shootingTrigger.negate())
+                .and(runTechnicianScreen.negate())
+                .and(runRainbowLEDs.negate())
+                .and(warn10Seconds.negate())
                 .whileTrue(s_Matrix.fireCommand(15, 20));
-
 
         }
     }

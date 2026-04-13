@@ -54,14 +54,14 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederMotor = new TalonFX(constants.feederId(), canBus);
 
 		spindexerConfig = new TalonFXConfiguration();
-		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
+		spindexerConfig.Feedback.SensorToMechanismRatio = 64.0 / 16.0;
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
 		spindexerConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.spindexerCurrent;
-		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.spindexerEnabled;
         spindexerConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.spindexerCurrent;
-        spindexerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        spindexerConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.spindexerEnabled;
 
 		PhoenixUtil.tryUntilOk(5, () -> spindexerMotor.getConfigurator().apply(spindexerConfig));
 		PhoenixUtil.tryUntilOk(5, spindexerMotor::optimizeBusUtilization);
@@ -72,9 +72,9 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
 		feederConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.feederCurrent;
-		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.feederEnabled;
         feederConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.feederCurrent;
-        feederConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        feederConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.feederEnabled;
 
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);

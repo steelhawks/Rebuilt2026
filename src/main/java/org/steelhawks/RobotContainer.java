@@ -69,7 +69,7 @@ public class RobotContainer {
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
-        LEDCommands.configureTriggers(driver.leftTrigger());
+        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
     }
 
     private void configureDriver() {
@@ -78,22 +78,17 @@ public class RobotContainer {
 
         new Trigger(() -> {
             double x = RobotState.getInstance().getEstimatedPose().getX();
-            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
-            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+            if (AllianceFlip.shouldFlip()) {
+                double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
+                return x <= boundary;
+            } else {
+                return x >= FieldConstants.Trench.TRENCH_END_X;
+            }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
-//        driver.povLeft().onTrue(s_Swerve.zeroHeading())
-//            .onTrue(RumbleAPI.steady());
-
-        driver.povUp().onTrue(
-            s_Flywheel.incrementVelocityFactor(0.03));
-
-        driver.povDown().onTrue(
-            s_Flywheel.incrementVelocityFactor(-0.03));
-
-        driver.povLeft()
+        driver.povRight()
             .whileTrue(s_Indexer.outtake());
 
         driver.rightBumper()

@@ -47,9 +47,9 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.Feedback.SensorToMechanismRatio = constants.reduction();
         config.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.flywheelCurrent;
-        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.flywheelEnabled;
         config.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.flywheelCurrent;
-        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.flywheelEnabled;
         config.Slot0.kP = constants.kP();
         config.Slot0.kI = constants.kI();
         config.Slot0.kD = constants.kD();
@@ -68,9 +68,9 @@ public class FlywheelIOTalonFX implements FlywheelIO {
         rightConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         rightConfig.Feedback.SensorToMechanismRatio = constants.reduction();
         rightConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.flywheelCurrent;
-        rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        rightConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.flywheelEnabled;
         rightConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.flywheelCurrent;
-        rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        rightConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.flywheelEnabled;
         rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
         rightMotor.getConfigurator().apply(rightConfig);
 

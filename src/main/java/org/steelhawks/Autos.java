@@ -89,6 +89,7 @@ public final class Autos {
     }
 
     public static void init() {
+        autoChooser.addOption("No Auton", Commands.none().withName("No Auton"));
         autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName(ChoreoTraj.FourMeterTest.name()));
         autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
         autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
@@ -97,6 +98,7 @@ public final class Autos {
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
         autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.NotSoOPAuton.name()));
+        autoChooser.addOption("Middle Depot Auton", middleDepotAuton().cmd().withName(ChoreoTraj.MiddleDepotAuton.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -214,7 +216,9 @@ public final class Autos {
         AutoRoutine routine = factory.newRoutine("Right Rebound Auton");
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.RRebound$0.asAutoTraj(routine);
-        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot1 = ChoreoTraj.RRebound$1.asAutoTraj(routine);
+        AutoTrajectory shootToMidToTrench = ChoreoTraj.RRebound$2.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot2 = ChoreoTraj.RRebound$3.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
@@ -225,25 +229,40 @@ public final class Autos {
         );
 
         trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
-        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
 
         trenchToMidToTrench.done().onTrue(
             Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToReboundToTrench.spawnCmd()
+                trenchToShoot1.spawnCmd()
             )
         );
 
-        trenchToReboundToTrench.done().onTrue(
+        trenchToShoot1.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+        trenchToShoot2.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+
+        trenchToShoot1.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
+                recoverToTrajectoryEnd(trenchToShoot1),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                shootToMidToTrench.spawnCmd()
+            )
+        );
+
+        shootToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot2.spawnCmd()
+            )
+        );
+
+        trenchToShoot2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot2),
+                ShootingCommands.autonShoot(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
@@ -272,8 +291,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+//                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
             )
@@ -283,8 +302,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+//                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
@@ -459,8 +478,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(moveToShootPose),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+//                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel),
                 intakeFromDepot.spawnCmd()
             )
         );
@@ -469,8 +488,8 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(intakeFromDepot),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel)
+                ShootingCommands.autonShoot().withTimeout(5.0)
+//                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel)
             )
         );
 

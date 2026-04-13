@@ -57,9 +57,9 @@ public class HoodIOTalonFX implements HoodIO {
         motorConfig.Feedback.SensorToMechanismRatio = constants.reduction();
 
         motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.hoodCurrent;
-        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.hoodEnabled;
         motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.hoodCurrent;
-        motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        motorConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.hoodEnabled;
 
         motorConfig.MotionMagic.MotionMagicCruiseVelocity = constants.maxVelocity();
         motorConfig.MotionMagic.MotionMagicAcceleration = constants.maxAcceleration();

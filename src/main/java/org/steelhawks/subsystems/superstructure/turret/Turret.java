@@ -43,7 +43,9 @@ public class Turret extends SubsystemBase {
     private static LoggedTunableNumber maxVelocityRadPerSec;
     private static LoggedTunableNumber maxAccelerationRadPerSecSq;
     private static LoggedTunableNumber manualIncrement;
-    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Units.degreesToRadians(3.0));
+//    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Units.degreesToRadians(5.0));
+    private static double tolerance = Units.degreesToRadians(5.0);
+
 
     private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
@@ -74,7 +76,7 @@ public class Turret extends SubsystemBase {
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
-    private final LoggedTunableNumber constantForceFF = new LoggedTunableNumber("Turret/ConstantForceFF", 40.0);
+    private final LoggedTunableNumber constantForceFF = new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
 
     public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
@@ -313,6 +315,11 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
+            if (DriverStation.isAutonomous()) {
+                tolerance = Units.degreesToRadians(15.0);
+            } else {
+                tolerance = Units.degreesToRadians(5.0);
+            }
             Translation2d velocityTargetFF = null;
             if (Toggles.shooterTuningMode.get()) {
                 RobotState.getInstance().setAimState(AimState.TO_HUB);
@@ -390,7 +397,7 @@ public class Turret extends SubsystemBase {
                         MathUtil.clamp(setpoint.position, constants.minRotation().getRadians(), constants.maxRotation().getRadians()),
                         0.0);
             }
-            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance.getAsDouble());
+            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance);
             if (atGoal) {
                 io.stop();
             } else {

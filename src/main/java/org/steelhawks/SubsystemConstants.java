@@ -145,12 +145,12 @@ public class SubsystemConstants {
                 200.0, 0.0, 0.0,
                 3.0, 5.0,
                 35.0, 0.05,
-                0.6, -1.0,
+                0.8, -1.0,
                 0.8);
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 10.0, 0.0, 0.0, 6.94627, 0.02, 5.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
+                5, 6, 0.85, 10.0, 0.0, 0.0, 6.94627, 0.02, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
 //    ﻿﻿﻿﻿﻿﻿﻿﻿Warning ﻿﻿ 44000 ﻿﻿ DS Return Key Disable ﻿﻿ Driver Station ﻿﻿﻿
 //            ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
