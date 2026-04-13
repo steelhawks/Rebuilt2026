@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -45,7 +46,7 @@ public class SubsystemConstants {
 
     public record TurretConstants(
         int turretId, int encoderId,
-        double kP, double kI, double kD, double kS, double kA,
+        double kP, double kI, double kD, double kS, double kA, double kV,
         double maxVelocityRadPerSec,
         double maxAccelerationRadPerSecSq,
         double manualIncrement,
@@ -56,7 +57,7 @@ public class SubsystemConstants {
         Rotation2d encoderOffset
     ) {
         public static final TurretConstants UNSET =
-            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d(), new Rotation2d());
+            new TurretConstants(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new Rotation2d(), new Rotation2d(), new Rotation2d());
     }
 
     public record HoodConstants(
@@ -80,10 +81,15 @@ public class SubsystemConstants {
         double currentHomingThreshold,
         double velocityStallingThreshold,
         double intakeSpeed, double outtakeSpeed,
-        double positionTwistingThreshold
+        double positionTwistingThreshold,
+        GravityTypeValue gravityType,
+        double cruiseVelocity,
+        double jerk,
+        double forwardSoftLimit,
+        double reverseSoftLimit
     ) {
         public static final IntakeConstants UNSET =
-            new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0);
+            new IntakeConstants(0, 0, 0, 0,0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.valueOf(0), 0, 0, 0, 0);
     }
 
     public record IndexerConstants(
@@ -146,7 +152,7 @@ public class SubsystemConstants {
                 3.0, 5.0,
                 35.0, 0.05,
                 0.6, -1.0,
-                0.8);
+                0.8, GravityTypeValue.Arm_Cosine, 2, 3, 4, 5);
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
@@ -175,7 +181,7 @@ public class SubsystemConstants {
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 5.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(-0.34619140625));
+                4, 9, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 0, 5.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(-0.34619140625));
 
         // Turret Characterization Results
         // kS: 13.18095
@@ -223,7 +229,12 @@ public class SubsystemConstants {
                 0.05, 0.08,
                 60, 0.03,
                 0.6, 0.6,
-                0.05
+                0.05,
+                    GravityTypeValue.Arm_Cosine,
+                    2,
+                    3,
+                    0.1,
+                    3
             );
 
         public static final FlywheelConstants FLYWHEEL =
@@ -245,7 +256,7 @@ public class SubsystemConstants {
                 1, 0,
                 1100, 0, 90,
                 3.0, 0,
-                10, 20,
+                10, 0, 20,
                 0.1,
                 5,
                 (200.0 / 20.0),
@@ -272,7 +283,12 @@ public class SubsystemConstants {
                 0.05, 0.08,
                 60, 0.03,
                 1, 1,
-                0.05
+                0.05,
+                    GravityTypeValue.Arm_Cosine,
+                    2,
+                    3,
+                    0.1,
+                    3
             );
 
         public static final FlywheelConstants FLYWHEEL =
@@ -294,7 +310,7 @@ public class SubsystemConstants {
                 1, 0,
                 200, 0, 7,
                 0.2, 0,
-                10, 20,
+                10, 0, 20,
                 0.1,
                 40,
                 (200.0 / 20.0),

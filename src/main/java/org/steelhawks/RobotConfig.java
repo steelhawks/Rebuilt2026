@@ -8,10 +8,7 @@ import org.steelhawks.generated.*;
 import org.steelhawks.subsystems.beam.BeamIO;
 import org.steelhawks.subsystems.beam.BeamIOCANRange;
 import org.steelhawks.subsystems.indexer.IndexerIO;
-import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeIO;
-import org.steelhawks.subsystems.intake.IntakeIOSim;
-import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
+import org.steelhawks.subsystems.intake.*;
 import org.steelhawks.subsystems.oldintake.*;
 import org.steelhawks.subsystems.oldintake.OldIntakeIO;
 import org.steelhawks.subsystems.indexer.Indexer;
@@ -158,11 +155,18 @@ public class RobotConfig {
         }
         return Optional.ofNullable(factory.createIndexer(indexerConstants));
     }
-    public Optional<Intake> createIntake() {
+////    public Optional<Intake> createIntake() {
+////        if (!hasIntake) {
+////            return Optional.empty();
+////        }
+////        return Optional.ofNullable(factory.createIntake(intakeConstants));
+//    }
+
+    public Optional<MagicIntake> createMagicIntake() {
         if (!hasIntake) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createIntake(intakeConstants));
+        return  Optional.ofNullable(factory.createMagicIntake(intakeConstants));
     }
 
     public static RobotConfig getConfig() {
@@ -179,7 +183,8 @@ public class RobotConfig {
                 .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
-                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+//                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new OmegaBotFactory())
@@ -195,7 +200,8 @@ public class RobotConfig {
                 .withTurret(false, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false, SubsystemConstants.AlphaBot.INTAKE)
+//                .withIntake(false, SubsystemConstants.AlphaBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(false, SubsystemConstants.AlphaBot.INDEXER)
                 .withAutos(false)
                 .withFactory(new AlphaBotFactory())
@@ -210,7 +216,8 @@ public class RobotConfig {
                 .withTurret(false, null)
                 .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false, null)
+//                .withIntake(false, null)
+                    .withMagicIntake(false, null)
                 .withIndexer(false, null)
                 .withAutos(false)
                 .withFactory(new ChassisBotFactory())
@@ -225,7 +232,8 @@ public class RobotConfig {
                 .withTurret(false, null)
                 .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false, null)
+//                .withIntake(false, null)
+                    .withMagicIntake(true, null)
                 .withIndexer(false, null)
                 .withAutos(false)
                 .withFactory(new LastYearFactory())
@@ -241,7 +249,8 @@ public class RobotConfig {
                 .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(false, null)
+//                .withIntake(false, null)
+                    .withMagicIntake(false, null)
                 .withIndexer(false, null)
                 .withAutos(false)
                 .withFactory(new TestBoardFactory())
@@ -255,7 +264,8 @@ public class RobotConfig {
                 .withTurret(true, SubsystemConstants.SimBot.TURRET)
                 .withHood(true, SubsystemConstants.SimBot.HOOD)
                 .withOldIntake(false)
-                .withIntake(true, SubsystemConstants.SimBot.INTAKE)
+//                .withIntake(true, SubsystemConstants.SimBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.SimBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
@@ -273,7 +283,8 @@ public class RobotConfig {
                 .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
-                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+//                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
@@ -287,7 +298,8 @@ public class RobotConfig {
                 .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
-                .withIntake(true, SubsystemConstants.AlphaBot.INTAKE)
+//                .withIntake(true, SubsystemConstants.AlphaBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.AlphaBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
@@ -302,7 +314,8 @@ public class RobotConfig {
                 .withTurret(false, TurretConstants.UNSET)
                 .withHood(false, HoodConstants.UNSET)
                 .withOldIntake(false)
-                .withIntake(true, IntakeConstants.UNSET)
+//                .withIntake(true, IntakeConstants.UNSET)
+                    .withMagicIntake(true, IntakeConstants.UNSET)
                 .withIndexer(true, IndexerConstants.UNSET)
                 .withAutos(true)
                 .withFactory(new ReplayFactory())
@@ -379,7 +392,13 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withIntake(boolean enabled, IntakeConstants intakeConstants) {
+//        public Builder withIntake(boolean enabled, IntakeConstants intakeConstants) {
+//            this.hasIntake = enabled;
+//            this.intakeConstants = intakeConstants;
+//            return this;
+//        }
+
+        public Builder withMagicIntake(boolean enabled, IntakeConstants intakeConstants) {
             this.hasIntake = enabled;
             this.intakeConstants = intakeConstants;
             return this;
@@ -438,7 +457,8 @@ public class RobotConfig {
         Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c);
         Hood createHood(HoodConstants c);
         OldIntake createOldIntake();
-        Intake createIntake(IntakeConstants c);
+//        Intake createIntake(IntakeConstants c);
+        MagicIntake createMagicIntake(IntakeConstants c);
         Indexer createIndexer(IndexerConstants c);
     }
 
@@ -495,9 +515,14 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return new Intake(new IntakeIOTalonFX(CANBusList.kRioBus, c), c);
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
-            return new Intake(new IntakeIOTalonFX(CANBusList.kRioBus, c), c);
+        public MagicIntake createMagicIntake(IntakeConstants c) {
+            return new MagicIntake(new IntakeIOTalonFX(CANBusList.kRioBus, c), c);
         }
 
         @Override
@@ -558,8 +583,13 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return null;
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public MagicIntake createMagicIntake(IntakeConstants c) {
             return null;
         }
 
@@ -620,8 +650,13 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return null;
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public MagicIntake createMagicIntake(IntakeConstants c) {
             return null;
         }
 
@@ -682,8 +717,13 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return null;
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public MagicIntake createMagicIntake(IntakeConstants c) {
             return null;
         }
 
@@ -746,8 +786,13 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return null;
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
+        public MagicIntake createMagicIntake(IntakeConstants c) {
             return null;
         }
 
@@ -809,9 +854,14 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return new Intake(new IntakeIOSim(c), c);
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
-            return new Intake(new IntakeIOSim(c), c);
+        public MagicIntake createMagicIntake(IntakeConstants c) {
+            return new MagicIntake(new IntakeIOSim(c), c);
         }
 
         @Override
@@ -870,9 +920,14 @@ public class RobotConfig {
             return new OldIntake(new OldIntakeIO() {});
         }
 
+//        @Override
+//        public Intake createIntake(IntakeConstants c) {
+//            return new Intake(new IntakeIO() {}, c);
+//        }
+
         @Override
-        public Intake createIntake(IntakeConstants c) {
-            return new Intake(new IntakeIO() {}, c);
+        public MagicIntake createMagicIntake(IntakeConstants c) {
+            return new MagicIntake(new IntakeIO() {}, c);
         }
 
         @Override

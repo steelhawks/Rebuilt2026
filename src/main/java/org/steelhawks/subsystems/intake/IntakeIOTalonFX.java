@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.intake;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -50,6 +51,9 @@ public class IntakeIOTalonFX implements IntakeIO {
     private final VoltageOut leftRackVoltageOut;
     private final VoltageOut rightRackVoltageOut;
 
+    private final MotionMagicVoltage m_request;
+    private final VoltageOut m_voltageOut;
+
     private final DutyCycleOut intakeDutyCycleOut;
 
     private final TalonFXConfiguration leftConfig;
@@ -74,12 +78,26 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Slot0.kP = constants.kP();
         leftConfig.Slot0.kI = constants.kI();
         leftConfig.Slot0.kD = constants.kD();
+        leftConfig.Slot0.kS = constants.kS();
+        leftConfig.Slot0.kA = constants.kA();
+        leftConfig.Slot0.kG = constants.kG();
+        leftConfig.Slot0.GravityType = constants.gravityType();
         leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
 
         leftConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakePositionCurrent;
         leftConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         leftConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.intakePositionCurrent;
         leftConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+
+        leftConfig.MotionMagic.MotionMagicCruiseVelocity = constants.cruiseVelocity();
+        leftConfig.MotionMagic.MotionMagicAcceleration = constants.maxAccelMetersPerSecSq();
+        leftConfig.MotionMagic.MotionMagicJerk = constants.jerk();
+
+        leftConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        leftConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        leftConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = constants.forwardSoftLimit();
+        leftConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = constants.reverseSoftLimit();
+
         tryUntilOk(5, () -> leftMotor.getConfigurator().apply(leftConfig));
 
         rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -87,12 +105,27 @@ public class IntakeIOTalonFX implements IntakeIO {
         rightConfig.Slot0.kP = constants.kP();
         rightConfig.Slot0.kI = constants.kI();
         rightConfig.Slot0.kD = constants.kD();
+        rightConfig.Slot0.kS = constants.kS();
+        rightConfig.Slot0.kA = constants.kA();
+        rightConfig.Slot0.kG = constants.kG();
+        rightConfig.Slot0.GravityType = constants.gravityType();
         rightConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
 
         rightConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakePositionCurrent;
         rightConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         rightConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.intakePositionCurrent;
         rightConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+
+
+        rightConfig.MotionMagic.MotionMagicCruiseVelocity = constants.cruiseVelocity();
+        rightConfig.MotionMagic.MotionMagicAcceleration = constants.maxAccelMetersPerSecSq();
+        rightConfig.MotionMagic.MotionMagicJerk = constants.jerk();
+
+        rightConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        rightConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        rightConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = constants.forwardSoftLimit();
+        rightConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = constants.reverseSoftLimit();
+
         tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
 
         intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -136,6 +169,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftRackVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
         rightRackVoltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
         intakeDutyCycleOut = new DutyCycleOut(0.0).withEnableFOC(true);
+        m_request = new MotionMagicVoltage(0.0).withUpdateFreqHz(0.0).withEnableFOC(true);
+        m_voltageOut = new VoltageOut(0.0).withUpdateFreqHz(0.0);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50,
@@ -198,14 +233,20 @@ public class IntakeIOTalonFX implements IntakeIO {
     @Override
     public void runRackPositionBoth(double positionMeters, double leftFF, double rightFF) {
         double rotations = positionMeters / IntakeConstants.METERS_PER_ROTATION;
+//        leftMotor.setControl(
+//            leftPositionTorqueCurrentFOC
+//                .withPosition(rotations)
+//                .withFeedForward(leftFF));
+//        rightMotor.setControl(
+//            rightPositionTorqueCurrentFOC
+//                .withPosition(rotations)
+//                .withFeedForward(rightFF));
         leftMotor.setControl(
-            leftPositionTorqueCurrentFOC
-                .withPosition(rotations)
-                .withFeedForward(leftFF));
+                m_request.withPosition(rotations).withFeedForward(leftFF)
+        );
         rightMotor.setControl(
-            rightPositionTorqueCurrentFOC
-                .withPosition(rotations)
-                .withFeedForward(rightFF));
+                m_request.withPosition(rotations).withFeedForward(rightFF)
+        );
     }
 
     @Override
@@ -231,12 +272,12 @@ public class IntakeIOTalonFX implements IntakeIO {
                 ? rightRackTorqueCurrentFOC.withOutput(rightOutput)
                 : rightRackVoltageOut.withOutput(rightOutput));
     }
-
-    @Override
-    public void runRackPercentOut(double output) {
-        leftMotor.setControl(leftRackDutyCycleOut.withOutput(output));
-        rightMotor.setControl(rightRackDutyCycleOut.withOutput(output));
-    }
+//
+//    @Override
+//    public void runRackPercentOut(double output) {
+//        leftMotor.setControl(leftRackDutyCycleOut.withOutput(output));
+//        rightMotor.setControl(rightRackDutyCycleOut.withOutput(output));
+//    }
 
     @Override
     public void setRackPID(double kP, double kI, double kD) {
@@ -251,18 +292,44 @@ public class IntakeIOTalonFX implements IntakeIO {
         tryUntilOk(5, () -> rightMotor.getConfigurator().apply(rightConfig));
     }
 
+//    @Override
+//    public void setPosition(double meters) {
+//        new Thread(() -> {
+//            tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
+//            tryUntilOk(5, () -> rightMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
+//        }).start();
+//    }
+
     @Override
     public void setPosition(double meters) {
         new Thread(() -> {
-            tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
-            tryUntilOk(5, () -> rightMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
-        }).start();
+            tryUntilOk(5, () -> leftMotor.setControl(m_request.withPosition(meters)));
+            tryUntilOk(5, () -> rightMotor.setControl(m_request.withPosition(meters)));
+
+        });
     }
+
+
+    @Override
+    public void setMotionMagicConstraints(double cruiseVelocity, double acceleration, double jerk) {
+        MotionMagicConfigs mm = new MotionMagicConfigs();
+        mm.MotionMagicCruiseVelocity = cruiseVelocity / IntakeConstants.METERS_PER_ROTATION;
+        mm.MotionMagicAcceleration = acceleration / IntakeConstants.METERS_PER_ROTATION;
+        mm.MotionMagicJerk = jerk / IntakeConstants.METERS_PER_ROTATION;
+        tryUntilOk(5, () -> leftMotor.getConfigurator().apply(mm));
+        tryUntilOk(5, () -> rightMotor.getConfigurator().apply(mm));
+    }
+//
+//    @Override
+//    public void runIntake(double output) {
+//        intakeMotor.setControl(intakeDutyCycleOut.withOutput(output));
+//    }
 
     @Override
     public void runIntake(double output) {
-        intakeMotor.setControl(intakeDutyCycleOut.withOutput(output));
+        intakeMotor.setControl(m_voltageOut.withOutput(output));
     }
+
 
     @Override
     public void stopRack() {

@@ -48,6 +48,8 @@ public interface IntakeIO {
 
     default void runRackPercentOut(double output) {}
 
+    default void setMotionMagicConstraints(double cruiseVelocity, double cruiseAcceleration, double jerk) {}
+
     default void setRackPID(double kP, double kI, double kD) {}
 
     default void setPosition(double meters) {}

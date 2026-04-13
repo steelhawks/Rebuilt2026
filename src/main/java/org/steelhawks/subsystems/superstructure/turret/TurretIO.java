@@ -36,4 +36,6 @@ public interface TurretIO {
     default void setPosition(double position) {}
 
     default void stop() {}
+
+    default void setMotionMagicConstraints(double cruiseVelocity, double acceleration, double jerk) {}
 }
