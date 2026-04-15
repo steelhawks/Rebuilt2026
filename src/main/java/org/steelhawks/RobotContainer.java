@@ -10,6 +10,7 @@ import org.steelhawks.commands.*;
 import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.intake.MagicIntake;
 import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
@@ -18,6 +19,7 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
+import org.steelhawks.subsystems.superstructure.turret.MagicTurret;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
@@ -33,9 +35,11 @@ public class RobotContainer {
     public static Vision s_Vision = null;
     public static ObjectVision s_ObjVision = null;
     public static Flywheel s_Flywheel = null;
-    public static Turret s_Turret = null;
+//    public static Turret s_Turret = null;
+    public static MagicTurret s_Turret = null;
     public static Hood s_Hood = null;
-    public static Intake s_Intake = null;
+//    public static Intake s_Intake = null;
+    public static MagicIntake s_Intake = null;
     public static OldIntake s_OldIntake = null;
     public static Indexer s_Indexer = null;
 
@@ -51,9 +55,9 @@ public class RobotContainer {
         s_Swerve = config.createSwerve();
         s_Vision = config.createVision().orElse(null);
         s_Flywheel = config.createFlywheel().orElse(null);
-        s_Turret = config.createTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
+        s_Turret = config.createMagicTurret(RobotState.getInstance()::getEstimatedPose).orElse(null);
         s_Hood = config.createHood().orElse(null);
-        s_Intake = config.createIntake().orElse(null);
+        s_Intake = config.createMagicIntake().orElse(null);
         s_OldIntake = config.createOldIntake().orElse(null);
         s_Indexer = config.createIndexer().orElse(null);
 

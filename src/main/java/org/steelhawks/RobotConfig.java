@@ -24,10 +24,7 @@ import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.hood.HoodIO;
 import org.steelhawks.subsystems.superstructure.hood.HoodIOSim;
 import org.steelhawks.subsystems.superstructure.hood.HoodIOTalonFX;
-import org.steelhawks.subsystems.superstructure.turret.Turret;
-import org.steelhawks.subsystems.superstructure.turret.TurretIO;
-import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
-import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
+import org.steelhawks.subsystems.superstructure.turret.*;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -128,11 +125,19 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createFlywheel(flywheelConstants));
     }
 
-    public Optional<Turret> createTurret(Supplier<Pose2d> poseSupplier) {
+//    public Optional<Turret> createTurret(Supplier<Pose2d> poseSupplier) {
+//        if (!hasTurret) {
+//            return Optional.empty();
+//        }
+//        return Optional.ofNullable(factory.createTurret(poseSupplier, turretConstants));
+//    }
+
+
+    public Optional<MagicTurret> createMagicTurret(Supplier<Pose2d> pose2dSupplier) {
         if (!hasTurret) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createTurret(poseSupplier, turretConstants));
+        return Optional.ofNullable(factory.createMagicTurret(pose2dSupplier, turretConstants));
     }
 
     public Optional<Hood> createHood() {
@@ -180,7 +185,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
+//                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
+                    .withMagicTurret(true, SubsystemConstants.OmegaBot.TURRET)
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
 //                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
@@ -197,11 +203,12 @@ public class RobotConfig {
                 .withVision(false)
                 .withObjectVision(false)
                 .withFlywheel(false, SubsystemConstants.AlphaBot.FLYWHEEL)
-                .withTurret(false, SubsystemConstants.AlphaBot.TURRET)
+//                .withTurret(false, SubsystemConstants.AlphaBot.TURRET)
+                    .withMagicTurret(true, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
 //                .withIntake(false, SubsystemConstants.AlphaBot.INTAKE)
-                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.AlphaBot.INTAKE)
                 .withIndexer(false, SubsystemConstants.AlphaBot.INDEXER)
                 .withAutos(false)
                 .withFactory(new AlphaBotFactory())
@@ -213,7 +220,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(false, null)
-                .withTurret(false, null)
+//                .withTurret(false, null)
+                    .withMagicTurret(false, null)
                 .withHood(false, null)
                 .withOldIntake(false)
 //                .withIntake(false, null)
@@ -229,7 +237,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(false, null)
-                .withTurret(false, null)
+//                .withTurret(false, null)
+                    .withMagicTurret(true, null)
                 .withHood(false, null)
                 .withOldIntake(false)
 //                .withIntake(false, null)
@@ -246,7 +255,8 @@ public class RobotConfig {
                 .withVision(false)
                 .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+//                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+                    .withMagicTurret(true, null)
                 .withHood(false, null)
                 .withOldIntake(false)
 //                .withIntake(false, null)
@@ -261,11 +271,12 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(true, SubsystemConstants.SimBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.SimBot.TURRET)
+//                .withTurret(true, SubsystemConstants.SimBot.TURRET)
+                    .withMagicTurret(false, SubsystemConstants.SimBot.TURRET)
                 .withHood(true, SubsystemConstants.SimBot.HOOD)
                 .withOldIntake(false)
 //                .withIntake(true, SubsystemConstants.SimBot.INTAKE)
-                    .withMagicIntake(true, SubsystemConstants.OmegaBot.INTAKE)
+                    .withMagicIntake(true, SubsystemConstants.SimBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.SimBot.INDEXER)
                 .withAutos(true)
                 .withFactory(new SimBotFactory())
@@ -280,7 +291,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(false)
                 .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
+//                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
+                    .withMagicTurret(true, SubsystemConstants.OmegaBot.TURRET)
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
 //                .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
@@ -295,7 +307,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(true, SubsystemConstants.AlphaBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+//                .withTurret(true, SubsystemConstants.AlphaBot.TURRET)
+                    .withMagicTurret(true, SubsystemConstants.AlphaBot.TURRET)
                 .withHood(false, null)
                 .withOldIntake(false)
 //                .withIntake(true, SubsystemConstants.AlphaBot.INTAKE)
@@ -311,7 +324,8 @@ public class RobotConfig {
                 .withVision(true)
                 .withObjectVision(true)
                 .withFlywheel(false, FlywheelConstants.UNSET)
-                .withTurret(false, TurretConstants.UNSET)
+//                .withTurret(false, TurretConstants.UNSET)
+                    .withMagicTurret(false, TurretConstants.UNSET)
                 .withHood(false, HoodConstants.UNSET)
                 .withOldIntake(false)
 //                .withIntake(true, IntakeConstants.UNSET)
@@ -375,7 +389,13 @@ public class RobotConfig {
             return this;
         }
 
-        public Builder withTurret(boolean enabled, TurretConstants turretConstants) {
+//        public Builder withTurret(boolean enabled, TurretConstants turretConstants) {
+//            this.hasTurret = enabled;
+//            this.turretConstants = turretConstants;
+//            return this;
+//        }
+
+        public Builder withMagicTurret(boolean enabled, TurretConstants turretConstants) {
             this.hasTurret = enabled;
             this.turretConstants = turretConstants;
             return this;
@@ -454,7 +474,8 @@ public class RobotConfig {
         Vision createVision();
         ObjectVision createObjectVision();
         Flywheel createFlywheel(FlywheelConstants c);
-        Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c);
+//        Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c);
+        MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c);
         Hood createHood(HoodConstants c);
         OldIntake createOldIntake();
 //        Intake createIntake(IntakeConstants c);
@@ -500,9 +521,14 @@ public class RobotConfig {
             return new Flywheel(new FlywheelIOTalonFX(CANBusList.kTurretBus, c), c);
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return new Turret(new TurretIOTalonFX(CANBusList.kTurretBus, c), poseSupplier, c);
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(CANBusList.kTurretBus, c), poseSupplier, c);
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
+            return new MagicTurret( new MagicTurretIOTalonFX(CANBusList.kTurretBus, c), pose2dSupplier, c);
         }
 
         @Override
@@ -567,9 +593,14 @@ public class RobotConfig {
             return new Flywheel(new FlywheelIOTalonFX(CANBusList.kRioBus, c), c);
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
+            return new MagicTurret(new MagicTurretIOTalonFX(CANBusList.kRioBus, c), pose2dSupplier, c);
         }
 
         @Override
@@ -635,8 +666,13 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return null;
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
             return null;
         }
 
@@ -702,11 +738,15 @@ public class RobotConfig {
             return null;
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return null;
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
             return null;
         }
-
         @Override
         public Hood createHood(HoodConstants c) {
             return null;
@@ -771,9 +811,14 @@ public class RobotConfig {
             return new Flywheel(new FlywheelIOTalonFX(CANBusList.kRioBus, c), c);
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOTalonFX(CANBusList.kRioBus, c), poseSupplier, c);
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
+            return new MagicTurret(new MagicTurretIOTalonFX(CANBusList.kRioBus, c), pose2dSupplier, c);
         }
 
         @Override
@@ -839,9 +884,14 @@ public class RobotConfig {
             return new Flywheel(new FlywheelIOSim(c), c);
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return new Turret(new TurretIOSim(c), poseSupplier, c);
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIOSim(c), poseSupplier, c);
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
+            return new MagicTurret(new TurretIOSim(c), pose2dSupplier, c);
         }
 
         @Override
@@ -905,9 +955,14 @@ public class RobotConfig {
             return new Flywheel(new FlywheelIO() {}, c);
         }
 
+//        @Override
+//        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
+//            return new Turret(new TurretIO() {}, poseSupplier, c);
+//        }
+
         @Override
-        public Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c) {
-            return new Turret(new TurretIO() {}, poseSupplier, c);
+        public MagicTurret createMagicTurret(Supplier<Pose2d> pose2dSupplier, TurretConstants c) {
+            return new MagicTurret(new TurretIO() {}, pose2dSupplier, c);
         }
 
         @Override
