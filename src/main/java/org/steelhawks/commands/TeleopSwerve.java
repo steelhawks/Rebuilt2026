@@ -12,7 +12,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.swerve.Swerve;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.function.DoubleSupplier;
@@ -51,7 +53,7 @@ public class TeleopSwerve extends Command {
         NORMAL,
         TRENCH_ALIGN,
         BUMP_ALIGN,
-        LOCK_SOTM
+        TURRET_ALIGN
     }
 
     private static DriveState currentDriveState = DriveState.NORMAL;
@@ -85,17 +87,16 @@ public class TeleopSwerve extends Command {
             .onTrue(Commands.runOnce(() -> Logger.recordOutput("AlignDebug/Trench/InTrigger", true)));
         RobotState.getInstance().getBumpTrigger()
             .onTrue(setDriveState(DriveState.BUMP_ALIGN));
-//        RobotState.getInstance().getSOTMTrigger().onTrue(
-//            setDriveState(DriveState.LOCK_SOTM)
-//                .alongWith(Commands.runOnce(() -> {
-//                    sotmHeadingSnapshot = RobotState.getInstance().getRotation().getRadians();
-//                    var chassisSpeeds = s_Swerve.getChassisSpeeds();
-//                    sotmSpeedSnapshotNormalized = Math.max(0.3, Math.hypot(
-//                        chassisSpeeds.vxMetersPerSecond,
-//                        chassisSpeeds.vyMetersPerSecond) / s_Swerve.getMaxLinearSpeedMetersPerSec());
-//                })));
         RobotState.getInstance().getSOTMTrigger().negate().and(RobotState.getInstance().getTrenchTrigger().negate()).and(RobotState.getInstance().getBumpTrigger().negate())
             .onTrue(setDriveState(DriveState.NORMAL));
+
+        RobotState.getInstance().getTurretJamTrigger()
+            .onTrue(setDriveState(DriveState.TURRET_ALIGN))
+            .onFalse(Commands.runOnce(() -> {
+                if (currentDriveState == DriveState.TURRET_ALIGN) {
+                    currentDriveState = DriveState.NORMAL;
+                }
+            }));
 
         trenchController =
             new ProfiledPIDController(
@@ -189,27 +190,24 @@ public class TeleopSwerve extends Command {
                 }
                 omega = angleController.calculate(currentRad, bumpAngleSetpointSnapshot);
             }
-            case LOCK_SOTM -> {
-                double x = xSupplier.getAsDouble();
-                double y = ySupplier.getAsDouble();
-                double magnitude = Math.hypot(x, y);
-                if (magnitude < Constants.Deadbands.DRIVE_DEADBAND) {
-                    linearVelocity = new Translation2d();
+            case TURRET_ALIGN -> {
+                RobotContainer.s_Turret.freezeAtCurrentPosition();
+                var sol = RobotState.getInstance().getMovingShotSolution();
+                double targetFieldAngle;
+                if (sol != null && RobotState.getInstance().getShootingState() == ShootingState.SHOOTING_MOVING) {
+                    targetFieldAngle = sol.turretAngle().getRadians() + currentRad;
                 } else {
-                    // Allow driver to steer and vary speed, but cap at the snapshotted speed
-                    // so predictInterceptPoint doesn't get a wildly different velocity
-                    double clampedMagnitude = Math.min(magnitude, sotmSpeedSnapshotNormalized);
-                    Rotation2d direction = new Rotation2d(Math.atan2(y, x));
-                    linearVelocity = new Pose2d(new Translation2d(), direction)
-                        .transformBy(new Transform2d(clampedMagnitude, 0.0, new Rotation2d()))
-                        .getTranslation();
+                    var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER);
+                    var robotTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
+                    targetFieldAngle = Math.atan2(
+                        hubCenter.getY() - robotTranslation.getY(),
+                        hubCenter.getX() - robotTranslation.getX());
                 }
-                omega = angleController.calculate(currentRad, sotmHeadingSnapshot);
-                var chassisSpeeds = s_Swerve.getChassisSpeeds();
-                double actualMagnitude = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
-                Logger.recordOutput("TeleopSwerve/HeadingSnapshot", sotmHeadingSnapshot);
-                Logger.recordOutput("TeleopSwerve/SpeedSnapshotNormalized", sotmSpeedSnapshotNormalized);
-                Logger.recordOutput("TeleopSwerve/ActualChassisSpeedMagnitude", actualMagnitude);
+                // rotate chassis so turret center (angle 0) points at target
+                double turretMountingYaw = Constants.RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
+                double desiredRobotAngle = MathUtil.angleModulus(targetFieldAngle - turretMountingYaw);
+                omega = angleController.calculate(currentRad, desiredRobotAngle);
+                Logger.recordOutput("TeleopSwerve/TurretAlign/DesiredRobotAngle", desiredRobotAngle);
             }
         }
         DriveCommands.runVelocity(

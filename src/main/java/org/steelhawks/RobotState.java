@@ -77,6 +77,8 @@ public class RobotState {
     private final Trigger inTrenchTrigger;
     @AutoLogOutput
     private final Trigger inBumpTrigger;
+    @AutoLogOutput
+    private final Trigger turretStuckTrigger;
 
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
@@ -149,6 +151,11 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER)
             .debounce(0.3);
+        turretStuckTrigger =
+            new Trigger(
+                () -> RobotContainer.s_Turret != null
+                    && RobotContainer.s_Turret.isJammedOrInDeadSpot()
+                    && shootingState != ShootingState.NOTHING);
     }
 
     public RobotFootprint getFootprint() {
@@ -165,6 +172,10 @@ public class RobotState {
 
     public Trigger getSOTMTrigger() {
         return sotmTrigger;
+    }
+
+    public Trigger getTurretJamTrigger() {
+        return turretStuckTrigger;
     }
 
     public void updateChassisSpeeds(ChassisSpeeds speeds) {
@@ -307,6 +318,10 @@ public class RobotState {
 //        if (desiredMode != currentAimState) {
 //            setAimState(desiredMode);
 //        }
+    }
+
+    public boolean isAimedToScore() {
+        return RobotContainer.s_Turret.atGoal() && !RobotContainer.s_Turret.isTraversing();
     }
 
     private AimState calculateDesiredMode() {
