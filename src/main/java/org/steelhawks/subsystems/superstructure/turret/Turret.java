@@ -121,6 +121,12 @@ public class Turret extends SubsystemBase {
         return atGoal;
     }
 
+    @AutoLogOutput(key = "Turret/IsTraversing")
+    public boolean isTraversing() {
+        return Math.abs(setpoint.position - goal.position) > tolerance
+            || Math.abs(setpoint.velocity) > Units.degreesToRadians(2.0);
+    }
+
     private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
         targetAngle = MathUtil.angleModulus(targetAngle);
         double bestAngle = currentAngle;
