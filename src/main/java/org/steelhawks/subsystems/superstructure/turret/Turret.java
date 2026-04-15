@@ -43,7 +43,7 @@ public class Turret extends SubsystemBase {
     private static LoggedTunableNumber maxVelocityRadPerSec;
     private static LoggedTunableNumber maxAccelerationRadPerSecSq;
     private static LoggedTunableNumber manualIncrement;
-    private static double tolerance = Units.degreesToRadians(5.0);
+    public static double tolerance = Units.degreesToRadians(5.0);
 
     private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
@@ -255,6 +255,14 @@ public class Turret extends SubsystemBase {
         goal = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
         setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
         desiredRotation = getPosition();
+    }
+
+    public Rotation2d getMinRotation() {
+        return constants.minRotation();
+    }
+
+    public Rotation2d getMaxRotation() {
+        return constants.minRotation();
     }
 
     @Override

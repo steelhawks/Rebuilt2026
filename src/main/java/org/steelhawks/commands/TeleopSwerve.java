@@ -2,9 +2,6 @@ package org.steelhawks.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
-import org.steelhawks.RobotState.ShootingState;
+import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -192,22 +189,27 @@ public class TeleopSwerve extends Command {
             }
             case TURRET_ALIGN -> {
                 RobotContainer.s_Turret.freezeAtCurrentPosition();
-                var sol = RobotState.getInstance().getMovingShotSolution();
-                double targetFieldAngle;
-                if (sol != null && RobotState.getInstance().getShootingState() == ShootingState.SHOOTING_MOVING) {
-                    targetFieldAngle = sol.turretAngle().getRadians() + currentRad;
-                } else {
-                    var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER);
-                    var robotTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
-                    targetFieldAngle = Math.atan2(
-                        hubCenter.getY() - robotTranslation.getY(),
-                        hubCenter.getX() - robotTranslation.getX());
-                }
-                // rotate chassis so turret center (angle 0) points at target
+                var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER);
+                var robotTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
                 double turretMountingYaw = Constants.RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
-                double desiredRobotAngle = MathUtil.angleModulus(targetFieldAngle - turretMountingYaw);
+
+                double targetFieldAngle = Math.atan2(
+                    hubCenter.getY() - robotTranslation.getY(),
+                    hubCenter.getX() - robotTranslation.getX());
+                double requiredTurretAngle = MathUtil.angleModulus(
+                    targetFieldAngle - currentRad - turretMountingYaw);
+                double clampedTurretAngle = MathUtil.clamp(
+                    requiredTurretAngle,
+                    RobotContainer.s_Turret.getMinRotation().getRadians() + Turret.tolerance,
+                    RobotContainer.s_Turret.getMaxRotation().getRadians() - Turret.tolerance);
+
+                double desiredRobotAngle = MathUtil.angleModulus(
+                    targetFieldAngle - turretMountingYaw - clampedTurretAngle);
+
                 omega = angleController.calculate(currentRad, desiredRobotAngle);
                 Logger.recordOutput("TeleopSwerve/TurretAlign/DesiredRobotAngle", desiredRobotAngle);
+                Logger.recordOutput("TeleopSwerve/TurretAlign/RequiredTurretAngle", requiredTurretAngle);
+                Logger.recordOutput("TeleopSwerve/TurretAlign/ClampedTurretAngle", clampedTurretAngle);
             }
         }
         DriveCommands.runVelocity(
