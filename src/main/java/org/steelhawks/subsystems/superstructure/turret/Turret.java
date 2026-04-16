@@ -357,11 +357,6 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
-            if (DriverStation.isAutonomous()) {
-                tolerance = Units.degreesToRadians(15.0);
-            } else {
-                tolerance = Units.degreesToRadians(5.0);
-            }
             Translation2d velocityTargetFF = null;
             if (Toggles.shooterTuningMode.get()) {
                 RobotState.getInstance().setAimState(AimState.TO_HUB);

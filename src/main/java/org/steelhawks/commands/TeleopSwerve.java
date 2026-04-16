@@ -202,11 +202,11 @@ public class TeleopSwerve extends Command {
                     requiredTurretAngle,
                     RobotContainer.s_Turret.getMinRotation().getRadians() + Turret.tolerance,
                     RobotContainer.s_Turret.getMaxRotation().getRadians() - Turret.tolerance);
-
                 double desiredRobotAngle = MathUtil.angleModulus(
                     targetFieldAngle - turretMountingYaw - clampedTurretAngle);
 
-                omega = angleController.calculate(currentRad, desiredRobotAngle);
+                double controllerOmega = angleController.calculate(currentRad, desiredRobotAngle);
+                omega = controllerOmega + omega * 0.3;
                 Logger.recordOutput("TeleopSwerve/TurretAlign/DesiredRobotAngle", desiredRobotAngle);
                 Logger.recordOutput("TeleopSwerve/TurretAlign/RequiredTurretAngle", requiredTurretAngle);
                 Logger.recordOutput("TeleopSwerve/TurretAlign/ClampedTurretAngle", clampedTurretAngle);
