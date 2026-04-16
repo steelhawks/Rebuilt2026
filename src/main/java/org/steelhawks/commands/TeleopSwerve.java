@@ -44,6 +44,8 @@ public class TeleopSwerve extends Command {
     private final DoubleSupplier xSupplier, ySupplier, omegaSupplier;
     private static Double trenchAngleSetpointSnapshot = null;
     private static Double bumpAngleSetpointSnapshot = null;
+    private double filteredOmega = 0.0;
+    private static final double OMEGA_FILTER_ALPHA = 0.2;
     private double sotmHeadingSnapshot = 0.0;
     private double sotmSpeedSnapshotNormalized = 0.0;
 
@@ -133,6 +135,11 @@ public class TeleopSwerve extends Command {
     }
 
     @Override
+    public void initialize() {
+        filteredOmega = 0.0;
+    }
+
+    @Override
     public void execute() {
         if (DriverStation.isAutonomous()) {
             s_Swerve.stopWithX();
@@ -154,10 +161,12 @@ public class TeleopSwerve extends Command {
                 Toggles.rateLimitSwerveEnabled.get()
                     ? joystickLimiter.calculate(ySupplier.getAsDouble())
                     : ySupplier.getAsDouble());
+        double currentRad = RobotState.getInstance().getRotation().getRadians();
         double omega =
             MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Constants.Deadbands.DRIVE_DEADBAND);
-        double currentRad = RobotState.getInstance().getRotation().getRadians();
-        omega = Math.copySign(Math.pow(omega, 2), omega);
+        omega = Math.pow(omega, 3);
+        filteredOmega = filteredOmega * (1.0 - OMEGA_FILTER_ALPHA) + omega * OMEGA_FILTER_ALPHA;
+        omega = filteredOmega;
         switch (currentDriveState) {
             case TRENCH_ALIGN -> {
                 double middleOfTrenchClearanceY =

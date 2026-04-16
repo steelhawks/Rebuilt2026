@@ -35,7 +35,7 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/MotionMagicEnabled", false);
 
     LoggedNetworkBoolean rateLimitSwerveEnabled =
-        new LoggedNetworkBoolean("Toggles/RateLimitSwerveEnabled", false);
+        new LoggedNetworkBoolean("Toggles/RateLimitSwerveEnabled", true);
 
     LoggedNetworkBoolean shooterTuningMode =
         new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);

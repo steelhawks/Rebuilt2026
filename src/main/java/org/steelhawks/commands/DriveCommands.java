@@ -37,7 +37,8 @@ import java.util.function.Supplier;
 
 public class DriveCommands {
 
-    public static final SlewRateLimiter joystickLimiter = new SlewRateLimiter(0.8);
+    public static final SlewRateLimiter joystickLimiter =
+        new SlewRateLimiter(3.5); // TODO tune, if driver wants faster accel increase
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
 
     private static final double FF_START_DELAY = 2.0; // Secs
@@ -53,8 +54,8 @@ public class DriveCommands {
         double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), Deadbands.DRIVE_DEADBAND);
         Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
-        // square for more precise control
-        linearMagnitude = Math.pow(linearMagnitude, 2);
+        // cube for even more precise control
+        linearMagnitude = Math.pow(linearMagnitude, 3);
 
         return new Pose2d(new Translation2d(), linearDirection)
             .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
