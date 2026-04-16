@@ -40,6 +40,10 @@ public class ShooterStructure {
     private static final double minFerryDistance;
     private static final double maxFerryDistance;
 
+    public static double getMaxShootDistance() {
+        return maxShootDistance;
+    }
+
     public record ProjectileData(double exitVelocity, double hoodAngle, Translation3d target) {}
     public record MovingShotSolution(
         double exitVelocity,
