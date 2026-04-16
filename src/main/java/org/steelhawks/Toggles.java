@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.vision.VisionConstants;
+import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
@@ -20,9 +21,11 @@ public interface Toggles {
         if (RobotConfig.getConfig().hasIntake)
             bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
        if (RobotConfig.getConfig().hasVision)
-            bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(() -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.LEFT_CORNER_2D)));
+            bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
+                () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.LEFT_CORNER_2D))));
         if (RobotConfig.getConfig().hasVision)
-            bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(() -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.RIGHT_CORNER_2d)));
+            bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
+                () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.RIGHT_CORNER_2d))));
     }
 
     private static void bindMomentary(String key, Command command) {

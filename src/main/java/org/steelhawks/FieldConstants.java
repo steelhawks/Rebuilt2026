@@ -96,15 +96,15 @@ public class FieldConstants {
     public static final class FieldCorners {
        public static final Pose2d LEFT_CORNER_2D =
            new Pose2d(
-               0,
-               FIELD_WIDTH,
+               RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2,
+               FIELD_WIDTH - (RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2),
                Rotation2d.kZero
            );
 
        public static final Pose2d RIGHT_CORNER_2d =
            new Pose2d(
-               0,
-               0,
+               RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2,
+               RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2,
                Rotation2d.kZero
            );
     }
