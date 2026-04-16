@@ -95,8 +95,8 @@ public final class Constants {
 
     public static final class RobotConstants {
         public static final double BAD_BATTERY_THRESHOLD = 11.6;
-        public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(34.0);
-        public static final double ROBOT_WIDTH_WITH_BUMPERS = Units.inchesToMeters(34.0);
+        public static final double ROBOT_LENGTH_WITH_BUMPERS = Units.inchesToMeters(35.0);
+        public static final double ROBOT_WIDTH_WITH_BUMPERS = Units.inchesToMeters(33.0);
 
         public static final Transform3d ROBOT_TO_TURRET;
         public static final double FIXED_SHOOTER_ANGLE = Math.toRadians(80.0);
