@@ -107,6 +107,9 @@ public class RobotContainer {
         driver.x()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
 
+        driver.b()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
+
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
 

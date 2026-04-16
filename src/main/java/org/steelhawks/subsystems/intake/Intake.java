@@ -314,7 +314,7 @@ public class Intake extends SubsystemBase {
                 new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SEC.get() * 0.3,
                 MAX_ACCEL_METERS_PER_SEC_SQ.get() * 0.3)))
-        .andThen(setDesiredStateCommand(IntakeConstants.State.HOME))
+//        .andThen(setDesiredStateCommand(IntakeConstants.State.HOME))
         .andThen(Commands.waitUntil(this::atGoal))
         .finallyDo(() ->
             profile = new TrapezoidProfile(

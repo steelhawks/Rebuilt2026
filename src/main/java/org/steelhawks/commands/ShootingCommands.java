@@ -60,10 +60,10 @@ public class ShootingCommands {
                     && RobotContainer.s_Hood.atGoal()),
             RobotContainer.s_Indexer.feed()
                 .alongWith(
-                    Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
-                        .andThen(Commands.waitSeconds(0.05))
-                        .andThen(RobotContainer.s_Intake.feed()
-                            .onlyIf(() -> !RobotContainer.s_Intake.isRollersRunning())))
+                    Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel()))
+//                        .andThen(Commands.waitSeconds(0.05))
+//                        .andThen(RobotContainer.s_Intake.feed()
+//                            .onlyIf(() -> !RobotContainer.s_Intake.isRollersRunning())))
                 .repeatedly()
         ).finallyDo(() -> {
             RobotState.getInstance().setShootingState(ShootingState.NOTHING);
