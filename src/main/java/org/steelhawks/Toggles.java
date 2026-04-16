@@ -19,6 +19,10 @@ public interface Toggles {
             bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
         if (RobotConfig.getConfig().hasIntake)
             bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
+       if (RobotConfig.getConfig().hasVision)
+            bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(() -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.LEFT_CORNER_2D)));
+        if (RobotConfig.getConfig().hasVision)
+            bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(() -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.RIGHT_CORNER_2d)));
     }
 
     private static void bindMomentary(String key, Command command) {

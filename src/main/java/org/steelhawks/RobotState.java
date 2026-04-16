@@ -399,6 +399,14 @@ public class RobotState {
         Logger.recordOutput("RobotState/PoseReset", pose);
     }
 
+    public void resetToPose(Pose2d newPose) {
+        resetPose(
+            newPose,
+            gyroRotation,
+            lastModulePositions
+        );
+    }
+
     public void addOdometryObservation(OdometryObservation observation) {
         if (observation.gyroAngle() != null) {
             gyroRotation = observation.gyroAngle();

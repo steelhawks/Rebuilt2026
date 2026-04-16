@@ -92,4 +92,20 @@ public class FieldConstants {
     public final static class Bump {
 
     }
+
+    public static final class FieldCorners {
+       public static final Pose2d LEFT_CORNER_2D =
+           new Pose2d(
+               0,
+               FIELD_WIDTH,
+               Rotation2d.kZero
+           );
+
+       public static final Pose2d RIGHT_CORNER_2d =
+           new Pose2d(
+               0,
+               0,
+               Rotation2d.kZero
+           );
+    }
 }
