@@ -76,7 +76,7 @@ public class Turret extends SubsystemBase {
         new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
 
     private static final double JAM_VELOCITY_THRESHOLD = Units.degreesToRadians(2.0); // rad/s
-    private static final double JAM_ERROR_THRESHOLD = Units.degreesToRadians(10.0);
+    private static final double JAM_ERROR_THRESHOLD = Units.degreesToRadians(5.0);
     private static final double JAM_DETECTION_TIME = 0.3; // seconds
     private final Debouncer jamDebouncer = new Debouncer(JAM_DETECTION_TIME, DebounceType.kRising);
     private final Debouncer unjamDebouncer = new Debouncer(0.15, DebounceType.kFalling);
@@ -124,25 +124,14 @@ public class Turret extends SubsystemBase {
         return atGoal;
     }
 
-    private boolean jamLatched = false;
-    private double jamStartTime = Double.NaN;
-
-    private static final double JAM_CURRENT_THRESHOLD = 30.0; // amps, tune this
     @AutoLogOutput(key = "Turret/IsJammedOrDeadSpot")
     public boolean isJammedOrInDeadSpot() {
-        boolean highCurrentWithError =
-            inputs.supplyCurrentAmps > JAM_CURRENT_THRESHOLD
+        boolean stuckWithError =
+            Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
                 && Math.abs(getPosition().getRadians() - goal.position) > JAM_ERROR_THRESHOLD
                 && shouldRun;
-
-        if (jamDebouncer.calculate(highCurrentWithError)) {
-            jamLatched = true;
-        }
-        if (Math.abs(getPosition().getRadians() - goal.position) <= tolerance) {
-            jamLatched = false;
-        }
-
-        return jamLatched || isAtDeadSpot();
+        boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
+        return jammed || isAtDeadSpot();
     }
 
     @AutoLogOutput(key = "Turret/IsAtDeadSpot")
