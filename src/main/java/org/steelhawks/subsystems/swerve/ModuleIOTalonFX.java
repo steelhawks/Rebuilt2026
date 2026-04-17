@@ -20,6 +20,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -36,6 +37,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final TalonFX turnTalon;
     private final CANcoder cancoder;
 
+    private final TalonFXConfiguration driveConfig;
+    private final TalonFXConfiguration turnConfig;
     // Voltage control requests
     private final VoltageOut voltageRequest = new VoltageOut(0);
     private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
@@ -90,7 +93,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         cancoder = new CANcoder(constants.EncoderId, bus);
 
         // Configure drive motor
-        var driveConfig = constants.DriveMotorInitialConfigs;
+        driveConfig = constants.DriveMotorInitialConfigs;
         driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         driveConfig.Slot0 = constants.DriveMotorGains;
         driveConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
@@ -106,7 +109,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         tryUntilOk(5, () -> driveTalon.setPosition(0.0));
 
         // Configure turn motor
-        var turnConfig = new TalonFXConfiguration();
+        turnConfig = new TalonFXConfiguration();
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnConfig.Slot0 = constants.SteerMotorGains;
         turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
@@ -300,5 +303,12 @@ public class ModuleIOTalonFX implements ModuleIO {
         constants.SteerMotorGains.kI = steerkI;
         constants.SteerMotorGains.kD = steerkD;
         tryUntilOk(5, () -> turnTalon.getConfigurator().apply(constants.SteerMotorGains));
+    }
+
+    @Override
+    public void updateCurrentLimit(boolean inBump) {
+        driveConfig.CurrentLimits.StatorCurrentLimit = inBump ? 120.0 : CurrentLimits.StatorLimit.driveCurrent;
+        turnConfig.CurrentLimits.StatorCurrentLimit = inBump ? 120.0 : CurrentLimits.StatorLimit.turnCurrent;
+
     }
 }

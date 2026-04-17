@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
@@ -89,6 +90,7 @@ public class SwerveModule {
         io.updateInputs(inputs);
         Logger.processInputs(loggerKey, inputs);
         BatteryUtil.recordCurrentUsage(batteryKey, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
+        io.updateCurrentLimit(RobotState.getBumpTrigger().getAsBoolean());
 
         cachedState.speedMetersPerSecond = inputs.driveVelocityRadPerSec * constants.WheelRadius;
         cachedState.angle = inputs.turnPosition;
