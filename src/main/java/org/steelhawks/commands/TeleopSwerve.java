@@ -16,7 +16,8 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.function.DoubleSupplier;
 
-import static org.steelhawks.commands.DriveCommands.joystickLimiter;
+import static org.steelhawks.commands.DriveCommands.xAxisLimiter;
+import static org.steelhawks.commands.DriveCommands.yAxisLimiter;
 
 public class TeleopSwerve extends Command {
 
@@ -154,10 +155,10 @@ public class TeleopSwerve extends Command {
         Translation2d linearVelocity =
             DriveCommands.getLinearVelocityFromJoysticks(
                 Toggles.rateLimitSwerveEnabled.get()
-                    ? joystickLimiter.calculate(xSupplier.getAsDouble())
+                    ? xAxisLimiter.calculate(xSupplier.getAsDouble())
                     : xSupplier.getAsDouble(),
                 Toggles.rateLimitSwerveEnabled.get()
-                    ? joystickLimiter.calculate(ySupplier.getAsDouble())
+                    ? yAxisLimiter.calculate(ySupplier.getAsDouble())
                     : ySupplier.getAsDouble());
         double currentRad = RobotState.getInstance().getRotation().getRadians();
         double omega =

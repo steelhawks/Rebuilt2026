@@ -37,8 +37,10 @@ import java.util.function.Supplier;
 
 public class DriveCommands {
 
-    public static final SlewRateLimiter joystickLimiter =
-        new SlewRateLimiter(3.5); // TODO tune, if driver wants faster accel increase
+    public static final SlewRateLimiter xAxisLimiter =
+        new SlewRateLimiter(5.0);
+    public static final SlewRateLimiter yAxisLimiter =
+        new SlewRateLimiter(5.0); // TODO tune, if driver wants faster accel increase
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
 
     private static final double FF_START_DELAY = 2.0; // Secs
@@ -74,10 +76,10 @@ public class DriveCommands {
                     linearVelocity =
                         getLinearVelocityFromJoysticks(
                             Toggles.rateLimitSwerveEnabled.get()
-                                ? joystickLimiter.calculate(xSupplier.getAsDouble())
+                                ? xAxisLimiter.calculate(xSupplier.getAsDouble())
                                 : xSupplier.getAsDouble(),
                             Toggles.rateLimitSwerveEnabled.get()
-                                ? joystickLimiter.calculate(ySupplier.getAsDouble())
+                                ? yAxisLimiter.calculate(ySupplier.getAsDouble())
                                 : ySupplier.getAsDouble());
                     lastVelocity = linearVelocity;
                 } else if (RobotState.getInstance().getShootingState() == ShootingState.SHOOTING_MOVING) {
@@ -118,10 +120,10 @@ public class DriveCommands {
                 Translation2d linearVelocity =
                     getLinearVelocityFromJoysticks(
                         Toggles.rateLimitSwerveEnabled.get()
-                            ? joystickLimiter.calculate(xSupplier.getAsDouble())
+                            ? xAxisLimiter.calculate(xSupplier.getAsDouble())
                             : xSupplier.getAsDouble(),
                         Toggles.rateLimitSwerveEnabled.get()
-                            ? joystickLimiter.calculate(ySupplier.getAsDouble())
+                            ? xAxisLimiter.calculate(ySupplier.getAsDouble())
                             : ySupplier.getAsDouble());
 
                 double omega =
