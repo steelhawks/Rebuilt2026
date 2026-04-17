@@ -163,11 +163,12 @@ public class Indexer extends SubsystemBase {
         return Commands.runEnd(
             () -> {
                 io.runFeeder(IndexerState.RUNNING.feederOutput);
-                if (!feederStalledCache) {
-                    io.runSpindexer(IndexerState.RUNNING.spindexerOutput);
-                } else {
-                    io.stopSpindexer();
-                }
+                io.runSpindexer(IndexerState.RUNNING.spindexerOutput);
+//                if (!feederStalledCache) {
+//                    io.runSpindexer(IndexerState.RUNNING.spindexerOutput);
+//                } else {
+//                    io.stopSpindexer();
+//                }
             },
             () -> {
                 io.stopSpindexer();

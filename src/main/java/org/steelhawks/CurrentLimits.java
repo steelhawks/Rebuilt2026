@@ -16,8 +16,8 @@ public interface CurrentLimits {
         boolean turretEnabled = false;
         boolean intakePositionEnabled = true;
         boolean intakeRollersEnabled = false;
-        boolean spindexerEnabled = true;
-        boolean feederEnabled = true;
+        boolean spindexerEnabled = false;
+        boolean feederEnabled = false;
     }
 
     interface StatorLimit {
@@ -36,7 +36,7 @@ public interface CurrentLimits {
         boolean turretEnabled = false;
         boolean intakePositionEnabled = true;
         boolean intakeRollersEnabled = false;
-        boolean spindexerEnabled = true;
-        boolean feederEnabled = true;
+        boolean spindexerEnabled = false;
+        boolean feederEnabled = false;
     }
 }
