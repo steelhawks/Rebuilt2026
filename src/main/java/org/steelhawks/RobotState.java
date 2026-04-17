@@ -159,7 +159,7 @@ public class RobotState {
         return inTrenchTrigger;
     }
 
-    public static Trigger getBumpTrigger() {
+    public Trigger getBumpTrigger() {
         return inBumpTrigger;
     }
 

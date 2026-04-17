@@ -90,7 +90,7 @@ public class SwerveModule {
         io.updateInputs(inputs);
         Logger.processInputs(loggerKey, inputs);
         BatteryUtil.recordCurrentUsage(batteryKey, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
-        io.updateCurrentLimit(RobotState.getBumpTrigger().getAsBoolean());
+        io.updateCurrentLimit(RobotState.getInstance().getBumpTrigger().getAsBoolean());
 
         cachedState.speedMetersPerSecond = inputs.driveVelocityRadPerSec * constants.WheelRadius;
         cachedState.angle = inputs.turnPosition;
