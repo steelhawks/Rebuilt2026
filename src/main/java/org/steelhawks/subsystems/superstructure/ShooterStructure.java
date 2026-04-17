@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
+import org.steelhawks.util.AllianceFlip;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -46,7 +47,8 @@ public class ShooterStructure {
         double hoodAngleRad,
         Rotation2d turretAngle,
         Translation3d virtualTarget,
-        double timeOfFlight
+        double timeOfFlight,
+        boolean converged
     ) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
@@ -163,6 +165,14 @@ public class ShooterStructure {
                  ferryHoodAngleMap.put(entry[0], Rotation2d.fromDegrees(entry[1]));
              }
          }
+    }
+
+    public static boolean isWithinShootDistance() {
+        if (RobotState.getInstance().getAimState() != RobotState.AimState.TO_HUB) {
+            return true;
+        }
+        double dist = distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D));
+        return dist >= minShootDistance && dist <= maxShootDistance;
     }
 
     public static boolean isNoSolution(ProjectileData data) {
@@ -397,7 +407,7 @@ public class ShooterStructure {
             double turretRelativeAngle = MathUtil.angleModulus(
                 fieldRelativeAngle - robotHeading.getRadians() - turretMountYaw);
             Logger.recordOutput("SOTM/TurretRelativeAngleDeg", Math.toDegrees(turretRelativeAngle));
-            return new MovingShotSolution(v, theta, Rotation2d.fromRadians(turretRelativeAngle), virtualTarget, tGuess);
+            return new MovingShotSolution(v, theta, Rotation2d.fromRadians(turretRelativeAngle), virtualTarget, tGuess, convergedAt < maxIterations);
         }
     }
 }

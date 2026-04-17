@@ -9,6 +9,7 @@ import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.vision.Vision;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AllianceFlip;
@@ -56,7 +57,9 @@ public class ShootingCommands {
             Commands.waitUntil(() ->
                 RobotContainer.s_Flywheel.isReadyToShoot()
                     && RobotContainer.s_Turret.atGoal()
-                    && RobotContainer.s_Hood.atGoal()),
+                    && RobotContainer.s_Hood.atGoal()
+                    && ShooterStructure.isWithinShootDistance()
+                    && RobotState.getInstance().isShotSolutionStable()),
             RobotContainer.s_Indexer.feed()
                 .alongWith(
                     Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())

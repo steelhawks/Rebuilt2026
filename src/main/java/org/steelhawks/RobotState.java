@@ -239,6 +239,15 @@ public class RobotState {
         return movingShotSolution;
     }
 
+    @AutoLogOutput(key = "RobotState/ShotSolutionStable")
+    public boolean isShotSolutionStable() {
+        ShootingState state = getShootingState();
+        if (state == ShootingState.SHOOTING_STATIONARY || state == ShootingState.NOTHING) {
+            return true;
+        }
+        return movingShotSolution != null && movingShotSolution.converged();
+    }
+
     public static RobotState getInstance() {
         if (instance == null) {
             instance = new RobotState();
