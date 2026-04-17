@@ -483,6 +483,19 @@ public class Turret extends SubsystemBase {
         }, this);
     }
 
+    public Command unjamTurret() {
+        return Commands.runOnce(() -> {
+            freezeAtCurrentPosition();
+            double currentRad = getPosition().getRadians();
+            boolean onLeftSide = Math.abs(currentRad - constants.maxRotation().getRadians()) < Math.abs(currentRad - constants.minRotation().getRadians());
+            if (onLeftSide) {
+                desiredRotation = constants.minRotation();
+            } else {
+                desiredRotation = constants.maxRotation();
+            }
+        }, this);
+    }
+
     public Command setDesiredRotation(Rotation2d rotation) {
         return Commands.either(
             Commands.runOnce(
