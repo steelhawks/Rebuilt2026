@@ -124,14 +124,25 @@ public class Turret extends SubsystemBase {
         return atGoal;
     }
 
+    private boolean jamLatched = false;
+    private double jamStartTime = Double.NaN;
+
+    private static final double JAM_CURRENT_THRESHOLD = 30.0; // amps, tune this
     @AutoLogOutput(key = "Turret/IsJammedOrDeadSpot")
     public boolean isJammedOrInDeadSpot() {
-        boolean stuckWithError =
-            Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
+        boolean highCurrentWithError =
+            inputs.supplyCurrentAmps > JAM_CURRENT_THRESHOLD
                 && Math.abs(getPosition().getRadians() - goal.position) > JAM_ERROR_THRESHOLD
                 && shouldRun;
-        boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
-        return jammed || isAtDeadSpot();
+
+        if (jamDebouncer.calculate(highCurrentWithError)) {
+            jamLatched = true;
+        }
+        if (Math.abs(getPosition().getRadians() - goal.position) <= tolerance) {
+            jamLatched = false;
+        }
+
+        return jamLatched || isAtDeadSpot();
     }
 
     @AutoLogOutput(key = "Turret/IsAtDeadSpot")
