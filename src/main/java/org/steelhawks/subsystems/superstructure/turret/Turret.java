@@ -124,14 +124,32 @@ public class Turret extends SubsystemBase {
         return atGoal;
     }
 
+    private boolean jamLatched = false;
+    private double jamStartTime = Double.NaN;
+
     @AutoLogOutput(key = "Turret/IsJammedOrDeadSpot")
     public boolean isJammedOrInDeadSpot() {
         boolean stuckWithError =
             Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
                 && Math.abs(getPosition().getRadians() - goal.position) > JAM_ERROR_THRESHOLD
                 && shouldRun;
-        boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
-        return jammed || isAtDeadSpot();
+
+        if (stuckWithError) {
+            if (Double.isNaN(jamStartTime)) {
+                jamStartTime = Timer.getFPGATimestamp();
+            }
+            if (Timer.getFPGATimestamp() - jamStartTime >= JAM_DETECTION_TIME) {
+                jamLatched = true;
+            }
+        } else {
+            jamStartTime = Double.NaN;
+            // only clear latch once error is actually resolved
+            if (Math.abs(getPosition().getRadians() - goal.position) <= tolerance) {
+                jamLatched = false;
+            }
+        }
+
+        return jamLatched || isAtDeadSpot();
     }
 
     @AutoLogOutput(key = "Turret/IsAtDeadSpot")
