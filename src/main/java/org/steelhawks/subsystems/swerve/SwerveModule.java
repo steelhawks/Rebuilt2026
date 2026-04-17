@@ -9,6 +9,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotState;
@@ -90,7 +92,6 @@ public class SwerveModule {
         io.updateInputs(inputs);
         Logger.processInputs(loggerKey, inputs);
         BatteryUtil.recordCurrentUsage(batteryKey, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
-        io.updateCurrentLimit(RobotState.getInstance().getBumpTrigger().getAsBoolean());
 
         cachedState.speedMetersPerSecond = inputs.driveVelocityRadPerSec * constants.WheelRadius;
         cachedState.angle = inputs.turnPosition;
@@ -242,5 +243,13 @@ public class SwerveModule {
                 default -> TunerConstants.FrontLeft.SlipCurrent;
             };
         return inputs.driveCurrentAmps >= stallCurrent;
+    }
+
+    public void updateCurrentLimits(double newLimit) {
+        io.updateCurrentLimits(newLimit);
+    }
+
+    public void resetCurrentLimits() {
+        io.resetCurrentLimits();
     }
 }

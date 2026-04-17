@@ -818,6 +818,18 @@ public class Swerve extends SubsystemBase {
         return bumpRisingDebouncer.calculate(rawTilt) || bumpFallingDebouncer.calculate(rawTilt);
     }
 
+    public void updateCurrentLimits(double newLimit) {
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i].updateCurrentLimits(newLimit);
+        }
+    }
+
+    public void resetCurrentLimits() {
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i].resetCurrentLimits();
+        }
+    }
+
     // Command Factories
     public Command toggleMultiplier() {
         return Commands.runOnce(() -> requestSlowMode = !requestSlowMode);
@@ -883,6 +895,14 @@ public class Swerve extends SubsystemBase {
 
     public Command testZeroedModules() {
         return Commands.run(() -> runDriveCharacterization(0.0), this);
+    }
+
+    public Command updateCurrentLimitsCmd(double newLimit) {
+        return Commands.runOnce(() -> updateCurrentLimits(newLimit));
+    }
+
+    public Command resetCurrentLimitsCmd() {
+        return Commands.runOnce(this::resetCurrentLimits);
     }
 
     public boolean isStalling() {

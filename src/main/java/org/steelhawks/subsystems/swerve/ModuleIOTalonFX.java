@@ -306,9 +306,26 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     @Override
-    public void updateCurrentLimit(boolean inBump) {
-        driveConfig.CurrentLimits.StatorCurrentLimit = inBump ? 120.0 : CurrentLimits.StatorLimit.driveCurrent;
-        turnConfig.CurrentLimits.StatorCurrentLimit = inBump ? 120.0 : CurrentLimits.StatorLimit.turnCurrent;
+    public void updateCurrentLimits(double newLimit) {
+        new Thread(() -> {
+            driveConfig.CurrentLimits.StatorCurrentLimit = newLimit;
+            driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+            turnConfig.CurrentLimits.StatorCurrentLimit = newLimit;
+            turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+            tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig));
+            tryUntilOk(5, () -> turnTalon.getConfigurator().apply(turnConfig));
+        }).start();
+    }
 
+    @Override
+    public void resetCurrentLimits() {
+        new Thread(() -> {
+            driveConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.driveCurrent;
+            driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+            turnConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.turnCurrent;
+            turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+            tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig));
+            tryUntilOk(5, () -> turnTalon.getConfigurator().apply(turnConfig));
+        }).start();
     }
 }

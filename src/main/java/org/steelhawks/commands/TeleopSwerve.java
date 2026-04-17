@@ -84,7 +84,9 @@ public class TeleopSwerve extends Command {
         RobotState.getInstance().getTrenchTrigger()
             .onTrue(Commands.runOnce(() -> Logger.recordOutput("AlignDebug/Trench/InTrigger", true)));
         RobotState.getInstance().getBumpTrigger()
-            .onTrue(setDriveState(DriveState.BUMP_ALIGN));
+            .onTrue(setDriveState(DriveState.BUMP_ALIGN)
+                .andThen(s_Swerve.updateCurrentLimitsCmd(120.0)))
+            .onFalse(s_Swerve.resetCurrentLimitsCmd());
 //        RobotState.getInstance().getSOTMTrigger().onTrue(
 //            setDriveState(DriveState.LOCK_SOTM)
 //                .alongWith(Commands.runOnce(() -> {
