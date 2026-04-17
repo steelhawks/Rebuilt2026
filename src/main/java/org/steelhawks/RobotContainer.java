@@ -110,5 +110,8 @@ public class RobotContainer {
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
 
+        driver.back()
+            .onTrue(s_Turret.unjamTurret());
+
     }
 }
