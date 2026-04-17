@@ -88,6 +88,9 @@ public class RobotContainer {
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
+        RobotState.getInstance().getHopperOverflowTrigger()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+
         driver.povRight()
             .whileTrue(s_Indexer.outtake());
 

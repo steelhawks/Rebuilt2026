@@ -77,6 +77,8 @@ public class RobotState {
     private final Trigger inTrenchTrigger;
     @AutoLogOutput
     private final Trigger inBumpTrigger;
+    @AutoLogOutput
+    private final Trigger hopperOverflowTrigger;
 
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
@@ -141,7 +143,6 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER))
             .debounce(0.3);
-
         inBumpTrigger =
             Boundary.asTrigger(
                 () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
@@ -149,6 +150,8 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER)
             .debounce(0.3);
+        hopperOverflowTrigger =
+            new Trigger(() -> RobotContainer.s_Intake.atHome() && RobotContainer.s_Indexer.isJammed());
     }
 
     public RobotFootprint getFootprint() {
@@ -165,6 +168,10 @@ public class RobotState {
 
     public Trigger getSOTMTrigger() {
         return sotmTrigger;
+    }
+
+    public Trigger getHopperOverflowTrigger() {
+        return hopperOverflowTrigger;
     }
 
     public void updateChassisSpeeds(ChassisSpeeds speeds) {

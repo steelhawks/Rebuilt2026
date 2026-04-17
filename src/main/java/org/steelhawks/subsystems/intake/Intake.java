@@ -78,6 +78,10 @@ public class Intake extends SubsystemBase {
         return desiredGoal;
     }
 
+    public boolean atHome() {
+        return atGoal && desiredGoal == IntakeConstants.State.HOME;
+    }
+
     public double getPosition() {
         return inputs.leftPositionMeters;
     }
