@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.flywheel;
+package org.steelhawks.subsystems.shooterSuperstructure.flywheel;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -12,7 +12,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import org.steelhawks.CurrentLimits;
-import org.steelhawks.RobotConfig;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 

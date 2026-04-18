@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.flywheel;
+package org.steelhawks.subsystems.shooterSuperstructure.flywheel;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -20,7 +20,7 @@ import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
+import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;

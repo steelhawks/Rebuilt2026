@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
+import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;

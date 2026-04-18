@@ -5,8 +5,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.subsystems.superstructure.hood.Hood;
+import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
+import org.steelhawks.subsystems.shooterSuperstructure.hood.Hood;
 import org.steelhawks.util.AllianceFlip;
 
 public class HoodDefaultCommand extends Command {

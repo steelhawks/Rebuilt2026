@@ -30,8 +30,8 @@ import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.subsystems.superstructure.ShooterTuner;
+import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
+import org.steelhawks.subsystems.shooterSuperstructure.ShooterTuner;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.*;
 

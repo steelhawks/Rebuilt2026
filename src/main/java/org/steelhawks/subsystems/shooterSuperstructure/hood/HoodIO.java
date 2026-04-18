@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.hood;
+package org.steelhawks.subsystems.shooterSuperstructure.hood;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;

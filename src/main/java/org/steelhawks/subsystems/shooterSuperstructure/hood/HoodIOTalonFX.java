@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.hood;
+package org.steelhawks.subsystems.shooterSuperstructure.hood;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;

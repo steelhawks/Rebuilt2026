@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.flywheel;
+package org.steelhawks.subsystems.shooterSuperstructure.flywheel;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;

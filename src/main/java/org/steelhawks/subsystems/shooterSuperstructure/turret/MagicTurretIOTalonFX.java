@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.turret;
+package org.steelhawks.subsystems.shooterSuperstructure.turret;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;

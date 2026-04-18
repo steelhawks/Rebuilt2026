@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure.turret;
+package org.steelhawks.subsystems.shooterSuperstructure.turret;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -19,7 +19,7 @@ import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
+import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
 import org.steelhawks.util.*;
 
 import java.text.DecimalFormat;

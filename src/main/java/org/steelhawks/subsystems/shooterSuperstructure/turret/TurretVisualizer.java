@@ -1,7 +1,7 @@
-package org.steelhawks.subsystems.superstructure.turret;
+package org.steelhawks.subsystems.shooterSuperstructure.turret;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import org.steelhawks.subsystems.superstructure.SuperstructureVisualizer;
+import org.steelhawks.subsystems.shooterSuperstructure.SuperstructureVisualizer;
 
 import java.util.function.Supplier;
 

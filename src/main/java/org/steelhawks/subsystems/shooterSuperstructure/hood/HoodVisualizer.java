@@ -1,6 +1,6 @@
-package org.steelhawks.subsystems.superstructure.hood;
+package org.steelhawks.subsystems.shooterSuperstructure.hood;
 
-import org.steelhawks.subsystems.superstructure.SuperstructureVisualizer;
+import org.steelhawks.subsystems.shooterSuperstructure.SuperstructureVisualizer;
 
 import java.util.function.Supplier;
 

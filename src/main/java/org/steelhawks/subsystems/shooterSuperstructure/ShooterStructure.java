@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure;
+package org.steelhawks.subsystems.shooterSuperstructure;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;

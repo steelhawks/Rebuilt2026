@@ -1,4 +1,4 @@
-package org.steelhawks.subsystems.superstructure;
+package org.steelhawks.subsystems.shooterSuperstructure;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
