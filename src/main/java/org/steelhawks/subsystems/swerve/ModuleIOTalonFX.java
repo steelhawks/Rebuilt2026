@@ -24,7 +24,6 @@ import org.steelhawks.Toggles;
 import org.steelhawks.util.PhoenixUtil;
 
 import java.util.Arrays;
-import java.util.Queue;
 
 
 public class ModuleIOTalonFX implements ModuleIO {
@@ -51,14 +50,14 @@ public class ModuleIOTalonFX implements ModuleIO {
         new VelocityTorqueCurrentFOC(0.0);
 
     // Timestamp inputs from Phoenix thread
-    private final Queue<Double> timestampQueue;
+    private final DoubleRingBuffer timestampQueue;
     private final double[] timestampBuffer = new double[50];
     private final double[] drivePositionBuffer = new double[50];
     private final Rotation2d[] turnPositionBuffer = new Rotation2d[50];
 
     // drive motor inputs
     private final StatusSignal<Angle> drivePosition;
-    private final Queue<Double> drivePositionQueue;
+    private final DoubleRingBuffer drivePositionQueue;
     private final StatusSignal<AngularVelocity> driveVelocity;
     private final StatusSignal<Voltage> driveAppliedVolts;
     private final StatusSignal<Current> driveSupplyCurrent;
@@ -69,7 +68,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final StatusSignal<Boolean> turnMagnetBad;
     private final StatusSignal<Angle> turnAbsolutePosition;
     private final StatusSignal<Angle> turnPosition;
-    private final Queue<Double> turnPositionQueue;
+    private final DoubleRingBuffer turnPositionQueue;
     private final StatusSignal<AngularVelocity> turnVelocity;
     private final StatusSignal<Voltage> turnAppliedVolts;
     private final StatusSignal<Current> turnSupplyCurrent;

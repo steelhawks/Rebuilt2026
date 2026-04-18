@@ -1,11 +1,8 @@
 package org.steelhawks.subsystems.vision;
 
-import static org.steelhawks.Constants.RobotType.*;
 import static org.steelhawks.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,20 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.RobotState.PoseObservationType;
 import org.steelhawks.util.LoopTimeUtil;
 
 public class Vision extends SubsystemBase {
-    // 2 threads matches RoboRIO 2's dual-core CPU lets updateInputs() calls for
-    // all cameras run in parallel while the main thread is blocked on Future.get().
-    private static final ExecutorService visionExecutor =
-        Executors.newFixedThreadPool(2);
-
     private final VisionIO[] io;
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
@@ -43,9 +31,6 @@ public class Vision extends SubsystemBase {
     private final boolean useQuestNav;
 
     private final QuestNavImpl questNav;
-    private final Debouncer stableTagDebouncer =
-        new Debouncer(0.1, DebounceType.kFalling);
-    private boolean tagStable = false;
 
     public Vision() {
         this(false);
@@ -96,10 +81,6 @@ public class Vision extends SubsystemBase {
         return false;
     }
 
-    public boolean hasStableTag() {
-        return tagStable;
-    }
-
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
@@ -118,50 +99,9 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Determine which cameras are enabled before submitting to worker threads
-        // (Toggles reads NT values — must happen on the main thread).
-        boolean[] cameraEnabled = new boolean[io.length];
         for (int i = 0; i < io.length; i++) {
-            cameraEnabled[i] = Toggles.Vision.camerasEnabled.get(io[i].getName()).get();
-        }
-
-        // Advance the sim world on the main thread before handing off to worker threads.
-        // VisionIOPhotonSim.updateSim() calls visionSim.update() exactly once per loop
-        // (timestamp-guarded); non-sim IO implementations do nothing here.
-        if (Constants.getRobot().equals(SIMBOT)) {
-            for (int i = 0; i < io.length; i++) {
-                if (cameraEnabled[i]) {
-                    io[i].updateSim();
-                }
-            }
-        }
-
-        // Submit updateInputs() for each enabled camera to the thread pool
-        // Each camera writes only to its own inputs[i] object so there is no sharing
-        // Future.get() provides a happens before guarantee before processInputs() below
-        @SuppressWarnings("unchecked")
-        Future<Void>[] futures = new Future[io.length];
-        for (int i = 0; i < io.length; i++) {
-            if (cameraEnabled[i]) {
-                final int idx = i;
-                futures[idx] = visionExecutor.submit(() -> {
-                    VisionIOInputsAutoLogged fresh = new VisionIOInputsAutoLogged();
-                    io[idx].updateInputs(fresh);
-                    inputs[idx] = fresh; // atomic reference store
-                    return null;
-                });
-            }
-        }
-
-        // Wait for all cameras to finish log on the main thread (required by AK).
-        for (int i = 0; i < io.length; i++) {
-            if (futures[i] != null) {
-                try {
-                    futures[i].get(15, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    // Camera timed out or threw stale inputs, will be relogged from last cycle.
-                    DriverStation.reportWarning("Vision camera " + i + " update timed out: " + e.getMessage(), false);
-                }
+            if (Toggles.Vision.camerasEnabled.get(io[i].getName()).get()) {
+                io[i].updateInputs(inputs[i]);
             }
             Logger.processInputs("Vision/" + io[i].getName(), inputs[i]);
         }
@@ -170,7 +110,6 @@ public class Vision extends SubsystemBase {
         List<Pose3d> allRobotPoses = new ArrayList<>();
         List<Pose3d> allRobotPosesAccepted = new ArrayList<>();
         List<Pose3d> allRobotPosesRejected = new ArrayList<>();
-        boolean hasAllowedTag = false;
 
         for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
             if (!Toggles.Vision.camerasEnabled.get(io[cameraIndex].getName()).get()) {
@@ -204,7 +143,6 @@ public class Vision extends SubsystemBase {
                 }
                 continue;
             }
-            hasAllowedTag = true;
 
             for (var observation : inputs[cameraIndex].poseObservations) {
                 boolean rejectPose =
@@ -325,7 +263,7 @@ public class Vision extends SubsystemBase {
                 }
             }
         }
-        tagStable = stableTagDebouncer.calculate(hasAllowedTag);
+
         LoopTimeUtil.record("Vision");
 
         if (questNav != null) {

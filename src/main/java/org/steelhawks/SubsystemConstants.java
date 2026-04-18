@@ -101,38 +101,38 @@ public class SubsystemConstants {
             new LUTConstants(
                 0.0, Double.MAX_VALUE,
                 0.0, Double.MAX_VALUE,
-                new double[][]{
+                new double[][]{ // Shooting ToF
                     {1.210, 1},
                     {1.870, 1},
                     {2.290, 1},
                     {2.920, 1},
                     {3.590, 1}
                 },
-                new double[][]{
+                new double[][]{ // Shooting Velocity
                     {1.210, 10.0},
                     {1.870, 10.5},
                     {2.290, 10.7},
                     {2.920, 11},
                     {3.590, 12}
                 },
-                new double[][]{
+                new double[][]{ // Shooting Hood Angle
                     {1.210, 80.0},
                     {1.870, 75.0},
                     {2.290, 70.0},
                     {2.920, 65.0},
                     {3.590, 63.0}
                 },
-                new double[][]{
+                new double[][]{ // Ferry ToF
                     {1.75, 14.8},
                     {2.12, 15.0},
                     {3.16, 18.8}
                 },
-                new double[][]{
+                new double[][]{ // Ferry Velocity
                     {1.75, 14.8},
                     {2.12, 15.0},
                     {3.16, 18.8}
                 },
-                new double[][]{
+                new double[][]{ // Ferry Hood Angle
                     {1.75, 14.8},
                     {2.12, 15.0},
                     {3.16, 18.8}
@@ -145,46 +145,60 @@ public class SubsystemConstants {
                 200.0, 0.0, 0.0,
                 3.0, 5.0,
                 35.0, 0.05,
-                0.6, -1.0,
+                0.8, -1.0,
                 0.8);
 
         public static final FlywheelConstants FLYWHEEL =
             new FlywheelConstants(
-                5, 6, 0.85, 15.0, 0.0, 0.0, 8.86249, 0.16195, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
+                5, 6, 0.85, 10.0, 0.0, 0.0, 6.94627, 0.02, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 9.70379 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.19390 ﻿
-
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.93642 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.20165 ﻿
-
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.53312 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.15897 ﻿
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.13426 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.17007 ﻿
-
-//        ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 8.86249 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.16195 ﻿
-
-
-
+//    ﻿﻿﻿﻿﻿﻿﻿﻿Warning ﻿﻿ 44000 ﻿﻿ DS Return Key Disable ﻿﻿ Driver Station ﻿﻿﻿
+//            ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: 7.44627 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.04831
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 3000.0, 0.0, 100.0, 5.5, 0.0, 20.0, 30.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.284097), Rotation2d.fromRadians(2.666059), Rotation2d.fromRotations(0.27490234375));
+                4, 9, 5000.0, 0.0, 200.0, 13.6, 0.0, 30.0, 50.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.485049), Rotation2d.fromRadians(3.402369), Rotation2d.fromRotations(-0.227294921875));
+        // Turret Characterization Results
+        // kS: 13.18095
+        // kV: 1.99614
+
+        // kS: 15.17513
+        // kv: 1.71165
+
+        // kS: 10.67311
+        // kv: 2.54928 omg cheesy poofs
+
+        // kS: 13.57013
+        // kv: 1.92354
+
+
+        // Turret Characterization Results
+        // kS: 13.18095
+        // kV: 1.99614
+
+        // kS: 15.17513
+        // kv: 1.71165
+
+        // kS: 10.67311
+        // kv: 2.54928 omg cheesy poofs
+
+        // kS: 13.57013
+        // kv: 1.92354
 
         public static final HoodConstants HOOD =
             new HoodConstants(
-                    7, 8, 110.0, 0.0, 0.0, 1.0, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 4.0);
+                    7, 8, 200.0, 0.0, 0.0, 0.42170, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 4.0);
+
+//        ﻿﻿﻿﻿﻿﻿ ********** Hood FF Characterization Results ********** ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kS: -0.42170 ﻿
+//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.02385 ﻿
+
 
         public static final IndexerConstants INDEXER =
             new IndexerConstants(
-                1, 3, 10.0, 10.0, OptionalInt.of(2), OptionalInt.of(0));
+                1, 3, 40.0, 50.0, OptionalInt.of(2), OptionalInt.of(0));
     }
 
     public static final class AlphaBot {

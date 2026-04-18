@@ -10,8 +10,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -50,16 +50,18 @@ public class IndexerIOTalonFX implements IndexerIO {
 	private StatusSignal<Temperature> spindexer2Temperature = null;
 
 	public IndexerIOTalonFX(CANBus canBus, SubsystemConstants.IndexerConstants constants) {
-        spindexerMotor = new TalonFX(constants.spindexerMotor1Id(), canBus);
+        spindexerMotor = new TalonFX(2, canBus);
         feederMotor = new TalonFX(constants.feederId(), canBus);
 
 		spindexerConfig = new TalonFXConfiguration();
-		spindexerConfig.Feedback.SensorToMechanismRatio = 15.0 / 1.0;
+		spindexerConfig.Feedback.SensorToMechanismRatio = 64.0 / 16.0;
 		spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		spindexerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-		spindexerConfig.CurrentLimits.SupplyCurrentLimit = 30.0;
-		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		spindexerConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.spindexerCurrent;
+		spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.spindexerEnabled;
+        spindexerConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.spindexerCurrent;
+        spindexerConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.spindexerEnabled;
 
 		PhoenixUtil.tryUntilOk(5, () -> spindexerMotor.getConfigurator().apply(spindexerConfig));
 		PhoenixUtil.tryUntilOk(5, spindexerMotor::optimizeBusUtilization);
@@ -69,8 +71,10 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         feederConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-		feederConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
-		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		feederConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.feederCurrent;
+		feederConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.feederEnabled;
+        feederConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.feederCurrent;
+        feederConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.feederEnabled;
 
         PhoenixUtil.tryUntilOk(5, () -> feederMotor.getConfigurator().apply(feederConfig));
         PhoenixUtil.tryUntilOk(5, feederMotor::optimizeBusUtilization);
@@ -78,7 +82,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 		spindexer1Position = spindexerMotor.getPosition();
         spindexer1Velocity = spindexerMotor.getVelocity();
 		spindexer1Voltage = spindexerMotor.getMotorVoltage();
-		spindexer1Current = spindexerMotor.getStatorCurrent();
+		spindexer1Current = spindexerMotor.getSupplyCurrent();
 		spindexer1TorqueCurrent = spindexerMotor.getTorqueCurrent();
 		spindexer1Temp = spindexerMotor.getDeviceTemp();
 
@@ -90,7 +94,7 @@ public class IndexerIOTalonFX implements IndexerIO {
         feederTemp = feederMotor.getDeviceTemp();
 
 		if (constants.spindexerMotor2Id().isPresent()) {
-			spindexerMotor2 = new TalonFX(constants.spindexerMotor2Id().getAsInt(), canBus);
+			spindexerMotor2 = new TalonFX(1, canBus);
 			spindexerMotor2.setControl(new Follower(spindexerMotor.getDeviceID(), MotorAlignmentValue.Aligned));
 			PhoenixUtil.tryUntilOk(5, () -> spindexerMotor2.getConfigurator().apply(spindexerConfig));
 			PhoenixUtil.tryUntilOk(5, spindexerMotor2::optimizeBusUtilization);
@@ -98,12 +102,12 @@ public class IndexerIOTalonFX implements IndexerIO {
 			spindexer2Position = spindexerMotor2.getPosition();
 			spindexer2Velocity = spindexerMotor2.getVelocity();
 			spindexer2Voltage = spindexerMotor2.getMotorVoltage();
-			spindexer2Current = spindexerMotor2.getStatorCurrent();
+			spindexer2Current = spindexerMotor2.getSupplyCurrent();
 			spindexer2TorqueCurrent = spindexerMotor2.getTorqueCurrent();
 			spindexer2Temperature = spindexerMotor2.getDeviceTemp();
 
 			BaseStatusSignal.setUpdateFrequencyForAll(
-				1000,
+				100,
 				spindexer2Velocity,
 				spindexer2Voltage,
 				spindexer2Current,
@@ -121,19 +125,20 @@ public class IndexerIOTalonFX implements IndexerIO {
 			);
 		}
 
-		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
-		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0).withEnableFOC(true);
+		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0).withEnableFOC(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-            1000,
+            100,
             spindexer1Velocity,
             spindexer1Voltage,
-            spindexer1TorqueCurrent
-            );
+            spindexer1Current,
+            spindexer1TorqueCurrent);
 
 		BaseStatusSignal.setUpdateFrequencyForAll(
-		50,
+			50,
 			spindexer1Current,
+			spindexer1TorqueCurrent,
 			feederVelocity,
 			feederVoltage,
 			feederCurrent,

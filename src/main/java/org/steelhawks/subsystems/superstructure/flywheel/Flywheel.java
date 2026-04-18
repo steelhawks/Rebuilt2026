@@ -20,6 +20,7 @@ import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
+import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.BatteryUtil;
@@ -40,7 +41,7 @@ public class Flywheel extends SubsystemBase {
 
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
-        new Debouncer(0.3, DebounceType.kBoth);
+        new Debouncer(0.6, DebounceType.kBoth);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -62,6 +63,8 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kV;
 
     private static double redBullConstant;
+
+    private boolean bumpUpSpeed = false;
 
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
@@ -93,12 +96,13 @@ public class Flywheel extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
-        BatteryUtil.recordCurrentUsage("Flywheel", inputs.supplyCurrentAmps);
-        redBullConstant = Toggles.useLUT.get() ? 1.0 : constants.stationaryHoodVelocityFactor();
+        BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
+        Logger.recordOutput("Flywheel/BumpSpeed", bumpUpSpeed);
+        redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.28 : 1.0)) : constants.stationaryHoodVelocityFactor();
 
         nearTargetVelocity =
             setpointDebouncer.calculate(
-                Maths.epsilonEquals(inputs.velocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
+                Maths.epsilonEquals((inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0, targetVelocityRadPerSec, velocityTolerance.get()));
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -181,6 +185,10 @@ public class Flywheel extends SubsystemBase {
         return cachedStationaryMps;
     }
 
+    public double getStatorCurrentAmps() {
+        return inputs.leftTorqueCurrentAmps;
+    }
+
     public void setTargetVelocity(double velocityRadPerSec) {
         if (Toggles.shooterTuningMode.get()) return;
         if (Double.isNaN(velocityRadPerSec) || Double.isInfinite(velocityRadPerSec)) {
@@ -197,6 +205,12 @@ public class Flywheel extends SubsystemBase {
     ///////////////////////
     /* COMMAND FACTORIES */
     ///////////////////////
+
+    public Command toggleBumpUp() {
+        return Commands.runOnce(
+            () -> bumpUpSpeed = !bumpUpSpeed)
+            .alongWith(RumbleAPI.steady(1.0, 1.0));
+    }
 
     public Command simFire() {
         return Commands.defer(() ->
@@ -262,7 +276,7 @@ public class Flywheel extends SubsystemBase {
                     () -> {
                         double current = timer.get() * FF_RAMP_RATE;
                         io.runFlywheelOpenLoop(current, true);
-                        velocitySamples.add(inputs.velocityRadPerSec);
+                        velocitySamples.add((inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0);
                         currentSamples.add(current);
                     },
                     this)

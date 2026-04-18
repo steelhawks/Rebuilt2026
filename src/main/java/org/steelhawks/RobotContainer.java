@@ -1,5 +1,7 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -68,34 +70,26 @@ public class RobotContainer {
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
-        LEDCommands.configureTriggers(driver.leftTrigger());
+//        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
     }
 
     private void configureDriver() {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .whileTrue(RumbleAPI.steady().repeatedly());
 
-        new Trigger(() -> true)
-            .whileTrue(TeleopSwerve.overrideState());
-
         new Trigger(() -> {
             double x = RobotState.getInstance().getEstimatedPose().getX();
-            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
-            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+            if (AllianceFlip.shouldFlip()) {
+                double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
+                return x <= boundary;
+            } else {
+                return x >= FieldConstants.Trench.TRENCH_END_X;
+            }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
-        driver.povLeft().onTrue(s_Swerve.zeroHeading())
-            .onTrue(RumbleAPI.steady());
-
-//        driver.povUp().onTrue(
-//            s_Flywheel.incrementVelocityFactor(0.03));
-//
-//        driver.povDown().onTrue(
-//            s_Flywheel.incrementVelocityFactor(-0.03));
-
-        driver.povLeft()
+        driver.povRight()
             .whileTrue(s_Indexer.outtake());
 
         driver.rightBumper()
@@ -116,5 +110,9 @@ public class RobotContainer {
 
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+        driver.a()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
+
     }
 }

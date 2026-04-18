@@ -40,7 +40,6 @@ import org.steelhawks.*;
 import org.steelhawks.Constants.*;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -57,8 +56,9 @@ import org.steelhawks.util.SwerveDriveController;
 
 public class Swerve extends SubsystemBase {
 
-    private static final double SLOW_SPEED_MULTIPLIER = 0.45;
+    private static final double SLOW_SPEED_MULTIPLIER = 0.3;
     private static final double SPEED_MULTIPLIER = 1.0;
+    private static final SwerveModuleState[] EMPTY_MODULE_STATES = new SwerveModuleState[0];
     private boolean isPathfinding = false;
     private boolean requestSlowMode = false;
 
@@ -105,11 +105,24 @@ public class Swerve extends SubsystemBase {
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final SwerveModule[] swerveModules = new SwerveModule[4]; // FL, FR, BL, BR
+
+    private final SwerveModuleState[] moduleStatesBuffer = {
+        new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState()
+    };
+    private final SwerveModulePosition[] modulePositionsBuffer = {
+        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+    };
+    private final SwerveModulePosition[] odometryPositionsBuffer = {
+        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+    };
+    private final SwerveModulePosition[] odometryDeltasBuffer = {
+        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+    };
     private final SysIdRoutine driveSysId;
     private final SysIdRoutine turnSysId;
     private final SysIdRoutine angularSysId;
-    private final Alert gyroDisconnectedAlert =
-        new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+//    private final Alert gyroDisconnectedAlert =
+//        new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
     private final SwerveDriveController autonController =
         new SwerveDriveController(
@@ -456,37 +469,36 @@ public class Swerve extends SubsystemBase {
             for (var module : swerveModules) {
                 module.stop();
             }
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[]{});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[]{});
+            Logger.recordOutput("SwerveStates/Setpoints", EMPTY_MODULE_STATES);
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", EMPTY_MODULE_STATES);
         }
 
         processOdometryObservations();
         robotState.updateChassisSpeeds(getChassisSpeeds());
         FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
-        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
+//        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
     }
 
     /**
-     * Process odometry observations and report to RobotState
+     * Process odometry observations and report to RobotState.
      */
     private void processOdometryObservations() {
         double[] sampleTimestamps = swerveModules[0].getOdometryTimestamps();
         int sampleCount = sampleTimestamps.length;
 
         for (int i = 0; i < sampleCount; i++) {
-            // Read wheel positions from each module
-            SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-            SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-                modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[i];
-                moduleDeltas[moduleIndex] =
-                    new SwerveModulePosition(
-                        modulePositions[moduleIndex].distanceMeters
-                            - lastModulePositions[moduleIndex].distanceMeters,
-                        modulePositions[moduleIndex].angle);
-                lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+                SwerveModulePosition pos = swerveModules[moduleIndex].getOdometryPositions()[i];
+                // Fill deltas buffer in-place
+                odometryDeltasBuffer[moduleIndex].distanceMeters =
+                    pos.distanceMeters - lastModulePositions[moduleIndex].distanceMeters;
+                odometryDeltasBuffer[moduleIndex].angle = pos.angle;
+                // Fill positions buffer in-place (consumed synchronously in addOdometryObservation)
+                odometryPositionsBuffer[moduleIndex].distanceMeters = pos.distanceMeters;
+                odometryPositionsBuffer[moduleIndex].angle = pos.angle;
+                lastModulePositions[moduleIndex].distanceMeters = pos.distanceMeters;
+                lastModulePositions[moduleIndex].angle = pos.angle;
             }
 
             // Update gyro angle
@@ -494,15 +506,15 @@ public class Swerve extends SubsystemBase {
                 rawGyroRotation = gyroInputs.odometryYawPositions[i];
             } else {
                 // Fall back to kinematics
-                Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+                Twist2d twist = kinematics.toTwist2d(odometryDeltasBuffer);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
 
             robotState.addOdometryObservation(
                 new RobotState.OdometryObservation(
                     sampleTimestamps[i],
-                    modulePositions,
-                    gyroInputs.connected ? Optional.of(rawGyroRotation) : Optional.empty()
+                    odometryPositionsBuffer,
+                    gyroInputs.connected ? rawGyroRotation : null
                 )
             );
         }
@@ -653,19 +665,19 @@ public class Swerve extends SubsystemBase {
 
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
-        SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
-            states[i] = swerveModules[i].getState();
+            moduleStatesBuffer[i].speedMetersPerSecond = swerveModules[i].getVelocityMetersPerSec();
+            moduleStatesBuffer[i].angle = swerveModules[i].getAngle();
         }
-        return states;
+        return moduleStatesBuffer;
     }
 
     private SwerveModulePosition[] getModulePositions() {
-        SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
-            states[i] = swerveModules[i].getPosition();
+            modulePositionsBuffer[i].distanceMeters = swerveModules[i].getPositionMeters();
+            modulePositionsBuffer[i].angle = swerveModules[i].getAngle();
         }
-        return states;
+        return modulePositionsBuffer;
     }
 
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")

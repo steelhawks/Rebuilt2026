@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
@@ -42,7 +41,7 @@ public final class Constants {
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.SIMBOT;
+    private static final RobotType ROBOT = RobotType.OMEGABOT;
 
     /**
      * The robot type.
@@ -81,8 +80,8 @@ public final class Constants {
 
     public static RobotType getRobot() {
         if (RobotBase.isReal() && ROBOT_TYPE == RobotType.SIMBOT) {
-            new Alert("Invalid robot selected, using omega robot as default.", AlertType.kError)
-                .set(true);
+//            new Alert("Invalid robot selected, using omega robot as default.", AlertType.kError)
+//                .set(true);
             return RobotType.OMEGABOT;
         }
 
@@ -114,7 +113,7 @@ public final class Constants {
                 }
                 default -> {
                     ROBOT_TO_TURRET =
-                        new Transform3d(Units.inchesToMeters(-4.490), 0.0, Units.inchesToMeters(12.635), new Rotation3d(0.0, 0.0, 0.0));
+                        new Transform3d(Units.inchesToMeters(-4.490), 0.0, Units.inchesToMeters(17.0), new Rotation3d(0.0, 0.0, 0.0));
                 }
             }
         }

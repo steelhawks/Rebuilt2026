@@ -7,13 +7,12 @@ import edu.wpi.first.math.util.Units;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotContainer;
 
-import java.util.Queue;
 
 public class GyroIONavX implements GyroIO {
 
     private final AHRS navX = new AHRS(NavXComType.kMXP_SPI, (byte) Swerve.ODOMETRY_FREQUENCY);
-    private final Queue<Double> yawPositionQueue;
-    private final Queue<Double> yawTimestampQueue;
+    private final DoubleRingBuffer yawPositionQueue;
+    private final DoubleRingBuffer yawTimestampQueue;
 
     public GyroIONavX() {
         yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();

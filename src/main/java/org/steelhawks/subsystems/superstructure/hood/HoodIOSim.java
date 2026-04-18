@@ -53,12 +53,7 @@ public class HoodIOSim implements HoodIO {
         inputs.supplyCurrentAmps = hoodMotor.getCurrentDrawAmps();
         inputs.torqueCurrentAmps = hoodMotor.getTorqueNewtonMeters() / DCMotor.getKrakenX44Foc(1).KtNMPerAmp;
         inputs.tempCelsius = hoodMotor.getCurrentDrawAmps() * 0.1;
-
-        inputs.cancoderConnected = true;
-        inputs.cancoderPositionDeg = inputs.motorPositionDeg;
-        inputs.cancoderVelocityDegPerSec =  inputs.motorVelocityDegPerSec;
-        inputs.cancoderAppliedVolts = Math.random() + MAX_VOLTS;
-
+        
         if (pidEnabled) {
             double torqueCurrent = controller.calculate(inputs.motorPositionDeg.getRadians(), desiredPositionRad) + ff;
             hoodMotor.setInputVoltage(

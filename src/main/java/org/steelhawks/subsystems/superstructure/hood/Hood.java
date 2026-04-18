@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,6 +14,11 @@ import org.steelhawks.*;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 import org.steelhawks.util.Maths;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Hood extends SubsystemBase {
 
@@ -37,6 +43,7 @@ public class Hood extends SubsystemBase {
     private static LoggedTunableNumber kI;
     private static LoggedTunableNumber kD;
     private static LoggedTunableNumber kS;
+    private static LoggedTunableNumber kV;
     private static LoggedTunableNumber kG;
 
     public Hood(HoodIO io, SubsystemConstants.HoodConstants constants) {
@@ -47,6 +54,7 @@ public class Hood extends SubsystemBase {
         kI = new LoggedTunableNumber("Hood/kI", constants.kI());
         kD = new LoggedTunableNumber("Hood/kD", constants.kD());
         kS = new LoggedTunableNumber("Hood/kS", constants.kS());
+        kV = new LoggedTunableNumber("Hood/kV", 0.02385);
         kG = new LoggedTunableNumber("Hood/kG", constants.kG());
         inputs.goal = 80.0;
     }
@@ -65,20 +73,20 @@ public class Hood extends SubsystemBase {
         if (!isHomed && Toggles.Hood.isEnabled.get()) {
             io.runOpenLoop(homingVolts, false);
             isHomed = isStalling();
-            Logger.recordOutput("Intake/IsHomed", isHomed);
+            Logger.recordOutput("Hood/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
                 io.setPosition(Rotation2d.fromDegrees(80.0));
                 io.stop();
                 isZeroed = true;
-                Logger.recordOutput("Intake/Zeroed", true);
+                Logger.recordOutput("Hood/Zeroed", true);
             }
         }
 
         final boolean shouldRun =
             DriverStation.isEnabled()
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(Constants.RobotType.SIMBOT))
-                && (inputs.motorConnected && inputs.cancoderConnected)
+                && inputs.motorConnected
                 && Toggles.Hood.isEnabled.get()
                 && !Toggles.Hood.voltageOverride.get()
                 && !Toggles.Hood.currentOverride.get()
@@ -122,7 +130,7 @@ public class Hood extends SubsystemBase {
 //            }
             atGoal = Maths.epsilonEquals(getPositionDeg(), setpoint.getDegrees(), constants.tolerance());
             io.runHoodPosition(
-                setpoint, 0.0);
+                setpoint, kS.getAsDouble());
         }
     }
 
@@ -168,5 +176,50 @@ public class Hood extends SubsystemBase {
         if (brakeModeEnabled == enabled) return;
         brakeModeEnabled = enabled;
         io.setBrakeMode(brakeModeEnabled);
+    }
+
+    private final static double FF_RAMP_RATE = -2.0;
+
+    public Command feedforwardCharacterization() {
+        List<Double> velocitySamples = new LinkedList<>();
+        List<Double> voltageSamples = new LinkedList<>();
+        Timer timer = new Timer();
+        return Commands.sequence(
+            // Reset data
+            Commands.runOnce(
+                () -> {
+                    velocitySamples.clear();
+                    voltageSamples.clear();
+                    timer.restart();
+                }),
+            // Accelerate and gather data
+            Commands.run(
+                    () -> {
+                        double voltage = timer.get() * FF_RAMP_RATE;
+                        io.runOpenLoop(voltage, false);
+                        velocitySamples.add(inputs.motorVelocityDegPerSec);
+                        voltageSamples.add(voltage);
+                    },
+                    this)
+                .finallyDo(
+                    () -> {
+                        int n = velocitySamples.size();
+                        double sumX = 0.0;
+                        double sumY = 0.0;
+                        double sumXY = 0.0;
+                        double sumX2 = 0.0;
+                        for (int i = 0; i < n; i++) {
+                            sumX += velocitySamples.get(i);
+                            sumY += voltageSamples.get(i);
+                            sumXY += velocitySamples.get(i) * voltageSamples.get(i);
+                            sumX2 += velocitySamples.get(i) * velocitySamples.get(i);
+                        }
+                        double kS = (sumY * sumX2 - sumX * sumXY) / (n * sumX2 - sumX * sumX);
+                        double kV = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                        NumberFormat formatter = new DecimalFormat("#0.00000");
+                        System.out.println("********** Hood FF Characterization Results **********");
+                        System.out.println("\tkS: " + formatter.format(kS));
+                        System.out.println("\tkV: " + formatter.format(kV));
+                    }));
     }
 }

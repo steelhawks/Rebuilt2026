@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import au.grapplerobotics.CanBridge;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
@@ -10,6 +9,7 @@ import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.util.ClassPreloader;
@@ -116,7 +116,10 @@ public class Robot extends LoggedRobot {
             case REAL -> {
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter());
-                Logger.addDataReceiver(new NT4Publisher());
+//                if (!DriverStation.isFMSAttached()) {
+                if (false) {
+                    Logger.addDataReceiver(new NT4Publisher());
+                }
                 new PowerDistribution(
                     Constants.POWER_DISTRIBUTION_CAN_ID, Constants.PD_MODULE_TYPE); // Enables power distribution logging
             }
@@ -153,7 +156,21 @@ public class Robot extends LoggedRobot {
             "edu.wpi.first.apriltag.AprilTagFieldLayout",
             "edu.wpi.first.math.estimator.SwerveDrivePoseEstimator",
             "edu.wpi.first.math.VecBuilder",
-            "org.photonvision.PhotonCamera");
+            "org.photonvision.PhotonCamera",
+
+            "com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC",
+            "com.ctre.phoenix6.controls.MotionMagicVoltage",
+            "com.ctre.phoenix6.controls.PositionVoltage",
+            "com.ctre.phoenix6.StatusSignal",
+
+            "edu.wpi.first.math.controller.PIDController",
+            "edu.wpi.first.math.trajectory.TrapezoidProfile",
+            "edu.wpi.first.math.geometry.Pose3d",
+            "edu.wpi.first.math.geometry.Translation3d",
+
+            "edu.wpi.first.networktables.NetworkTableInstance",
+            "edu.wpi.first.networktables.DoubleArrayPublisher"
+        );
 
         // Check for valid swerve config
         var modules =
@@ -206,7 +223,6 @@ public class Robot extends LoggedRobot {
         }
         // ENABLE ONLY IF YOU KNOW WHAT YOU ARE DOING
 //        Threads.setCurrentThreadPriority(true, 10);
-        CanBridge.runTCP();
     }
 
     @Override
@@ -244,6 +260,22 @@ public class Robot extends LoggedRobot {
         if (DriverStation.isEnabled()) {
             Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
         }
+
+        var projectileData = ShooterStructure.Static.calculateShot(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D), AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D));
+        var turretTranslation = new Pose3d(org.steelhawks.RobotState.getInstance().getEstimatedPose())
+            .transformBy(Constants.RobotConstants.ROBOT_TO_TURRET)
+            .toPose2d()
+            .getTranslation();
+        double launchAngle = projectileData.hoodAngle();
+        double timeOfFlight = ShooterStructure.calculateTimeOfFlight(
+            projectileData.exitVelocity(),
+            launchAngle,
+            turretTranslation.getDistance(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER)),
+            AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D).getZ() - Constants.RobotConstants.ROBOT_TO_TURRET.getZ());
+//        Logger.recordOutput("Turret/ProjectileData/Velocity", projectileData.exitVelocity());
+//        Logger.recordOutput("Turret/ProjectileData/AngleDeg", Math.toDegrees(projectileData.hoodAngle()));
+//        Logger.recordOutput("Turret/ProjectileData/TimeOfFlight",  timeOfFlight);
+        Logger.recordOutput("ShooterTuner/Live/DistanceMeters", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
     }
 
     private void visualizeFieldConstants() {

@@ -1,105 +1,96 @@
+<div align="center">
 
+<img src="https://www.steelhawks.net/logo.svg" alt="Steel Hawks Logo" />
 
-# Swerve Base Template :: Steel Hawks
-![Logo](https://www.steelhawks.net/logo.svg)
+# Shaquille O'Steel
+### FRC Team Steel Hawks 2601 :: 2026 Robot Code
 
+[![WPILib](https://img.shields.io/badge/WPILib-v2026.2.1-AC2B37?style=flat-square&logo=github)](https://github.com/wpilibsuite/allwpilib/releases/tag/v2026.2.1)
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://www.java.com/)
+[![License](https://img.shields.io/badge/License-MIT-6DB33F?style=flat-square)](LICENSE)
 
-## Authors
+</div>
 
-- [@steelhawks](https://www.github.com/steelhawks)
-- [@farhanj2](https://www.github.com/farhanj2)
+---
 
+<div align="center">
 
-## Acknowledgements
+| | | |
+|:---:|:---:|:---:|
+| ![](images/01.JPG) | ![](images/02.JPG) | ![](images/03.JPG) |
 
- - [WPILIB Version: v2025.1.1](https://github.com/wpilibsuite/allwpilib/releases/tag/v2025.1.1)
+</div>
 
+---
 
+## Table of Contents
 
-## Project Structure
+- [Overview](#overview)
+- [Branch Naming Scheme](#branch-naming-scheme)
+- [AdvantageScope: Robot\_Shaq Asset](#advantagescope-robot_shaq-asset)
 
-# Project File Structure
+---
 
-```plaintext
-SwerveTemplate/
-├── src/
-│   ├── main/
-│   │   │
-│   │   deploy/
-│   │   │
-│   │   └── java/
-│   │       ├── org.steelhawks/
-│   │       │   ├── commands/
-│   │       │   │   ├── SuperStructure.java   # The command factory for commands that require multiple subsystems
-│   │       │   │   ├── DriveCommands.java    # The command factory for commands for driving the robot, including pathfinding and auton
-│   │       │   ├── generated/                # The folder with the generated TunerConstants from CTRE's Swerve tuner on Phoenix Tuner X
-│   │       │   │   ├── TunerConstants.java    # The generated TunerConstants from CTRE's Swerve tuner on Phoenix Tuner X
-│   │       │   ├── util/                     # The folder with all custom libraries, such as vision with Limelight, and implementations in code such as odometry.]
-│   │       │   │   ├── AllianceFlip.java     # A helper class that flips the robot's pose coordinates and rotation based on the alliance
-│   │       │   │   ├── Conversions.java      # A helper class in converting between obscure units
-│   │       │   │   ├── DashboardTrigger.java # A helper class that triggers a command when a button is pressed from the iPad app HawkControl. This can be used in tandem with a controller.
-│   │       │   │   ├── LocalADStarAK.java    # A helper class that implements the A* algorithm for pathfinding
-│   │       │   │   ├── PhoenixUtil.java      # A helper class that contains utility functions for Phoenix motor controllers
-│   │       │   │   ├── TunableNumber.java    # A helper class which allows for tuning of numbers in the AdvantageScope, without redeploying each time a number is changed
-│   │       │   ├── subsystems/               # The main folder where all the subsystem logic is written
-│   │       │   │    ├── swerve/              # The folder with all the swerve logic
-│   │       │   │    │    ├── GyroIO.java                 # The IO Interface for the Gyro
-│   │       │   │    │    ├── GyroIONavX.java             # The IO Implementation for the NavX
-│   │       │   │    │    ├── GyroIOPigeon2.java          # The IO Implementation for the Pigeon2 (Most likely the main gyro)
-│   │       │   │    │    ├── ModuleIO.java               # The IO Interface for a SwerveModule
-│   │       │   │    │    ├── ModuleIOSim.java            # The IO Implementation for a SwerveModule in the simulator
-│   │       │   │    │    ├── ModuleIOTalonFX.java        # The IO Implementation for a SwerveModule for TalonFX motors
-│   │       │   │    │    ├── PhoenixOdometryThread.java  # A daemon thread that runs the odometry calculations
-│   │       │   │    │    ├── Swerve.java                 # The main subsystem that controls the movement of the drivetrain
-│   │       │   │    │    ├── SwerveModule.java           # The helper file for a SwerveModule, taking in a ModuleIO in its constructor
-│   │       │   │    ├── LED.java             # The subsystem that controls the LEDs
-│   │       │   ├── Constants.java            # Configuration for motor ports, speeds, etc
-│   │       │   ├── Autos.java                # Configuration for Autonomous commands and to use vision or not
-│   │       │   ├── BuildConstants.java       # Gets the Git status of the code such as if it is dirty, time of commit, etc. This is generated when code is deployed
-│   │       │   ├── SwerveModule.java         # Controls individual module's speed and direction
-│   │       │   ├── OperatorLock.java         # Enum to control different key mappings
-│   │       │   ├── RobotMode.java            # Enum to control different key mappings
-│   │       │   └── RobotContainer.java       # Manages controls and subsystems
-│   └── test/
-│       └── java/                                 # Unit tests (if any)
-├── vendordeps/                                   # External vendor libraries
-├── build.gradle                                  # Gradle build file
-├── settings.gradle                               # Gradle settings
-└── WPILib-License.md                             # WPILib license info
+## Overview
+
+This repository contains all robot code for **Shaquille O'Steel**, Steel Hawks' 2026 competition robot.
+
+---
+
+## Branch Naming Scheme
+
+| Prefix | Purpose |
+|--------|---------|
+| `main` | Stable, competition-ready code |
+| `feat/` | New features under development |
+| `bugfix/` | Bug fixes |
+| `refactor/` | Code cleanup and restructuring |
+| `sandbox/` | Experimental work, not for merge |
+| `event/` | Event-specific branches |
+
+---
+
+## AdvantageScope: Robot\_Shaq Asset
+
+This section explains how to install the custom **Robot\_Kirin** 3D model with articulated subsystems in AdvantageScope.
+
+### Step 1 — Open the Assets Folder
+
+1. Open AdvantageScope
+2. Navigate to **App → AdvantageScope → Show Assets Folder**
+3. A folder will open on your computer — this is the root assets directory
+
+### Step 2 — Drag the Folder In
+
+Drag the entire **`Robot_Shaq`** folder into the AdvantageScope assets folder.
+
+> [!IMPORTANT]
+> Drag the **entire folder**, not individual files inside it.
+
+The final structure should look like this:
+
+```
+AdvantageScopeAssets/
+└── Robot_Shaq/
+    ├── model.glb
+    ├── config.json
+    └── ...
 ```
 
-## Explanation of Project Structure
+### Step 3 — Restart AdvantageScope
 
-### Root Directory
-- **`build.gradle`**: Defines project dependencies, build tasks, and configuration for Gradle.
-- **`settings.gradle`**: Specifies project settings and root directory info for Gradle.
-- **`vendordeps/`**: Contains vendor dependency files, crucial for hardware interfaces (e.g., CTRE or Rev Robotics libraries).
-- **`WPILib-License.md`**: Licensing information for WPILib, which provides the core libraries for FRC robot programming.
+After restarting, **Shaq** should appear in the robot selection dropdown.
 
-### `src/main/java/org/steelhawks/`
-- **`Constants.java`**: Holds all constant values, such as motor ports, PID settings, and other configurations.
-- **`SwerveModule.java`**: Manages each swerve module’s direction and speed, allowing independent control over each wheel.
-- **`RobotContainer.java`**: Links subsystems, commands, and input devices, acting as the central command hub for the robot code.
-- **`OperatorLock.java`** & **`RobotMode.java`**: Enumerations that handle different control modes and operator mappings for flexible user input setups.
+### Step 4 — Add the NT Fields
 
-### Commands
-- **`commands/SuperStructure.java`**: A command factory for handling complex commands involving multiple subsystems, making it easier to coordinate between drivetrain, intake, and shooter, if applicable.
-- **`commands/DriveCommands.java`**: A command factory for handling driving commands such as pathfinding, autonomous routines, and other drivetrain-specific tasks.
+With the robot model selected, drag and drop the following fields onto the **Robot** component in AdvantageScope — **in this order**:
 
-### `subsystems/`
-- **`Swerve.java`**: Main subsystem that manages the swerve drive logic, allowing the robot to move omnidirectionally by coordinating individual `SwerveModule` instances.
+```
+NT:/AdvantageKit/RealOutputs/Superstructure/ComponentPoses
+NT:/AdvantageKit/RealOutputs/Intake/ComponentPoses
+```
 
-### `util/`
-- **Utility Code**: This folder is designed to store helper classes and utilities that support core functionality, like math utilities, sensor handling, or other common tasks.
+> [!NOTE]
+> Articulation currently only works in simulation.
 
-### `src/test/java`
-- **Testing**: Contains unit tests or simulation-based tests, allowing verification of subsystem and command behavior in a safe environment.
-
-# Branch Name Scheme
-
-- main
-- feat/
-- bugfix/
-- refactor/
-- sandbox/
-- event/
+![AdvantageScope setup](images/image.png)
