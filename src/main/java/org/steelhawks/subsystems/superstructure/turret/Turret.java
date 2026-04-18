@@ -42,6 +42,7 @@ public class Turret extends SubsystemBase {
 
     private static LoggedTunableNumber maxVelocityRadPerSec;
     private static LoggedTunableNumber maxAccelerationRadPerSecSq;
+    private static LoggedTunableNumber maxJerkRadPerSecCubed;
     private static LoggedTunableNumber manualIncrement;
     public static double tolerance = Units.degreesToRadians(5.0);
 
@@ -51,7 +52,6 @@ public class Turret extends SubsystemBase {
     private final Debouncer homingDebouncer = new Debouncer(0.15, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
     private final Supplier<Pose2d> poseSupplier;
-    private TrapezoidProfile profile;
     private final TurretIO io;
 
     private LoggedTunableNumber tuningVolts;
@@ -62,8 +62,6 @@ public class Turret extends SubsystemBase {
 
     private double manualGoalRad = 0.0;
     private Rotation2d desiredRotation = new Rotation2d();
-    private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
-    private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
     private boolean shouldRun = false;
     private boolean isManual = false;
@@ -95,13 +93,10 @@ public class Turret extends SubsystemBase {
             new LoggedTunableNumber("Turret/MaxVelocityRadPerSec", constants.maxVelocityRadPerSec());
         maxAccelerationRadPerSecSq =
             new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", constants.maxAccelerationRadPerSecSq());
+        maxJerkRadPerSecCubed =
+            new LoggedTunableNumber("Turret/MaxJerkRadPerSecCubed", 0.0);
         manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", constants.manualIncrement());
         currentHomingThres = new LoggedTunableNumber("Turret/CurrentHomingThresholdAmps", constants.currentHomingThreshold());
-        profile =
-            new TrapezoidProfile(
-                new TrapezoidProfile.Constraints(
-                    maxVelocityRadPerSec.getAsDouble(),
-                    maxAccelerationRadPerSecSq.getAsDouble()));
         isHomed = Constants.getRobot().equals(RobotType.OMEGABOT);
     }
 
@@ -128,7 +123,7 @@ public class Turret extends SubsystemBase {
     public boolean isJammedOrInDeadSpot() {
         boolean stuckWithError =
             Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
-                && Math.abs(getPosition().getRadians() - goal.position) > JAM_ERROR_THRESHOLD
+                && Math.abs(getPosition().getRadians() - desiredRotation.getRadians()) > JAM_ERROR_THRESHOLD
                 && shouldRun;
         boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
         return jammed || isAtDeadSpot();
@@ -137,7 +132,7 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/IsAtDeadSpot")
     private boolean isAtDeadSpot() {
         if (!shouldRun) return false;
-        double goalRad = goal.position;
+        double goalRad = desiredRotation.getRadians();
         boolean atMinLimit = Math.abs(goalRad - constants.minRotation().getRadians()) < tolerance;
         boolean atMaxLimit = Math.abs(goalRad - constants.maxRotation().getRadians()) < tolerance;
         return (atMinLimit || atMaxLimit) && !atGoal;
@@ -145,8 +140,8 @@ public class Turret extends SubsystemBase {
 
     @AutoLogOutput(key = "Turret/IsTraversing")
     public boolean isTraversing() {
-        return Math.abs(setpoint.position - goal.position) > tolerance
-            || Math.abs(setpoint.velocity) > Units.degreesToRadians(2.0);
+        return Math.abs(inputs.positionRad.getRadians() - desiredRotation.getRadians()) > tolerance
+            || Math.abs(inputs.velocityRadPerSec.getRadians()) > Units.degreesToRadians(2.0);
     }
 
     private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
@@ -252,8 +247,6 @@ public class Turret extends SubsystemBase {
     }
 
     public void freezeAtCurrentPosition() {
-        goal = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
-        setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
         desiredRotation = getPosition();
     }
 
@@ -276,7 +269,6 @@ public class Turret extends SubsystemBase {
             io.setPosition(0);
             isZeroed = true;
             // sync setpoint to new position immediately, so turret doesnt violently snap like we've been seeing
-            setpoint = new TrapezoidProfile.State(Math.PI, 0.0);
             desiredRotation = Rotation2d.fromRadians(Math.PI);
             Logger.recordOutput("Turret/Zeroed", true);
         }
@@ -290,7 +282,6 @@ public class Turret extends SubsystemBase {
                 io.stop();
                 isZeroed = true;
                 // sync setpoint to new position immediately, so turret doesnt violently snap like we've been seeing
-                setpoint = new TrapezoidProfile.State(Math.PI, 0.0);
                 desiredRotation = Rotation2d.fromRadians(Math.PI);
                 Logger.recordOutput("Turret/Zeroed", true);
             }
@@ -307,7 +298,6 @@ public class Turret extends SubsystemBase {
                     && getPosition().getRadians() >= constants.minRotation().getRadians());
         Logger.recordOutput("Turret/ShouldRun", shouldRun);
         if (DriverStation.isDisabled()) {
-            setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
             desiredRotation = getPosition();
         }
         if (DriverStation.isDisabled() && Robot.isFirstRun()) {
@@ -338,11 +328,10 @@ public class Turret extends SubsystemBase {
             if (maxVelocityRadPerSec.hasChanged(hashCode())
                 || maxAccelerationRadPerSecSq.hasChanged(hashCode())
             ) {
-                profile =
-                    new TrapezoidProfile(
-                        new TrapezoidProfile.Constraints(
-                            maxVelocityRadPerSec.get(),
-                            maxAccelerationRadPerSecSq.get()));
+                io.setMotionMagic(
+                    maxVelocityRadPerSec.get(),
+                    maxAccelerationRadPerSecSq.get(),
+                    maxJerkRadPerSecCubed.get());
             }
         }
         if (isManual && joystickAxis != null) {
@@ -421,24 +410,11 @@ public class Turret extends SubsystemBase {
                 Rotation2d.fromRadians(
                     MathUtil.clamp(
                         desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
-            goal = new TrapezoidProfile.State(desiredRotation.getRadians(), 0.0);
-            double previousVelocity = setpoint.velocity;
-            setpoint =
-                profile
-                    .calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
-            if (setpoint.position < constants.minRotation().getRadians()
-                || setpoint.position > constants.maxRotation().getRadians()
-            ) {
-                setpoint =
-                    new TrapezoidProfile.State(
-                        MathUtil.clamp(setpoint.position, constants.minRotation().getRadians(), constants.maxRotation().getRadians()),
                         0.0);
-            }
-            atGoal = Maths.epsilonEquals(getPosition().getRadians(), goal.position, tolerance);
+            atGoal = Maths.epsilonEquals(getPosition().getRadians(), desiredRotation.getRadians(), tolerance);
             if (atGoal) {
                 io.stop();
             } else {
-                double acceleration = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
                 boolean springPullsNegative = getPosition().getRadians() <= -0.984816; // spring resists CCW
                 boolean springPullsPositive = getPosition().getRadians() >= 1.810097;  // spring resists CW
 
@@ -449,20 +425,16 @@ public class Turret extends SubsystemBase {
                     constantForceSpringFF = -constantForceFF.getAsDouble(); // need negative torque to fight spring
                 }
                 Logger.recordOutput("Turret/ForceSpringActive", springPullsNegative || springPullsPositive);
-                io.runPivot(
-                    setpoint.position,
-                    kS.getAsDouble() * Math.signum(setpoint.velocity)
+                io.runPivotMM(
+                    desiredRotation.getRadians(),
+                    kS.getAsDouble() * Math.signum(desiredRotation.getRadians() - inputs.positionRad.getRadians())
                         + kV.getAsDouble() * calculateTurretVelocityFF(velocityTargetFF)
-                        + kA.getAsDouble() * acceleration
                         + constantForceSpringFF
                 );
             }
-            Logger.recordOutput("Turret/SetpointPosition", setpoint.position);
-            Logger.recordOutput("Turret/SetpointVelocity", setpoint.velocity);
-            Logger.recordOutput("Turret/GoalPosition", goal.position);
-            Logger.recordOutput("Turret/GoalVelocity", goal.velocity);
+            Logger.recordOutput("Turret/GoalPosition", desiredRotation.getRadians());
         } else {
-            setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
+            desiredRotation = new Rotation2d(0.0);
             Logger.recordOutput("Turret/SetpointPosition", 0.0);
             Logger.recordOutput("Turret/SetpointVelocity", 0.0);
             Logger.recordOutput("Turret/GoalPosition", 0.0);
