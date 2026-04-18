@@ -536,7 +536,7 @@ public class Swerve extends SubsystemBase {
         SwerveSample flipped = sample;
         if (flipY) {
             double flippedY = FieldConstants.FIELD_WIDTH - sample.y;
-            double flippedHeading = Math.PI - sample.heading;
+            double flippedHeading = -sample.heading;
             double flippedVy = -sample.vy;
             double flippedOmega = -sample.omega;
 
@@ -547,8 +547,18 @@ public class Swerve extends SubsystemBase {
                 sample.vx, flippedVy,
                 sample.ax, sample.ay,
                 flippedOmega, sample.alpha,
-                sample.moduleForcesX(),
-                sample.moduleForcesY() // might need negating too, check SwerveSample API
+                new double[] {
+                    sample.moduleForcesX()[1],
+                    sample.moduleForcesX()[0],
+                    sample.moduleForcesX()[3],
+                    sample.moduleForcesX()[2]
+                },
+                new double[] {
+                    -sample.moduleForcesY()[1],
+                    -sample.moduleForcesY()[0],
+                    -sample.moduleForcesY()[3],
+                    -sample.moduleForcesY()[2]
+                } // might need negating too, check SwerveSample API
             );
         }
         followTrajectory(flipped);
