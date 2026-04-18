@@ -9,6 +9,15 @@ import org.steelhawks.util.AprilTag;
 
 public class FieldConstants {
 
+    public static Translation2d getFerryTarget() {
+        double robotY = RobotState.getInstance().getEstimatedPose().getY();
+        if (robotY < FIELD_WIDTH / 2.0) {
+            return getClosestPointOnLine(Ferrying.START_LINE, Ferrying.MID_LINE);
+        } else {
+            return getClosestPointOnLine(Ferrying.MID_LINE, Ferrying.END_LINE);
+        }
+    }
+
     public static Translation2d getClosestPointOnLine(
         Translation2d startLine, Translation2d endLine) {
         Translation2d robotPoint = RobotState.getInstance().getEstimatedPose().getTranslation();
@@ -66,6 +75,7 @@ public class FieldConstants {
         public static final double EN_FERRY_LINE_Y = FIELD_WIDTH - Units.inchesToMeters(65.65);
 
         public static final Translation2d START_LINE = new Translation2d(FERRY_LINE_X, ST_FERRY_LINE_Y);
+        public static final Translation2d MID_LINE = new Translation2d(FERRY_LINE_X, FIELD_WIDTH / 2.0);
         public static final Translation2d END_LINE = new Translation2d(FERRY_LINE_X, EN_FERRY_LINE_Y);
     }
 

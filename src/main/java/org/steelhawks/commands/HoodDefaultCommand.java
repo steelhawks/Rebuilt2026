@@ -32,9 +32,7 @@ public class HoodDefaultCommand extends Command {
             case SHOOTING_MOVING -> {
                 if (RobotState.getInstance().getAimState().equals(RobotState.AimState.FERRY)) {
                     s_Hood.setDesiredPosition(Rotation2d.fromRadians(ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
-                        FieldConstants.getClosestPointOnLine(
-                            FieldConstants.Ferrying.START_LINE,
-                            FieldConstants.Ferrying.END_LINE))).hoodAngle()));
+                        FieldConstants.getFerryTarget())).hoodAngle()));
                     return;
                 }
                 if (sol != null) {
