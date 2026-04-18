@@ -211,23 +211,23 @@ public record ChoreoTraj(
     public static final ChoreoTraj RDoubleRebound = new ChoreoTraj(
         "RDoubleRebound",
         OptionalInt.empty(),
-        10.02113,
-        new Pose2d(4.42874, 0.4445, Rotation2d.fromRadians(1.5708)),
+        10.06075,
+        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
         new Pose2d(3.6, 0.64334, Rotation2d.fromRadians(3.14159))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj RDoubleRebound$0 = new ChoreoTraj(
         "RDoubleRebound",
         OptionalInt.of(0),
-        4.86888,
-        new Pose2d(4.42874, 0.4445, Rotation2d.fromRadians(1.5708)),
+        4.9085,
+        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
         new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj RDoubleRebound$1 = new ChoreoTraj(
         "RDoubleRebound",
         OptionalInt.of(1),
-        5.1522499999999996,
+        5.15225,
         new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0)),
         new Pose2d(3.6, 0.64334, Rotation2d.fromRadians(3.14159))
     );

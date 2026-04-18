@@ -84,18 +84,18 @@ public class RobotContainer {
             double x = RobotState.getInstance().getEstimatedPose().getX();
             if (AllianceFlip.shouldFlip()) {
                 double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
-                return x <= boundary && Robot.getState().equals(TELEOP);
+                return x <= boundary;
             } else {
-                return x >= FieldConstants.Trench.TRENCH_END_X && Robot.getState().equals(TELEOP);
+                return x >= FieldConstants.Trench.TRENCH_END_X;
             }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
-        RobotModeTriggers.autonomous()
-            .or(s_Swerve::isOnBump)
-            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
-            .onFalse(s_Swerve.resetCurrentLimitsCmd());
+//        RobotModeTriggers.autonomous()
+//            .or(s_Swerve::isOnBump)
+//            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
+//            .onFalse(s_Swerve.resetCurrentLimitsCmd());
 
         driver.povRight()
             .whileTrue(s_Indexer.outtake());
