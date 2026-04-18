@@ -5,7 +5,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -410,7 +409,6 @@ public class Turret extends SubsystemBase {
                 Rotation2d.fromRadians(
                     MathUtil.clamp(
                         desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
-                        0.0);
             atGoal = Maths.epsilonEquals(getPosition().getRadians(), desiredRotation.getRadians(), tolerance);
             if (atGoal) {
                 io.stop();
