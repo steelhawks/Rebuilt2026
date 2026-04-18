@@ -25,6 +25,8 @@ import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.AllianceFlip;
 
+import static org.steelhawks.Robot.RobotState.*;
+
 public class RobotContainer {
 
     private final RobotConfig config = RobotConfig.getConfig();
@@ -81,9 +83,9 @@ public class RobotContainer {
             double x = RobotState.getInstance().getEstimatedPose().getX();
             if (AllianceFlip.shouldFlip()) {
                 double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
-                return x <= boundary;
+                return x <= boundary && Robot.getState().equals(TELEOP);
             } else {
-                return x >= FieldConstants.Trench.TRENCH_END_X;
+                return x >= FieldConstants.Trench.TRENCH_END_X && Robot.getState().equals(TELEOP);
             }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
