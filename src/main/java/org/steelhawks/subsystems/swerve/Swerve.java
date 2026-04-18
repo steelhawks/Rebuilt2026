@@ -246,7 +246,7 @@ public class Swerve extends SubsystemBase {
                 TURN_MOTOR = DCMotor.getKrakenX60Foc(1);
                     ROBOT_MASS_KG = Units.lbsToKilograms(139.0);
                 ROBOT_MOI = (1.0 / 12.0) * ROBOT_MASS_KG * (2 * Math.pow(Units.inchesToMeters(25), 2));
-                WHEEL_COF = 0.67;
+                WHEEL_COF = 1.786;
                 PP_CONFIG =
                     new RobotConfig(
                         ROBOT_MASS_KG,
