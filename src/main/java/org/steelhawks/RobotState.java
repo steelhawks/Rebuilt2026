@@ -143,13 +143,19 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER))
             .debounce(0.3);
-
         inBumpTrigger =
             Boundary.asTrigger(
-                () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
+                "LeftBump",
+                () -> AllianceFlip.apply(FieldConstants.Bump.BUMP_LEFT_TRIGGER_BOX),
                 this::getEstimatedPose,
                 footprint,
                 Boundary.Mode.PERIMETER)
+            .or(Boundary.asTrigger(
+                "RightBump",
+                () -> AllianceFlip.apply(FieldConstants.Bump.BUMP_RIGHT_TRIGGER_BOX),
+                this::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER))
             .debounce(0.3);
         turretStuckTrigger =
             new Trigger(

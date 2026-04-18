@@ -90,6 +90,20 @@ public class FieldConstants {
     }
 
     public final static class Bump {
+        public static final double BUMP_WIDTH = Units.inchesToMeters(73.0);
+        public static final double BUMP_LENGTH = Units.inchesToMeters(44.4);
 
+        public static final double BUMP_START_X = Units.inchesToMeters(156.61 + 2.0);
+        public static final double BUMP_START_Y = Units.inchesToMeters(12.0 + 50.35);
+
+        public static final Rectangle2d BUMP_RIGHT_TRIGGER_BOX =
+            new Rectangle2d(
+                new Translation2d(BUMP_START_X, BUMP_START_Y),
+                new Translation2d(BUMP_START_X + BUMP_LENGTH, BUMP_START_Y + BUMP_WIDTH));
+
+        public static final Rectangle2d BUMP_LEFT_TRIGGER_BOX =
+            new Rectangle2d(
+                new Translation2d(BUMP_START_X, FIELD_WIDTH - BUMP_START_Y),
+                new Translation2d(BUMP_START_X + BUMP_LENGTH, FIELD_WIDTH - BUMP_START_Y - BUMP_WIDTH));
     }
 }
