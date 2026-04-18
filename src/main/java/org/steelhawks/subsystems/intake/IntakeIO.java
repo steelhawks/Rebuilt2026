@@ -56,6 +56,8 @@ public interface IntakeIO {
 
     default void runIntake(double output) {}
 
+    default void runAtSysIdVoltage(double volts) {}
+
     default void stopRack() {}
 
     default void stopIntake() {}

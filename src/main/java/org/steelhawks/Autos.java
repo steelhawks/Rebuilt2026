@@ -19,6 +19,7 @@ import org.steelhawks.commands.align.SwerveDriveAlignment;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.intake.MagicIntake;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Set;
 public final class Autos {
 
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
-    private static final Intake s_Intake = RobotContainer.s_Intake;
+    private static final MagicIntake s_Intake = RobotContainer.s_Intake;
     private static final Indexer s_Indexer = RobotContainer.s_Indexer;
 
     private static final LoggedDashboardChooser<Command> autoChooser =
@@ -127,6 +128,12 @@ public final class Autos {
             autoChooser.addOption("Flywheel (Quasistatic Backward)", RobotContainer.s_Flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
             autoChooser.addOption("Turret (Quick Characterizer)", RobotContainer.s_Turret.feedforwardCharacterization());
+
+
+            autoChooser.addOption("Intake (Quasistatic Forward)", RobotContainer.s_Intake.quasistaticCharacterization(true));
+            autoChooser.addOption("Intake (Quasistatic Backward)", RobotContainer.s_Intake.quasistaticCharacterization(false));
+            autoChooser.addOption("Intake (Dynamic Forward)", RobotContainer.s_Intake.dynamicCharacterization(true));
+            autoChooser.addOption("Intake (Dynamic Backward)", RobotContainer.s_Intake.dynamicCharacterization(false));
             tuningOptionsAdded = true;
         }
     }

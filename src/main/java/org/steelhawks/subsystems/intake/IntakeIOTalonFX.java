@@ -330,6 +330,12 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeMotor.setControl(m_voltageOut.withOutput(output));
     }
 
+    @Override
+    public void runAtSysIdVoltage(double volts) {
+        leftMotor.setControl(m_voltageOut.withOutput(volts));
+        rightMotor.setControl(m_voltageOut.withOutput(volts));
+    }
+
 
     @Override
     public void stopRack() {

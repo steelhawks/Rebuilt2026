@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.intake;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,6 +12,11 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MagicIntake extends SubsystemBase {
 
@@ -52,6 +58,9 @@ public class MagicIntake extends SubsystemBase {
     // Tuning overrides (lazy init — only created when tuning mode is on)
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
+
+    private final double FF_RAMP_RATE = 1.0;
+    private final double DYNAMIC_STEP_VOLTAGE = 4.0;
 
     public MagicIntake(IntakeIO io, SubsystemConstants.IntakeConstants constants) {
         this.io = io;
@@ -303,5 +312,101 @@ public class MagicIntake extends SubsystemBase {
             isZeroed = false;
             isHomed = false;
         }, this);
+    }
+
+
+
+    public Command quasistaticCharacterization(boolean forward) {
+        List<Double> velocitySamples = new LinkedList<>();
+        List<Double> voltageSamples = new LinkedList<>();
+        Timer timer = new Timer();
+        double direction = forward ? 1.0 : -1.0;
+
+        return Commands.sequence(
+                Commands.runOnce(
+                        () -> {
+                            velocitySamples.clear();
+                            voltageSamples.clear();
+                            timer.restart();
+                        }
+                ),
+                Commands.run(
+                                () -> {
+                                    double voltage = direction * timer.get() * FF_RAMP_RATE;
+                                    io.runAtSysIdVoltage(voltage);
+
+                                    if (Math.abs(inputs.leftVelocityMetersPerSec) > 0.01) {
+                                        velocitySamples.add(inputs.leftVelocityMetersPerSec);
+                                        voltageSamples.add(inputs.leftAppliedVolts);
+                                    }
+                                }, this
+                        )
+                        .finallyDo(
+                                () -> {
+                                    io.stopRack();
+                                    int n = velocitySamples.size();
+                                    if (n < 2) {
+                                        System.out.println("********** Intake Quasistatic: not enough data **********");
+                                        return;
+                                    }
+
+                                    double sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumX2 = 0.0;
+                                    for (int i = 0; i < n; i++) {
+                                        sumX += velocitySamples.get(i);
+                                        sumY += voltageSamples.get(i);
+                                        sumXY += velocitySamples.get(i) * voltageSamples.get(i);
+                                        sumX2 += velocitySamples.get(i) * velocitySamples.get(i);
+                                    }
+                                    double kS = (sumY * sumX2 - sumX * sumXY) / (n * sumX2 - sumX * sumX);
+                                    double kV = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                                    NumberFormat formatter = new DecimalFormat("#0.00000");
+                                    System.out.println("********** Intake Quasistatic Characterization Results **********");
+                                    System.out.println("\tkS: " + formatter.format(kS));
+                                    System.out.println("\tkV: " + formatter.format(kV));
+                                }
+                        )
+        );
+    }
+
+
+    public Command dynamicCharacterization(boolean forward) {
+        List<Double> velocitySamples = new LinkedList<>();
+        List<Double> timeSamples = new LinkedList<>();
+        Timer timer = new Timer();
+        double stepVoltage = forward ? DYNAMIC_STEP_VOLTAGE : -DYNAMIC_STEP_VOLTAGE;
+
+        return Commands.sequence(
+                Commands.runOnce(
+                        () -> {
+                            velocitySamples.clear();
+                            timeSamples.clear();
+                            timer.restart();
+                        }
+                ),
+                Commands.run(() -> {
+                            io.runAtSysIdVoltage(stepVoltage);
+                            velocitySamples.add(inputs.leftVelocityMetersPerSec);
+                            timeSamples.add(timer.get());
+                        }, this)
+                        .finallyDo(() -> {
+                            io.stopRack();
+                            int n = velocitySamples.size();
+                            if (n < 2) {
+                                System.out.println("********** Intake Dynamic: not enough data **********");
+                                return;
+                            }
+
+                            double totalTime = timeSamples.get(n - 1) - timeSamples.get(0);
+                            double totalVelocityChange = velocitySamples.get(n - 1) - velocitySamples.get(0);
+                            double acceleration = totalVelocityChange / totalTime;
+
+                            double kA = Math.abs(stepVoltage) / Math.abs(acceleration);
+                            NumberFormat formatter = new DecimalFormat("#0.00000");
+                            System.out.println("********** Intake Dynamic Characterization Results **********");
+                            System.out.println("\tkA (approximate): " + formatter.format(kA));
+                            System.out.println("\tAverage acceleration: " + formatter.format(acceleration) + " m/s²");
+
+                        })
+        );
     }
 }

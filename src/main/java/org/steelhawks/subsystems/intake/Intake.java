@@ -5,6 +5,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,6 +14,11 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Intake extends SubsystemBase {
 
