@@ -99,6 +99,7 @@ public final class Autos {
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
         autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.NotSoOPAuton.name()));
         autoChooser.addOption("Middle Depot Auton", middleDepotAuton().cmd().withName(ChoreoTraj.MiddleDepotAuton.name()));
+        autoChooser.addOption("Middle Depot Auton 2", middleDepotAuton2().cmd().withName(ChoreoTraj.MiddleDepotAuton2.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -222,6 +223,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
@@ -278,6 +280,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
