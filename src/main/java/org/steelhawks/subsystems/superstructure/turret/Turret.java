@@ -31,27 +31,22 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
-    private final static double FF_RAMP_RATE = 5.0; // 2 AMPS per sec
+    private final static double FF_RAMP_RATE = 5.0; // 5 AMPS per sec
 
     private final LoggedTunableNumber kS;
     private final LoggedTunableNumber kA;
     private final LoggedTunableNumber kV;
     private final LoggedTunableNumber kP;
     private final LoggedTunableNumber kI;
-    private final LoggedTunableNumber kD; // 35
+    private final LoggedTunableNumber kD;
 
     private static LoggedTunableNumber maxVelocityRadPerSec;
     private static LoggedTunableNumber maxAccelerationRadPerSecSq;
     private static LoggedTunableNumber manualIncrement;
-//    private static final LoggedTunableNumber tolerance = new LoggedTunableNumber("Turret/Tolerance", Units.degreesToRadians(5.0));
-    private static double tolerance = Units.degreesToRadians(5.0);
-
+    public static double tolerance = Units.degreesToRadians(5.0);
 
     private static LoggedTunableNumber currentHomingThres;
     private static final double homingVolts = 0.1;
-
-    // private static final Rotation2d minRotation = new Rotation2d(Constants.value((-Math.PI / 2.0), 0.0) - (Math.PI / 60.0));
-    // private static final Rotation2d maxRotation = new Rotation2d(Constants.value(Math.PI, 2 * Math.PI) + (Math.PI / 60.0));
 
     private final Debouncer homingDebouncer = new Debouncer(0.15, DebounceType.kRising);
     private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
@@ -63,20 +58,28 @@ public class Turret extends SubsystemBase {
     private LoggedTunableNumber tuningAmps;
 
     private int trajectoryLoopCounter = 0;
-    private static final int TRAJECTORY_LOG_INTERVAL = 5; // log trajectory every 5 loops (~10Hz)
+    private static final int TRAJECTORY_LOG_INTERVAL = 5; // log trajectory every 5 loops ~10Hz
 
     private double manualGoalRad = 0.0;
     private Rotation2d desiredRotation = new Rotation2d();
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
+    private boolean shouldRun = false;
     private boolean isManual = false;
     private boolean atGoal = false;
     private boolean isHomed = false;
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
-    private final LoggedTunableNumber constantForceFF = new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
+    private final LoggedTunableNumber constantForceFF =
+        new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
+
+    private static final double JAM_VELOCITY_THRESHOLD = Units.degreesToRadians(2.0); // rad/s
+    private static final double JAM_ERROR_THRESHOLD = Units.degreesToRadians(5.0);
+    private static final double JAM_DETECTION_TIME = 0.3; // seconds
+    private final Debouncer jamDebouncer = new Debouncer(JAM_DETECTION_TIME, DebounceType.kRising);
+    private final Debouncer unjamDebouncer = new Debouncer(0.15, DebounceType.kFalling);
 
     public Turret(TurretIO io, Supplier<Pose2d> poseSupplier, SubsystemConstants.TurretConstants constants) {
         this.poseSupplier = poseSupplier;
@@ -119,6 +122,31 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/AtGoal")
     public boolean atGoal() {
         return atGoal;
+    }
+
+    @AutoLogOutput(key = "Turret/IsJammedOrDeadSpot")
+    public boolean isJammedOrInDeadSpot() {
+        boolean stuckWithError =
+            Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
+                && Math.abs(getPosition().getRadians() - goal.position) > JAM_ERROR_THRESHOLD
+                && shouldRun;
+        boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
+        return jammed || isAtDeadSpot();
+    }
+
+    @AutoLogOutput(key = "Turret/IsAtDeadSpot")
+    private boolean isAtDeadSpot() {
+        if (!shouldRun) return false;
+        double goalRad = goal.position;
+        boolean atMinLimit = Math.abs(goalRad - constants.minRotation().getRadians()) < tolerance;
+        boolean atMaxLimit = Math.abs(goalRad - constants.maxRotation().getRadians()) < tolerance;
+        return (atMinLimit || atMaxLimit) && !atGoal;
+    }
+
+    @AutoLogOutput(key = "Turret/IsTraversing")
+    public boolean isTraversing() {
+        return Math.abs(setpoint.position - goal.position) > tolerance
+            || Math.abs(setpoint.velocity) > Units.degreesToRadians(2.0);
     }
 
     private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
@@ -223,6 +251,20 @@ public class Turret extends SubsystemBase {
         return trajectoryPoints;
     }
 
+    public void freezeAtCurrentPosition() {
+        goal = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
+        setpoint = new TrapezoidProfile.State(getPosition().getRadians(), 0.0);
+        desiredRotation = getPosition();
+    }
+
+    public Rotation2d getMinRotation() {
+        return constants.minRotation();
+    }
+
+    public Rotation2d getMaxRotation() {
+        return constants.minRotation();
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
@@ -253,7 +295,7 @@ public class Turret extends SubsystemBase {
                 Logger.recordOutput("Turret/Zeroed", true);
             }
         }
-        final boolean shouldRun =
+        shouldRun =
             DriverStation.isEnabled()
                 && !isManual
                 && ((isHomed && isZeroed) || Constants.getRobot().equals(RobotType.SIMBOT))
@@ -315,11 +357,6 @@ public class Turret extends SubsystemBase {
             desiredRotation = Rotation2d.fromRadians(manualGoalRad);
         }
         if (shouldRun) {
-            if (DriverStation.isAutonomous()) {
-                tolerance = Units.degreesToRadians(15.0);
-            } else {
-                tolerance = Units.degreesToRadians(5.0);
-            }
             Translation2d velocityTargetFF = null;
             if (Toggles.shooterTuningMode.get()) {
                 RobotState.getInstance().setAimState(AimState.TO_HUB);

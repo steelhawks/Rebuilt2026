@@ -99,6 +99,7 @@ public final class Autos {
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.OPAuton.name()));
         autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.NotSoOPAuton.name()));
         autoChooser.addOption("Middle Depot Auton", middleDepotAuton().cmd().withName(ChoreoTraj.MiddleDepotAuton.name()));
+        autoChooser.addOption("Middle Depot Auton 2", middleDepotAuton2().cmd().withName(ChoreoTraj.MiddleDepotAuton2.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -222,6 +223,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
@@ -278,6 +280,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
@@ -462,34 +465,71 @@ public final class Autos {
         AutoRoutine routine = factory.newRoutine("Middle Depot Auton");
 
         AutoTrajectory moveToShootPose = ChoreoTraj.MiddleDepotAuton$0.asAutoTraj(routine);
-        AutoTrajectory intakeFromDepot = ChoreoTraj.MiddleDepotAuton$1.asAutoTraj(routine);
+        AutoTrajectory shootToDepotToShoot = ChoreoTraj.MiddleDepotAuton$1.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
+                moveToShootPose.resetOdometry(),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 moveToShootPose.spawnCmd()
             )
         );
 
         moveToShootPose.active().whileTrue(RobotContainer.s_Intake.runIntake());
-        intakeFromDepot.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToDepotToShoot.active().whileTrue(RobotContainer.s_Intake.runIntake());
 
         moveToShootPose.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(moveToShootPose),
-                ShootingCommands.autonShoot().withTimeout(5.0),
-//                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel),
-                intakeFromDepot.spawnCmd()
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                shootToDepotToShoot.spawnCmd()
             )
         );
 
-        intakeFromDepot.done().onTrue(
+        shootToDepotToShoot.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(intakeFromDepot),
+                recoverToTrajectoryEnd(shootToDepotToShoot),
+                ShootingCommands.autonShoot().withTimeout(3.0),
+                shootToDepotToShoot.spawnCmd()
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine middleDepotAuton2() {
+        AutoRoutine routine = factory.newRoutine("Middle Depot Auton 2");
+
+        AutoTrajectory moveToShootPose = ChoreoTraj.MiddleDepotAuton2$0.asAutoTraj(routine);
+        AutoTrajectory shootToDepotToShoot = ChoreoTraj.MiddleDepotAuton2$1.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                moveToShootPose.resetOdometry(),
+                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                moveToShootPose.spawnCmd()
+            )
+        );
+
+        moveToShootPose.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToDepotToShoot.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        moveToShootPose.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(moveToShootPose),
+                ShootingCommands.autonShoot().withTimeout(2.0),
+                shootToDepotToShoot.spawnCmd()
+            )
+        );
+
+        shootToDepotToShoot.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootToDepotToShoot),
                 ShootingCommands.autonShoot().withTimeout(5.0)
-//                ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel)
             )
         );
 

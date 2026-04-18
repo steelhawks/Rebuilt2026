@@ -1,6 +1,7 @@
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -23,6 +24,8 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.AllianceFlip;
+
+import static org.steelhawks.Robot.RobotState.*;
 
 public class RobotContainer {
 
@@ -69,7 +72,7 @@ public class RobotContainer {
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
-        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
+//        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
     }
 
     private void configureDriver() {
@@ -80,9 +83,9 @@ public class RobotContainer {
             double x = RobotState.getInstance().getEstimatedPose().getX();
             if (AllianceFlip.shouldFlip()) {
                 double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
-                return x <= boundary;
+                return x <= boundary && Robot.getState().equals(TELEOP);
             } else {
-                return x >= FieldConstants.Trench.TRENCH_END_X;
+                return x >= FieldConstants.Trench.TRENCH_END_X && Robot.getState().equals(TELEOP);
             }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
@@ -109,6 +112,9 @@ public class RobotContainer {
 
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+        driver.a()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
 
     }
 }

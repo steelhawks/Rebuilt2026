@@ -125,8 +125,8 @@ public class IndexerIOTalonFX implements IndexerIO {
 			);
 		}
 
-		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
-		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0);
+		spindexerDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0).withEnableFOC(true);
+		feederDutyCycleOut = new DutyCycleOut(0.0).withUpdateFreqHz(0.0).withEnableFOC(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             100,

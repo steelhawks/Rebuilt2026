@@ -36,7 +36,7 @@ public class ShootingCommands {
             shoot()
                 .alongWith(
                     Commands.waitSeconds(1.5)
-                        .andThen(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION))));
+                        .andThen(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME))));
     }
 
     public static Command shoot() {
@@ -55,6 +55,7 @@ public class ShootingCommands {
             }),
             Commands.waitUntil(() ->
                 RobotContainer.s_Flywheel.isReadyToShoot()
+                    && !RobotContainer.s_Turret.isTraversing()
                     && RobotContainer.s_Turret.atGoal()
                     && RobotContainer.s_Hood.atGoal()),
             RobotContainer.s_Indexer.feed()
