@@ -484,16 +484,23 @@ public class Turret extends SubsystemBase {
     }
 
     public Command unjamTurret() {
-        return Commands.runOnce(() -> {
-            freezeAtCurrentPosition();
-            double currentRad = getPosition().getRadians();
-            boolean onLeftSide = Math.abs(currentRad - constants.maxRotation().getRadians()) < Math.abs(currentRad - constants.minRotation().getRadians());
-            if (onLeftSide) {
-                desiredRotation = constants.minRotation();
-            } else {
-                desiredRotation = constants.maxRotation();
-            }
-        }, this);
+        return Commands.sequence(
+            Commands.runOnce(() -> {
+                RobotState.getInstance().setAimState(AimState.MANUAL);
+                freezeAtCurrentPosition();
+                double currentRad = getPosition().getRadians();
+                boolean onLeftSide = Math.abs(currentRad - constants.maxRotation().getRadians()) < Math.abs(currentRad - constants.minRotation().getRadians());
+                if (onLeftSide) {
+                    desiredRotation = constants.minRotation();
+                } else {
+                    desiredRotation = constants.maxRotation();
+                }
+            }),
+            Commands.waitUntil(this::atGoal),
+            Commands.runOnce(() -> RobotState.getInstance().setAimState(
+                RobotState.getInstance().getNeutralZoneTrigger().getAsBoolean()
+                    ? AimState.FERRY
+                    : AimState.TO_HUB)));
     }
 
     public Command setDesiredRotation(Rotation2d rotation) {

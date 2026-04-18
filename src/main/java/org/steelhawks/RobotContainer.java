@@ -76,15 +76,7 @@ public class RobotContainer {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
             .whileTrue(RumbleAPI.steady().repeatedly());
 
-        new Trigger(() -> {
-            double x = RobotState.getInstance().getEstimatedPose().getX();
-            if (AllianceFlip.shouldFlip()) {
-                double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
-                return x <= boundary;
-            } else {
-                return x >= FieldConstants.Trench.TRENCH_END_X;
-            }
-        })
+        RobotState.getInstance().getNeutralZoneTrigger()
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 

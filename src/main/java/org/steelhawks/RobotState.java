@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -79,6 +80,8 @@ public class RobotState {
     private final Trigger inBumpTrigger;
     @AutoLogOutput
     private final Trigger turretStuckTrigger;
+    @AutoLogOutput
+    private final Trigger neutralZoneTrigger;
 
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
@@ -143,7 +146,6 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER))
             .debounce(0.3);
-
         inBumpTrigger =
             Boundary.asTrigger(
                 () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
@@ -156,6 +158,16 @@ public class RobotState {
                 () -> RobotContainer.s_Turret != null
                     && RobotContainer.s_Turret.isJammedOrInDeadSpot()
                     && shootingState != ShootingState.NOTHING);
+         neutralZoneTrigger =
+             new Trigger(() -> {
+                 double x = RobotState.getInstance().getEstimatedPose().getX();
+                 if (AllianceFlip.shouldFlip()) {
+                     double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
+                     return x <= boundary;
+                 } else {
+                     return x >= FieldConstants.Trench.TRENCH_END_X;
+                 }
+             });
     }
 
     public RobotFootprint getFootprint() {
@@ -176,6 +188,10 @@ public class RobotState {
 
     public Trigger getTurretJamTrigger() {
         return turretStuckTrigger;
+    }
+
+    public Trigger getNeutralZoneTrigger() {
+        return neutralZoneTrigger;
     }
 
     public void updateChassisSpeeds(ChassisSpeeds speeds) {
