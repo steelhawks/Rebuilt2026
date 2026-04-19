@@ -73,7 +73,7 @@ public class ShooterStructure {
         shootingFlywheelVelocityMap.put(2.19, 11.431 * 1.04);
         shootingFlywheelVelocityMap.put(2.67, 11.83 * 1.04);
         shootingFlywheelVelocityMap.put(3.2, 12.5 * 1.04);
-        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.04);
+        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.06);
         shootingFlywheelVelocityMap.put(4.03, 13.1 * 1.04);
         shootingFlywheelVelocityMap.put(4.37, 13.3 * 1.04);
         shootingFlywheelVelocityMap.put(4.82, 13.4 * 1.04);
