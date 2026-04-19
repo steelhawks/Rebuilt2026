@@ -10,6 +10,7 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
@@ -34,9 +35,13 @@ public class ShooterStructure {
 
     private static final LoggedNetworkNumber lutDistanceOffsetMeters =
         new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(0.0)); // 1.95ft is what we had on the  field
+    private static final LoggedNetworkBoolean lutSoft =
+        new LoggedNetworkBoolean("ShooterStructure/UsingLUTSoft", false);
+    private static final LoggedNetworkBoolean lutHard =
+        new LoggedNetworkBoolean("ShooterStructure/UsingLUTHard", false);
 
-    private static final double minShootDistance;
-    private static final double maxShootDistance;
+    private static double minShootDistance;
+    private static double maxShootDistance;
     private static final double minFerryDistance;
     private static final double maxFerryDistance;
 
@@ -62,54 +67,56 @@ public class ShooterStructure {
         minFerryDistance = c.minFerryDistance();
         maxFerryDistance = c.maxFerryDistance();
 
+        loadLUTHard();
+
         /************************************************/
         /* Tuning from Home */
         /************************************************/
 
-                minShootDistance = 1.146;
-        maxShootDistance = 4.057;
-
-        shootingFlywheelVelocityMap.put(1.39, 11.0 * 1.04);
-        shootingFlywheelVelocityMap.put(2.19, 11.431 * 1.04);
-        shootingFlywheelVelocityMap.put(2.67, 11.83 * 1.04);
-        shootingFlywheelVelocityMap.put(3.2, 12.5 * 1.04);
-        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.06);
-        shootingFlywheelVelocityMap.put(4.03, 13.1 * 1.04);
-        shootingFlywheelVelocityMap.put(4.37, 13.3 * 1.04);
-        shootingFlywheelVelocityMap.put(4.82, 13.4 * 1.04);
-        shootingFlywheelVelocityMap.put(4.92, 13.5 * 1.04);
-        shootingFlywheelVelocityMap.put(5.099, 13.6 * 1.04);
-        shootingFlywheelVelocityMap.put(5.36, 13.75  * 1.05);
-        shootingFlywheelVelocityMap.put(5.56, 13.8 * 1.05);
-        shootingFlywheelVelocityMap.put(5.85, 14.1 * 1.06);
-
-        shootingHoodAngleMap.put(1.39, Rotation2d.fromDegrees(80.0));
-        shootingHoodAngleMap.put(2.19, Rotation2d.fromDegrees(74.0));
-        shootingHoodAngleMap.put(2.67, Rotation2d.fromDegrees(71.0));
-        shootingHoodAngleMap.put(3.2, Rotation2d.fromDegrees(70.0));
-        shootingHoodAngleMap.put(3.65, Rotation2d.fromDegrees(69.0));
-        shootingHoodAngleMap.put(4.03, Rotation2d.fromDegrees(68.0));
-        shootingHoodAngleMap.put(4.37, Rotation2d.fromDegrees(67.0));
-        shootingHoodAngleMap.put(4.82, Rotation2d.fromDegrees(65.0));
-        shootingHoodAngleMap.put(4.92, Rotation2d.fromDegrees(64.0));
-        shootingHoodAngleMap.put(5.099, Rotation2d.fromDegrees(63.0));
-        shootingHoodAngleMap.put(5.36, Rotation2d.fromDegrees(62.0));
-        shootingHoodAngleMap.put(5.56, Rotation2d.fromDegrees(61.0));
-        shootingHoodAngleMap.put(5.85, Rotation2d.fromDegrees(59.0));
-
-        shootingTimeOfFlightMap.put(1.44, 1.11);
-        shootingTimeOfFlightMap.put(2.2, 1.19);
-        shootingTimeOfFlightMap.put(2.677, 1.23);
-        shootingTimeOfFlightMap.put(3.207, 1.38);
-        shootingTimeOfFlightMap.put(3.652, 1.41);
-        shootingTimeOfFlightMap.put(4.0318, 1.48);
-        shootingTimeOfFlightMap.put(4.3785, 1.5);
-        shootingTimeOfFlightMap.put(4.827, 1.53); //
+//        minShootDistance = 1.146;
+//        maxShootDistance = 4.057;
+//
+//        shootingFlywheelVelocityMap.put(1.39, 11.0 * 1.04);
+//        shootingFlywheelVelocityMap.put(2.19, 11.431 * 1.04);
+//        shootingFlywheelVelocityMap.put(2.67, 11.83 * 1.04);
+//        shootingFlywheelVelocityMap.put(3.2, 12.5 * 1.04);
+//        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.06);
+//        shootingFlywheelVelocityMap.put(4.03, 13.1 * 1.04);
+//        shootingFlywheelVelocityMap.put(4.37, 13.3 * 1.04);
+//        shootingFlywheelVelocityMap.put(4.82, 13.4 * 1.04);
+//        shootingFlywheelVelocityMap.put(4.92, 13.5 * 1.04);
+//        shootingFlywheelVelocityMap.put(5.099, 13.6 * 1.04);
+//        shootingFlywheelVelocityMap.put(5.36, 13.75  * 1.05);
+//        shootingFlywheelVelocityMap.put(5.56, 13.8 * 1.05);
+//        shootingFlywheelVelocityMap.put(5.85, 14.1 * 1.06);
+//
+//        shootingHoodAngleMap.put(1.39, Rotation2d.fromDegrees(80.0));
+//        shootingHoodAngleMap.put(2.19, Rotation2d.fromDegrees(74.0));
+//        shootingHoodAngleMap.put(2.67, Rotation2d.fromDegrees(71.0));
+//        shootingHoodAngleMap.put(3.2, Rotation2d.fromDegrees(70.0));
+//        shootingHoodAngleMap.put(3.65, Rotation2d.fromDegrees(69.0));
+//        shootingHoodAngleMap.put(4.03, Rotation2d.fromDegrees(68.0));
+//        shootingHoodAngleMap.put(4.37, Rotation2d.fromDegrees(67.0));
+//        shootingHoodAngleMap.put(4.82, Rotation2d.fromDegrees(65.0));
+//        shootingHoodAngleMap.put(4.92, Rotation2d.fromDegrees(64.0));
+//        shootingHoodAngleMap.put(5.099, Rotation2d.fromDegrees(63.0));
+//        shootingHoodAngleMap.put(5.36, Rotation2d.fromDegrees(62.0));
+//        shootingHoodAngleMap.put(5.56, Rotation2d.fromDegrees(61.0));
+//        shootingHoodAngleMap.put(5.85, Rotation2d.fromDegrees(59.0));
+//
+//        shootingTimeOfFlightMap.put(1.44, 1.11);
+//        shootingTimeOfFlightMap.put(2.2, 1.19);
+//        shootingTimeOfFlightMap.put(2.677, 1.23);
+//        shootingTimeOfFlightMap.put(3.207, 1.38);
+//        shootingTimeOfFlightMap.put(3.652, 1.41);
+//        shootingTimeOfFlightMap.put(4.0318, 1.48);
+//        shootingTimeOfFlightMap.put(4.3785, 1.5);
+//        shootingTimeOfFlightMap.put(4.827, 1.53); //
 //        shootingTimeOfFlightMap.put(4.92, 1.26);
-        shootingTimeOfFlightMap.put(5.0926, 1.55);
-        shootingTimeOfFlightMap.put(5.362, 1.58);
-        shootingTimeOfFlightMap.put(5.559, 1.59);
-        shootingTimeOfFlightMap.put(5.856, 1.7);
+//        shootingTimeOfFlightMap.put(5.0926, 1.55);
+//        shootingTimeOfFlightMap.put(5.362, 1.58);
+//        shootingTimeOfFlightMap.put(5.559, 1.59);
+//        shootingTimeOfFlightMap.put(5.856, 1.7);
 
         /************************************************/
         /* NYC Tuning */
@@ -399,5 +406,102 @@ public class ShooterStructure {
             Logger.recordOutput("SOTM/TurretRelativeAngleDeg", Math.toDegrees(turretRelativeAngle));
             return new MovingShotSolution(v, theta, Rotation2d.fromRadians(turretRelativeAngle), virtualTarget, tGuess);
         }
+    }
+
+    public static void loadLUTHard() {
+        minShootDistance = 1.146;
+        maxShootDistance = 4.057;
+
+        lutHard.set(true);
+        lutSoft.set(false);
+
+        shootingFlywheelVelocityMap.clear();
+        shootingHoodAngleMap.clear();
+        shootingTimeOfFlightMap.clear();
+
+        shootingFlywheelVelocityMap.put(1.39, 11.0 * 1.04);
+        shootingFlywheelVelocityMap.put(2.19, 11.431 * 1.04);
+        shootingFlywheelVelocityMap.put(2.67, 11.83 * 1.04);
+        shootingFlywheelVelocityMap.put(3.2, 12.5 * 1.04);
+        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.06);
+        shootingFlywheelVelocityMap.put(4.03, 13.1 * 1.04);
+        shootingFlywheelVelocityMap.put(4.37, 13.3 * 1.04);
+        shootingFlywheelVelocityMap.put(4.82, 13.4 * 1.04);
+        shootingFlywheelVelocityMap.put(4.92, 13.5 * 1.04);
+        shootingFlywheelVelocityMap.put(5.099, 13.6 * 1.04);
+        shootingFlywheelVelocityMap.put(5.36, 13.75  * 1.05);
+        shootingFlywheelVelocityMap.put(5.56, 13.8 * 1.05);
+        shootingFlywheelVelocityMap.put(5.85, 14.1 * 1.06);
+
+        shootingHoodAngleMap.put(1.39, Rotation2d.fromDegrees(80.0));
+        shootingHoodAngleMap.put(2.19, Rotation2d.fromDegrees(74.0));
+        shootingHoodAngleMap.put(2.67, Rotation2d.fromDegrees(71.0));
+        shootingHoodAngleMap.put(3.2, Rotation2d.fromDegrees(70.0));
+        shootingHoodAngleMap.put(3.65, Rotation2d.fromDegrees(69.0));
+        shootingHoodAngleMap.put(4.03, Rotation2d.fromDegrees(68.0));
+        shootingHoodAngleMap.put(4.37, Rotation2d.fromDegrees(67.0));
+        shootingHoodAngleMap.put(4.82, Rotation2d.fromDegrees(65.0));
+        shootingHoodAngleMap.put(4.92, Rotation2d.fromDegrees(64.0));
+        shootingHoodAngleMap.put(5.099, Rotation2d.fromDegrees(63.0));
+        shootingHoodAngleMap.put(5.36, Rotation2d.fromDegrees(62.0));
+        shootingHoodAngleMap.put(5.56, Rotation2d.fromDegrees(61.0));
+        shootingHoodAngleMap.put(5.85, Rotation2d.fromDegrees(59.0));
+
+        shootingTimeOfFlightMap.put(1.44, 1.11);
+        shootingTimeOfFlightMap.put(2.2, 1.19);
+        shootingTimeOfFlightMap.put(2.677, 1.23);
+        shootingTimeOfFlightMap.put(3.207, 1.38);
+        shootingTimeOfFlightMap.put(3.652, 1.41);
+        shootingTimeOfFlightMap.put(4.0318, 1.48);
+        shootingTimeOfFlightMap.put(4.3785, 1.5);
+        shootingTimeOfFlightMap.put(4.827, 1.53); //
+//        shootingTimeOfFlightMap.put(4.92, 1.26);
+        shootingTimeOfFlightMap.put(5.0926, 1.55);
+        shootingTimeOfFlightMap.put(5.362, 1.58);
+        shootingTimeOfFlightMap.put(5.559, 1.59);
+        shootingTimeOfFlightMap.put(5.856, 1.7);
+    }
+
+    public static void loadLUTSoft() {
+        minShootDistance = 1.2;
+        maxShootDistance = 5.74;
+
+        lutSoft.set(true);
+        lutHard.set(false);
+
+        shootingFlywheelVelocityMap.clear();
+        shootingHoodAngleMap.clear();
+        shootingTimeOfFlightMap.clear();
+
+        shootingFlywheelVelocityMap.put(1.2, 12.5);
+        shootingFlywheelVelocityMap.put(1.56, 13.0);
+        shootingFlywheelVelocityMap.put(2.12, 14.0);
+        shootingFlywheelVelocityMap.put(2.677, 14.3);
+        shootingFlywheelVelocityMap.put(3.32, 14.5);
+        shootingFlywheelVelocityMap.put(4.16, 15.0);
+        shootingFlywheelVelocityMap.put(4.85, 15.5);
+        shootingFlywheelVelocityMap.put(5.35, 15.8);
+        shootingFlywheelVelocityMap.put(5.74, 16.1);
+
+        shootingHoodAngleMap.put(1.2, Rotation2d.fromDegrees(80.0));
+        shootingHoodAngleMap.put(1.56, Rotation2d.fromDegrees(76.0));
+        shootingHoodAngleMap.put(2.12, Rotation2d.fromDegrees(74.0));
+        shootingHoodAngleMap.put(2.677, Rotation2d.fromDegrees(71.0));
+        shootingHoodAngleMap.put(3.32, Rotation2d.fromDegrees(69.0));
+        shootingHoodAngleMap.put(4.16, Rotation2d.fromDegrees(67.0));
+        shootingHoodAngleMap.put(4.85, Rotation2d.fromDegrees(65.0));
+        shootingHoodAngleMap.put(5.35, Rotation2d.fromDegrees(63.0));
+        shootingHoodAngleMap.put(5.74, Rotation2d.fromDegrees(61.0));
+
+        shootingTimeOfFlightMap.put(1.2, 1.3);
+        shootingTimeOfFlightMap.put(1.56, 1.35);
+        shootingTimeOfFlightMap.put(2.12, 1.4);
+        shootingTimeOfFlightMap.put(2.677, 1.56);
+        shootingTimeOfFlightMap.put(3.32, 1.68);
+        shootingTimeOfFlightMap.put(4.16, 1.72);
+        shootingTimeOfFlightMap.put(4.85, 1.8);
+        shootingTimeOfFlightMap.put(5.35, 1.83);
+        shootingTimeOfFlightMap.put(5.74, 1.85);
+
     }
 }
