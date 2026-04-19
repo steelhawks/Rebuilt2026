@@ -73,7 +73,7 @@ public class Turret extends SubsystemBase {
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
     private final LoggedTunableNumber constantForceFF =
-        new LoggedTunableNumber("Turret/ConstantForceFF", 25.0);
+        new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
 
     private static final double JAM_VELOCITY_THRESHOLD = Units.degreesToRadians(2.0); // rad/s
     private static final double JAM_ERROR_THRESHOLD = Units.degreesToRadians(5.0);
@@ -413,26 +413,28 @@ public class Turret extends SubsystemBase {
                     MathUtil.clamp(
                         desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
             atGoal = Maths.epsilonEquals(getPosition().getRadians(), desiredRotation.getRadians(), tolerance);
-            if (atGoal) {
-                io.stop();
-            } else {
-                boolean springPullsNegative = getPosition().getRadians() <= -0.984816 + SPRING_HYSTERESIS;
-                boolean springPullsPositive = getPosition().getRadians() >= 1.810097 - SPRING_HYSTERESIS;
 
-                double constantForceSpringFF = 0.0;
-                if (springPullsNegative) {
-                    constantForceSpringFF = constantForceFF.getAsDouble(); // need positive torque to fight spring
-                } else if (springPullsPositive) {
-                    constantForceSpringFF = -constantForceFF.getAsDouble(); // need negative torque to fight spring
-                }
-                Logger.recordOutput("Turret/ForceSpringActive", springPullsNegative || springPullsPositive);
-                io.runPivotMM(
-                    desiredRotation.getRadians(),
-                    kS.getAsDouble() * Math.signum(inputs.velocityRadPerSec.getRadians())
-                        + kV.getAsDouble() * calculateTurretVelocityFF(velocityTargetFF)
-                        + constantForceSpringFF
-                );
+            boolean springPullsNegative = getPosition().getRadians() <= -0.984816 + SPRING_HYSTERESIS;
+            boolean springPullsPositive = getPosition().getRadians() >= 1.810097 - SPRING_HYSTERESIS;
+
+            double constantForceSpringFF = 0.0;
+            double pos = getPosition().getRadians();
+            double negThreshold = -0.984816 + SPRING_HYSTERESIS;
+            double posThreshold = 1.810097 - SPRING_HYSTERESIS;
+
+            if (pos <= negThreshold) {
+                double depth = (negThreshold - pos) / (negThreshold - constants.minRotation().getRadians());
+                constantForceSpringFF = constantForceFF.getAsDouble() * Math.min(depth, 1.0);
+            } else if (pos >= posThreshold) {
+                double depth = (pos - posThreshold) / (constants.maxRotation().getRadians() - posThreshold);
+                constantForceSpringFF = -constantForceFF.getAsDouble() * Math.min(depth, 1.0);
             }
+            Logger.recordOutput("Turret/ForceSpringActive", springPullsNegative || springPullsPositive);
+            io.runPivotMM(
+                desiredRotation.getRadians(),
+                kV.getAsDouble() * calculateTurretVelocityFF(velocityTargetFF)
+                    + constantForceSpringFF
+            );
             Logger.recordOutput("Turret/GoalPosition", desiredRotation.getRadians());
         } else {
             desiredRotation = new Rotation2d(0.0);
