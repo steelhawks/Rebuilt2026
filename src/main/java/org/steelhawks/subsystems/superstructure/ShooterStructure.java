@@ -69,19 +69,19 @@ public class ShooterStructure {
                 minShootDistance = 1.146;
         maxShootDistance = 4.057;
 
-        shootingFlywheelVelocityMap.put(1.39, 11.0);
-        shootingFlywheelVelocityMap.put(2.19, 11.431);
-        shootingFlywheelVelocityMap.put(2.67, 11.83);
-        shootingFlywheelVelocityMap.put(3.2, 12.5);
-        shootingFlywheelVelocityMap.put(3.65, 12.76);
-        shootingFlywheelVelocityMap.put(4.03, 13.1);
-        shootingFlywheelVelocityMap.put(4.37, 13.3);
-        shootingFlywheelVelocityMap.put(4.82, 13.4);
-        shootingFlywheelVelocityMap.put(4.92, 13.5);
-        shootingFlywheelVelocityMap.put(5.099, 13.6);
-        shootingFlywheelVelocityMap.put(5.36, 13.75);
-        shootingFlywheelVelocityMap.put(5.56, 13.8);
-        shootingFlywheelVelocityMap.put(5.85, 14.1);
+        shootingFlywheelVelocityMap.put(1.39, 11.0 * 1.04);
+        shootingFlywheelVelocityMap.put(2.19, 11.431 * 1.04);
+        shootingFlywheelVelocityMap.put(2.67, 11.83 * 1.04);
+        shootingFlywheelVelocityMap.put(3.2, 12.5 * 1.04);
+        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.06);
+        shootingFlywheelVelocityMap.put(4.03, 13.1 * 1.04);
+        shootingFlywheelVelocityMap.put(4.37, 13.3 * 1.04);
+        shootingFlywheelVelocityMap.put(4.82, 13.4 * 1.04);
+        shootingFlywheelVelocityMap.put(4.92, 13.5 * 1.04);
+        shootingFlywheelVelocityMap.put(5.099, 13.6 * 1.04);
+        shootingFlywheelVelocityMap.put(5.36, 13.75  * 1.05);
+        shootingFlywheelVelocityMap.put(5.56, 13.8 * 1.05);
+        shootingFlywheelVelocityMap.put(5.85, 14.1 * 1.06);
 
         shootingHoodAngleMap.put(1.39, Rotation2d.fromDegrees(80.0));
         shootingHoodAngleMap.put(2.19, Rotation2d.fromDegrees(74.0));

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
@@ -24,6 +25,8 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.AllianceFlip;
+
+import static org.steelhawks.Robot.RobotState.*;
 
 public class RobotContainer {
 
@@ -88,6 +91,11 @@ public class RobotContainer {
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
+
+//        RobotModeTriggers.autonomous()
+//            .or(s_Swerve::isOnBump)
+//            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
+//            .onFalse(s_Swerve.resetCurrentLimitsCmd());
 
         driver.povRight()
             .whileTrue(s_Indexer.outtake());

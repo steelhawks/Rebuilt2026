@@ -16,6 +16,7 @@ import edu.wpi.first.util.ClassPreloader;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -128,7 +129,7 @@ public class Robot extends LoggedRobot {
             case REPLAY -> {
                 // Replaying a log, set up replay source
                 setUseTiming(false); // Run as fast as possible
-                String logPath = LogFileUtil.findReplayLog();
+            String logPath = LogFileUtil.findReplayLog();
                 Logger.setReplaySource(new WPILOGReader(logPath));
                 Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
             }
@@ -275,7 +276,8 @@ public class Robot extends LoggedRobot {
 //        Logger.recordOutput("Turret/ProjectileData/Velocity", projectileData.exitVelocity());
 //        Logger.recordOutput("Turret/ProjectileData/AngleDeg", Math.toDegrees(projectileData.hoodAngle()));
 //        Logger.recordOutput("Turret/ProjectileData/TimeOfFlight",  timeOfFlight);
-        Logger.recordOutput("ShooterTuner/Live/DistanceMeters", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
+//        Logger.recordOutput("ShooterTuner/Live/DistanceMeters", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
+        SmartDashboard.putNumber("ShooterTuner/Live/DistanceMeters", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
     }
 
     private void visualizeFieldConstants() {

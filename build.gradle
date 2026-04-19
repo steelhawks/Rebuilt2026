@@ -95,10 +95,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
-test {
-    useJUnitPlatform()
-    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
-}
+//test {
+//    useJUnitPlatform()
+//    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+//}
 
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
@@ -175,6 +175,7 @@ tasks.register("replayWatch", JavaExec) {
 }
 repositories {
     mavenCentral()
+//    maven { url "https://frcmaven.wpi.edu/release" }
 }
 kotlin {
     jvmToolchain(17)

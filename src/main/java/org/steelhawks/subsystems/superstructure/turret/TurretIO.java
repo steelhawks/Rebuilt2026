@@ -2,6 +2,7 @@ package org.steelhawks.subsystems.superstructure.turret;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
+import org.steelhawks.util.PhoenixUtil;
 
 public interface TurretIO {
 
@@ -26,6 +27,10 @@ public interface TurretIO {
     default void setBrakeMode(boolean enabled) {}
 
     default void runPivot(double setpoint, double feedforward) {}
+
+    default void runPivotMM(double setpoint, double feedforward) {}
+
+    default void setMotionMagic(double cruiseVelocity, double accel, double jerk) {}
 
     default void runOpenLoop(double output, boolean isTorqueCurrent) {}
 
