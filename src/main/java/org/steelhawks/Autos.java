@@ -26,6 +26,7 @@ import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -86,10 +87,23 @@ public final class Autos {
      * trajectory's end pose and recovers accordingly:
      * Call this AFTER a trajectory ends, BEFORE shooting or spawning the next trajectory.
      */
-    public static Command recoverToTrajectoryEnd(AutoTrajectory traj) {
+    public static Command recoverToTrajectoryEnd(AutoTrajectory traj, boolean isLeft) {
         return Commands.defer(() -> {
-            Pose2d finalPose = traj.getFinalPose()
-                .orElse(RobotState.getInstance().getEstimatedPose());
+            Optional<Pose2d> maybeFinalPose = traj.getFinalPose();
+
+            Pose2d finalPose;
+            if (maybeFinalPose.isPresent()) {
+                Pose2d rawFinal = maybeFinalPose.get();
+                finalPose = isLeft
+                    ? new Pose2d(
+                        rawFinal.getX(),
+                        FieldConstants.FIELD_WIDTH - rawFinal.getY(),
+                        new Rotation2d(-rawFinal.getRotation().getRadians()))
+                    : rawFinal;
+            } else {
+                finalPose = RobotState.getInstance().getEstimatedPose();
+            }
+
             double distanceFromEnd = RobotState.getInstance().getEstimatedPose()
                 .getTranslation()
                 .getDistance(finalPose.getTranslation());
@@ -242,7 +256,7 @@ public final class Autos {
                         Pose2d flipped = new Pose2d(
                             bluePose.getX(),
                             FieldConstants.FIELD_WIDTH - bluePose.getY(),
-                            new Rotation2d(Math.PI - bluePose.getRotation().getRadians()));
+                            new Rotation2d(-bluePose.getRotation().getRadians()));
                         return Commands.runOnce(() -> s_Swerve.setPose(AllianceFlip.apply(flipped)));
                     } else {
                         return trenchToMidToTrench.resetOdometry();
@@ -260,7 +274,7 @@ public final class Autos {
         trenchToMidToTrench.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToMidToTrench),
+                recoverToTrajectoryEnd(trenchToMidToTrench, isLeft),
                 ShootingCommands.shoot().withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchToReboundToTrench.spawnCmd()
@@ -270,7 +284,7 @@ public final class Autos {
         trenchToReboundToTrench.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToReboundToTrench),
+                recoverToTrajectoryEnd(trenchToReboundToTrench, isLeft),
                 ShootingCommands.shoot(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
@@ -311,7 +325,7 @@ public final class Autos {
         trenchPickUpCrossBump1.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchPickUpCrossBump1),
+                recoverToTrajectoryEnd(trenchPickUpCrossBump1, false),
                 shootingSection1.spawnCmd()
             )
         );
@@ -322,7 +336,7 @@ public final class Autos {
         shootingSection1.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(shootingSection1),
+                recoverToTrajectoryEnd(shootingSection1, false),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 trenchPickUpCrossBump2.spawnCmd()
             )
@@ -331,7 +345,7 @@ public final class Autos {
         trenchPickUpCrossBump2.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchPickUpCrossBump2),
+                recoverToTrajectoryEnd(trenchPickUpCrossBump2, false),
                 shootingSection2.spawnCmd()
             )
         );
@@ -339,7 +353,7 @@ public final class Autos {
         shootingSection2.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(shootingSection2),
+                recoverToTrajectoryEnd(shootingSection2, false),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 finalRebound.spawnCmd()
             )
@@ -370,7 +384,7 @@ public final class Autos {
         firstPass.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(firstPass),
+                recoverToTrajectoryEnd(firstPass, false),
                 ShootingCommands.autonShoot().withTimeout(2.0),
                 ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
@@ -381,7 +395,7 @@ public final class Autos {
         secondPass.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(secondPass),
+                recoverToTrajectoryEnd(secondPass, false),
                 ShootingCommands.autonShoot().withTimeout(2.0),
                 ShootingCommands.autonShoot().until(RobotContainer.s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
@@ -412,7 +426,7 @@ public final class Autos {
         moveToShootPose.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(moveToShootPose),
+                recoverToTrajectoryEnd(moveToShootPose, false),
                 ShootingCommands.autonShoot().withTimeout(2.0),
                 shootToDepotToShoot.spawnCmd()
             )
@@ -421,7 +435,7 @@ public final class Autos {
         shootToDepotToShoot.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(shootToDepotToShoot),
+                recoverToTrajectoryEnd(shootToDepotToShoot, false),
                 ShootingCommands.autonShoot().withTimeout(3.0),
                 shootToDepotToShoot.spawnCmd()
             )
@@ -450,7 +464,7 @@ public final class Autos {
         moveToShootPose.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(moveToShootPose),
+                recoverToTrajectoryEnd(moveToShootPose, false),
                 ShootingCommands.autonShoot().withTimeout(2.0),
                 shootToDepotToShoot.spawnCmd()
             )
@@ -459,7 +473,7 @@ public final class Autos {
         shootToDepotToShoot.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(shootToDepotToShoot),
+                recoverToTrajectoryEnd(shootToDepotToShoot, false),
                 ShootingCommands.autonShoot().withTimeout(5.0)
             )
         );
