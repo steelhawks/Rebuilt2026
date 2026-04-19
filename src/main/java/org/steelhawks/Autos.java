@@ -279,10 +279,13 @@ public final class Autos {
         AutoRoutine routine = factory.newRoutine("Left Rebound Auton");
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
-        AutoTrajectory trenchToReboundToTrench = ChoreoTraj.LRebound$1.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot1 = ChoreoTraj.LRebound$1.asAutoTraj(routine);
+        AutoTrajectory shootToMidToTrench = ChoreoTraj.LRebound$2.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot2 = ChoreoTraj.LRebound$3.asAutoTraj(routine);
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
@@ -290,25 +293,40 @@ public final class Autos {
         );
 
         trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
-        trenchToReboundToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
 
         trenchToMidToTrench.done().onTrue(
             Commands.sequence(
-                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToMidToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                trenchToReboundToTrench.spawnCmd()
+                trenchToShoot1.spawnCmd()
             )
         );
 
-        trenchToReboundToTrench.done().onTrue(
+        trenchToShoot1.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+        trenchToShoot2.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+
+        trenchToShoot1.done().onTrue(
             Commands.sequence(
                 Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
-                recoverToTrajectoryEnd(trenchToReboundToTrench),
-                ShootingCommands.autonShoot().withTimeout(2.0),
-                ShootingCommands.autonShoot().until(s_Indexer::emptyFuel).withTimeout(5.0),
+                recoverToTrajectoryEnd(trenchToShoot1),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                shootToMidToTrench.spawnCmd()
+            )
+        );
+
+        shootToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot2.spawnCmd()
+            )
+        );
+
+        trenchToShoot2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot2),
+                ShootingCommands.autonShoot(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );
@@ -411,6 +429,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchPickUpCrossBump1.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchPickUpCrossBump1.spawnCmd()
@@ -472,6 +491,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                trenchPickUpCrossBump1.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 trenchPickUpCrossBump1.spawnCmd()
@@ -531,6 +551,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                firstPass.resetOdometry(),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 firstPass.spawnCmd()
@@ -575,6 +596,7 @@ public final class Autos {
 
         routine.active().onTrue(
             Commands.sequence(
+                firstPass.resetOdometry(),
                 RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 firstPass.spawnCmd()
