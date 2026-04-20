@@ -2,10 +2,13 @@ package org.steelhawks;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AprilTag;
+
+import static edu.wpi.first.units.Units.Meters;
 
 public class FieldConstants {
 
@@ -67,7 +70,10 @@ public class FieldConstants {
         public static final double EN_FERRY_LINE_Y = FIELD_WIDTH - Units.inchesToMeters(65.65);
 
         public static final Translation2d START_LINE = new Translation2d(FERRY_LINE_X, ST_FERRY_LINE_Y);
+        public static final Translation2d MID_LINE = new Translation2d(FERRY_LINE_X, FIELD_WIDTH / 2.0);
         public static final Translation2d END_LINE = new Translation2d(FERRY_LINE_X, EN_FERRY_LINE_Y);
+
+        public static final double DISTANCE_OFFSET = Units.inchesToMeters(58.41 / 2.0) + 2.0; // half of hub net + 2m offset
     }
 
     public final static class Trench {

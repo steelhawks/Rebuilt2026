@@ -230,7 +230,7 @@ public class ShooterStructure {
         /**
          * Computes a ballistic launch solution for a shooter with a fixed pitch angle.
          *
-         * @param actualTarget   The real hub target.
+         * @param actualTarget    The real hub target.
          * @param predictedTarget Used for shooting on the move.
          * @return ProjectileData, or kNoSolution if the fixed angle cannot clear the funnel or reach the target.
          */
@@ -276,72 +276,20 @@ public class ShooterStructure {
             return new ProjectileData(v0, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
         }
 
-        /**
-         *
-         * Do not AllianceFlip this, it is already in the correct field frame.
-         * @return
-         */
         public static Translation2d calculateFerryShotSetpoint() {
-            Translation2d R = getTurretTranslation();
-            double rx = R.getX();
-            double ry = R.getY();
-            double fx = AllianceFlip.applyX(FieldConstants.Ferrying.START_LINE.getX());
-            Translation3d H = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
-            double hx = H.getX();
-            double hy = H.getY();
-            Translation2d T = AllianceFlip
-                .apply(FieldConstants.getClosestPointOnLine(
-                    FieldConstants.Ferrying.START_LINE,
-                    FieldConstants.Ferrying.END_LINE));
-            double ty = T.getY();
-            double r = FieldConstants.Hub.FUNNEL_RADIUS + FieldConstants.Hub.FERRY_CLEARANCE_FACTOR;
+            double robotYBlue = AllianceFlip.shouldFlip()
+                ? FieldConstants.FIELD_WIDTH - RobotState.getInstance().getEstimatedPose().getY()
+                : RobotState.getInstance().getEstimatedPose().getY();
 
-            double dx = fx - rx;
-            double vx = hx - rx;
-            double vy = hy - ry;
-            double RH2 = vx * vx + vy * vy;
+            double offset = FieldConstants.Ferrying.DISTANCE_OFFSET;
+            Translation2d segEnd = (robotYBlue < FieldConstants.FIELD_WIDTH / 2.0)
+                ? FieldConstants.Ferrying.MID_LINE.minus(new Translation2d(0.0, offset))
+                : FieldConstants.Ferrying.MID_LINE.plus(new Translation2d(0.0, offset));
+            Translation2d segStart = (robotYBlue < FieldConstants.FIELD_WIDTH / 2.0)
+                ? FieldConstants.Ferrying.START_LINE
+                : FieldConstants.Ferrying.END_LINE;
 
-            // handle edges
-            // check if original ferry point is even obstructed at all, if not just skip and send
-            double RT = Math.hypot(dx, ty - ry);
-            double dist = Math.abs(dx * (hy - ry) - (ty - ry) * (hx - rx)) / RT;
-            if (dist >= r) {
-                return T;
-            }
-            // robot is inside exclusion zone, impossible to ferry
-            if (RH2 <= r * r) {
-                Logger.recordOutput("Ferrying/Blocked", true);
-                return T;
-            }
-
-            // continue to solve quadratic
-            final double A = vx * vx - r * r;
-            final double B = -2 * dx * vx * vy;
-            final double C = dx * dx * (vy * vy - r * r);
-            double discriminant = B * B - 4.0 * A * C;
-
-            if (discriminant < 0) {
-                return T;
-            }
-            double sqrtDiscriminant = Math.sqrt(discriminant);
-            double dy1 = (-B + sqrtDiscriminant) / (2.0 * A);
-            double dy2 = (-B - sqrtDiscriminant) / (2.0 * A);
-
-            // pick the root that is on the same side of the hub as original T???
-            double dy = (Math.abs(dy1 - (ty - ry)) <= Math.abs(dy2 - (ty - ry))) ? dy1 : dy2;
-            double ty_prime = ry + dy;
-
-            double minY = Math.min(
-                AllianceFlip.applyY(FieldConstants.Ferrying.START_LINE.getY()),
-                AllianceFlip.applyY(FieldConstants.Ferrying.END_LINE.getY()));
-            double maxY = Math.max(
-                AllianceFlip.applyY(FieldConstants.Ferrying.START_LINE.getY()),
-                AllianceFlip.applyY(FieldConstants.Ferrying.END_LINE.getY()));
-            ty_prime = MathUtil.clamp(ty_prime, minY, maxY);
-
-            Logger.recordOutput("Ferry/SetpointY", ty_prime);
-            Logger.recordOutput("Ferry/ObstructionDist", dist);
-            return new Translation2d(fx, ty_prime);
+            return AllianceFlip.apply(FieldConstants.getClosestPointOnLine(segStart, segEnd));
         }
     }
 
