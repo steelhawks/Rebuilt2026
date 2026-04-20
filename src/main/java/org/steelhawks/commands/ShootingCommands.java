@@ -62,7 +62,7 @@ public class ShootingCommands {
                 .alongWith(
                     Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
                         .andThen(Commands.waitSeconds(0.05))
-                        .andThen(RobotContainer.s_Intake.feed()
+                        .andThen(RobotContainer.s_Intake.agitate()
                             .onlyIf(() -> !RobotContainer.s_Intake.isRollersRunning())))
                 .repeatedly()
         ).finallyDo(() -> {
