@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
+import org.steelhawks.CurrentLimits;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.util.PhoenixUtil;
 
@@ -33,6 +34,7 @@ public class TurretIOTalonFX implements TurretIO {
 
     private final PositionVoltage positionVoltage;
     private final PositionTorqueCurrentFOC positionTorqueCurrentFOC;
+    private final MotionMagicTorqueCurrentFOC motionMagicTorqueCurrentFOC;
     private final VoltageOut voltageOut;
     private final TorqueCurrentFOC torqueCurrentFOC;
     private final DutyCycleOut dutyCycleOut;
@@ -56,13 +58,19 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot0.kP = constants.kP();
         motorConfig.Slot0.kI = constants.kI();
         motorConfig.Slot0.kD = constants.kD();
+        motorConfig.Slot0.kS = constants.kS();
         motorConfig.ClosedLoopGeneral.ContinuousWrap = false;
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
         motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
-        motorConfig.CurrentLimits.StatorCurrentLimit = 40.0;
-        motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.turretCurrent;
+        motorConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.turretEnabled;
+        motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.turretCurrent;
+        motorConfig.CurrentLimits.StatorCurrentLimitEnable = CurrentLimits.StatorLimit.turretEnabled;
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = Units.radiansToRotations(constants.maxVelocityRadPerSec());
+        motorConfig.MotionMagic.MotionMagicAcceleration = Units.radiansToRotations(constants.maxAccelerationRadPerSecSq());
+        motorConfig.MotionMagic.MotionMagicJerk = 0.0;
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
         PhoenixUtil.tryUntilOk(5, motor::optimizeBusUtilization);
 
@@ -79,6 +87,7 @@ public class TurretIOTalonFX implements TurretIO {
 
         positionTorqueCurrentFOC = new PositionTorqueCurrentFOC(0.0).withSlot(0);
         positionVoltage = new PositionVoltage(0.0).withSlot(1);
+        motionMagicTorqueCurrentFOC = new MotionMagicTorqueCurrentFOC(0.0);
         voltageOut = new VoltageOut(0.0);
         torqueCurrentFOC = new TorqueCurrentFOC(0.0);
         dutyCycleOut = new DutyCycleOut(0.0);
@@ -126,6 +135,13 @@ public class TurretIOTalonFX implements TurretIO {
     }
 
     @Override
+    public void runPivotMM(double setpoint, double feedforward) {
+        motor.setControl(
+            motionMagicTorqueCurrentFOC.withPosition(Units.radiansToRotations(setpoint))
+                .withFeedForward(feedforward));
+    }
+
+    @Override
     public void runOpenLoop(double output, boolean isTorqueCurrent) {
         motor.setControl(
             isTorqueCurrent
@@ -144,6 +160,14 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot0.kP = kp;
         motorConfig.Slot0.kI = ki;
         motorConfig.Slot0.kD = kd;
+        PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
+    }
+
+    @Override
+    public void setMotionMagic(double cruiseVelocity, double accel, double jerk) {
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = Units.radiansToRotations(cruiseVelocity);
+        motorConfig.MotionMagic.MotionMagicAcceleration = Units.radiansToRotations(accel);
+        motorConfig.MotionMagic.MotionMagicJerk = Units.radiansToRotations(jerk);
         PhoenixUtil.tryUntilOk(5, () -> motor.getConfigurator().apply(motorConfig));
     }
 

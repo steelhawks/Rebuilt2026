@@ -78,6 +78,8 @@ public class RobotState {
     private final Trigger inTrenchTrigger;
     @AutoLogOutput
     private final Trigger inBumpTrigger;
+    @AutoLogOutput
+    private final Trigger turretStuckTrigger;
 
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
@@ -150,6 +152,11 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER)
             .debounce(0.3);
+        turretStuckTrigger =
+            new Trigger(
+                () -> RobotContainer.s_Turret != null
+                    && RobotContainer.s_Turret.isJammedOrInDeadSpot()
+                    && shootingState != ShootingState.NOTHING);
     }
 
     public RobotFootprint getFootprint() {
@@ -166,6 +173,10 @@ public class RobotState {
 
     public Trigger getSOTMTrigger() {
         return sotmTrigger;
+    }
+
+    public Trigger getTurretJamTrigger() {
+        return turretStuckTrigger;
     }
 
     public void updateChassisSpeeds(ChassisSpeeds speeds) {
@@ -205,14 +216,13 @@ public class RobotState {
             currentChassisSpeeds.vxMetersPerSecond,
             currentChassisSpeeds.vyMetersPerSecond);
         if (shootingState == ShootingState.SHOOTING) {
-//            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
-//                ? movingVelocityThreshold * 0.5
-//                : movingVelocityThreshold;
-//            lastDerivedShootingState = linearVelocity > threshold
-//                ? ShootingState.SHOOTING_MOVING
-//                : ShootingState.SHOOTING_STATIONARY;
-//            return lastDerivedShootingState;
-            return ShootingState.SHOOTING_MOVING;
+            double threshold = lastDerivedShootingState == ShootingState.SHOOTING_MOVING
+                ? movingVelocityThreshold * 0.5
+                : movingVelocityThreshold;
+            lastDerivedShootingState = linearVelocity > threshold
+                ? ShootingState.SHOOTING_MOVING
+                : ShootingState.SHOOTING_STATIONARY;
+            return lastDerivedShootingState;
         }
         return shootingState;
     }
@@ -239,6 +249,7 @@ public class RobotState {
             target,
             robotVelocity,
             getRotation(),
+            currentChassisSpeeds.omegaRadiansPerSecond,
             Constants.SOTMConstants.MAX_ITERATIONS,
             Constants.SOTMConstants.TIME_TOLERANCE
         );
@@ -316,6 +327,10 @@ public class RobotState {
 //        if (desiredMode != currentAimState) {
 //            setAimState(desiredMode);
 //        }
+    }
+
+    public boolean isAimedToScore() {
+        return RobotContainer.s_Turret.atGoal() && !RobotContainer.s_Turret.isTraversing();
     }
 
     private AimState calculateDesiredMode() {
@@ -409,9 +424,9 @@ public class RobotState {
     }
 
     public void addOdometryObservation(OdometryObservation observation) {
-        if (observation.gyroAngle().isPresent()) {
-            gyroRotation = observation.gyroAngle().get();
-            rawGyroRotation = observation.gyroAngle().get();
+        if (observation.gyroAngle() != null) {
+            gyroRotation = observation.gyroAngle();
+            rawGyroRotation = observation.gyroAngle();
         }
         Pose2d estimatedPose = poseEstimator.updateWithTime(
             observation.timestamp(), gyroRotation, observation.wheelPositions());
@@ -521,7 +536,7 @@ public class RobotState {
     private record TimestampedObjectList(double timestamp, List<DetectedObject> objects) {}
 
     public record OdometryObservation(
-        double timestamp, SwerveModulePosition[] wheelPositions, Optional<Rotation2d> gyroAngle) {}
+        double timestamp, SwerveModulePosition[] wheelPositions, Rotation2d gyroAngle) {}
 
     public record VisionObservation(
         double timestamp,

@@ -56,4 +56,7 @@ public interface ModuleIO {
 
     default void setSteerPID(double steerkP, double steerkI, double steerKD) {}
     default void setDrivePID(double drivekP, double drivekI, double driveKD) {}
+
+    default void updateCurrentLimits(double newLimit) {}
+    default void resetCurrentLimits() {}
 }

@@ -6,6 +6,38 @@ package org.steelhawks.subsystems.led.anim;
  */
 public class AnimationLibrary {
 
+    public static FrameAnimation lightningBolt() {
+        int[][][] frames = new int[4][32][8];
+        int ON  = 0xFFFF00; // yellow
+        int DIM = 0x888800; // dimmed yellow for flicker frame
+        int OFF = 0x000000;
+
+        int[][] bolt = new int[32][8];
+        for (int x = 0; x < 32; x++) java.util.Arrays.fill(bolt[x], OFF);
+
+        //     y: 0 1 2 3 4 5 6 7
+        bolt[12][0] = 1; bolt[12][1] = 1;
+        bolt[13][1] = 1; bolt[13][2] = 1;
+        bolt[14][2] = 1; bolt[14][3] = 1; bolt[14][4] = 1;
+        bolt[15][2] = 1; bolt[15][3] = 1; bolt[15][4] = 1;
+        bolt[16][4] = 1; bolt[16][5] = 1;
+        bolt[17][5] = 1; bolt[17][6] = 1;
+        bolt[18][6] = 1; bolt[18][7] = 1;
+        bolt[19][7] = 1;
+
+        for (int x = 0; x < 32; x++) {
+            for (int y = 0; y < 8; y++) {
+                int lit = bolt[x][y];
+                frames[0][x][y] = lit == 1 ? ON  : OFF;
+                frames[1][x][y] = lit == 1 ? DIM : OFF;
+                frames[2][x][y] = lit == 1 ? ON  : OFF;
+                frames[3][x][y] = OFF;
+            }
+        }
+
+        return new FrameAnimation(frames, 3, true); // 3 = frame duration, loops
+    }
+
     public static FrameAnimation warningSign() {
         int[][][] frames = new int[1][32][8];
 

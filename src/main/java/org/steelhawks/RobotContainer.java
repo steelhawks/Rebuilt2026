@@ -6,9 +6,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
+import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
-import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -21,6 +21,7 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.AllianceFlip;
+
 
 public class RobotContainer {
 
@@ -43,6 +44,7 @@ public class RobotContainer {
     public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
+        RumbleAPI.register(driver);
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
@@ -66,34 +68,31 @@ public class RobotContainer {
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
-        LEDCommands.configureTriggers(driver.leftTrigger());
+//        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
     }
 
     private void configureDriver() {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
-            .onTrue(new VibrateController(driver).repeatedly());
-
-        new Trigger(() -> true)
-            .whileTrue(TeleopSwerve.overrideState());
+            .whileTrue(RumbleAPI.steady().repeatedly());
 
         new Trigger(() -> {
             double x = RobotState.getInstance().getEstimatedPose().getX();
-            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_END_X);
-            return AllianceFlip.shouldFlip() ? x <= boundary : x >= boundary;
+            if (AllianceFlip.shouldFlip()) {
+                double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
+                return x <= boundary;
+            } else {
+                return x >= FieldConstants.Trench.TRENCH_END_X;
+            }
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
-        driver.povLeft().onTrue(s_Swerve.zeroHeading())
-            .onTrue(new VibrateController(driver));
+//        RobotModeTriggers.autonomous()
+//            .or(s_Swerve::isOnBump)
+//            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
+//            .onFalse(s_Swerve.resetCurrentLimitsCmd());
 
-//        driver.povUp().onTrue(
-//            s_Flywheel.incrementVelocityFactor(0.03));
-//
-//        driver.povDown().onTrue(
-//            s_Flywheel.incrementVelocityFactor(-0.03));
-
-        driver.povLeft()
+        driver.povRight()
             .whileTrue(s_Indexer.outtake());
 
         driver.rightBumper()
@@ -114,5 +113,9 @@ public class RobotContainer {
 
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+        driver.a()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
+
     }
 }

@@ -4,8 +4,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.vision.VisionConstants;
-import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +19,9 @@ public interface Toggles {
             bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
         if (RobotConfig.getConfig().hasIntake)
             bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
+
+        bindMomentary("Dashboard/LUT/UseLUTHardBalls", Commands.runOnce(ShooterStructure::loadLUTHard));
+        bindMomentary("Dashboard/LUT/UseLUTSoftBalls", Commands.runOnce(ShooterStructure::loadLUTSoft));
     }
 
     private static void bindMomentary(String key, Command command) {
@@ -41,9 +44,9 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/ShooterTuningMode", false);
 
     LoggedNetworkBoolean useLUT =
-        new LoggedNetworkBoolean("Toggles/LUT", false);
+        new LoggedNetworkBoolean("Toggles/LUT", true);
     LoggedNetworkBoolean useKinematicsTOF =
-        new LoggedNetworkBoolean("Toggles/KinematicsTOF", true);
+        new LoggedNetworkBoolean("Toggles/KinematicsTOF", false);
 
     class Vision {
         public static final LoggedNetworkBoolean visionEnabled =

@@ -10,8 +10,6 @@ import org.steelhawks.RobotContainer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
@@ -29,9 +27,9 @@ public class PhoenixOdometryThread extends Thread {
         new ReentrantLock(); // Prevents conflicts when registering signals
     private BaseStatusSignal[] phoenixSignals = new BaseStatusSignal[0];
     private final List<DoubleSupplier> genericSignals = new ArrayList<>();
-    private final List<Queue<Double>> phoenixQueues = new ArrayList<>();
-    private final List<Queue<Double>> genericQueues = new ArrayList<>();
-    private final List<Queue<Double>> timestampQueues = new ArrayList<>();
+    private final List<DoubleRingBuffer> phoenixQueues = new ArrayList<>();
+    private final List<DoubleRingBuffer> genericQueues = new ArrayList<>();
+    private final List<DoubleRingBuffer> timestampQueues = new ArrayList<>();
 
     private static Boolean isCANFD;
     private static PhoenixOdometryThread instance = null;
@@ -66,8 +64,8 @@ public class PhoenixOdometryThread extends Thread {
     /**
      * Registers a Phoenix signal to be read from the thread.
      */
-    public Queue<Double> registerSignal(StatusSignal<Angle> signal) {
-        Queue<Double> queue = new ArrayBlockingQueue<>(20);
+    public DoubleRingBuffer registerSignal(StatusSignal<Angle> signal) {
+        DoubleRingBuffer queue = new DoubleRingBuffer(20);
         signalsLock.lock();
         Swerve.odometryLock.lock();
         try {
@@ -86,8 +84,8 @@ public class PhoenixOdometryThread extends Thread {
     /**
      * Registers a generic signal to be read from the thread.
      */
-    public Queue<Double> registerSignal(DoubleSupplier signal) {
-        Queue<Double> queue = new ArrayBlockingQueue<>(20);
+    public DoubleRingBuffer registerSignal(DoubleSupplier signal) {
+        DoubleRingBuffer queue = new DoubleRingBuffer(20);
         signalsLock.lock();
         Swerve.odometryLock.lock();
         try {
@@ -103,8 +101,8 @@ public class PhoenixOdometryThread extends Thread {
     /**
      * Returns a new queue that returns timestamp values for each sample.
      */
-    public Queue<Double> makeTimestampQueue() {
-        Queue<Double> queue = new ArrayBlockingQueue<>(20);
+    public DoubleRingBuffer makeTimestampQueue() {
+        DoubleRingBuffer queue = new DoubleRingBuffer(20);
         Swerve.odometryLock.lock();
         try {
             timestampQueues.add(queue);
@@ -157,7 +155,7 @@ public class PhoenixOdometryThread extends Thread {
                 for (int i = 0; i < genericSignals.size(); i++) {
                     genericQueues.get(i).offer(genericSignals.get(i).getAsDouble());
                 }
-                for (Queue<Double> timestampQueue : timestampQueues) {
+                for (DoubleRingBuffer timestampQueue : timestampQueues) {
                     timestampQueue.offer(timestamp);
                 }
             } finally {

@@ -9,8 +9,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.RobotState;
 import org.steelhawks.Toggles;
 import org.steelhawks.generated.TunerConstants;
 import org.steelhawks.generated.TunerConstantsAlpha;
@@ -34,14 +37,20 @@ public class SwerveModule {
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
+    private final String loggerKey;
+    private final String batteryKey;
     private final SwerveModuleConstants<
         TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constants;
 
-    private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
-    private final Alert driveDisconnectedAlert;
-    private final Alert turnDisconnectedAlert;
-    private final Alert turnEncoderDisconnectedAlert;
+    private static final int MAX_ODOMETRY_SAMPLES = 20;
+    private final SwerveModulePosition[] odometryPositions = new SwerveModulePosition[MAX_ODOMETRY_SAMPLES];
+
+    private final SwerveModuleState cachedState = new SwerveModuleState();
+    private final SwerveModulePosition cachedPosition = new SwerveModulePosition();
+//    private final Alert driveDisconnectedAlert;
+//    private final Alert turnDisconnectedAlert;
+//    private final Alert turnEncoderDisconnectedAlert;
 
     public SwerveModule(
         ModuleIO io,
@@ -51,6 +60,8 @@ public class SwerveModule {
         this.io = io;
         this.index = index;
         this.constants = constants;
+        this.loggerKey = "Swerve/Module" + index;
+        this.batteryKey = "Module" + index;
 
         drivekP.initDefault(constants.DriveMotorGains.kP);
         drivekI.initDefault(constants.DriveMotorGains.kI);
@@ -60,39 +71,43 @@ public class SwerveModule {
         steerkI.initDefault(constants.SteerMotorGains.kI);
         steerkD.initDefault(constants.SteerMotorGains.kD);
 
-        driveDisconnectedAlert =
-            new Alert(
-                "Disconnected drive motor on module " + index + ".",
-                AlertType.kError);
-        turnDisconnectedAlert =
-            new Alert(
-                "Disconnected turn motor on module " + index + ".", AlertType.kError);
-        turnEncoderDisconnectedAlert =
-            new Alert(
-                "Disconnected turn encoder on module " + index + ".",
-                AlertType.kError);
+//        driveDisconnectedAlert =
+//            new Alert(
+//                "Disconnected drive motor on module " + index + ".",
+//                AlertType.kError);
+//        turnDisconnectedAlert =
+//            new Alert(
+//                "Disconnected turn motor on module " + index + ".", AlertType.kError);
+//        turnEncoderDisconnectedAlert =
+//            new Alert(
+//                "Disconnected turn encoder on module " + index + ".",
+//                AlertType.kError);
+
+        for (int i = 0; i < MAX_ODOMETRY_SAMPLES; i++) {
+            odometryPositions[i] = new SwerveModulePosition();
+        }
     }
 
     public void periodic() {
         io.updateInputs(inputs);
-        Logger.processInputs("Swerve/Module" + index, inputs);
-        BatteryUtil.recordCurrentUsage("Module" + index, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
+        Logger.processInputs(loggerKey, inputs);
+        BatteryUtil.recordCurrentUsage(batteryKey, inputs.driveCurrentAmps + inputs.turnCurrentAmps);
 
-        // calculate positions for odometry
-        int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-        if (odometryPositions.length != sampleCount) {
-            odometryPositions = new SwerveModulePosition[sampleCount];
-        }
+        cachedState.speedMetersPerSecond = inputs.driveVelocityRadPerSec * constants.WheelRadius;
+        cachedState.angle = inputs.turnPosition;
+        cachedPosition.distanceMeters = inputs.drivePositionRad * constants.WheelRadius;
+        cachedPosition.angle = inputs.turnPosition;
+
+        int sampleCount = inputs.odometryTimestamps.length;
         for (int i = 0; i < sampleCount; i++) {
-            double positionMeters = inputs.odometryDrivePositionsRad[i] * constants.WheelRadius;
-            Rotation2d angle = inputs.odometryTurnPositions[i];
-            odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
+            odometryPositions[i].distanceMeters = inputs.odometryDrivePositionsRad[i] * constants.WheelRadius;
+            odometryPositions[i].angle = inputs.odometryTurnPositions[i];
         }
 
         // Update alerts
-        driveDisconnectedAlert.set(!inputs.driveConnected);
-        turnDisconnectedAlert.set(!inputs.turnConnected);
-        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
+//        driveDisconnectedAlert.set(!inputs.driveConnected);
+//        turnDisconnectedAlert.set(!inputs.turnConnected);
+//        turnEncoderDisconnectedAlert.set(!inputs.turnEncoderConnected);
 
         if (Toggles.tuningMode.get()) {
             if (Toggles.Swerve.driveOpenLoopOverride.get()) {
@@ -179,14 +194,14 @@ public class SwerveModule {
      * Returns the module position (turn angle and drive position).
      */
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(getPositionMeters(), getAngle());
+        return cachedPosition;
     }
 
     /**
      * Returns the module state (turn angle and drive velocity).
      */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(getVelocityMetersPerSec(), getAngle());
+        return cachedState;
     }
 
     /**
@@ -228,5 +243,13 @@ public class SwerveModule {
                 default -> TunerConstants.FrontLeft.SlipCurrent;
             };
         return inputs.driveCurrentAmps >= stallCurrent;
+    }
+
+    public void updateCurrentLimits(double newLimit) {
+        io.updateCurrentLimits(newLimit);
+    }
+
+    public void resetCurrentLimits() {
+        io.resetCurrentLimits();
     }
 }
