@@ -216,6 +216,7 @@ public class Robot extends LoggedRobot {
 
         PhoenixUtil.refreshAll();
         LoopTimeUtil.record("PhoenixUtil");
+        RobotContainer.gamePieceTracker.update();
 //        VirtualSubsystem.periodicAll();
 //        LoopTimeUtil.record("VirtualPeriodic");
         org.steelhawks.RobotState.getInstance().periodic();

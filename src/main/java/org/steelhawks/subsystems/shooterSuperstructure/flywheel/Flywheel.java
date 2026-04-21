@@ -242,6 +242,10 @@ public class Flywheel extends SubsystemBase {
             .finallyDo(io::stop);
     }
 
+    public double getVelocityRadPerSec() {
+        return inputs.leftVelocityRadPerSec;
+    }
+
     public Command incrementVelocityFactor(double increment) {
         return Commands.runOnce(() -> {
             redBullConstant += increment;
