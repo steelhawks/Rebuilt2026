@@ -186,4 +186,4 @@ compile_commands.json
 # Version file
 src/main/java/org/steelhawks/BuildConstants.java
 /.kotlin/
-src/main/java/org/steelhawks/subsystems/superstructure/objective
+src/main/java/org/steelhawks/objective
