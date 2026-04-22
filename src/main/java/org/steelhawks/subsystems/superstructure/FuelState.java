@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.superstructure;
 
-public enum GamePieceState {
+public enum FuelState {
+    NONE(false),
     EMPTY(false),
     INTAKING(false),
     HOLDING(true),
@@ -8,9 +9,9 @@ public enum GamePieceState {
     SHOOTING(false),
     FERRY(false);
 
-    boolean hasBalls;
+    final boolean hasBalls;
 
-    GamePieceState(boolean hasBalls) {
+    FuelState(boolean hasBalls) {
         this.hasBalls = hasBalls;
     }
 }

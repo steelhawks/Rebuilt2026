@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
 import org.steelhawks.commands.rumble.RumbleAPI;
-import org.steelhawks.subsystems.beam.BeamIO;
 import org.steelhawks.subsystems.beam.BeamIOInputsAutoLogged;
 import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.intake.MagicIntake;
@@ -19,7 +18,7 @@ import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.shooterSuperstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.shooterSuperstructure.hood.Hood;
 import org.steelhawks.subsystems.shooterSuperstructure.turret.MagicTurret;
-import org.steelhawks.subsystems.superstructure.GamePieceTracker;
+import org.steelhawks.subsystems.superstructure.FuelStateTracker;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -28,7 +27,7 @@ import org.steelhawks.util.AllianceFlip;
 public class RobotContainer {
 
     private final RobotConfig config = RobotConfig.getConfig();
-    public static GamePieceTracker gamePieceTracker = null;
+    public static FuelStateTracker gamePieceTracker = null;
     private BeamIOInputsAutoLogged inputs;
 
     public static LEDMatrix s_Matrix = null;
@@ -51,7 +50,7 @@ public class RobotContainer {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
         RumbleAPI.register(driver);
-        gamePieceTracker = new GamePieceTracker(
+        gamePieceTracker = new FuelStateTracker(
                 inputs,
                 () -> RobotState.getInstance().getAimState(),
                 () -> s_Flywheel.getVelocityRadPerSec(),
