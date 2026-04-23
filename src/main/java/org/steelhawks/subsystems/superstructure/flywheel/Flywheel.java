@@ -49,6 +49,8 @@ public class Flywheel extends SubsystemBase {
     private final FlywheelIO io;
     private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
+    private final boolean hoodReady = RobotContainer.s_Hood.isHomed() && RobotContainer.s_Hood.isZeroed();
+
     private boolean nearTargetVelocity = false;
     private double targetVelocityRadPerSec = 0.0;
 
@@ -108,7 +110,8 @@ public class Flywheel extends SubsystemBase {
             DriverStation.isEnabled()
                 && Toggles.Flywheel.isEnabled.get()
                 && !Toggles.Flywheel.toggleVoltageOverride.get()
-                && !Toggles.Flywheel.toggleCurrentOverride.get();
+                && !Toggles.Flywheel.toggleCurrentOverride.get()
+                && hoodReady;
 
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {

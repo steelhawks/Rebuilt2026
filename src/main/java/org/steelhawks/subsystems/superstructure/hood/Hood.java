@@ -64,6 +64,14 @@ public class Hood extends SubsystemBase {
         return homingDebouncer.calculate(Math.abs(inputs.torqueCurrentAmps) > 50.0);
     }
 
+    public boolean isHomed() {
+        return isHomed;
+    }
+
+    public boolean isZeroed() {
+        return isZeroed;
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
