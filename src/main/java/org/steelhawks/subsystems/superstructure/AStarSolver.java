@@ -2,6 +2,8 @@ package org.steelhawks.subsystems.superstructure;
 
 import java.util.*;
 
+// THE MOST BEAUTIFUL PIECE OF CODE I HAVE EVER WRITTEN
+
 public class AStarSolver<N> {
     public interface Heuristic<N> {
         double estimate(N current, N goal);
@@ -11,21 +13,18 @@ public class AStarSolver<N> {
         List<Edge<N>> getNeighbors(N node);
     }
 
-    public record Edge<N>(N neighbor, double cost) {
+//    public record Edge<N>(N neighbor, double cost) {}
 
-    }
+     public static class Edge<N> {
+       public final N neighbor;
+       public final double cost;
 
-    /*
-    * public static class Edge<N> {
-    *   public final N neighbor;
-    *   public final double cost;
-    *
-    *   public Edge(N neighbor, double cost) {
-    *       this.neighbor = neighbor;
-    *       this.cost = cost;
-    *   }
-    * }
-    *  */
+       public Edge(N neighbor, double cost) {
+           this.neighbor = neighbor;
+           this.cost = cost;
+       }
+     }
+
 
     public List<N> solve(N start, N goal, Heuristic<N> heuristic, Neighbors<N> neighbors) {
         Map<N, Double> gScore = new HashMap<>();
@@ -69,18 +68,18 @@ public class AStarSolver<N> {
         return path;
     }
 
-    /*
-     * private class NodeRecord<N> {
-     *   private final N node;
-     *   private final double fScore;
-     *
-     *   public NodeRecord<N>(N node, double fScore) {
-     *       this.node = node;
-     *       this.fScore = fScore;
-     *   }
-     *  */
+    private static class NodeRecord<N> {
+        private final N node;
+        private final double fScore;
+
+        public NodeRecord(N node, double fScore) {
+            this.node = node;
+            this.fScore = fScore;
+        }
+
+    }
 
 
-    private record NodeRecord<N>(N node, double fScore) {}
+//    private record NodeRecord<N>(N node, double fScore) {}
 
 }

@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 
 public class FuelStateTracker {
     private FuelState currentGamePieceState = FuelState.NONE;
-    private FuelState previousGamePieceState;
 
     private double lastTransitionTime = Timer.getFPGATimestamp();
     private final double TIMEOUT_SECONDS = 3.0;
@@ -50,7 +49,6 @@ public class FuelStateTracker {
 
 
     public void update() {
-        previousGamePieceState = currentGamePieceState;
         boolean beamBroken = hopperSupplier.get();
         boolean isFerry = aimStateSupplier.get() == RobotState.AimState.FERRY;
         boolean shooterReady = shooterAtSpeedSupplier.get();
