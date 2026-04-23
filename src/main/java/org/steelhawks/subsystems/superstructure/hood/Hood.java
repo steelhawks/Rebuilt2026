@@ -25,6 +25,8 @@ public class Hood extends SubsystemBase {
     private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
     private final HoodIO io;
 
+    public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(75.0); // TODO: tune
+
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
