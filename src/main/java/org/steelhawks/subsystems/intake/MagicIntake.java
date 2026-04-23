@@ -239,6 +239,10 @@ public class MagicIntake extends SubsystemBase {
         // No profile recalculation needed — TalonFX generates a new S-curve onboard
     }
 
+    public IntakeConstants.State getCurrentState() {
+        return desiredGoal;
+    }
+
     // ---- Commands ----
 
     public Command setDesiredStateCommand(IntakeConstants.State state) {

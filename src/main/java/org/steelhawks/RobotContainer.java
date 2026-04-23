@@ -50,13 +50,6 @@ public class RobotContainer {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
         RumbleAPI.register(driver);
-        gamePieceTracker = new FuelStateTracker(
-                inputs,
-                () -> RobotState.getInstance().getAimState(),
-                () -> s_Flywheel.getVelocityRadPerSec(),
-                s_Flywheel::isReadyToShoot,
-                s_Intake::isRollersRunning
-        );
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
