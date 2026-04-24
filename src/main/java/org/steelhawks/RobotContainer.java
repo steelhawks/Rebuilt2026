@@ -66,12 +66,13 @@ public class RobotContainer {
                 () -> -driver.getRightX()));
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
+        configureSystemsCheck();
         Toggles.configureOverrides();
 //        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
     }
 
     private void configureDriver() {
-        new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper())
+        new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper()).and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(RumbleAPI.steady().repeatedly());
 
         new Trigger(() -> {
@@ -82,7 +83,7 @@ public class RobotContainer {
             } else {
                 return x >= FieldConstants.Trench.TRENCH_END_X;
             }
-        })
+        }).and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
@@ -91,30 +92,49 @@ public class RobotContainer {
 //            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
 //            .onFalse(s_Swerve.resetCurrentLimitsCmd());
 
-        driver.povRight()
+        driver.povRight().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(s_Indexer.outtake());
 
-        driver.rightBumper()
+        driver.rightBumper().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(s_Intake.outtakeIntake());
 
-        driver.leftTrigger()
+        driver.leftTrigger().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(ShootingCommands.shootWhileIntaking());
 
-        driver.leftBumper()
+        driver.leftBumper().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(ShootingCommands.shoot());
 
-        driver.rightTrigger()
+        driver.rightTrigger().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(
                 s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(Intake.State.INTAKE)));
 
-        driver.x()
+        driver.x().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .onTrue(s_Intake.setDesiredStateCommand(Intake.State.INTAKE));
 
-        driver.y()
+        driver.y().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .onTrue(s_Intake.setDesiredStateCommand(Intake.State.HOME));
 
-        driver.a()
+        driver.a().and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .onTrue(s_Intake.setDesiredStateCommand(Intake.State.CENTER_OF_MOTION));
+    }
 
+    private void configureSystemsCheck() {
+        driver.rightBumper().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.swerve());
+
+        driver.leftBumper().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.flywheel());
+
+        driver.x().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .onTrue(SystemsCheck.turret());
+
+        driver.y().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .onTrue(SystemsCheck.hood());
+
+        driver.b().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.intake());
+
+        driver.a().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.indexer());
     }
 }
