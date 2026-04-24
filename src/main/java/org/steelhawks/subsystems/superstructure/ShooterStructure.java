@@ -410,7 +410,7 @@ public class ShooterStructure {
 
     public static void loadLUTHard() {
         minShootDistance = 1.146;
-        maxShootDistance = 4.057;
+        maxShootDistance = 6.2;
 
         lutHard.set(true);
         lutSoft.set(false);
@@ -418,48 +418,33 @@ public class ShooterStructure {
         shootingFlywheelVelocityMap.clear();
         shootingHoodAngleMap.clear();
         shootingTimeOfFlightMap.clear();
+//
+//        shootingFlywheelVelocityMap.put(1.405, 12.3);
+        shootingFlywheelVelocityMap.put(1.972, 11.0);
+        shootingFlywheelVelocityMap.put(2.635, 11.2);
+        shootingFlywheelVelocityMap.put(3.17, 11.5);
+        shootingFlywheelVelocityMap.put(3.855, 12.0);
+        shootingFlywheelVelocityMap.put(4.588, 12.7);
+        shootingFlywheelVelocityMap.put(5.217, 13.2);
+        shootingFlywheelVelocityMap.put(6.123, 13.8);
+//
+//        shootingHoodAngleMap.put(1.405, Rotation2d.fromDegrees(78));
+        shootingHoodAngleMap.put(1.972, Rotation2d.fromDegrees(73));
+        shootingHoodAngleMap.put(2.635, Rotation2d.fromDegrees(68));
+        shootingHoodAngleMap.put(3.17, Rotation2d.fromDegrees(66));
+        shootingHoodAngleMap.put(3.855, Rotation2d.fromDegrees(64));
+        shootingHoodAngleMap.put(4.588, Rotation2d.fromDegrees(62));
+        shootingHoodAngleMap.put(5.217, Rotation2d.fromDegrees(60));
+        shootingHoodAngleMap.put(6.123, Rotation2d.fromDegrees(58));
 
-        shootingFlywheelVelocityMap.put(1.39, 11.0 * 1.04);
-        shootingFlywheelVelocityMap.put(2.19, 11.431 * 1.04);
-        shootingFlywheelVelocityMap.put(2.67, 11.83 * 1.04);
-        shootingFlywheelVelocityMap.put(3.2, 12.5 * 1.04);
-        shootingFlywheelVelocityMap.put(3.65, 12.76 * 1.06);
-        shootingFlywheelVelocityMap.put(4.03, 13.1 * 1.04);
-        shootingFlywheelVelocityMap.put(4.37, 13.3 * 1.04);
-        shootingFlywheelVelocityMap.put(4.82, 13.4 * 1.04);
-        shootingFlywheelVelocityMap.put(4.92, 13.5 * 1.04);
-        shootingFlywheelVelocityMap.put(5.099, 13.6 * 1.04);
-        shootingFlywheelVelocityMap.put(5.36, 13.75  * 1.05);
-        shootingFlywheelVelocityMap.put(5.56, 13.8 * 1.05);
-        shootingFlywheelVelocityMap.put(5.85, 14.1 * 1.06);
-
-        shootingHoodAngleMap.put(1.39, Rotation2d.fromDegrees(80.0));
-        shootingHoodAngleMap.put(2.19, Rotation2d.fromDegrees(74.0));
-        shootingHoodAngleMap.put(2.67, Rotation2d.fromDegrees(71.0));
-        shootingHoodAngleMap.put(3.2, Rotation2d.fromDegrees(70.0));
-        shootingHoodAngleMap.put(3.65, Rotation2d.fromDegrees(69.0));
-        shootingHoodAngleMap.put(4.03, Rotation2d.fromDegrees(68.0));
-        shootingHoodAngleMap.put(4.37, Rotation2d.fromDegrees(67.0));
-        shootingHoodAngleMap.put(4.82, Rotation2d.fromDegrees(65.0));
-        shootingHoodAngleMap.put(4.92, Rotation2d.fromDegrees(64.0));
-        shootingHoodAngleMap.put(5.099, Rotation2d.fromDegrees(63.0));
-        shootingHoodAngleMap.put(5.36, Rotation2d.fromDegrees(62.0));
-        shootingHoodAngleMap.put(5.56, Rotation2d.fromDegrees(61.0));
-        shootingHoodAngleMap.put(5.85, Rotation2d.fromDegrees(59.0));
-
-        shootingTimeOfFlightMap.put(1.44, 1.11);
-        shootingTimeOfFlightMap.put(2.2, 1.19);
-        shootingTimeOfFlightMap.put(2.677, 1.23);
-        shootingTimeOfFlightMap.put(3.207, 1.38);
-        shootingTimeOfFlightMap.put(3.652, 1.41);
-        shootingTimeOfFlightMap.put(4.0318, 1.48);
-        shootingTimeOfFlightMap.put(4.3785, 1.5);
-        shootingTimeOfFlightMap.put(4.827, 1.53); //
-//        shootingTimeOfFlightMap.put(4.92, 1.26);
-        shootingTimeOfFlightMap.put(5.0926, 1.55);
-        shootingTimeOfFlightMap.put(5.362, 1.58);
-        shootingTimeOfFlightMap.put(5.559, 1.59);
-        shootingTimeOfFlightMap.put(5.856, 1.7);
+//        shootingTimeOfFlightMap.put(1.405, 1.296);
+        shootingTimeOfFlightMap.put(1.972, 1.23);
+        shootingTimeOfFlightMap.put(2.635, 1.20);
+        shootingTimeOfFlightMap.put(3.17, 1.21);
+        shootingTimeOfFlightMap.put(3.855, 1.23);
+        shootingTimeOfFlightMap.put(4.588, 1.31);
+        shootingTimeOfFlightMap.put(5.217, 1.39);
+        shootingTimeOfFlightMap.put(6.123, 1.38);
     }
 
     public static void loadLUTSoft() {
