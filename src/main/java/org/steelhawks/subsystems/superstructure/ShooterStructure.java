@@ -14,6 +14,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
+import org.steelhawks.RobotState.AimState;
+import org.steelhawks.util.AllianceFlip;
 
 import static edu.wpi.first.units.Units.Meters;
 
@@ -53,6 +55,7 @@ public class ShooterStructure {
         Translation3d virtualTarget,
         double timeOfFlight
     ) {}
+    public record FerryShotSolution(ProjectileData shotData, Rotation2d turretAngle) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
 
@@ -291,7 +294,7 @@ public class ShooterStructure {
         /**
          * Computes a ballistic launch solution for a shooter with a fixed pitch angle.
          *
-         * @param actualTarget   The real hub target.
+         * @param actualTarget    The real hub target.
          * @param predictedTarget Used for shooting on the move.
          * @return ProjectileData, or kNoSolution if the fixed angle cannot clear the funnel or reach the target.
          */
@@ -336,6 +339,22 @@ public class ShooterStructure {
 
             return new ProjectileData(v0, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
         }
+
+        public static Translation2d calculateFerryShotSetpoint() {
+            double robotYBlue = AllianceFlip.shouldFlip()
+                ? FieldConstants.FIELD_WIDTH - RobotState.getInstance().getEstimatedPose().getY()
+                : RobotState.getInstance().getEstimatedPose().getY();
+
+            double offset = FieldConstants.Ferrying.DISTANCE_OFFSET;
+            Translation2d segEnd = (robotYBlue < FieldConstants.FIELD_WIDTH / 2.0)
+                ? FieldConstants.Ferrying.MID_LINE.minus(new Translation2d(0.0, offset))
+                : FieldConstants.Ferrying.MID_LINE.plus(new Translation2d(0.0, offset));
+            Translation2d segStart = (robotYBlue < FieldConstants.FIELD_WIDTH / 2.0)
+                ? FieldConstants.Ferrying.START_LINE
+                : FieldConstants.Ferrying.END_LINE;
+
+            return AllianceFlip.apply(FieldConstants.getClosestPointOnLine(segStart, segEnd));
+        }
     }
 
     public static class Moving {
@@ -348,6 +367,7 @@ public class ShooterStructure {
             int maxIterations,
             double timeTolerance
         ) {
+            boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
             Translation2d turretXY = getTurretTranslation();
             // add turrets tangential velocity from chassis rotation.
             // for a point at (dx, dy) in robot frame rotating at omega rad/s:
@@ -366,7 +386,10 @@ public class ShooterStructure {
             Translation3d virtualTarget = actualTarget;
             double rawDist = turretXY.getDistance(actualTarget.toTranslation2d());
             double virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
-            var projectile = Static.calculateShot(actualTarget, actualTarget, false, rawDist);
+            var projectile =
+                isFerry
+                    ? Static.calculateFerryShot(actualTarget.toTranslation2d())
+                    : Static.calculateShot(actualTarget, actualTarget, false, rawDist);
             double v = projectile.exitVelocity();
             double theta = projectile.hoodAngle();
             double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
@@ -378,7 +401,9 @@ public class ShooterStructure {
                     actualTarget.getZ());
                 rawDist = turretXY.getDistance(virtualTarget.toTranslation2d());
                 virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
-                projectile = Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
+                projectile = isFerry
+                    ? Static.calculateFerryShot(virtualTarget.toTranslation2d())
+                    : Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
                 double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH);

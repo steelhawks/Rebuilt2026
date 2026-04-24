@@ -172,10 +172,7 @@ public class Flywheel extends SubsystemBase {
 
     private double getStationaryExitVelocityMps(Translation3d hubCenter) {
         if (!RobotState.getInstance().getAimState().equals(AimState.TO_HUB)) {
-            return ShooterStructure.Static.calculateFerryShot(AllianceFlip.apply(
-                FieldConstants.getClosestPointOnLine(
-                    FieldConstants.Ferrying.START_LINE,
-                    FieldConstants.Ferrying.END_LINE))).exitVelocity();
+            return ShooterStructure.Static.calculateFerryShot(ShooterStructure.Static.calculateFerryShotSetpoint()).exitVelocity();
         }
         double currentDist = ShooterStructure.distanceToTarget(hubCenter);
         if (Double.isNaN(cachedStationaryDist) || Math.abs(currentDist - cachedStationaryDist) > IDLE_SHOT_CACHE_THRESHOLD) {
