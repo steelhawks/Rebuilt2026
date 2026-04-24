@@ -100,7 +100,7 @@ public class Intake extends SubsystemBase {
     @AutoLogOutput(key = "Intake/IsTwisting")
     private boolean isTwisting() {
         return twistingDebouncer.calculate(
-            Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble()) && isHomed;
+            isHomed && Math.abs(inputs.leftPositionMeters - inputs.rightPositionMeters) > positionTwistingThreshold.getAsDouble());
     }
 
     @Override
@@ -109,9 +109,7 @@ public class Intake extends SubsystemBase {
         Logger.processInputs("Intake", inputs);
         BatteryUtil.recordCurrentUsage(
             "Intake",
-            inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps + inputs.leftTorqueCurrentAmps + inputs.rightTorqueCurrentAmps
-        );
-
+            inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps + inputs.leftTorqueCurrentAmps + inputs.rightTorqueCurrentAmps);
         if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             io.setPosition(0);
@@ -121,7 +119,6 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/IsHomed", true);
             Logger.recordOutput("Intake/Zeroed", true);
         }
-
         if (!isHomed && Toggles.Intake.isEnabled.get()) {
             io.runRackOpenLoop(homingVolts, false);
             isHomed = isStalling();
@@ -144,8 +141,6 @@ public class Intake extends SubsystemBase {
                 && Toggles.Intake.isEnabled.get()
                 && !Toggles.Intake.toggleCurrentOverride.get()
                 && !Toggles.Intake.toggleVoltageOverride.get();
-//                && (getPosition() >= IntakeConstants.MIN_EXTENSION
-//                && getPosition() <= IntakeConstants.MAX_EXTENSION_FROM_FRAME + 0.05);
         Logger.recordOutput("Intake/ShouldRun", shouldRun);
 
         if (DriverStation.isDisabled()) {
@@ -157,7 +152,6 @@ public class Intake extends SubsystemBase {
         if (DriverStation.isEnabled()) {
             setBrakeMode(true);
         }
-
         if (Toggles.tuningMode.get()) {
             if (Toggles.Intake.toggleVoltageOverride.get()) {
                 if (tuningVolts == null) {
@@ -183,12 +177,11 @@ public class Intake extends SubsystemBase {
                             MAX_ACCEL_METERS_PER_SEC_SQ.get()));
             }
         }
-
         if (shouldRun) {
-//            if (RobotContainer.s_Swerve.collisionDetected()) {
-//                setDesiredState(IntakeConstants.State.RETRACTED);
-//            }
-
+            if (isTwisting()) {
+                isHomed = false;
+                isZeroed = false;
+            }
             double previousVelocity = setpoint.velocity;
             setpoint = profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
             if (setpoint.position <= IntakeConstants.MIN_EXTENSION
@@ -201,9 +194,7 @@ public class Intake extends SubsystemBase {
                             IntakeConstants.MAX_EXTENSION_FROM_FRAME),
                         0.0);
             }
-
             atGoal = Math.abs(getPosition() - goal.position) <= IntakeConstants.TOLERANCE;
-
             if (atGoal) {
                 io.stopRack();
             } else {
@@ -239,7 +230,6 @@ public class Intake extends SubsystemBase {
 
                 io.runRackPositionBoth(setpoint.position, leftFF, rightFF);
             }
-
             Logger.recordOutput("Intake/SetpointPosition", setpoint.position);
             Logger.recordOutput("Intake/SetpointVelocity", setpoint.velocity);
             Logger.recordOutput("Intake/GoalPosition", goal.position);
