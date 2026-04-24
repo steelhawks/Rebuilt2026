@@ -15,11 +15,14 @@ public class IntakeConstants {
     public static final double INTAKE_SPEED = 1.0;
     public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(-19.0);
 
+    public static final double MAX_EXTENSION_FROM_FRAME = Units.inchesToMeters(12.0 + (1.0 / 8.0));
+    public static final double RETRACTED_POS = 0.15;
+    public static final double HOME_POS = MAX_EXTENSION_FROM_FRAME - 0.33;
+
     public enum State {
-        // TODO In meters, need to tune
-        RETRACTED(0.15),
-        CENTER_OF_MOTION(0.15),
-        HOME(MAX_EXTENSION_FROM_FRAME - 0.33),
+        RETRACTED(RETRACTED_POS),
+        CENTER_OF_MOTION((RETRACTED_POS + HOME_POS) / 2.0),
+        HOME(HOME_POS),
         INTAKE(0.3);
 
         private final double positionMeters;
@@ -32,8 +35,6 @@ public class IntakeConstants {
             return positionMeters;
         }
     }
-
-    public static final double MAX_EXTENSION_FROM_FRAME = Units.inchesToMeters(12.0 + (1.0 / 8.0));
 
     public static final LoggedTunableNumber kP = new LoggedTunableNumber("Intake/kP", 5.0);
     public static final LoggedTunableNumber kI = new LoggedTunableNumber("Intake/kI", 0.0);
