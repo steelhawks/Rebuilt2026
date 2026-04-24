@@ -20,6 +20,7 @@ import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LatchedBoolean;
+import org.steelhawks.util.Maths;
 import org.steelhawks.util.geometry.Boundary;
 import org.steelhawks.util.geometry.RobotFootprint;
 
@@ -77,6 +78,8 @@ public class RobotState {
     private final Trigger inTrenchTrigger;
     @AutoLogOutput
     private final Trigger inBumpTrigger;
+    @AutoLogOutput
+    private final Trigger turretStuckTrigger;
 
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
@@ -149,6 +152,11 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER)
             .debounce(0.3);
+        turretStuckTrigger =
+            new Trigger(
+                () -> RobotContainer.s_Turret != null
+                    && RobotContainer.s_Turret.isJammedOrInDeadSpot()
+                    && shootingState != ShootingState.NOTHING);
     }
 
     public RobotFootprint getFootprint() {
@@ -165,6 +173,10 @@ public class RobotState {
 
     public Trigger getSOTMTrigger() {
         return sotmTrigger;
+    }
+
+    public Trigger getTurretJamTrigger() {
+        return turretStuckTrigger;
     }
 
     public void updateChassisSpeeds(ChassisSpeeds speeds) {
@@ -220,13 +232,21 @@ public class RobotState {
     }
 
     public void updateMovingShot() {
-        var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
+        var target =
+            getAimState().equals(AimState.TO_HUB)
+                ? AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)
+                : AllianceFlip.apply(
+                    Maths.fromTranslation2dWithZ(
+                        FieldConstants.getClosestPointOnLine(
+                            FieldConstants.Ferrying.START_LINE,
+                            FieldConstants.Ferrying.END_LINE),
+                        0.0));
         Translation3d robotVelocity = new Translation3d(
             currentChassisSpeeds.vxMetersPerSecond,
             currentChassisSpeeds.vyMetersPerSecond,
             0.0);
         movingShotSolution = ShooterStructure.Moving.solveMovingShot(
-            hubCenter,
+            target,
             robotVelocity,
             getRotation(),
             currentChassisSpeeds.omegaRadiansPerSecond,
@@ -307,6 +327,10 @@ public class RobotState {
 //        if (desiredMode != currentAimState) {
 //            setAimState(desiredMode);
 //        }
+    }
+
+    public boolean isAimedToScore() {
+        return RobotContainer.s_Turret.atGoal() && !RobotContainer.s_Turret.isTraversing();
     }
 
     private AimState calculateDesiredMode() {

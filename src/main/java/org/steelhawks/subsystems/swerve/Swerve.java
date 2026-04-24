@@ -244,9 +244,9 @@ public class Swerve extends SubsystemBase {
                             Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
                 DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
                 TURN_MOTOR = DCMotor.getKrakenX60Foc(1);
-                ROBOT_MASS_KG = Units.lbsToKilograms(108.4 + 11.4 + 14);
+                    ROBOT_MASS_KG = Units.lbsToKilograms(139.0);
                 ROBOT_MOI = (1.0 / 12.0) * ROBOT_MASS_KG * (2 * Math.pow(Units.inchesToMeters(25), 2));
-                WHEEL_COF = COTS.WHEELS.COLSONS.cof;
+                WHEEL_COF = 1.786;
                 PP_CONFIG =
                     new RobotConfig(
                         ROBOT_MASS_KG,
@@ -818,6 +818,18 @@ public class Swerve extends SubsystemBase {
         return bumpRisingDebouncer.calculate(rawTilt) || bumpFallingDebouncer.calculate(rawTilt);
     }
 
+    public void updateCurrentLimits(double newLimit) {
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i].updateCurrentLimits(newLimit);
+        }
+    }
+
+    public void resetCurrentLimits() {
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i].resetCurrentLimits();
+        }
+    }
+
     // Command Factories
     public Command toggleMultiplier() {
         return Commands.runOnce(() -> requestSlowMode = !requestSlowMode);
@@ -883,6 +895,14 @@ public class Swerve extends SubsystemBase {
 
     public Command testZeroedModules() {
         return Commands.run(() -> runDriveCharacterization(0.0), this);
+    }
+
+    public Command updateCurrentLimitsCmd(double newLimit) {
+        return Commands.runOnce(() -> updateCurrentLimits(newLimit));
+    }
+
+    public Command resetCurrentLimitsCmd() {
+        return Commands.runOnce(this::resetCurrentLimits);
     }
 
     public boolean isStalling() {

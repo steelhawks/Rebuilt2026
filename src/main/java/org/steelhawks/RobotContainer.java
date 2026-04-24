@@ -1,6 +1,5 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -10,7 +9,6 @@ import org.steelhawks.commands.*;
 import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeConstants;
-import org.steelhawks.subsystems.led.Color;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -23,6 +21,7 @@ import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.AllianceFlip;
+
 
 public class RobotContainer {
 
@@ -69,7 +68,7 @@ public class RobotContainer {
         s_Hood.setDefaultCommand(new HoodDefaultCommand(s_Hood));
         configureDriver();
         Toggles.configureOverrides();
-        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
+//        LEDCommands.configureTriggers(driver.leftTrigger().or(driver.leftBumper()));
     }
 
     private void configureDriver() {
@@ -87,6 +86,11 @@ public class RobotContainer {
         })
             .onTrue(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)))
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
+
+//        RobotModeTriggers.autonomous()
+//            .or(s_Swerve::isOnBump)
+//            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
+//            .onFalse(s_Swerve.resetCurrentLimitsCmd());
 
         driver.povRight()
             .whileTrue(s_Indexer.outtake());
@@ -109,6 +113,9 @@ public class RobotContainer {
 
         driver.y()
             .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+
+        driver.a()
+            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
 
     }
 }
