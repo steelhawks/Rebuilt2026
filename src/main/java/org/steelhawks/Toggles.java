@@ -7,7 +7,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AllianceFlip;
-import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,12 +20,12 @@ public interface Toggles {
             bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
         if (RobotConfig.getConfig().hasIntake)
             bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
-       if (RobotConfig.getConfig().hasVision)
-            bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
-                () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.LEFT_CORNER_2D))));
-        if (RobotConfig.getConfig().hasVision)
-            bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
-                () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.RIGHT_CORNER_2d))));
+       if (RobotConfig.getConfig().hasVision) {
+           bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
+               () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.LEFT_CORNER_2D))));
+           bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
+               () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.RIGHT_CORNER_2D))));
+       }
 
         bindMomentary("Dashboard/LUT/UseLUTHardBalls", Commands.runOnce(ShooterStructure::loadLUTHard));
         bindMomentary("Dashboard/LUT/UseLUTSoftBalls", Commands.runOnce(ShooterStructure::loadLUTSoft));

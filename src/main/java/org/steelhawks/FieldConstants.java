@@ -2,13 +2,10 @@ package org.steelhawks;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AprilTag;
-
-import static edu.wpi.first.units.Units.Meters;
 
 public class FieldConstants {
 
@@ -108,7 +105,7 @@ public class FieldConstants {
                Rotation2d.kZero
            );
 
-       public static final Pose2d RIGHT_CORNER_2d =
+       public static final Pose2d RIGHT_CORNER_2D =
            new Pose2d(
                RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2,
                RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2,
