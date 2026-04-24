@@ -108,7 +108,9 @@ public class Flywheel extends SubsystemBase {
             DriverStation.isEnabled()
                 && Toggles.Flywheel.isEnabled.get()
                 && !Toggles.Flywheel.toggleVoltageOverride.get()
-                && !Toggles.Flywheel.toggleCurrentOverride.get();
+                && !Toggles.Flywheel.toggleCurrentOverride.get()
+                && RobotContainer.s_Hood.isHomed()
+                && RobotContainer.s_Hood.isZeroed();
 
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {
