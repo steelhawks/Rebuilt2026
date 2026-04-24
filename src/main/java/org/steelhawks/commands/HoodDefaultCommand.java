@@ -23,7 +23,7 @@ public class HoodDefaultCommand extends Command {
         if (Toggles.shooterTuningMode.get()) return;
         var sol = RobotState.getInstance().getMovingShotSolution();
         switch (RobotState.getInstance().getShootingState()) {
-            case NOTHING -> s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(80.0));
+            case NOTHING -> s_Hood.setDesiredPositionForced(Hood.HOME_POSITION);
             case SHOOTING_STATIONARY -> {
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                 s_Hood.setDesiredPosition(Rotation2d.fromRadians(

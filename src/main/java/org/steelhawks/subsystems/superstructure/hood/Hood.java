@@ -25,6 +25,8 @@ public class Hood extends SubsystemBase {
     private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
     private final HoodIO io;
 
+    public static final Rotation2d HOME_POSITION = Rotation2d.fromDegrees(75.0); // TODO: tune
+
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
@@ -62,6 +64,14 @@ public class Hood extends SubsystemBase {
     @AutoLogOutput(key = "Hood/IsStalling")
     private boolean isStalling() {
         return homingDebouncer.calculate(Math.abs(inputs.torqueCurrentAmps) > 50.0);
+    }
+
+    public boolean isHomed() {
+        return isHomed;
+    }
+
+    public boolean isZeroed() {
+        return isZeroed;
     }
 
     @Override
