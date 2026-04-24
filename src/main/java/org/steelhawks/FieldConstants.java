@@ -99,4 +99,20 @@ public class FieldConstants {
     public final static class Bump {
 
     }
+
+    public static final class FieldCorners {
+       public static final Pose2d LEFT_CORNER_2D =
+           new Pose2d(
+               RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2,
+               FIELD_WIDTH - (RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2),
+               Rotation2d.kZero
+           );
+
+       public static final Pose2d RIGHT_CORNER_2d =
+           new Pose2d(
+               RobotConstants.ROBOT_LENGTH_WITH_BUMPERS / 2,
+               RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2,
+               Rotation2d.kZero
+           );
+    }
 }
