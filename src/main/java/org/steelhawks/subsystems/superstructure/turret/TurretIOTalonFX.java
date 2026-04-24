@@ -59,6 +59,12 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot0.kI = constants.kI();
         motorConfig.Slot0.kD = constants.kD();
         motorConfig.Slot0.kS = constants.kS();
+
+        motorConfig.Slot1.kP = 5000.0;
+        motorConfig.Slot1.kI = 125.0;
+        motorConfig.Slot1.kD = 200.0;
+        motorConfig.Slot1.kS = 25.0;
+
         motorConfig.ClosedLoopGeneral.ContinuousWrap = false;
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
