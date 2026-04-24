@@ -8,7 +8,6 @@ import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
 import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeConstants;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -106,16 +105,16 @@ public class RobotContainer {
 
         driver.rightTrigger()
             .whileTrue(
-                s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)));
+                s_Intake.runIntake().alongWith(s_Intake.setDesiredStateCommand(Intake.State.INTAKE)));
 
         driver.x()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+            .onTrue(s_Intake.setDesiredStateCommand(Intake.State.INTAKE));
 
         driver.y()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME));
+            .onTrue(s_Intake.setDesiredStateCommand(Intake.State.HOME));
 
         driver.a()
-            .onTrue(s_Intake.setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION));
+            .onTrue(s_Intake.setDesiredStateCommand(Intake.State.CENTER_OF_MOTION));
 
     }
 }

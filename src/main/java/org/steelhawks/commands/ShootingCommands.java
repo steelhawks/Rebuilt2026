@@ -3,12 +3,10 @@ package org.steelhawks.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.ShootingState;
-import org.steelhawks.commands.rumble.RumbleAPI;
-import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.vision.Vision;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AllianceFlip;
@@ -19,7 +17,7 @@ public class ShootingCommands {
         return shoot()
             .alongWith(
                 RobotContainer.s_Intake.runIntake()
-                    .alongWith(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE)))
+                    .alongWith(RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE)))
             .beforeStarting(RobotContainer.s_Swerve.toggleLowGear())
             .finallyDo(() -> CommandScheduler.getInstance().schedule(RobotContainer.s_Swerve.toggleNormal()));
     }
@@ -36,7 +34,7 @@ public class ShootingCommands {
             shoot()
                 .alongWith(
                     Commands.waitSeconds(1.5)
-                        .andThen(RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.HOME))));
+                        .andThen(RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.HOME))));
     }
 
     public static Command shoot() {
@@ -69,7 +67,7 @@ public class ShootingCommands {
             RobotState.getInstance().setShootingState(ShootingState.NOTHING);
             Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
             CommandScheduler.getInstance().schedule(
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE));
+                RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE));
         });
     }
 }

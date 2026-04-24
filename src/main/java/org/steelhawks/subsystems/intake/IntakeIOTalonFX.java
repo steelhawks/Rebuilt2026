@@ -74,7 +74,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         leftConfig.Slot0.kP = constants.kP();
         leftConfig.Slot0.kI = constants.kI();
         leftConfig.Slot0.kD = constants.kD();
-        leftConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
+        leftConfig.Feedback.SensorToMechanismRatio = Intake.REDUCTION;
 
         leftConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakePositionCurrent;
         leftConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.intakePositionEnabled;
@@ -87,7 +87,7 @@ public class IntakeIOTalonFX implements IntakeIO {
         rightConfig.Slot0.kP = constants.kP();
         rightConfig.Slot0.kI = constants.kI();
         rightConfig.Slot0.kD = constants.kD();
-        rightConfig.Feedback.SensorToMechanismRatio = IntakeConstants.REDUCTION;
+        rightConfig.Feedback.SensorToMechanismRatio = Intake.REDUCTION;
 
         rightConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.intakePositionCurrent;
         rightConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.intakePositionEnabled;
@@ -153,8 +153,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     public void updateInputs(IntakeIOInputs inputs) {
         inputs.leftConnected =
             BaseStatusSignal.isAllGood(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTorqueCurrent, leftTemp);
-        inputs.leftPositionMeters = leftPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
-        inputs.leftVelocityMetersPerSec = leftVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
+        inputs.leftPositionMeters = leftPosition.getValueAsDouble() * Intake.METERS_PER_ROTATION;
+        inputs.leftVelocityMetersPerSec = leftVelocity.getValueAsDouble() * Intake.METERS_PER_ROTATION;
         inputs.leftAppliedVolts = leftVoltage.getValueAsDouble();
         inputs.leftSupplyCurrentAmps = leftCurrent.getValueAsDouble();
         inputs.leftTorqueCurrentAmps = leftTorqueCurrent.getValueAsDouble();
@@ -162,8 +162,8 @@ public class IntakeIOTalonFX implements IntakeIO {
 
         inputs.rightConnected =
             BaseStatusSignal.isAllGood(rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTorqueCurrent, rightTemp);
-        inputs.rightPositionMeters = rightPosition.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
-        inputs.rightVelocityMetersPerSec = rightVelocity.getValueAsDouble() * IntakeConstants.METERS_PER_ROTATION;
+        inputs.rightPositionMeters = rightPosition.getValueAsDouble() * Intake.METERS_PER_ROTATION;
+        inputs.rightVelocityMetersPerSec = rightVelocity.getValueAsDouble() * Intake.METERS_PER_ROTATION;
         inputs.rightAppliedVolts = rightVoltage.getValueAsDouble();
         inputs.rightSupplyCurrentAmps = rightCurrent.getValueAsDouble();
         inputs.rightTorqueCurrentAmps = rightTorqueCurrent.getValueAsDouble();
@@ -193,7 +193,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     @Override
     public void runRackPositionBoth(double positionMeters, double leftFF, double rightFF) {
-        double rotations = positionMeters / IntakeConstants.METERS_PER_ROTATION;
+        double rotations = positionMeters / Intake.METERS_PER_ROTATION;
         leftMotor.setControl(
             leftPositionTorqueCurrentFOC
                 .withPosition(rotations)
@@ -250,8 +250,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     @Override
     public void setPosition(double meters) {
         new Thread(() -> {
-            tryUntilOk(5, () -> leftMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
-            tryUntilOk(5, () -> rightMotor.setPosition(meters / IntakeConstants.METERS_PER_ROTATION));
+            tryUntilOk(5, () -> leftMotor.setPosition(meters / Intake.METERS_PER_ROTATION));
+            tryUntilOk(5, () -> rightMotor.setPosition(meters / Intake.METERS_PER_ROTATION));
         }).start();
     }
 

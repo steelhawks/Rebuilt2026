@@ -18,7 +18,7 @@ import org.steelhawks.commands.ShootingCommands;
 import org.steelhawks.commands.align.SwerveDriveAlignment;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.intake.IntakeConstants;
+import org.steelhawks.subsystems.intake.Intake.State;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -228,7 +228,7 @@ public final class Autos {
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -287,7 +287,7 @@ public final class Autos {
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -344,7 +344,7 @@ public final class Autos {
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -386,7 +386,7 @@ public final class Autos {
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
             )
         );
@@ -431,7 +431,7 @@ public final class Autos {
             Commands.sequence(
                 trenchPickUpCrossBump1.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 trenchPickUpCrossBump1.spawnCmd()
             )
         );
@@ -493,7 +493,7 @@ public final class Autos {
             Commands.sequence(
                 trenchPickUpCrossBump1.resetOdometry(),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 trenchPickUpCrossBump1.spawnCmd()
             )
         );
@@ -552,7 +552,7 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 firstPass.resetOdometry(),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 firstPass.spawnCmd()
             )
@@ -597,7 +597,7 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 firstPass.resetOdometry(),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 firstPass.spawnCmd()
             )
@@ -641,7 +641,7 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 moveToShootPose.resetOdometry(),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 moveToShootPose.spawnCmd()
             )
         );
@@ -679,7 +679,7 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 moveToShootPose.resetOdometry(),
-                RobotContainer.s_Intake.setDesiredStateCommand(IntakeConstants.State.INTAKE),
+                RobotContainer.s_Intake.setDesiredStateCommand(State.INTAKE),
                 moveToShootPose.spawnCmd()
             )
         );

@@ -2,8 +2,10 @@ package org.steelhawks.subsystems.intake;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,6 +18,36 @@ import org.steelhawks.util.LoggedTunableNumber;
 
 public class Intake extends SubsystemBase {
 
+    public static final double REDUCTION = (7.0 / 1.0);
+    public static final double PINION_RADIUS = Units.inchesToMeters(1.033922 / 2.0);
+    public static final double METERS_PER_ROTATION = (2 * Math.PI * PINION_RADIUS);
+    public static final double METERS_PER_RADIAN = PINION_RADIUS / REDUCTION;
+    public static final double MASS_KG = 0.0;
+
+    public static final Rotation2d RACK_ANGLE = Rotation2d.fromDegrees(-19.0);
+    public static final double MAX_EXTENSION_FROM_FRAME = Units.inchesToMeters(12.0 + (1.0 / 8.0));
+    public static final double MIN_EXTENSION = MAX_EXTENSION_FROM_FRAME - 0.33 - 0.02; //    0.144461m
+    public static final double RETRACTED_POS = 0.15;
+    public static final double HOME_POS = MAX_EXTENSION_FROM_FRAME - 0.33;
+    public static final double TOLERANCE = 0.01;
+
+    public enum State {
+        RETRACTED(RETRACTED_POS),
+        CENTER_OF_MOTION((RETRACTED_POS + HOME_POS) / 2.0),
+        HOME(HOME_POS),
+        INTAKE(0.3);
+
+        private final double positionMeters;
+
+        State(double positionMeters) {
+            this.positionMeters = positionMeters;
+        }
+
+        public double getPosition() {
+            return positionMeters;
+        }
+    }
+
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
     private TrapezoidProfile profile;
     private final IntakeIO io;
@@ -23,7 +55,7 @@ public class Intake extends SubsystemBase {
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
 
-    private IntakeConstants.State desiredGoal = IntakeConstants.State.HOME;
+    private State desiredGoal = State.HOME;
     private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.State goal = new TrapezoidProfile.State();
     private boolean brakeModeEnabled = false;
@@ -74,7 +106,7 @@ public class Intake extends SubsystemBase {
         return atGoal;
     }
 
-    public IntakeConstants.State getDesiredGoal() {
+    public State getDesiredGoal() {
         return desiredGoal;
     }
 
@@ -114,8 +146,8 @@ public class Intake extends SubsystemBase {
             isHomed = true;
             io.setPosition(0);
             isZeroed = true;
-            goal = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
-            setpoint = new TrapezoidProfile.State(IntakeConstants.State.HOME.getPosition(), 0.0);
+            goal = new TrapezoidProfile.State(State.HOME.getPosition(), 0.0);
+            setpoint = new TrapezoidProfile.State(State.HOME.getPosition(), 0.0);
             Logger.recordOutput("Intake/IsHomed", true);
             Logger.recordOutput("Intake/Zeroed", true);
         }
@@ -125,11 +157,11 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
-                io.setPosition(IntakeConstants.State.INTAKE.getPosition());
+                io.setPosition(State.INTAKE.getPosition());
                 io.stopRack();
                 isZeroed = true;
-                goal = new TrapezoidProfile.State(IntakeConstants.State.INTAKE.getPosition(), 0.0);
-                setpoint = new TrapezoidProfile.State(IntakeConstants.State.INTAKE.getPosition(), 0.0);
+                goal = new TrapezoidProfile.State(State.INTAKE.getPosition(), 0.0);
+                setpoint = new TrapezoidProfile.State(State.INTAKE.getPosition(), 0.0);
                 Logger.recordOutput("Intake/Zeroed", true);
             }
         }
@@ -184,17 +216,17 @@ public class Intake extends SubsystemBase {
             }
             double previousVelocity = setpoint.velocity;
             setpoint = profile.calculate(Constants.UPDATE_LOOP_DT, setpoint, goal);
-            if (setpoint.position <= IntakeConstants.MIN_EXTENSION
-                || setpoint.position >= IntakeConstants.MAX_EXTENSION_FROM_FRAME) {
+            if (setpoint.position <= MIN_EXTENSION
+                || setpoint.position >= MAX_EXTENSION_FROM_FRAME) {
                 setpoint =
                     new TrapezoidProfile.State(
                         MathUtil.clamp(
                             setpoint.position,
-                            IntakeConstants.MIN_EXTENSION,
-                            IntakeConstants.MAX_EXTENSION_FROM_FRAME),
+                            MIN_EXTENSION,
+                            MAX_EXTENSION_FROM_FRAME),
                         0.0);
             }
-            atGoal = Math.abs(getPosition() - goal.position) <= IntakeConstants.TOLERANCE;
+            atGoal = Math.abs(getPosition() - goal.position) <= TOLERANCE;
             if (atGoal) {
                 io.stopRack();
             } else {
@@ -203,10 +235,10 @@ public class Intake extends SubsystemBase {
                 double drivetrainAccelG = rawAccelY - Math.sin(pitchRadians);
                 double drivetrainAccel = drivetrainAccelG * 9.81;
 
-                double mass = IntakeConstants.MASS_KG;
-                double rackAngle = IntakeConstants.RACK_ANGLE.getRadians();
-                double pinionRadius = IntakeConstants.PINION_RADIUS;
-                double gearRatio = IntakeConstants.REDUCTION;
+                double mass = MASS_KG;
+                double rackAngle = RACK_ANGLE.getRadians();
+                double pinionRadius = PINION_RADIUS;
+                double gearRatio = REDUCTION;
                 double frictionMultiplier = 1.3;
                 double rackAccel = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
                 double forceGravity = mass * 9.81 * Math.sin(rackAngle);
@@ -243,16 +275,16 @@ public class Intake extends SubsystemBase {
         }
     }
 
-    public void setDesiredState(IntakeConstants.State state) {
+    public void setDesiredState(State state) {
         inputs.goal = MathUtil.clamp(
             state.getPosition(),
-            IntakeConstants.MIN_EXTENSION,
-            IntakeConstants.MAX_EXTENSION_FROM_FRAME);
+            MIN_EXTENSION,
+            MAX_EXTENSION_FROM_FRAME);
         goal = new TrapezoidProfile.State(inputs.goal, 0.0);
         desiredGoal = state;
     }
 
-    public Command setDesiredStateCommand(IntakeConstants.State state) {
+    public Command setDesiredStateCommand(State state) {
         return Commands.runOnce(() -> setDesiredState(state));
     }
 
@@ -260,13 +292,13 @@ public class Intake extends SubsystemBase {
         return Commands.run(
                 () -> io.runRackOpenLoop(5.0, false))
             .until(this::isStalling)
-            .finallyDo(() -> io.setPosition(IntakeConstants.State.INTAKE.getPosition()));
+            .finallyDo(() -> io.setPosition(State.INTAKE.getPosition()));
     }
 
     public Command slamIn() {
         return Commands.run(
                 () -> io.runRackOpenLoop(-5.0, false)).until(this::isStalling)
-            .finallyDo(() -> io.setPosition(IntakeConstants.State.HOME.getPosition()));
+            .finallyDo(() -> io.setPosition(State.HOME.getPosition()));
     }
 
     public boolean isRollersRunning() {
@@ -290,12 +322,12 @@ public class Intake extends SubsystemBase {
 
     public Command agitate() {
         return Commands.sequence(
-            setDesiredStateCommand(IntakeConstants.State.INTAKE),
+            setDesiredStateCommand(State.INTAKE),
             Commands.waitUntil(this::atGoal),
-            setDesiredStateCommand(IntakeConstants.State.CENTER_OF_MOTION),
+            setDesiredStateCommand(State.CENTER_OF_MOTION),
             Commands.waitUntil(() -> atGoal() || isStalling()))
         .repeatedly()
-        .finallyDo(() -> setDesiredState(IntakeConstants.State.HOME));
+        .finallyDo(() -> setDesiredState(State.HOME));
     }
 
     public Command feed() {
@@ -304,7 +336,7 @@ public class Intake extends SubsystemBase {
                 new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SEC.get() * 0.3,
                 MAX_ACCEL_METERS_PER_SEC_SQ.get() * 0.3)))
-        .andThen(setDesiredStateCommand(IntakeConstants.State.HOME))
+        .andThen(setDesiredStateCommand(State.HOME))
         .andThen(Commands.waitUntil(this::atGoal))
         .finallyDo(() ->
             profile = new TrapezoidProfile(

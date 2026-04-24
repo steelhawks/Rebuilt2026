@@ -34,9 +34,9 @@ public class IntakeVisualizer {
         Logger.recordOutput("Intake/ComponentPoses", new Pose3d[]{
             new Pose3d(
                 new Translation3d(
-                    positionMeters * Math.cos(IntakeConstants.RACK_ANGLE.getRadians()),
+                    positionMeters * Math.cos(Intake.RACK_ANGLE.getRadians()),
                     0.0,
-                    positionMeters * Math.sin(IntakeConstants.RACK_ANGLE.getRadians())
+                    positionMeters * Math.sin(Intake.RACK_ANGLE.getRadians())
                 ),
                 new Rotation3d()
             )
