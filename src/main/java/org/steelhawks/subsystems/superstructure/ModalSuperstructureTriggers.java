@@ -89,7 +89,7 @@ public class ModalSuperstructureTriggers {
     }
 
     private  Command createHubSnapCommand() {
-
+        return Commands.none();
     }
 
 
