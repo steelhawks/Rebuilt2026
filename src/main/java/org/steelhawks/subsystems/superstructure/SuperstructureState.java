@@ -89,6 +89,8 @@ public enum SuperstructureState {
             case SHOOTING:
                 all.remove(EnumSet.of(STOWED, INTAKING));
                 return all;
+            case IN_HOPPER:
+                all.remove(EnumSet.of(STOWED, SHOOTING));
             default:
                 return all;
 

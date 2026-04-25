@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.superstructure;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
@@ -12,22 +13,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ModalSuperstructureTriggers {
-    private final RobotContainer robotContainer;
+    private final RobotContainer container;
     private final SSM stateMachine;
     private final FuelStateTracker fuelTracker;
 
     private final AtomicReference<SuperstructureState> latestFuelState = new AtomicReference<>(
             SuperstructureState.IN_HOPPER
     );
-    private final AtomicBoolean coralAtShooter =  new AtomicBoolean(false);
+
+    private final AtomicBoolean fuelAtShooter =  new AtomicBoolean(false);
     private final AtomicReference<RobotState.AimState> selectedAimstate = new AtomicReference<>(RobotState.AimState.TO_HUB);
     private final AtomicBoolean enableAutoStow = new AtomicBoolean(false);
     private final AtomicBoolean enableHubSnap =  new AtomicBoolean(true);
 
     public ModalSuperstructureTriggers(RobotContainer robotContainer, SSM stateMachine, FuelStateTracker fuelTracker) {
-        this.robotContainer = robotContainer;
+        this.container = robotContainer;
         this.stateMachine = stateMachine;
         this.fuelTracker = fuelTracker;
+
+        configureTriggers();
     }
 
     public AtomicReference<SuperstructureState> getLatestFuelState() {
@@ -88,12 +92,31 @@ public class ModalSuperstructureTriggers {
                 () -> isScoreableFuel(null)).withName("HI");
     }
 
-    private  Command createHubSnapCommand() {
+
+    private Command createExhaustFuelCommand() {
         return Commands.none();
+    }
+
+    private Command createSpindexerToShooterCommand() {
+        return new SequentialCommandGroup(
+                Commands.none()
+        );
+    }
+
+    private Command createIntakingWhileSpindexerToShooterCommand() {
+        return new SequentialCommandGroup(
+                Commands.none()
+        );
     }
 
 
 
+
+    private void configureTriggers() {
+        Trigger indexFuelIfShooterReady = new Trigger(
+                () -> fuelAtShooter.get() && container.s_Flywheel.isReadyToShoot()
+        );
+    }
 
 
 }
