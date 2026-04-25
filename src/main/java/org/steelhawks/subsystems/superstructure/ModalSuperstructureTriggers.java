@@ -38,7 +38,7 @@ public class ModalSuperstructureTriggers {
         return latestFuelState;
     }
 
-    private boolean isScoreableFuel(SuperstructureState fuelState) {
+    public static boolean isScoreableFuel(SuperstructureState fuelState) {
         return fuelState == SuperstructureState.SPINDEXING
                 || fuelState == SuperstructureState.SHOOTING
                 || fuelState == SuperstructureState.IN_HOPPER;
