@@ -60,6 +60,8 @@ public class SSM {
         this.futureDesiredState = null;
         this.container = container;
         loadTransitionCosts();
+        autoGenerateTransitions();
+        precomputeAllPaths();
     }
 
     public void setTransitioning(boolean transitioning) {

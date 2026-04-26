@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.commands.ShootingCommands;
+import org.steelhawks.subsystems.shooterSuperstructure.flywheel.Flywheel;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,45 +53,54 @@ public class ModalSuperstructureTriggers {
     }
 
     private Command setStateCommand(SuperstructureState state, String name) {
-        return Commands.none();
+        return new InstantCommand(
+                () -> stateMachine.setDesiredState(state)
+        ).withName(name);
     }
 
     private Command setStateCommand(SuperstructureState state, boolean setFuture, String name) {
-        return Commands.none();
+        return new InstantCommand(
+                () -> stateMachine.setDesiredState(state, setFuture, true)
+        ).withName(name);
     }
 
     private Command setStateCommand(AtomicReference<SuperstructureState> state, boolean setFuture, String name) {
-        return Commands.none();
+        return new InstantCommand(
+                () -> stateMachine.setDesiredState(state.get(), setFuture, true)
+        ).withName(name);
     }
 
     public Command setAndWaitCommand(SuperstructureState state, String name) {
         return Commands.sequence(
                 setStateCommand(state, name),
-                new WaitUntilCommand(() -> stateMachine != null)
-        );
+                new WaitUntilCommand(() -> container.getStateMachine().getDesiredState() != null
+                && stateMachine.getCurrentState().equals(state)));
     }
 
     public Command setFutureStateAndWaitCommand(SuperstructureState state, String name) {
         return Commands.sequence(
                 setStateCommand(state, true, name),
-                new WaitUntilCommand(() -> stateMachine != null)
+                new WaitUntilCommand(() -> (container.getStateMachine().getDesiredState() != null
+                && stateMachine.getDesiredState().equals(state)) ||
+                        (container.getStateMachine().getCurrentState() != null
+                        && container.getStateMachine().getCurrentState().equals(state)))
         );
     }
 
     public Command commandToDesiredStateCommand() {
         return Commands.defer(
-                () -> setAndWaitCommand(null, "Stage Desired State"),
+                () -> setAndWaitCommand(stateMachine.getDesiredState(), "Stage Desired State"),
                 Set.of());
     }
 
     private Command createScoreHubCommand() {
         Command indexCommand = commandToDesiredStateCommand();
-        Command scoreCommand = new InstantCommand(Commands::none);
+        Command scoreCommand = new InstantCommand((Runnable) ShootingCommands.shoot());
         Command fullScoreSequence = Commands.sequence(indexCommand, scoreCommand);
         return new ConditionalCommand(
                 fullScoreSequence,
                 Commands.none(),
-                () -> isScoreableFuel(null)).withName("HI");
+                () -> isScoreableFuel(stateMachine.getCurrentState())).withName("Superstructure Score");
     }
 
 
@@ -114,8 +125,11 @@ public class ModalSuperstructureTriggers {
 
     private void configureTriggers() {
         Trigger indexFuelIfShooterReady = new Trigger(
-                () -> fuelAtShooter.get() && container.s_Flywheel.isReadyToShoot()
+                () -> fuelAtShooter.get() && (container.getFlywheel().isReadyToShoot() && container.getStateMachine().getDesiredState() == SuperstructureState.SPINDEXING) ||
+                        (container.getFlywheel().isReadyToShoot() && container.getStateMachine().getDesiredState() == SuperstructureState.SHOOTING)
         );
+
+
     }
 
 
