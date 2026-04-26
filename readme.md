@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="https://www.steelhawks.net/logo.svg" alt="Steel Hawks Logo" />
+<picture>
+    <source media="(prefers-color-scheme: light)" srcset="images/logo/steelhawks-light-mode.svg">
+    <img src="images/logo/steelhawks-dark-mode.svg" alt="Steel Hawks Logo">
+</picture>
 
 # Shaquille O'Steel
 ### FRC Team Steel Hawks 2601 :: 2026 Robot Code
