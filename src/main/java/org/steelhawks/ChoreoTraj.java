@@ -83,21 +83,21 @@ public record ChoreoTraj(
 	public static final ChoreoTraj LNotSoOPAuton = new ChoreoTraj(
 	    "LNotSoOPAuton",
 	    OptionalInt.empty(),
-	    15.89189,
+	    15.84224,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.882, 2.989, Rotation2d.fromRadians(-1.571))
 	);
 	public static final ChoreoTraj LNotSoOPAuton$0 = new ChoreoTraj(
 	    "LNotSoOPAuton",
 	    OptionalInt.of(0),
-	    5.26116,
+	    5.22234,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521))
 	);
 	public static final ChoreoTraj LNotSoOPAuton$1 = new ChoreoTraj(
 	    "LNotSoOPAuton",
 	    OptionalInt.of(1),
-	    6.735809999999999,
+	    6.7249799999999995,
 	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521)),
 	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521))
 	);
@@ -111,36 +111,36 @@ public record ChoreoTraj(
 	public static final ChoreoTraj LOPAuton = new ChoreoTraj(
 	    "LOPAuton",
 	    OptionalInt.empty(),
-	    23.66495,
+	    23.3012,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.882, 2.989, Rotation2d.fromRadians(-1.571))
 	);
 	public static final ChoreoTraj LOPAuton$0 = new ChoreoTraj(
 	    "LOPAuton",
 	    OptionalInt.of(0),
-	    4.44624,
+	    4.45491,
 	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
-	    new Pose2d(2.837, 5.516, Rotation2d.fromRadians(-2.356))
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356))
 	);
 	public static final ChoreoTraj LOPAuton$1 = new ChoreoTraj(
 	    "LOPAuton",
 	    OptionalInt.of(1),
-	    6.067189999999999,
-	    new Pose2d(2.837, 5.516, Rotation2d.fromRadians(-2.356)),
+	    5.86706,
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356)),
 	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj LOPAuton$2 = new ChoreoTraj(
 	    "LOPAuton",
 	    OptionalInt.of(2),
-	    4.189960000000001,
+	    4.2178,
 	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0)),
-	    new Pose2d(2.837, 5.516, Rotation2d.fromRadians(-2.356))
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356))
 	);
 	public static final ChoreoTraj LOPAuton$3 = new ChoreoTraj(
 	    "LOPAuton",
 	    OptionalInt.of(3),
-	    6.067079999999999,
-	    new Pose2d(2.837, 5.516, Rotation2d.fromRadians(-2.356)),
+	    5.866949999999999,
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356)),
 	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj LOPAuton$4 = new ChoreoTraj(
@@ -251,21 +251,21 @@ public record ChoreoTraj(
 	public static final ChoreoTraj RNotSoOPAuton = new ChoreoTraj(
 	    "RNotSoOPAuton",
 	    OptionalInt.empty(),
-	    15.89189,
+	    15.84224,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
 	);
 	public static final ChoreoTraj RNotSoOPAuton$0 = new ChoreoTraj(
 	    "RNotSoOPAuton",
 	    OptionalInt.of(0),
-	    5.26116,
+	    5.22234,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
 	);
 	public static final ChoreoTraj RNotSoOPAuton$1 = new ChoreoTraj(
 	    "RNotSoOPAuton",
 	    OptionalInt.of(1),
-	    6.735809999999999,
+	    6.7249799999999995,
 	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
 	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
 	);
@@ -279,36 +279,36 @@ public record ChoreoTraj(
 	public static final ChoreoTraj ROPAuton = new ChoreoTraj(
 	    "ROPAuton",
 	    OptionalInt.empty(),
-	    23.66494,
+	    23.3012,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
 	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
 	);
 	public static final ChoreoTraj ROPAuton$0 = new ChoreoTraj(
 	    "ROPAuton",
 	    OptionalInt.of(0),
-	    4.44624,
+	    4.45491,
 	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
-	    new Pose2d(2.837, 2.553, Rotation2d.fromRadians(2.356))
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356))
 	);
 	public static final ChoreoTraj ROPAuton$1 = new ChoreoTraj(
 	    "ROPAuton",
 	    OptionalInt.of(1),
-	    6.067189999999999,
-	    new Pose2d(2.837, 2.553, Rotation2d.fromRadians(2.356)),
+	    5.86706,
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356)),
 	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj ROPAuton$2 = new ChoreoTraj(
 	    "ROPAuton",
 	    OptionalInt.of(2),
-	    4.189960000000001,
+	    4.2178,
 	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0)),
-	    new Pose2d(2.837, 2.553, Rotation2d.fromRadians(2.356))
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356))
 	);
 	public static final ChoreoTraj ROPAuton$3 = new ChoreoTraj(
 	    "ROPAuton",
 	    OptionalInt.of(3),
-	    6.067079999999999,
-	    new Pose2d(2.837, 2.553, Rotation2d.fromRadians(2.356)),
+	    5.866959999999999,
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356)),
 	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0))
 	);
 	public static final ChoreoTraj ROPAuton$4 = new ChoreoTraj(
