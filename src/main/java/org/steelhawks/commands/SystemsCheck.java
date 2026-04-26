@@ -1,14 +1,12 @@
 package org.steelhawks.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.SubsystemConstants;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
-import org.steelhawks.subsystems.oldintake.OldIntake;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
@@ -27,16 +25,30 @@ public final class SystemsCheck {
 		throw new RuntimeException("This is a util class.");
 	}
 
-	public static Command swerve() {
-		return Commands.runEnd(
-			() -> DriveCommands.runVelocity(new Translation2d(2.0, 0.0), 2.0),
-			s_Swerve::stop,
-			s_Swerve);
-		// zxeroes wheels, moves to 45, spins angular, spins linear
+	public static Command zeroSwerve() {
+		return Commands.runOnce(() -> s_Swerve.runAngle(Rotation2d.kZero), s_Swerve);
 	}
 
-	public static Command indexer() {
-		return s_Indexer.feed();
+	public static Command testSwerveAngle() {
+		return Commands.runOnce(() -> s_Swerve.runAngle(Rotation2d.fromDegrees(45.0)), s_Swerve);
+	}
+
+	public static Command testSwerveDriving() {
+		return Commands.run(() -> s_Swerve.runDriveCharacterization(3.0), s_Swerve)
+			.finallyDo(s_Swerve::stop);
+	}
+
+	public static Command testSwerveTurning() {
+		return Commands.run(() -> s_Swerve.runTurnCharacterization(3.0), s_Swerve)
+			.finallyDo(s_Swerve::stop);
+	}
+
+	public static Command spindexer() {
+		return s_Indexer.runSpindexer();
+	}
+
+	public static Command feeder() {
+		return s_Indexer.runFeeder();
 	}
 
 	public static Command intake() {
@@ -45,16 +57,16 @@ public final class SystemsCheck {
 	}
 
 	public static Command flywheel() {
-		return s_Flywheel.setTargetVelocityForcedCmd(50.0);
+		return s_Flywheel.setTargetVelocityForcedCmd(50.0)
+			.finallyDo(() -> s_Flywheel.setTargetVelocity(0.0));
 	}
 
 	public static Command hood() {
 		return Commands.sequence(
 			s_Hood.setDesiredPositionCommand(SubsystemConstants.OmegaBot.HOOD.minAngle()),
 			Commands.waitUntil(s_Hood::atGoal),
-			s_Hood.setDesiredPositionCommand(Hood.HOME_POSITION));
+			s_Hood.setDesiredPositionCommand(Hood.HOME_POSITION)); // needs testing
 	}
-
 
 	public static Command turret() {
 		return Commands.sequence(
@@ -62,5 +74,4 @@ public final class SystemsCheck {
 			Commands.waitUntil(s_Turret::atGoal),
 			s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2)));
 	}
-
 }

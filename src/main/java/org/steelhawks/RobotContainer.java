@@ -137,22 +137,37 @@ public class RobotContainer {
     }
 
     private void configureSystemsCheck() {
-        driver.rightBumper().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .whileTrue(SystemsCheck.swerve());
+
+        RobotModeTriggers.test().onTrue(s_Flywheel.setTargetVelocityForcedCmd(0.0));
 
         driver.leftBumper().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .whileTrue(SystemsCheck.flywheel()); // doesnt work
+            .whileTrue(SystemsCheck.flywheel());
 
-        driver.x().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .onTrue(SystemsCheck.turret()); // doesnt work
-
-        driver.y().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .onTrue(SystemsCheck.hood()); // doesnt work
-
-        driver.b().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+        driver.rightBumper().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(SystemsCheck.intake());
 
+        driver.povUp().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .onTrue(SystemsCheck.zeroSwerve());
+
+        driver.povLeft().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .onTrue(SystemsCheck.testSwerveAngle());
+
+        driver.povDown().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.testSwerveDriving());
+
+        driver.povRight().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.testSwerveTurning());
+
+        driver.y().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .onTrue(SystemsCheck.hood()); // needs testing
+
+        driver.x().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .onTrue(SystemsCheck.turret());
+
         driver.a().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .whileTrue(SystemsCheck.indexer());
+            .whileTrue(SystemsCheck.spindexer());
+
+        driver.b().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
+            .whileTrue(SystemsCheck.feeder())
     }
 }

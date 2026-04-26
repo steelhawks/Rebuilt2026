@@ -21,7 +21,7 @@ public class HoodDefaultCommand extends Command {
 
     @Override
     public void execute() {
-        if (Toggles.shooterTuningMode.get() && !DriverStation.isTest()) return;
+        if (Toggles.shooterTuningMode.get() || DriverStation.isTest()) return;
         var sol = RobotState.getInstance().getMovingShotSolution();
         switch (RobotState.getInstance().getShootingState()) {
             case NOTHING -> s_Hood.setDesiredPositionForced(Hood.HOME_POSITION);

@@ -162,6 +162,14 @@ public class SwerveModule {
     }
 
     /**
+     * Sets the module to a desired angle.
+     */
+    public void setAngle(Rotation2d angle) {
+        io.setDriveOpenLoop(0);
+        io.setTurnPosition(angle);
+    }
+
+    /**
      * Disables all outputs to motors.
      */
     public void stop() {

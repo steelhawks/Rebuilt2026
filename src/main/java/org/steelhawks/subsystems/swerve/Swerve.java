@@ -568,6 +568,12 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public void runAngle(Rotation2d angle) {
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i].setAngle(angle);
+        }
+    }
+
     /** Calculates the drive wheel coefficient of static friction. */
     public double runWheelCOFCharacterizer() {
         double totalFrictionForce =
