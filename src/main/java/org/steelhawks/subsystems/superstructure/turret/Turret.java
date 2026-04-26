@@ -469,14 +469,15 @@ public class Turret extends SubsystemBase {
     }
 
     public Command setDesiredRotation(Rotation2d rotation) {
-        return Commands.either(
-            Commands.runOnce(
-                () -> desiredRotation =
-                        Rotation2d.fromRadians(
-                            MathUtil.clamp(
-                                rotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians())), this),
-                Commands.none(),
-                () -> RobotState.getInstance().getAimState().equals(AimState.MANUAL))
+        return Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.MANUAL)).andThen(
+            Commands.either(
+                Commands.runOnce(
+                    () -> desiredRotation =
+                            Rotation2d.fromRadians(
+                                MathUtil.clamp(
+                                    rotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians())), this),
+                    Commands.none(),
+                    () -> RobotState.getInstance().getAimState().equals(AimState.MANUAL)))
             .withName("Set Desired State");
     }
 

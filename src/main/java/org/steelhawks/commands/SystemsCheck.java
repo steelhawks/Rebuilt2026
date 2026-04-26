@@ -32,6 +32,7 @@ public final class SystemsCheck {
 			() -> DriveCommands.runVelocity(new Translation2d(2.0, 0.0), 2.0),
 			s_Swerve::stop,
 			s_Swerve);
+		// zxeroes wheels, moves to 45, spins angular, spins linear
 	}
 
 	public static Command indexer() {
@@ -49,14 +50,17 @@ public final class SystemsCheck {
 
 	public static Command hood() {
 		return Commands.sequence(
-			s_Hood.setDesiredPositionCommand(SubsystemConstants.OmegaBot.HOOD.maxAngle()),
+			s_Hood.setDesiredPositionCommand(SubsystemConstants.OmegaBot.HOOD.minAngle()),
+			Commands.waitUntil(s_Hood::atGoal),
 			s_Hood.setDesiredPositionCommand(Hood.HOME_POSITION));
 	}
 
+
 	public static Command turret() {
 		return Commands.sequence(
-			s_Turret.setDesiredRotation(s_Turret.getMaxRotation()),
-			s_Turret.setDesiredRotation(s_Turret.getMinRotation()));
+			s_Turret.setDesiredRotation(Rotation2d.fromRadians(-Math.PI / 2)),
+			Commands.waitUntil(s_Turret::atGoal),
+			s_Turret.setDesiredRotation(Rotation2d.fromRadians(Math.PI / 2)));
 	}
 
 }

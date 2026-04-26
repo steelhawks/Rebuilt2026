@@ -130,7 +130,7 @@ public class Flywheel extends SubsystemBase {
             }, kP, kI, kD);
         }
         if (shouldRun) {
-            if (!Toggles.shooterTuningMode.get()) {
+            if (!Toggles.shooterTuningMode.get() && !DriverStation.isTest()) {
                 Logger.recordOutput("Flywheel/AimState", RobotState.getInstance().getShootingState().name());
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                 switch (RobotState.getInstance().getShootingState()) {

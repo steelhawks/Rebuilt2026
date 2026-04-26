@@ -3,6 +3,7 @@ package org.steelhawks;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
@@ -75,6 +76,23 @@ public class RobotContainer {
         new Trigger(() -> s_Flywheel.isReadyToShoot()).and(driver.leftBumper()).and(() -> !Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(RumbleAPI.steady().repeatedly());
 
+        RobotModeTriggers.teleop()
+            .onTrue(
+                Commands.either(
+                    Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.FERRY)),
+                    Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)),
+                    () -> {
+                        double x = RobotState.getInstance().getEstimatedPose().getX();
+                        if (AllianceFlip.shouldFlip()) {
+                            double boundary = AllianceFlip.applyX(FieldConstants.Trench.TRENCH_START_X);
+                            return x <= boundary;
+                        } else {
+                            return x >= FieldConstants.Trench.TRENCH_END_X;
+                        }
+                    }
+                )
+            );
+
         new Trigger(() -> {
             double x = RobotState.getInstance().getEstimatedPose().getX();
             if (AllianceFlip.shouldFlip()) {
@@ -123,13 +141,13 @@ public class RobotContainer {
             .whileTrue(SystemsCheck.swerve());
 
         driver.leftBumper().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .whileTrue(SystemsCheck.flywheel());
+            .whileTrue(SystemsCheck.flywheel()); // doesnt work
 
         driver.x().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .onTrue(SystemsCheck.turret());
+            .onTrue(SystemsCheck.turret()); // doesnt work
 
         driver.y().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
-            .onTrue(SystemsCheck.hood());
+            .onTrue(SystemsCheck.hood()); // doesnt work
 
         driver.b().and(() -> Robot.getState().equals(Robot.RobotState.TEST))
             .whileTrue(SystemsCheck.intake());

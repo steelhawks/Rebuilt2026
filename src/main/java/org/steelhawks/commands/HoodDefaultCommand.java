@@ -1,6 +1,7 @@
 package org.steelhawks.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.RobotState;
@@ -20,7 +21,7 @@ public class HoodDefaultCommand extends Command {
 
     @Override
     public void execute() {
-        if (Toggles.shooterTuningMode.get()) return;
+        if (Toggles.shooterTuningMode.get() && !DriverStation.isTest()) return;
         var sol = RobotState.getInstance().getMovingShotSolution();
         switch (RobotState.getInstance().getShootingState()) {
             case NOTHING -> s_Hood.setDesiredPositionForced(Hood.HOME_POSITION);
