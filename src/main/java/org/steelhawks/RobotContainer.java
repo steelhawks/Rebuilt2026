@@ -3,8 +3,6 @@ package org.steelhawks;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
@@ -21,17 +19,13 @@ import org.steelhawks.subsystems.shooterSuperstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.shooterSuperstructure.hood.Hood;
 import org.steelhawks.subsystems.shooterSuperstructure.turret.MagicTurret;
 import org.steelhawks.subsystems.superstructure.FuelStateTracker;
-import org.steelhawks.subsystems.superstructure.SSM;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.util.AllianceFlip;
 
-import java.io.FileNotFoundException;
+public class RobotContainer {
 
-public class RobotContainer<N> {
-
-    private final SSM stateMachine;
     private final RobotConfig config = RobotConfig.getConfig();
     public static FuelStateTracker gamePieceTracker = null;
     private BeamIOInputsAutoLogged inputs;
@@ -52,10 +46,7 @@ public class RobotContainer<N> {
     private final CommandXboxController driver =
         new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
-    public RobotContainer() throws FileNotFoundException {
-
-        stateMachine = new SSM(this);
-
+    public RobotContainer() {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
         RumbleAPI.register(driver);
@@ -134,14 +125,5 @@ public class RobotContainer<N> {
 //            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kZero));
 //        driver.a()
 //            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kPi.div(2.0)));
-    }
-
-
-    public SSM getStateMachine() {
-        return stateMachine;
-    }
-
-    public Flywheel getFlywheel() {
-        return s_Flywheel;
     }
 }

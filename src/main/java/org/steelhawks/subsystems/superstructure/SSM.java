@@ -54,14 +54,16 @@ public class SSM {
         }
     }
 
-    public SSM(RobotContainer container) throws FileNotFoundException {
+    public SSM(RobotContainer container) {
         this.currentState = null;
         this.desiredState = null;
         this.futureDesiredState = null;
         this.container = container;
-        loadTransitionCosts();
-        autoGenerateTransitions();
-        precomputeAllPaths();
+        try {
+            loadTransitionCosts();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setTransitioning(boolean transitioning) {
