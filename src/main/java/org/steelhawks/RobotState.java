@@ -80,6 +80,8 @@ public class RobotState {
     private final Trigger inBumpTrigger;
     @AutoLogOutput
     private final Trigger turretStuckTrigger;
+    @AutoLogOutput
+    private final Trigger nearHubTrigger;
 
     private ShooterStructure.MovingShotSolution movingShotSolution = null;
 
@@ -144,10 +146,17 @@ public class RobotState {
                 footprint,
                 Boundary.Mode.PERIMETER))
             .debounce(0.3);
-
         inBumpTrigger =
             Boundary.asTrigger(
                 () -> AllianceFlip.apply(new Rectangle2d(new Translation2d(), new Translation2d())),
+                this::getEstimatedPose,
+                footprint,
+                Boundary.Mode.PERIMETER)
+            .debounce(0.3);
+        nearHubTrigger =
+            Boundary.asTrigger(
+                "NearHub",
+                () -> AllianceFlip.apply(FieldConstants.Hub.NEAR_HUB_TRIGGER_BOX),
                 this::getEstimatedPose,
                 footprint,
                 Boundary.Mode.PERIMETER)
@@ -169,6 +178,10 @@ public class RobotState {
 
     public Trigger getBumpTrigger() {
         return inBumpTrigger;
+    }
+
+    public Trigger getNearHubTrigger() {
+        return nearHubTrigger;
     }
 
     public Trigger getSOTMTrigger() {

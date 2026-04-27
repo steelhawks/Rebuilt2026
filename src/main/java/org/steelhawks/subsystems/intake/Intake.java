@@ -62,6 +62,7 @@ public class Intake extends SubsystemBase {
     private final double homingVolts = 5.0;
     private boolean atGoal = false;
     private boolean isHomed = false;
+    private boolean homedInwards = false;
     private boolean isZeroed = false;
     private boolean isRollersRunning = false;
 
@@ -152,16 +153,24 @@ public class Intake extends SubsystemBase {
             Logger.recordOutput("Intake/Zeroed", true);
         }
         if (!isHomed && Toggles.Intake.isEnabled.get()) {
-            io.runRackOpenLoop(homingVolts, false);
+            boolean nearHub = RobotState.getInstance().getNearHubTrigger().getAsBoolean();
+            if (nearHub) {
+                io.runRackOpenLoop(-homingVolts, false);
+                homedInwards = true;
+            } else {
+                io.runRackOpenLoop(homingVolts, false);
+                homedInwards = false;
+            }
             isHomed = isStalling();
             Logger.recordOutput("Intake/IsHomed", isHomed);
         } else {
             if (!isZeroed) {
-                io.setPosition(State.INTAKE.getPosition());
+                State zeroState = homedInwards ? State.HOME : State.INTAKE;
+                io.setPosition(zeroState.getPosition());
                 io.stopRack();
                 isZeroed = true;
-                goal = new TrapezoidProfile.State(State.INTAKE.getPosition(), 0.0);
-                setpoint = new TrapezoidProfile.State(State.INTAKE.getPosition(), 0.0);
+                goal = new TrapezoidProfile.State(zeroState.getPosition(), 0.0);
+                setpoint = new TrapezoidProfile.State(zeroState.getPosition(), 0.0);
                 Logger.recordOutput("Intake/Zeroed", true);
             }
         }
@@ -212,6 +221,7 @@ public class Intake extends SubsystemBase {
         if (shouldRun) {
             if (isTwisting()) {
                 isHomed = false;
+                homedInwards = false;
                 isZeroed = false;
             }
             double previousVelocity = setpoint.velocity;
@@ -348,6 +358,7 @@ public class Intake extends SubsystemBase {
     public Command zeroIntake() {
         return Commands.runOnce(() -> {
             isZeroed = false;
+            homedInwards = false;
             isHomed = false;
         });
     }
