@@ -59,6 +59,48 @@ public record ChoreoTraj(
 	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
 	    new Pose2d(5, 0.537, Rotation2d.fromRadians(0))
 	);
+	public static final ChoreoTraj LBumpHubDepot = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.empty(),
+	    11.85603,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LBumpHubDepot$0 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(0),
+	    1.34261,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.818, 5.616, Rotation2d.fromRadians(-0.785))
+	);
+	public static final ChoreoTraj LBumpHubDepot$1 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(1),
+	    0.50366,
+	    new Pose2d(2.818, 5.616, Rotation2d.fromRadians(-0.785)),
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785))
+	);
+	public static final ChoreoTraj LBumpHubDepot$2 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(2),
+	    4.924860000000001,
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785)),
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LBumpHubDepot$3 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(3),
+	    3.3316299999999996,
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LBumpHubDepot$4 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(4),
+	    1.7532700000000006,
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
 	public static final ChoreoTraj LDoubleRebound = new ChoreoTraj(
 	    "LDoubleRebound",
 	    OptionalInt.empty(),
@@ -185,24 +227,59 @@ public record ChoreoTraj(
 	    new Pose2d(5.602, 7.426, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.394, 7.426, Rotation2d.fromRadians(0))
 	);
+	public static final ChoreoTraj LStuyAuton = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.empty(),
+	    13.55371,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LStuyAuton$0 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(0),
+	    1.84628,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785))
+	);
+	public static final ChoreoTraj LStuyAuton$1 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(1),
+	    6.62383,
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785)),
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LStuyAuton$2 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(2),
+	    3.3303100000000008,
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LStuyAuton$3 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(3),
+	    1.7532899999999998,
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
 	public static final ChoreoTraj MiddleDepotAuton = new ChoreoTraj(
 	    "MiddleDepotAuton",
 	    OptionalInt.empty(),
-	    4.77665,
+	    3.75724,
 	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
 	);
 	public static final ChoreoTraj MiddleDepotAuton$0 = new ChoreoTraj(
 	    "MiddleDepotAuton",
 	    OptionalInt.of(0),
-	    0.53845,
+	    0.53844,
 	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
 	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
 	);
 	public static final ChoreoTraj MiddleDepotAuton$1 = new ChoreoTraj(
 	    "MiddleDepotAuton",
 	    OptionalInt.of(1),
-	    4.2382,
+	    3.2188,
 	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451)),
 	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
 	);
@@ -353,33 +430,89 @@ public record ChoreoTraj(
 	    new Pose2d(5.602, 0.643, Rotation2d.fromRadians(0)),
 	    new Pose2d(4.394, 0.643, Rotation2d.fromRadians(0))
 	);
-	public static final ChoreoTraj LeftBumpToDepot = new ChoreoTraj(
-	    "LeftBumpToDepot",
+	public static final ChoreoTraj RStuyAuton = new ChoreoTraj(
+	    "RStuyAuton",
 	    OptionalInt.empty(),
-	    6.78854,
+	    13.30791,
 	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
-	    new Pose2d(0.586, 5.964, Rotation2d.fromRadians(3.142))
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
 	);
-	public static final ChoreoTraj LeftBumpToDepot$0 = new ChoreoTraj(
-	    "LeftBumpToDepot",
+	public static final ChoreoTraj RStuyAuton$0 = new ChoreoTraj(
+	    "RStuyAuton",
 	    OptionalInt.of(0),
-	    0.92748,
+	    1.83039,
 	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
-	    new Pose2d(2.818, 5.616, Rotation2d.fromRadians(-0.785))
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785))
 	);
-	public static final ChoreoTraj LeftBumpToDepot$1 = new ChoreoTraj(
-	    "LeftBumpToDepot",
+	public static final ChoreoTraj RStuyAuton$1 = new ChoreoTraj(
+	    "RStuyAuton",
 	    OptionalInt.of(1),
-	    4.37659,
-	    new Pose2d(2.818, 5.616, Rotation2d.fromRadians(-0.785)),
-	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-3.142))
+	    6.371600000000001,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356))
 	);
-	public static final ChoreoTraj LeftBumpToDepot$2 = new ChoreoTraj(
-	    "LeftBumpToDepot",
+	public static final ChoreoTraj RStuyAuton$2 = new ChoreoTraj(
+	    "RStuyAuton",
 	    OptionalInt.of(2),
-	    1.48447,
-	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-3.142)),
-	    new Pose2d(0.586, 5.964, Rotation2d.fromRadians(3.142))
+	    2.6198099999999993,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356)),
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186))
+	);
+	public static final ChoreoTraj RStuyAuton$3 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(3),
+	    1.317680000000001,
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186)),
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RStuyAuton$4 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(4),
+	    1.168429999999999,
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RBumpHubDepot = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.empty(),
+	    10.99103,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RBumpHubDepot$0 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(0),
+	    1.83039,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785))
+	);
+	public static final ChoreoTraj RBumpHubDepot$1 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(1),
+	    4.05471,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj RBumpHubDepot$2 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(2),
+	    2.61981,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356)),
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186))
+	);
+	public static final ChoreoTraj RBumpHubDepot$3 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(3),
+	    1.3176799999999993,
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186)),
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RBumpHubDepot$4 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(4),
+	    1.1684400000000004,
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
 	);
 
     /**
@@ -392,6 +525,12 @@ public record ChoreoTraj(
 		Map.entry("CenterPath$1", CenterPath$1),
 		Map.entry("FourMeterSpinTest", FourMeterSpinTest),
 		Map.entry("FourMeterTest", FourMeterTest),
+		Map.entry("LBumpHubDepot", LBumpHubDepot),
+		Map.entry("LBumpHubDepot$0", LBumpHubDepot$0),
+		Map.entry("LBumpHubDepot$1", LBumpHubDepot$1),
+		Map.entry("LBumpHubDepot$2", LBumpHubDepot$2),
+		Map.entry("LBumpHubDepot$3", LBumpHubDepot$3),
+		Map.entry("LBumpHubDepot$4", LBumpHubDepot$4),
 		Map.entry("LDoubleRebound", LDoubleRebound),
 		Map.entry("LDoubleRebound$0", LDoubleRebound$0),
 		Map.entry("LDoubleRebound$1", LDoubleRebound$1),
@@ -410,6 +549,11 @@ public record ChoreoTraj(
 		Map.entry("LRebound$1", LRebound$1),
 		Map.entry("LRebound$2", LRebound$2),
 		Map.entry("LRebound$3", LRebound$3),
+		Map.entry("LStuyAuton", LStuyAuton),
+		Map.entry("LStuyAuton$0", LStuyAuton$0),
+		Map.entry("LStuyAuton$1", LStuyAuton$1),
+		Map.entry("LStuyAuton$2", LStuyAuton$2),
+		Map.entry("LStuyAuton$3", LStuyAuton$3),
 		Map.entry("MiddleDepotAuton", MiddleDepotAuton),
 		Map.entry("MiddleDepotAuton$0", MiddleDepotAuton$0),
 		Map.entry("MiddleDepotAuton$1", MiddleDepotAuton$1),
@@ -434,10 +578,18 @@ public record ChoreoTraj(
 		Map.entry("RRebound$1", RRebound$1),
 		Map.entry("RRebound$2", RRebound$2),
 		Map.entry("RRebound$3", RRebound$3),
-		Map.entry("LeftBumpToDepot", LeftBumpToDepot),
-		Map.entry("LeftBumpToDepot$0", LeftBumpToDepot$0),
-		Map.entry("LeftBumpToDepot$1", LeftBumpToDepot$1),
-		Map.entry("LeftBumpToDepot$2", LeftBumpToDepot$2)
+		Map.entry("RStuyAuton", RStuyAuton),
+		Map.entry("RStuyAuton$0", RStuyAuton$0),
+		Map.entry("RStuyAuton$1", RStuyAuton$1),
+		Map.entry("RStuyAuton$2", RStuyAuton$2),
+		Map.entry("RStuyAuton$3", RStuyAuton$3),
+		Map.entry("RStuyAuton$4", RStuyAuton$4),
+		Map.entry("RBumpHubDepot", RBumpHubDepot),
+		Map.entry("RBumpHubDepot$0", RBumpHubDepot$0),
+		Map.entry("RBumpHubDepot$1", RBumpHubDepot$1),
+		Map.entry("RBumpHubDepot$2", RBumpHubDepot$2),
+		Map.entry("RBumpHubDepot$3", RBumpHubDepot$3),
+		Map.entry("RBumpHubDepot$4", RBumpHubDepot$4)
     );
 
     /**
