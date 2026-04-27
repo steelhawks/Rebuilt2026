@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.*;
+import org.steelhawks.subsystems.superstructure.FuelStateTracker;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -23,6 +24,7 @@ public class MagicIntake extends SubsystemBase {
     private final IntakeIO io;
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
     private final SubsystemConstants.IntakeConstants constants;
+    private final FuelStateTracker fuelStateTracker = new FuelStateTracker();
 
     // Goal — single double, no TrapezoidProfile state objects
     private double goalMeters = 0.0;
@@ -126,6 +128,7 @@ public class MagicIntake extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        fuelStateTracker.updateAtIntake((isRollersRunning && atGoal()) || (isRollersRunning));
         Logger.processInputs("Intake", inputs);
         BatteryUtil.recordCurrentUsage(
                 "Intake",

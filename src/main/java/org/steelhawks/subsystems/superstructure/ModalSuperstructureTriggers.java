@@ -114,7 +114,7 @@ public class ModalSuperstructureTriggers {
 
     private void configureTriggers() {
         Trigger indexFuelIfShooterReady = new Trigger(
-                () -> fuelAtShooter.get() && container.s_Flywheel.isReadyToShoot()
+                () -> fuelAtShooter.get() && container.getFlywheel().isReadyToShoot()
         );
     }
 

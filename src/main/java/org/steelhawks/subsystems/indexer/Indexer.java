@@ -10,6 +10,7 @@ import org.steelhawks.SubsystemConstants;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.beam.BeamIO;
 import org.steelhawks.subsystems.beam.BeamIOInputsAutoLogged;
+import org.steelhawks.subsystems.superstructure.FuelStateTracker;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -18,6 +19,8 @@ public class Indexer extends SubsystemBase {
     private static LoggedTunableNumber SPINDEXER_JAM_CURRENT;// TODO tune
     private static LoggedTunableNumber FEEDER_JAM_CURRENT; // TODO tune
     private static LoggedTunableNumber BEAM_DEBOUNCE_TIME; // TODO tune
+
+    private final FuelStateTracker fuelStateTracker = new FuelStateTracker();
 
     private LoggedTunableNumber tuningSpindexerVolts;
     private LoggedTunableNumber tuningFeederVolts;
@@ -60,6 +63,7 @@ public class Indexer extends SubsystemBase {
     public void periodic() {
         io.updateInputs(spindexerInputs, feederInputs);
         beamIO.updateInputs(beamInputs);
+        fuelStateTracker.updateAtSpindexer(beamInputs.detected);
         Logger.processInputs("Indexer/Spindexer/Inputs", spindexerInputs);
         Logger.processInputs("Indexer/Feeder/Inputs", feederInputs);
         Logger.processInputs("Indexer/Beam/Inputs", beamInputs);

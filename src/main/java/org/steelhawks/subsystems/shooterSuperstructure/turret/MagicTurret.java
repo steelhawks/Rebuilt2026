@@ -19,6 +19,7 @@ import org.steelhawks.Constants.RobotType;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
+import org.steelhawks.subsystems.superstructure.FuelStateTracker;
 import org.steelhawks.util.*;
 
 import java.text.DecimalFormat;
@@ -38,6 +39,8 @@ public class MagicTurret extends SubsystemBase {
     private final LoggedTunableNumber kP;
     private final LoggedTunableNumber kI;
     private final LoggedTunableNumber kD;
+
+    private final FuelStateTracker fuelStateTracker = new FuelStateTracker();
 
     // kV here scales the geometry-based velocity FF (calculateTurretVelocityFF),
     // NOT the motor model — that lives in Slot0.kV on the TalonFX
@@ -312,6 +315,7 @@ public class MagicTurret extends SubsystemBase {
             // ---- Aim state machine — identical to original ----
             switch (RobotState.getInstance().getAimState()) {
                 case TO_HUB -> {
+                    fuelStateTracker.updateAtAimstate(AimState.TO_HUB);
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                     var sol = RobotState.getInstance().getMovingShotSolution();
@@ -347,6 +351,7 @@ public class MagicTurret extends SubsystemBase {
                     }
                 }
                 case FERRY -> {
+                    fuelStateTracker.updateAtAimstate(AimState.FERRY);
                     var robot = getPose();
                     var ferryGoal2d = AllianceFlip.apply(
                             FieldConstants.getClosestPointOnLine(

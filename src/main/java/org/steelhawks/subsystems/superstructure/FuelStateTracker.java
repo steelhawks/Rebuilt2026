@@ -3,7 +3,6 @@ package org.steelhawks.subsystems.superstructure;
 import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.RobotState;
-import org.steelhawks.subsystems.beam.BeamIOInputsAutoLogged;
 import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.function.Supplier;
@@ -35,7 +34,7 @@ public class FuelStateTracker {
         update();
     }
 
-    public void updateWhenFerrying(RobotState.AimState value) {
+    public void updateAtAimstate(RobotState.AimState value) {
         aimStateSupplier = () -> value;
         update();
     }

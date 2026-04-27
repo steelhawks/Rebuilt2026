@@ -19,6 +19,7 @@ import org.steelhawks.subsystems.shooterSuperstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.shooterSuperstructure.hood.Hood;
 import org.steelhawks.subsystems.shooterSuperstructure.turret.MagicTurret;
 import org.steelhawks.subsystems.superstructure.FuelStateTracker;
+import org.steelhawks.subsystems.superstructure.SSM;
 import org.steelhawks.subsystems.swerve.*;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
@@ -26,6 +27,7 @@ import org.steelhawks.util.AllianceFlip;
 
 public class RobotContainer {
 
+    private final SSM stateMachine = new SSM(this);
     private final RobotConfig config = RobotConfig.getConfig();
     public static FuelStateTracker gamePieceTracker = null;
     private BeamIOInputsAutoLogged inputs;
@@ -125,5 +127,37 @@ public class RobotContainer {
 //            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kZero));
 //        driver.a()
 //            .onTrue(s_Turret.setDesiredRotation(Rotation2d.kPi.div(2.0)));
+    }
+
+    public SSM getStateMachine() {
+        return stateMachine;
+    }
+
+    public Flywheel getFlywheel() {
+        return s_Flywheel;
+    }
+
+    public MagicTurret getMagicTurret() {
+        return s_Turret;
+    }
+
+    public MagicIntake getMagicIntake() {
+        return s_Intake;
+    }
+
+    public Hood getHood() {
+        return s_Hood;
+    }
+
+    public Indexer getIndexer() {
+        return s_Indexer;
+    }
+
+    public Vision getVision() {
+        return s_Vision;
+    }
+
+    public Swerve getSwerve() {
+        return s_Swerve;
     }
 }

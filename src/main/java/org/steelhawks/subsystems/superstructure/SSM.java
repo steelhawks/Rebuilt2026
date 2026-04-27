@@ -64,6 +64,8 @@ public class SSM {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+        autoGenerateTransitions();
+        precomputeAllPaths();
     }
 
     public void setTransitioning(boolean transitioning) {

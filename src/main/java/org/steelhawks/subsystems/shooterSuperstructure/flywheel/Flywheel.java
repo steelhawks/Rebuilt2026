@@ -21,6 +21,8 @@ import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.shooterSuperstructure.ShooterStructure;
+import org.steelhawks.subsystems.superstructure.FuelState;
+import org.steelhawks.subsystems.superstructure.FuelStateTracker;
 import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.BatteryUtil;
 import org.steelhawks.util.LoggedTunableNumber;
@@ -37,6 +39,8 @@ import static edu.wpi.first.units.Units.*;
 public class Flywheel extends SubsystemBase {
 
     private final static double FF_RAMP_RATE = 10.0; // 10 AMPS per sec
+
+    private final FuelStateTracker fuelStateTracker = new FuelStateTracker();
 
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
@@ -92,6 +96,7 @@ public class Flywheel extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        fuelStateTracker.updateAtShooter(nearTargetVelocity, inputs.leftVelocityRadPerSec);
         Logger.processInputs("Flywheel", inputs);
         BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
         redBullConstant = Toggles.useLUT.get() ? 1.0 : constants.stationaryHoodVelocityFactor();
