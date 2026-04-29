@@ -159,7 +159,7 @@ public class SubsystemConstants {
 
         public static final TurretConstants TURRET =
             new TurretConstants(
-                4, 9, 4500.0, 150.0, 100.0, 18.0, 0.0, 30.0, 50.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.485049), Rotation2d.fromRadians(3.402369), Rotation2d.fromRotations(-0.321533203125));
+                4, 9, 4500.0, 150.0, 100.0, 18.0, 0.0, 30.0, 50.0, 0.0, 0.0, (18.0 / 18.0) * (46.0 / 18.0) * (96.0 / 12.0), Rotation2d.fromRadians(-2.485049), Rotation2d.fromRadians(3.402369), Rotation2d.fromRotations(-0.32177734375));
         // Turret Characterization Results
         // kS: 13.18095
         // kV: 1.99614
