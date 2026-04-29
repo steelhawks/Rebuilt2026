@@ -210,7 +210,7 @@ public class ShooterStructure {
             double denom = 2.0 * cos * cos * (x * Math.tan(theta) - y);
             double v0 = Math.sqrt(G * x * x / denom);
 
-            return new ProjectileData(v0 * 1.61, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
+            return new ProjectileData(v0, theta, new Translation3d(actualTarget.getX(), actualTarget.getY(), 0.0));
         }
 
         public static Translation2d calculateFerryShotSetpoint() {
