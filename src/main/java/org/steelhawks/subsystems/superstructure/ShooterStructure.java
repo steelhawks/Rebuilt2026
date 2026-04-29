@@ -9,8 +9,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.steelhawks.*;
 import org.steelhawks.Constants.RobotConstants;
@@ -30,10 +30,6 @@ public class ShooterStructure {
 
     private static final LoggedNetworkNumber lutDistanceOffsetMeters =
         new LoggedNetworkNumber("ShooterStructure/LUTDistanceOffsetMeters", Units.feetToMeters(0.0)); // 1.95ft is what we had on the field
-    private static final LoggedNetworkBoolean lutSoft =
-        new LoggedNetworkBoolean("ShooterStructure/UsingLUTSoft", false);
-    private static final LoggedNetworkBoolean lutHard =
-        new LoggedNetworkBoolean("ShooterStructure/UsingLUTHard", false);
 
     private static double minShootDistance;
     private static double maxShootDistance;
@@ -46,7 +42,6 @@ public class ShooterStructure {
         Translation3d virtualTarget,
         double timeOfFlight
     ) {}
-    public record FerryShotSolution(ProjectileData shotData, Rotation2d turretAngle) {}
     public static final ProjectileData kNoSolution = new ProjectileData(Double.NaN, Double.NaN, new Translation3d());
     private static final double G = 9.81;
 
@@ -123,8 +118,6 @@ public class ShooterStructure {
         public static ProjectileData calculateShot(
             Translation3d actualTarget, Translation3d predictedTarget, boolean isFixedPitch, double precomputedDist
         ) {
-//            Logger.recordOutput("Testing/ActualTarget", actualTarget.plus(new Translation3d(lutDistanceOffsetMeters.get(), 0.0, 0.0)));
-//            Logger.recordOutput("Testing/PredictedTarget", predictedTarget.plus(new Translation3d(lutDistanceOffsetMeters.get(), 0.0, 0.0)));
             if (isFixedPitch) {
                 return calculateShotFixedPitch(actualTarget, predictedTarget);
             }
@@ -312,13 +305,15 @@ public class ShooterStructure {
         }
     }
 
+    private static void switchLUT(boolean softLUTOn) {
+        SmartDashboard.putBoolean("ShooterStructure/UsingLUTSoft", softLUTOn);
+    }
+
     public static void loadLUTHard() {
         minShootDistance = 1.146;
         maxShootDistance = 6.2;
 
-        lutHard.set(true);
-        lutSoft.set(false);
-
+        switchLUT(false);
         shootingFlywheelVelocityMap.clear();
         shootingHoodAngleMap.clear();
         shootingTimeOfFlightMap.clear();
@@ -355,9 +350,7 @@ public class ShooterStructure {
         minShootDistance = 1.401;
         maxShootDistance = 6.123;
 
-        lutSoft.set(true);
-        lutHard.set(false);
-
+        switchLUT(true);
         shootingFlywheelVelocityMap.clear();
         shootingHoodAngleMap.clear();
         shootingTimeOfFlightMap.clear();
