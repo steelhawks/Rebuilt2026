@@ -143,7 +143,7 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/IsTraversing")
     public boolean isTraversing() {
         return Math.abs(inputs.positionRad.getRadians() - desiredRotation.getRadians()) > tolerance
-            || Math.abs(inputs.velocityRadPerSec.getRadians()) > Units.degreesToRadians(2.0);
+            || Math.abs(inputs.velocityRadPerSec.getRadians()) > Units.degreesToRadians(10.0);
     }
 
     private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
