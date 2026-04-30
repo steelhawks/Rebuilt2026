@@ -64,7 +64,7 @@ public final class Autos {
     }
 
     // Distance threshold to decide between pathfinding vs simple PID recovery
-    public static double replanDistanceRequirement = Units.inchesToMeters(15.0); // tune
+    public static double replanDistanceRequirement = Units.inchesToMeters(5.0); // tune
     private static boolean tuningOptionsAdded = false;
 
     /**
@@ -107,6 +107,7 @@ public final class Autos {
         autoChooser.addOption("Left Stuy Auton", leftStuy().cmd().withName(ChoreoTraj.LStuyAuton.name()));
         autoChooser.addOption("Right Bump Hub Depot Auton", rightBumpHubDepot().cmd().withName(ChoreoTraj.RBumpHubDepot.name()));
         autoChooser.addOption("Left Bump Hub Depot Auton", leftBumpHubDepot().cmd().withName(ChoreoTraj.LBumpHubDepot.name()));
+        autoChooser.addOption("Stationary Shoot", ShootingCommands.shoot());
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();

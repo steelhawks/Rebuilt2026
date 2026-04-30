@@ -523,7 +523,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj RStuyAuton = new ChoreoTraj(
         "RStuyAuton",
         OptionalInt.empty(),
-        13.30791,
+        12.77518,
         new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
         new Pose2d(0.3937, 5.86411, Rotation2d.fromRadians(1.5708))
     );
@@ -539,7 +539,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj RStuyAuton$1 = new ChoreoTraj(
         "RStuyAuton",
         OptionalInt.of(1),
-        6.371600000000001,
+        5.83887,
         new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(0.7854)),
         new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(2.35619))
     );
@@ -547,7 +547,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj RStuyAuton$2 = new ChoreoTraj(
         "RStuyAuton",
         OptionalInt.of(2),
-        2.6198099999999993,
+        2.61981,
         new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(2.35619)),
         new Pose2d(0.9271, 2.25336, Rotation2d.fromRadians(2.1858))
     );
@@ -555,7 +555,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj RStuyAuton$3 = new ChoreoTraj(
         "RStuyAuton",
         OptionalInt.of(3),
-        1.317680000000001,
+        1.3176799999999993,
         new Pose2d(0.9271, 2.25336, Rotation2d.fromRadians(2.1858)),
         new Pose2d(0.3937, 4.75336, Rotation2d.fromRadians(1.5708))
     );
@@ -563,7 +563,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj RStuyAuton$4 = new ChoreoTraj(
         "RStuyAuton",
         OptionalInt.of(4),
-        1.168429999999999,
+        1.1684300000000007,
         new Pose2d(0.3937, 4.75336, Rotation2d.fromRadians(1.5708)),
         new Pose2d(0.3937, 5.86411, Rotation2d.fromRadians(1.5708))
     );
