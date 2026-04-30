@@ -755,11 +755,12 @@ public final class Autos {
             Commands.sequence(
                 Commands.runOnce(s_Swerve::stopWithX),
                 recoverToTrajectoryEnd(shootingSection),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
                 towerAlign.spawnCmd()
             )
         );
 
-        towerAlign.active().whileTrue(s_Intake.setDesiredStateCommand(State.INTAKE));
+        towerAlign.active().whileTrue(s_Intake.runIntake());
 
         towerAlign.done().onTrue(
             Commands.sequence(
