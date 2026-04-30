@@ -117,8 +117,8 @@ public class Robot extends LoggedRobot {
             case REAL -> {
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-                if (!DriverStation.isFMSAttached()) {
-//                if (false) {
+//                if (!DriverStation.isFMSAttached()) {
+                if (false) {
                     Logger.addDataReceiver(new NT4Publisher());
                 }
                 new PowerDistribution(

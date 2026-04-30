@@ -13,6 +13,7 @@ import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
@@ -90,6 +91,14 @@ public class RobotContainer {
 //            .or(s_Swerve::isOnBump)
 //            .onTrue(s_Swerve.updateCurrentLimitsCmd(120.0))
 //            .onFalse(s_Swerve.resetCurrentLimitsCmd());
+
+        driver.povUp()
+            .onTrue(Commands.runOnce(ShooterStructure::loadLUTSoft)
+                .alongWith(RumbleAPI.steady()));
+
+        driver.povDown()
+            .onTrue(Commands.runOnce(ShooterStructure::loadLUTHard)
+                .alongWith(RumbleAPI.steady()));
 
         driver.povRight()
             .whileTrue(s_Indexer.outtake());
