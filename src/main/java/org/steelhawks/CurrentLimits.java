@@ -21,8 +21,8 @@ public interface CurrentLimits {
     }
 
     interface StatorLimit {
-        double driveCurrent = 45.0;
-        double turnCurrent = 25.0;
+        double driveCurrent = 80.0;
+        double turnCurrent = 40.0;
         double flywheelCurrent = 80.0;
         double hoodCurrent = 60.0;
         double turretCurrent = 40.0;
