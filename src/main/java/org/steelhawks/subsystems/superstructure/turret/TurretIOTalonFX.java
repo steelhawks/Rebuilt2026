@@ -66,10 +66,10 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot1.kS = 25.0;
 
         motorConfig.ClosedLoopGeneral.ContinuousWrap = false;
-        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
-        motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
+        motorConfig.Feedback.SensorToMechanismRatio = 7.0 / 6.0;
         motorConfig.CurrentLimits.SupplyCurrentLimit = CurrentLimits.SupplyLimit.turretCurrent;
         motorConfig.CurrentLimits.SupplyCurrentLimitEnable = CurrentLimits.SupplyLimit.turretEnabled;
         motorConfig.CurrentLimits.StatorCurrentLimit = CurrentLimits.StatorLimit.turretCurrent;
