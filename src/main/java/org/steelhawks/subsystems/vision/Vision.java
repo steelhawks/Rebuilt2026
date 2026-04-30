@@ -175,6 +175,14 @@ public class Vision extends SubsystemBase {
                 }
                 if (!hasHubTag) stdDevFactor *= NON_HUB_STDDEV_FACTOR;
 
+                if (RobotState.getInstance().getEstimatedPose().getX() < 0.0
+                    || RobotState.getInstance().getEstimatedPose().getX() > APRIL_TAG_LAYOUT.getFieldLength()
+                    || RobotState.getInstance().getEstimatedPose().getY() < 0.0
+                    || RobotState.getInstance().getEstimatedPose().getY() > APRIL_TAG_LAYOUT.getFieldWidth()
+                ) {
+                    stdDevFactor *= 0.3;
+                }
+
                 double linearStdDev = LINEAR_STD_DEV_BASELINE * stdDevFactor;
                 double angularStdDev = ANGULAR_STD_DEV_BASELINE * stdDevFactor;
 

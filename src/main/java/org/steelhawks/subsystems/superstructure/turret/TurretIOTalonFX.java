@@ -66,7 +66,7 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot1.kS = 25.0;
 
         motorConfig.ClosedLoopGeneral.ContinuousWrap = false;
-        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder; // remote cancoder works pretty well
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder; // remote cancoder works pretty well, just have to retune
         motorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = constants.motorReduction();
         motorConfig.Feedback.SensorToMechanismRatio = 6.0 / 7.0;
