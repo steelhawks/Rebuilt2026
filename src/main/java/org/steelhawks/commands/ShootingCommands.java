@@ -55,7 +55,8 @@ public class ShootingCommands {
                 RobotContainer.s_Flywheel.isReadyToShoot()
                     && !RobotContainer.s_Turret.isTraversing()
                     && RobotContainer.s_Turret.atGoal()
-                    && RobotContainer.s_Hood.atGoal()),
+//                    && RobotContainer.s_Hood.atGoal()
+            ),
             RobotContainer.s_Indexer.feed()
                 .alongWith(
                     Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
