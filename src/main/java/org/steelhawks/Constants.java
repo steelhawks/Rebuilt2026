@@ -112,8 +112,8 @@ public final class Constants {
                         new Transform3d(Units.inchesToMeters(13.5 - 2.5), 0.0, Units.inchesToMeters(24.0), new Rotation3d(0.0, 0.0, Math.PI));
                 }
                 default -> {
-                    ROBOT_TO_TURRET = // 5 in
-                        new Transform3d(Units.inchesToMeters(-4.890), 0.0, Units.inchesToMeters(17.0), new Rotation3d(0.0, 0.0, 0.0));
+                    ROBOT_TO_TURRET =
+                        new Transform3d(Units.inchesToMeters(-5.0), 0.0, Units.inchesToMeters(17.0), new Rotation3d(0.0, 0.0, 0.0));
                 }
             }
         }
