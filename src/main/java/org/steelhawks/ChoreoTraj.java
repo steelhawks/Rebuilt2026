@@ -1,4 +1,4 @@
-// spotless:off
+
 package org.steelhawks;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -6,10 +6,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.Map;
 import java.util.OptionalInt;
 
+// If these imports cause errors because you're not using ChoreoLib,
+// turn off "Include ChoreoLib-specific Helpers" in Choreo's codegen settings.
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
-// If the 2 imports above cause errors because you're not using ChoreoLib,
-// turn off "Include ChoreoLib-specific Helpers" in Choreo's codegen settings.
 
 /**
  * A class containing the name, start pose, end pose, and total time of every Choreo trajectory.
@@ -25,624 +25,571 @@ public record ChoreoTraj(
     Pose2d endPoseBlue
 ) {
     public static final ChoreoTraj CenterPath = new ChoreoTraj(
-        "CenterPath",
-        OptionalInt.empty(),
-        4.79161,
-        new Pose2d(3.53925, 0.66003, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj CenterPath$0 = new ChoreoTraj(
-        "CenterPath",
-        OptionalInt.of(0),
-        2.2359,
-        new Pose2d(3.53925, 0.66003, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj CenterPath$1 = new ChoreoTraj(
-        "CenterPath",
-        OptionalInt.of(1),
-        2.5557100000000004,
-        new Pose2d(7.60108, 2.82798, Rotation2d.fromRadians(-3.0885)),
-        new Pose2d(2.58149, 0.78413, Rotation2d.fromRadians(1.59711))
-    );
-    public static final ChoreoTraj FourMeterSpinTest = new ChoreoTraj(
-        "FourMeterSpinTest",
-        OptionalInt.empty(),
-        2.22895,
-        new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
-        new Pose2d(5, 0.53702, Rotation2d.fromRadians(3.14159))
-    );
-    public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
-        "FourMeterTest",
-        OptionalInt.empty(),
-        2.23064,
-        new Pose2d(1, 0.53702, Rotation2d.fromRadians(0)),
-        new Pose2d(5, 0.53702, Rotation2d.fromRadians(0))
-    );
-    public static final ChoreoTraj LBumpHubDepot = new ChoreoTraj(
-        "LBumpHubDepot",
-        OptionalInt.empty(),
-        11.85603,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(0.3937, 5.96411, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LBumpHubDepot$0 = new ChoreoTraj(
-        "LBumpHubDepot",
-        OptionalInt.of(0),
-        1.34261,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(2.81799, 5.61597, Rotation2d.fromRadians(-0.7854))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LBumpHubDepot$1 = new ChoreoTraj(
-        "LBumpHubDepot",
-        OptionalInt.of(1),
-        0.50366,
-        new Pose2d(2.81799, 5.61597, Rotation2d.fromRadians(-0.7854)),
-        new Pose2d(3.5374, 5.61597, Rotation2d.fromRadians(-0.7854))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LBumpHubDepot$2 = new ChoreoTraj(
-        "LBumpHubDepot",
-        OptionalInt.of(2),
-        4.924860000000001,
-        new Pose2d(3.5374, 5.61597, Rotation2d.fromRadians(-0.7854)),
-        new Pose2d(3.13349, 5.8424, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LBumpHubDepot$3 = new ChoreoTraj(
-        "LBumpHubDepot",
-        OptionalInt.of(3),
-        3.3316299999999996,
-        new Pose2d(3.13349, 5.8424, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(0.3937, 7.62483, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LBumpHubDepot$4 = new ChoreoTraj(
-        "LBumpHubDepot",
-        OptionalInt.of(4),
-        1.7532700000000006,
-        new Pose2d(0.3937, 7.62483, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(0.3937, 5.96411, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj LDoubleRebound = new ChoreoTraj(
-        "LDoubleRebound",
-        OptionalInt.empty(),
-        10.06105,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(3.6, 7.42599, Rotation2d.fromRadians(3.14159))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LDoubleRebound$0 = new ChoreoTraj(
-        "LDoubleRebound",
-        OptionalInt.of(0),
-        4.9088,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 7.42599, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LDoubleRebound$1 = new ChoreoTraj(
-        "LDoubleRebound",
-        OptionalInt.of(1),
-        5.1522499999999996,
-        new Pose2d(4.3942, 7.42599, Rotation2d.fromRadians(0)),
-        new Pose2d(3.6, 7.42599, Rotation2d.fromRadians(3.14159))
-    );
-    public static final ChoreoTraj LNotSoOPAuton = new ChoreoTraj(
-        "LNotSoOPAuton",
-        OptionalInt.empty(),
-        15.88313,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(7.88187, 2.98933, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LNotSoOPAuton$0 = new ChoreoTraj(
-        "LNotSoOPAuton",
-        OptionalInt.of(0),
-        5.2348,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(2.95823, 5.22082, Rotation2d.fromRadians(-2.52134))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LNotSoOPAuton$1 = new ChoreoTraj(
-        "LNotSoOPAuton",
-        OptionalInt.of(1),
-        6.74428,
-        new Pose2d(2.95823, 5.22082, Rotation2d.fromRadians(-2.52134)),
-        new Pose2d(2.95823, 5.22082, Rotation2d.fromRadians(-2.52134))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LNotSoOPAuton$2 = new ChoreoTraj(
-        "LNotSoOPAuton",
-        OptionalInt.of(2),
-        3.90405,
-        new Pose2d(2.95823, 5.22082, Rotation2d.fromRadians(-2.52134)),
-        new Pose2d(7.88187, 2.98933, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj LOPAuton = new ChoreoTraj(
-        "LOPAuton",
-        OptionalInt.empty(),
-        23.31159,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(7.88187, 2.98933, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LOPAuton$0 = new ChoreoTraj(
-        "LOPAuton",
-        OptionalInt.of(0),
-        4.46038,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(2.8374, 5.61597, Rotation2d.fromRadians(-2.35619))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LOPAuton$1 = new ChoreoTraj(
-        "LOPAuton",
-        OptionalInt.of(1),
-        5.86414,
-        new Pose2d(2.8374, 5.61597, Rotation2d.fromRadians(-2.35619)),
-        new Pose2d(3.9374, 7.43636, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LOPAuton$2 = new ChoreoTraj(
-        "LOPAuton",
-        OptionalInt.of(2),
-        4.225200000000001,
-        new Pose2d(3.9374, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(2.8374, 5.61597, Rotation2d.fromRadians(-2.35619))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LOPAuton$3 = new ChoreoTraj(
-        "LOPAuton",
-        OptionalInt.of(3),
-        5.864139999999999,
-        new Pose2d(2.8374, 5.61597, Rotation2d.fromRadians(-2.35619)),
-        new Pose2d(3.9374, 7.43636, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LOPAuton$4 = new ChoreoTraj(
-        "LOPAuton",
-        OptionalInt.of(4),
-        2.8977299999999993,
-        new Pose2d(3.9374, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(7.88187, 2.98933, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj LRebound = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.empty(),
-        9.44302,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 7.42599, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.of(0),
-        4.38193,
-        new Pose2d(4.42874, 7.43636, Rotation2d.fromRadians(0)),
-        new Pose2d(5.60208, 7.42599, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.of(1),
-        0.5274700000000001,
-        new Pose2d(5.60208, 7.42599, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 7.42599, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LRebound$2 = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.of(2),
-        4.0061,
-        new Pose2d(4.3942, 7.42599, Rotation2d.fromRadians(0)),
-        new Pose2d(5.60208, 7.42599, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LRebound$3 = new ChoreoTraj(
-        "LRebound",
-        OptionalInt.of(3),
-        0.5275200000000009,
-        new Pose2d(5.60208, 7.42599, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 7.42599, Rotation2d.fromRadians(0))
-    );
-    public static final ChoreoTraj LStuyAuton = new ChoreoTraj(
-        "LStuyAuton",
-        OptionalInt.empty(),
-        13.55371,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(0.3937, 5.96411, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LStuyAuton$0 = new ChoreoTraj(
-        "LStuyAuton",
-        OptionalInt.of(0),
-        1.84628,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5374, 5.61597, Rotation2d.fromRadians(-0.7854))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LStuyAuton$1 = new ChoreoTraj(
-        "LStuyAuton",
-        OptionalInt.of(1),
-        6.62383,
-        new Pose2d(3.5374, 5.61597, Rotation2d.fromRadians(-0.7854)),
-        new Pose2d(3.13349, 5.8424, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LStuyAuton$2 = new ChoreoTraj(
-        "LStuyAuton",
-        OptionalInt.of(2),
-        3.3303100000000008,
-        new Pose2d(3.13349, 5.8424, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(0.3937, 7.62483, Rotation2d.fromRadians(-1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj LStuyAuton$3 = new ChoreoTraj(
-        "LStuyAuton",
-        OptionalInt.of(3),
-        1.7532899999999998,
-        new Pose2d(0.3937, 7.62483, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(0.3937, 5.96411, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj MiddleDepotAuton = new ChoreoTraj(
-        "MiddleDepotAuton",
-        OptionalInt.empty(),
-        3.75724,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj MiddleDepotAuton$0 = new ChoreoTraj(
-        "MiddleDepotAuton",
-        OptionalInt.of(0),
-        0.53844,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj MiddleDepotAuton$1 = new ChoreoTraj(
-        "MiddleDepotAuton",
-        OptionalInt.of(1),
-        3.2188,
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115)),
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115))
-    );
-    public static final ChoreoTraj MiddleDepotAuton2 = new ChoreoTraj(
-        "MiddleDepotAuton2",
-        OptionalInt.empty(),
-        4.38871,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj MiddleDepotAuton2$0 = new ChoreoTraj(
-        "MiddleDepotAuton2",
-        OptionalInt.of(0),
-        0.55281,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj MiddleDepotAuton2$1 = new ChoreoTraj(
-        "MiddleDepotAuton2",
-        OptionalInt.of(1),
-        3.8358999999999996,
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115)),
-        new Pose2d(2.81799, 4.96972, Rotation2d.fromRadians(-2.45115))
-    );
-    public static final ChoreoTraj RBumpHubDepot = new ChoreoTraj(
-        "RBumpHubDepot",
-        OptionalInt.empty(),
-        10.99103,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(0.3937, 5.86411, Rotation2d.fromRadians(1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RBumpHubDepot$0 = new ChoreoTraj(
-        "RBumpHubDepot",
-        OptionalInt.of(0),
-        1.83039,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(0.7854))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RBumpHubDepot$1 = new ChoreoTraj(
-        "RBumpHubDepot",
-        OptionalInt.of(1),
-        4.05471,
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(0.7854)),
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(2.35619))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RBumpHubDepot$2 = new ChoreoTraj(
-        "RBumpHubDepot",
-        OptionalInt.of(2),
-        2.61981,
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(2.35619)),
-        new Pose2d(0.9271, 2.25336, Rotation2d.fromRadians(2.1858))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RBumpHubDepot$3 = new ChoreoTraj(
-        "RBumpHubDepot",
-        OptionalInt.of(3),
-        1.3176799999999993,
-        new Pose2d(0.9271, 2.25336, Rotation2d.fromRadians(2.1858)),
-        new Pose2d(0.3937, 4.75336, Rotation2d.fromRadians(1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RBumpHubDepot$4 = new ChoreoTraj(
-        "RBumpHubDepot",
-        OptionalInt.of(4),
-        1.1684400000000004,
-        new Pose2d(0.3937, 4.75336, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(0.3937, 5.86411, Rotation2d.fromRadians(1.5708))
-    );
-    public static final ChoreoTraj RDoubleRebound = new ChoreoTraj(
-        "RDoubleRebound",
-        OptionalInt.empty(),
-        10.06075,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(3.6, 0.64334, Rotation2d.fromRadians(3.14159))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RDoubleRebound$0 = new ChoreoTraj(
-        "RDoubleRebound",
-        OptionalInt.of(0),
-        4.9085,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RDoubleRebound$1 = new ChoreoTraj(
-        "RDoubleRebound",
-        OptionalInt.of(1),
-        5.15225,
-        new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(3.6, 0.64334, Rotation2d.fromRadians(3.14159))
-    );
-    public static final ChoreoTraj RNotSoOPAuton = new ChoreoTraj(
-        "RNotSoOPAuton",
-        OptionalInt.empty(),
-        15.88313,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(7.88187, 5.08, Rotation2d.fromRadians(1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RNotSoOPAuton$0 = new ChoreoTraj(
-        "RNotSoOPAuton",
-        OptionalInt.of(0),
-        5.2348,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(2.95823, 2.84851, Rotation2d.fromRadians(2.52134))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RNotSoOPAuton$1 = new ChoreoTraj(
-        "RNotSoOPAuton",
-        OptionalInt.of(1),
-        6.74428,
-        new Pose2d(2.95823, 2.84851, Rotation2d.fromRadians(2.52134)),
-        new Pose2d(2.95823, 2.84851, Rotation2d.fromRadians(2.52134))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RNotSoOPAuton$2 = new ChoreoTraj(
-        "RNotSoOPAuton",
-        OptionalInt.of(2),
-        3.90405,
-        new Pose2d(2.95823, 2.84851, Rotation2d.fromRadians(2.52134)),
-        new Pose2d(7.88187, 5.08, Rotation2d.fromRadians(1.5708))
-    );
-    public static final ChoreoTraj ROPAuton = new ChoreoTraj(
-        "ROPAuton",
-        OptionalInt.empty(),
-        23.31158,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(7.88187, 5.08, Rotation2d.fromRadians(1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj ROPAuton$0 = new ChoreoTraj(
-        "ROPAuton",
-        OptionalInt.of(0),
-        4.4604,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(2.8374, 2.45336, Rotation2d.fromRadians(2.35619))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj ROPAuton$1 = new ChoreoTraj(
-        "ROPAuton",
-        OptionalInt.of(1),
-        5.86415,
-        new Pose2d(2.8374, 2.45336, Rotation2d.fromRadians(2.35619)),
-        new Pose2d(3.9374, 0.63297, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj ROPAuton$2 = new ChoreoTraj(
-        "ROPAuton",
-        OptionalInt.of(2),
-        4.22519,
-        new Pose2d(3.9374, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(2.8374, 2.45336, Rotation2d.fromRadians(2.35619))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj ROPAuton$3 = new ChoreoTraj(
-        "ROPAuton",
-        OptionalInt.of(3),
-        5.864139999999999,
-        new Pose2d(2.8374, 2.45336, Rotation2d.fromRadians(2.35619)),
-        new Pose2d(3.9374, 0.63297, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj ROPAuton$4 = new ChoreoTraj(
-        "ROPAuton",
-        OptionalInt.of(4),
-        2.8977000000000004,
-        new Pose2d(3.9374, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(7.88187, 5.08, Rotation2d.fromRadians(1.5708))
-    );
-    public static final ChoreoTraj RRebound = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.empty(),
-        9.44284,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(0),
-        4.38167,
-        new Pose2d(4.42874, 0.63297, Rotation2d.fromRadians(0)),
-        new Pose2d(5.60208, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(1),
-        0.5274600000000005,
-        new Pose2d(5.60208, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(2),
-        4.006189999999999,
-        new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(5.60208, 0.64334, Rotation2d.fromRadians(0))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RRebound$3 = new ChoreoTraj(
-        "RRebound",
-        OptionalInt.of(3),
-        0.5275200000000009,
-        new Pose2d(5.60208, 0.64334, Rotation2d.fromRadians(0)),
-        new Pose2d(4.3942, 0.64334, Rotation2d.fromRadians(0))
-    );
-    public static final ChoreoTraj RStuyAuton = new ChoreoTraj(
-        "RStuyAuton",
-        OptionalInt.empty(),
-        12.77518,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(0.3937, 5.86411, Rotation2d.fromRadians(1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RStuyAuton$0 = new ChoreoTraj(
-        "RStuyAuton",
-        OptionalInt.of(0),
-        1.83039,
-        new Pose2d(3.57726, 4.02072, Rotation2d.fromRadians(0)),
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(0.7854))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RStuyAuton$1 = new ChoreoTraj(
-        "RStuyAuton",
-        OptionalInt.of(1),
-        5.83887,
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(0.7854)),
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(2.35619))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RStuyAuton$2 = new ChoreoTraj(
-        "RStuyAuton",
-        OptionalInt.of(2),
-        2.61981,
-        new Pose2d(3.5374, 2.45336, Rotation2d.fromRadians(2.35619)),
-        new Pose2d(0.9271, 2.25336, Rotation2d.fromRadians(2.1858))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RStuyAuton$3 = new ChoreoTraj(
-        "RStuyAuton",
-        OptionalInt.of(3),
-        1.3176799999999993,
-        new Pose2d(0.9271, 2.25336, Rotation2d.fromRadians(2.1858)),
-        new Pose2d(0.3937, 4.75336, Rotation2d.fromRadians(1.5708))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj RStuyAuton$4 = new ChoreoTraj(
-        "RStuyAuton",
-        OptionalInt.of(4),
-        1.1684300000000007,
-        new Pose2d(0.3937, 4.75336, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(0.3937, 5.86411, Rotation2d.fromRadians(1.5708))
-    );
+	    "CenterPath",
+	    OptionalInt.empty(),
+	    4.79161,
+	    new Pose2d(3.539, 0.66, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(2.581, 0.784, Rotation2d.fromRadians(1.597))
+	);
+	public static final ChoreoTraj CenterPath$0 = new ChoreoTraj(
+	    "CenterPath",
+	    OptionalInt.of(0),
+	    2.2359,
+	    new Pose2d(3.539, 0.66, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(7.601, 2.828, Rotation2d.fromRadians(-3.088))
+	);
+	public static final ChoreoTraj CenterPath$1 = new ChoreoTraj(
+	    "CenterPath",
+	    OptionalInt.of(1),
+	    2.5557100000000004,
+	    new Pose2d(7.601, 2.828, Rotation2d.fromRadians(-3.088)),
+	    new Pose2d(2.581, 0.784, Rotation2d.fromRadians(1.597))
+	);
+	public static final ChoreoTraj FourMeterSpinTest = new ChoreoTraj(
+	    "FourMeterSpinTest",
+	    OptionalInt.empty(),
+	    2.22895,
+	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
+	    new Pose2d(5, 0.537, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj FourMeterTest = new ChoreoTraj(
+	    "FourMeterTest",
+	    OptionalInt.empty(),
+	    2.23064,
+	    new Pose2d(1, 0.537, Rotation2d.fromRadians(0)),
+	    new Pose2d(5, 0.537, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LBumpHubDepot = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.empty(),
+	    11.85603,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LBumpHubDepot$0 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(0),
+	    1.34261,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.818, 5.616, Rotation2d.fromRadians(-0.785))
+	);
+	public static final ChoreoTraj LBumpHubDepot$1 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(1),
+	    0.50366,
+	    new Pose2d(2.818, 5.616, Rotation2d.fromRadians(-0.785)),
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785))
+	);
+	public static final ChoreoTraj LBumpHubDepot$2 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(2),
+	    4.924860000000001,
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785)),
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LBumpHubDepot$3 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(3),
+	    3.3316299999999996,
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LBumpHubDepot$4 = new ChoreoTraj(
+	    "LBumpHubDepot",
+	    OptionalInt.of(4),
+	    1.7532700000000006,
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LDoubleRebound = new ChoreoTraj(
+	    "LDoubleRebound",
+	    OptionalInt.empty(),
+	    10.06105,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.6, 7.426, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj LDoubleRebound$0 = new ChoreoTraj(
+	    "LDoubleRebound",
+	    OptionalInt.of(0),
+	    4.9088,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.394, 7.426, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LDoubleRebound$1 = new ChoreoTraj(
+	    "LDoubleRebound",
+	    OptionalInt.of(1),
+	    5.1522499999999996,
+	    new Pose2d(4.394, 7.426, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.6, 7.426, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj LNotSoOPAuton = new ChoreoTraj(
+	    "LNotSoOPAuton",
+	    OptionalInt.empty(),
+	    15.88313,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 2.989, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LNotSoOPAuton$0 = new ChoreoTraj(
+	    "LNotSoOPAuton",
+	    OptionalInt.of(0),
+	    5.2348,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521))
+	);
+	public static final ChoreoTraj LNotSoOPAuton$1 = new ChoreoTraj(
+	    "LNotSoOPAuton",
+	    OptionalInt.of(1),
+	    6.74428,
+	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521)),
+	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521))
+	);
+	public static final ChoreoTraj LNotSoOPAuton$2 = new ChoreoTraj(
+	    "LNotSoOPAuton",
+	    OptionalInt.of(2),
+	    3.90405,
+	    new Pose2d(2.958, 5.221, Rotation2d.fromRadians(-2.521)),
+	    new Pose2d(7.882, 2.989, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LOPAuton = new ChoreoTraj(
+	    "LOPAuton",
+	    OptionalInt.empty(),
+	    23.31159,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 2.989, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LOPAuton$0 = new ChoreoTraj(
+	    "LOPAuton",
+	    OptionalInt.of(0),
+	    4.46038,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356))
+	);
+	public static final ChoreoTraj LOPAuton$1 = new ChoreoTraj(
+	    "LOPAuton",
+	    OptionalInt.of(1),
+	    5.86414,
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356)),
+	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LOPAuton$2 = new ChoreoTraj(
+	    "LOPAuton",
+	    OptionalInt.of(2),
+	    4.225200000000001,
+	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356))
+	);
+	public static final ChoreoTraj LOPAuton$3 = new ChoreoTraj(
+	    "LOPAuton",
+	    OptionalInt.of(3),
+	    5.864139999999999,
+	    new Pose2d(2.837, 5.616, Rotation2d.fromRadians(-2.356)),
+	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LOPAuton$4 = new ChoreoTraj(
+	    "LOPAuton",
+	    OptionalInt.of(4),
+	    2.8977299999999993,
+	    new Pose2d(3.937, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 2.989, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LRebound = new ChoreoTraj(
+	    "LRebound",
+	    OptionalInt.empty(),
+	    9.80379,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.886, 7.426, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LRebound$0 = new ChoreoTraj(
+	    "LRebound",
+	    OptionalInt.of(0),
+	    4.38193,
+	    new Pose2d(4.429, 7.436, Rotation2d.fromRadians(0)),
+	    new Pose2d(5.602, 7.426, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LRebound$1 = new ChoreoTraj(
+	    "LRebound",
+	    OptionalInt.of(1),
+	    0.6477400000000006,
+	    new Pose2d(5.602, 7.426, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.886, 7.426, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LRebound$2 = new ChoreoTraj(
+	    "LRebound",
+	    OptionalInt.of(2),
+	    4.12633,
+	    new Pose2d(3.886, 7.426, Rotation2d.fromRadians(0)),
+	    new Pose2d(5.602, 7.426, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LRebound$3 = new ChoreoTraj(
+	    "LRebound",
+	    OptionalInt.of(3),
+	    0.6477899999999988,
+	    new Pose2d(5.602, 7.426, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.886, 7.426, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj LStuyAuton = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.empty(),
+	    13.55371,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LStuyAuton$0 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(0),
+	    1.84628,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785))
+	);
+	public static final ChoreoTraj LStuyAuton$1 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(1),
+	    6.62383,
+	    new Pose2d(3.537, 5.616, Rotation2d.fromRadians(-0.785)),
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LStuyAuton$2 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(2),
+	    3.3303100000000008,
+	    new Pose2d(3.133, 5.842, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj LStuyAuton$3 = new ChoreoTraj(
+	    "LStuyAuton",
+	    OptionalInt.of(3),
+	    1.7532899999999998,
+	    new Pose2d(0.394, 7.625, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(0.394, 5.964, Rotation2d.fromRadians(-1.571))
+	);
+	public static final ChoreoTraj MiddleDepotAuton = new ChoreoTraj(
+	    "MiddleDepotAuton",
+	    OptionalInt.empty(),
+	    3.75724,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton$0 = new ChoreoTraj(
+	    "MiddleDepotAuton",
+	    OptionalInt.of(0),
+	    0.53844,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton$1 = new ChoreoTraj(
+	    "MiddleDepotAuton",
+	    OptionalInt.of(1),
+	    3.2188,
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton2 = new ChoreoTraj(
+	    "MiddleDepotAuton2",
+	    OptionalInt.empty(),
+	    4.38871,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton2$0 = new ChoreoTraj(
+	    "MiddleDepotAuton2",
+	    OptionalInt.of(0),
+	    0.55281,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(3.142)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj MiddleDepotAuton2$1 = new ChoreoTraj(
+	    "MiddleDepotAuton2",
+	    OptionalInt.of(1),
+	    3.8358999999999996,
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451)),
+	    new Pose2d(2.818, 4.97, Rotation2d.fromRadians(-2.451))
+	);
+	public static final ChoreoTraj RBumpHubDepot = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.empty(),
+	    10.99103,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RBumpHubDepot$0 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(0),
+	    1.83039,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785))
+	);
+	public static final ChoreoTraj RBumpHubDepot$1 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(1),
+	    4.05471,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj RBumpHubDepot$2 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(2),
+	    2.61981,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356)),
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186))
+	);
+	public static final ChoreoTraj RBumpHubDepot$3 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(3),
+	    1.3176799999999993,
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186)),
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RBumpHubDepot$4 = new ChoreoTraj(
+	    "RBumpHubDepot",
+	    OptionalInt.of(4),
+	    1.1684400000000004,
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RDoubleRebound = new ChoreoTraj(
+	    "RDoubleRebound",
+	    OptionalInt.empty(),
+	    10.06075,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.6, 0.643, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj RDoubleRebound$0 = new ChoreoTraj(
+	    "RDoubleRebound",
+	    OptionalInt.of(0),
+	    4.9085,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(4.394, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RDoubleRebound$1 = new ChoreoTraj(
+	    "RDoubleRebound",
+	    OptionalInt.of(1),
+	    5.15225,
+	    new Pose2d(4.394, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.6, 0.643, Rotation2d.fromRadians(3.142))
+	);
+	public static final ChoreoTraj RNotSoOPAuton = new ChoreoTraj(
+	    "RNotSoOPAuton",
+	    OptionalInt.empty(),
+	    15.88313,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RNotSoOPAuton$0 = new ChoreoTraj(
+	    "RNotSoOPAuton",
+	    OptionalInt.of(0),
+	    5.2348,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
+	);
+	public static final ChoreoTraj RNotSoOPAuton$1 = new ChoreoTraj(
+	    "RNotSoOPAuton",
+	    OptionalInt.of(1),
+	    6.74428,
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521))
+	);
+	public static final ChoreoTraj RNotSoOPAuton$2 = new ChoreoTraj(
+	    "RNotSoOPAuton",
+	    OptionalInt.of(2),
+	    3.90405,
+	    new Pose2d(2.958, 2.849, Rotation2d.fromRadians(2.521)),
+	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj ROPAuton = new ChoreoTraj(
+	    "ROPAuton",
+	    OptionalInt.empty(),
+	    23.31158,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj ROPAuton$0 = new ChoreoTraj(
+	    "ROPAuton",
+	    OptionalInt.of(0),
+	    4.4604,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj ROPAuton$1 = new ChoreoTraj(
+	    "ROPAuton",
+	    OptionalInt.of(1),
+	    5.86415,
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356)),
+	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj ROPAuton$2 = new ChoreoTraj(
+	    "ROPAuton",
+	    OptionalInt.of(2),
+	    4.22519,
+	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj ROPAuton$3 = new ChoreoTraj(
+	    "ROPAuton",
+	    OptionalInt.of(3),
+	    5.864139999999999,
+	    new Pose2d(2.837, 2.453, Rotation2d.fromRadians(2.356)),
+	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj ROPAuton$4 = new ChoreoTraj(
+	    "ROPAuton",
+	    OptionalInt.of(4),
+	    2.8977000000000004,
+	    new Pose2d(3.937, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(7.882, 5.08, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RRebound = new ChoreoTraj(
+	    "RRebound",
+	    OptionalInt.empty(),
+	    9.80361,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.886, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RRebound$0 = new ChoreoTraj(
+	    "RRebound",
+	    OptionalInt.of(0),
+	    4.38166,
+	    new Pose2d(4.429, 0.633, Rotation2d.fromRadians(0)),
+	    new Pose2d(5.602, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RRebound$1 = new ChoreoTraj(
+	    "RRebound",
+	    OptionalInt.of(1),
+	    0.6477399999999998,
+	    new Pose2d(5.602, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.886, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RRebound$2 = new ChoreoTraj(
+	    "RRebound",
+	    OptionalInt.of(2),
+	    4.12642,
+	    new Pose2d(3.886, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(5.602, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RRebound$3 = new ChoreoTraj(
+	    "RRebound",
+	    OptionalInt.of(3),
+	    0.6477900000000005,
+	    new Pose2d(5.602, 0.643, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.886, 0.643, Rotation2d.fromRadians(0))
+	);
+	public static final ChoreoTraj RStuyAuton = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.empty(),
+	    12.77518,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RStuyAuton$0 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(0),
+	    1.83039,
+	    new Pose2d(3.577, 4.021, Rotation2d.fromRadians(0)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785))
+	);
+	public static final ChoreoTraj RStuyAuton$1 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(1),
+	    5.83887,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(0.785)),
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj RStuyAuton$2 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(2),
+	    2.61981,
+	    new Pose2d(3.537, 2.453, Rotation2d.fromRadians(2.356)),
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186))
+	);
+	public static final ChoreoTraj RStuyAuton$3 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(3),
+	    1.3176799999999993,
+	    new Pose2d(0.927, 2.253, Rotation2d.fromRadians(2.186)),
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571))
+	);
+	public static final ChoreoTraj RStuyAuton$4 = new ChoreoTraj(
+	    "RStuyAuton",
+	    OptionalInt.of(4),
+	    1.1684300000000007,
+	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-        Map.entry("CenterPath", CenterPath),
-        Map.entry("CenterPath$0", CenterPath$0),
-        Map.entry("CenterPath$1", CenterPath$1),
-        Map.entry("FourMeterSpinTest", FourMeterSpinTest),
-        Map.entry("FourMeterTest", FourMeterTest),
-        Map.entry("LBumpHubDepot", LBumpHubDepot),
-        Map.entry("LBumpHubDepot$0", LBumpHubDepot$0),
-        Map.entry("LBumpHubDepot$1", LBumpHubDepot$1),
-        Map.entry("LBumpHubDepot$2", LBumpHubDepot$2),
-        Map.entry("LBumpHubDepot$3", LBumpHubDepot$3),
-        Map.entry("LBumpHubDepot$4", LBumpHubDepot$4),
-        Map.entry("LDoubleRebound", LDoubleRebound),
-        Map.entry("LDoubleRebound$0", LDoubleRebound$0),
-        Map.entry("LDoubleRebound$1", LDoubleRebound$1),
-        Map.entry("LNotSoOPAuton", LNotSoOPAuton),
-        Map.entry("LNotSoOPAuton$0", LNotSoOPAuton$0),
-        Map.entry("LNotSoOPAuton$1", LNotSoOPAuton$1),
-        Map.entry("LNotSoOPAuton$2", LNotSoOPAuton$2),
-        Map.entry("LOPAuton", LOPAuton),
-        Map.entry("LOPAuton$0", LOPAuton$0),
-        Map.entry("LOPAuton$1", LOPAuton$1),
-        Map.entry("LOPAuton$2", LOPAuton$2),
-        Map.entry("LOPAuton$3", LOPAuton$3),
-        Map.entry("LOPAuton$4", LOPAuton$4),
-        Map.entry("LRebound", LRebound),
-        Map.entry("LRebound$0", LRebound$0),
-        Map.entry("LRebound$1", LRebound$1),
-        Map.entry("LRebound$2", LRebound$2),
-        Map.entry("LRebound$3", LRebound$3),
-        Map.entry("LStuyAuton", LStuyAuton),
-        Map.entry("LStuyAuton$0", LStuyAuton$0),
-        Map.entry("LStuyAuton$1", LStuyAuton$1),
-        Map.entry("LStuyAuton$2", LStuyAuton$2),
-        Map.entry("LStuyAuton$3", LStuyAuton$3),
-        Map.entry("MiddleDepotAuton", MiddleDepotAuton),
-        Map.entry("MiddleDepotAuton$0", MiddleDepotAuton$0),
-        Map.entry("MiddleDepotAuton$1", MiddleDepotAuton$1),
-        Map.entry("MiddleDepotAuton2", MiddleDepotAuton2),
-        Map.entry("MiddleDepotAuton2$0", MiddleDepotAuton2$0),
-        Map.entry("MiddleDepotAuton2$1", MiddleDepotAuton2$1),
-        Map.entry("RBumpHubDepot", RBumpHubDepot),
-        Map.entry("RBumpHubDepot$0", RBumpHubDepot$0),
-        Map.entry("RBumpHubDepot$1", RBumpHubDepot$1),
-        Map.entry("RBumpHubDepot$2", RBumpHubDepot$2),
-        Map.entry("RBumpHubDepot$3", RBumpHubDepot$3),
-        Map.entry("RBumpHubDepot$4", RBumpHubDepot$4),
-        Map.entry("RDoubleRebound", RDoubleRebound),
-        Map.entry("RDoubleRebound$0", RDoubleRebound$0),
-        Map.entry("RDoubleRebound$1", RDoubleRebound$1),
-        Map.entry("RNotSoOPAuton", RNotSoOPAuton),
-        Map.entry("RNotSoOPAuton$0", RNotSoOPAuton$0),
-        Map.entry("RNotSoOPAuton$1", RNotSoOPAuton$1),
-        Map.entry("RNotSoOPAuton$2", RNotSoOPAuton$2),
-        Map.entry("ROPAuton", ROPAuton),
-        Map.entry("ROPAuton$0", ROPAuton$0),
-        Map.entry("ROPAuton$1", ROPAuton$1),
-        Map.entry("ROPAuton$2", ROPAuton$2),
-        Map.entry("ROPAuton$3", ROPAuton$3),
-        Map.entry("ROPAuton$4", ROPAuton$4),
-        Map.entry("RRebound", RRebound),
-        Map.entry("RRebound$0", RRebound$0),
-        Map.entry("RRebound$1", RRebound$1),
-        Map.entry("RRebound$2", RRebound$2),
-        Map.entry("RRebound$3", RRebound$3),
-        Map.entry("RStuyAuton", RStuyAuton),
-        Map.entry("RStuyAuton$0", RStuyAuton$0),
-        Map.entry("RStuyAuton$1", RStuyAuton$1),
-        Map.entry("RStuyAuton$2", RStuyAuton$2),
-        Map.entry("RStuyAuton$3", RStuyAuton$3),
-        Map.entry("RStuyAuton$4", RStuyAuton$4)
+    	Map.entry("CenterPath", CenterPath),
+		Map.entry("CenterPath$0", CenterPath$0),
+		Map.entry("CenterPath$1", CenterPath$1),
+		Map.entry("FourMeterSpinTest", FourMeterSpinTest),
+		Map.entry("FourMeterTest", FourMeterTest),
+		Map.entry("LBumpHubDepot", LBumpHubDepot),
+		Map.entry("LBumpHubDepot$0", LBumpHubDepot$0),
+		Map.entry("LBumpHubDepot$1", LBumpHubDepot$1),
+		Map.entry("LBumpHubDepot$2", LBumpHubDepot$2),
+		Map.entry("LBumpHubDepot$3", LBumpHubDepot$3),
+		Map.entry("LBumpHubDepot$4", LBumpHubDepot$4),
+		Map.entry("LDoubleRebound", LDoubleRebound),
+		Map.entry("LDoubleRebound$0", LDoubleRebound$0),
+		Map.entry("LDoubleRebound$1", LDoubleRebound$1),
+		Map.entry("LNotSoOPAuton", LNotSoOPAuton),
+		Map.entry("LNotSoOPAuton$0", LNotSoOPAuton$0),
+		Map.entry("LNotSoOPAuton$1", LNotSoOPAuton$1),
+		Map.entry("LNotSoOPAuton$2", LNotSoOPAuton$2),
+		Map.entry("LOPAuton", LOPAuton),
+		Map.entry("LOPAuton$0", LOPAuton$0),
+		Map.entry("LOPAuton$1", LOPAuton$1),
+		Map.entry("LOPAuton$2", LOPAuton$2),
+		Map.entry("LOPAuton$3", LOPAuton$3),
+		Map.entry("LOPAuton$4", LOPAuton$4),
+		Map.entry("LRebound", LRebound),
+		Map.entry("LRebound$0", LRebound$0),
+		Map.entry("LRebound$1", LRebound$1),
+		Map.entry("LRebound$2", LRebound$2),
+		Map.entry("LRebound$3", LRebound$3),
+		Map.entry("LStuyAuton", LStuyAuton),
+		Map.entry("LStuyAuton$0", LStuyAuton$0),
+		Map.entry("LStuyAuton$1", LStuyAuton$1),
+		Map.entry("LStuyAuton$2", LStuyAuton$2),
+		Map.entry("LStuyAuton$3", LStuyAuton$3),
+		Map.entry("MiddleDepotAuton", MiddleDepotAuton),
+		Map.entry("MiddleDepotAuton$0", MiddleDepotAuton$0),
+		Map.entry("MiddleDepotAuton$1", MiddleDepotAuton$1),
+		Map.entry("MiddleDepotAuton2", MiddleDepotAuton2),
+		Map.entry("MiddleDepotAuton2$0", MiddleDepotAuton2$0),
+		Map.entry("MiddleDepotAuton2$1", MiddleDepotAuton2$1),
+		Map.entry("RBumpHubDepot", RBumpHubDepot),
+		Map.entry("RBumpHubDepot$0", RBumpHubDepot$0),
+		Map.entry("RBumpHubDepot$1", RBumpHubDepot$1),
+		Map.entry("RBumpHubDepot$2", RBumpHubDepot$2),
+		Map.entry("RBumpHubDepot$3", RBumpHubDepot$3),
+		Map.entry("RBumpHubDepot$4", RBumpHubDepot$4),
+		Map.entry("RDoubleRebound", RDoubleRebound),
+		Map.entry("RDoubleRebound$0", RDoubleRebound$0),
+		Map.entry("RDoubleRebound$1", RDoubleRebound$1),
+		Map.entry("RNotSoOPAuton", RNotSoOPAuton),
+		Map.entry("RNotSoOPAuton$0", RNotSoOPAuton$0),
+		Map.entry("RNotSoOPAuton$1", RNotSoOPAuton$1),
+		Map.entry("RNotSoOPAuton$2", RNotSoOPAuton$2),
+		Map.entry("ROPAuton", ROPAuton),
+		Map.entry("ROPAuton$0", ROPAuton$0),
+		Map.entry("ROPAuton$1", ROPAuton$1),
+		Map.entry("ROPAuton$2", ROPAuton$2),
+		Map.entry("ROPAuton$3", ROPAuton$3),
+		Map.entry("ROPAuton$4", ROPAuton$4),
+		Map.entry("RRebound", RRebound),
+		Map.entry("RRebound$0", RRebound$0),
+		Map.entry("RRebound$1", RRebound$1),
+		Map.entry("RRebound$2", RRebound$2),
+		Map.entry("RRebound$3", RRebound$3),
+		Map.entry("RStuyAuton", RStuyAuton),
+		Map.entry("RStuyAuton$0", RStuyAuton$0),
+		Map.entry("RStuyAuton$1", RStuyAuton$1),
+		Map.entry("RStuyAuton$2", RStuyAuton$2),
+		Map.entry("RStuyAuton$3", RStuyAuton$3),
+		Map.entry("RStuyAuton$4", RStuyAuton$4)
     );
 
     /**
@@ -669,4 +616,3 @@ public record ChoreoTraj(
         return routine.trajectory(this.name);
     }
 }
-// spotless:on
