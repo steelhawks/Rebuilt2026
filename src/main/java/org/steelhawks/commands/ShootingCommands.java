@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.vision.Vision;
@@ -44,7 +45,7 @@ public class ShootingCommands {
             Commands.runOnce(() -> RobotContainer.s_Indexer.resetBeamState()),
             Commands.runOnce(() -> {
                 if (AllianceFlip.shouldFlip()
-                    && RobotState.getInstance().getAimState().equals(RobotState.AimState.TO_HUB)
+                    && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
                 ) {
                     Vision.whitelistTagIds(VisionConstants.RED_TAGS);
                 } else {
@@ -52,11 +53,10 @@ public class ShootingCommands {
                 }
             }),
             Commands.waitUntil(() ->
-                RobotContainer.s_Flywheel.isReadyToShoot()
+                (RobotContainer.s_Flywheel.isReadyToShoot()
                     && !RobotContainer.s_Turret.isTraversing()
-                    && RobotContainer.s_Turret.atGoal()
-//                    && RobotContainer.s_Hood.atGoal()
-            ),
+                    && RobotContainer.s_Turret.atGoal())
+                    || RobotState.getInstance().getAimState().equals(AimState.FERRY)),
             RobotContainer.s_Indexer.feed()
                 .alongWith(
                     Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
