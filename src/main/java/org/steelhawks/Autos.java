@@ -19,6 +19,7 @@ import org.steelhawks.commands.align.SwerveDriveAlignment;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.Intake.State;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -95,6 +96,7 @@ public final class Autos {
 //        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
+        autoChooser.addOption("Left Rebound Auton Q112", leftRebound112().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Right Double Rebound Auton", rightDoubleRebound().cmd().withName(ChoreoTraj.RDoubleRebound.name()));
         autoChooser.addOption("Left Double Rebound Auton", leftDoubleRebound().cmd().withName(ChoreoTraj.LDoubleRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.ROPAuton.name()));
@@ -291,6 +293,67 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE),
+                trenchToMidToTrench.spawnCmd()
+            )
+        );
+
+        trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot1.spawnCmd()
+            )
+        );
+
+        trenchToShoot1.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+        trenchToShoot2.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+
+        trenchToShoot1.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot1),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                shootToMidToTrench.spawnCmd()
+            )
+        );
+
+        shootToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot2.spawnCmd()
+            )
+        );
+
+        trenchToShoot2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot2),
+                ShootingCommands.autonShoot(),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine leftRebound112() {
+        AutoRoutine routine = factory.newRoutine("Left Rebound Auton");
+
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot1 = ChoreoTraj.LRebound$1.asAutoTraj(routine);
+        AutoTrajectory shootToMidToTrench = ChoreoTraj.LRebound$2.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot2 = ChoreoTraj.LRebound$3.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
+                ShootingCommands.autonShoot(),
+                Commands.waitSeconds(10.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
