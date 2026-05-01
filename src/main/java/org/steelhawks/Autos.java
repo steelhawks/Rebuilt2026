@@ -96,7 +96,7 @@ public final class Autos {
 //        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
-        autoChooser.addOption("Left Rebound Auton Q112", leftRebound112().cmd().withName(ChoreoTraj.LRebound.name()));
+        autoChooser.addOption("Left Rebound Auton Q112", leftRebound112().cmd().withName(ChoreoTraj.LRebound.name() + "112"));
         autoChooser.addOption("Right Double Rebound Auton", rightDoubleRebound().cmd().withName(ChoreoTraj.RDoubleRebound.name()));
         autoChooser.addOption("Left Double Rebound Auton", leftDoubleRebound().cmd().withName(ChoreoTraj.LDoubleRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.ROPAuton.name()));
