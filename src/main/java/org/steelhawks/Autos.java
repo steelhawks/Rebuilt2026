@@ -342,7 +342,7 @@ public final class Autos {
     }
 
     public static AutoRoutine leftRebound112() {
-        AutoRoutine routine = factory.newRoutine("Left Rebound Auton");
+        AutoRoutine routine = factory.newRoutine("Left Rebound Auton 112");
 
         AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
         AutoTrajectory trenchToShoot1 = ChoreoTraj.LRebound$1.asAutoTraj(routine);
