@@ -24,7 +24,7 @@ import java.util.Set;
 public class VisionConstants {
 
     public static LoggedTunableNumber baselineDropOdomFactor
-        = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.8);
+        = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.3);
 
     public static final double NON_HUB_STDDEV_FACTOR = 1.1;
 
