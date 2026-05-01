@@ -67,7 +67,7 @@ public class Flywheel extends SubsystemBase {
     private static final double ferryLongDistanceMultiplier = 1.20;
     private static final double ferryLongDistanceThresholdMeters = 8.0;
 
-    private boolean bumpUpSpeed = false;
+    private boolean bumpUpSpeed = true;
 
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
@@ -156,7 +156,7 @@ public class Flywheel extends SubsystemBase {
                                 : 1.0;
                             double rps = ShooterStructure.linearToAngularVelocity(
                                 redBullConstant * sol.exitVelocity() * ferryFactor
-                                    * (DriverStation.isAutonomous() ? 1.06 : 1.0),
+                                    * (DriverStation.isAutonomous() ? 1.02 : 1.0),
                                 constants.flywheelRadius());
                             setTargetVelocity(rps);
                         }
