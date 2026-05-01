@@ -352,8 +352,7 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
-                ShootingCommands.autonShoot().withTimeout(5.0),
-                Commands.waitSeconds(10.0),
+                ShootingCommands.shoot().withTimeout(10.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
