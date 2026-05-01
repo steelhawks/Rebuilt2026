@@ -99,7 +99,7 @@ public interface Toggles {
 
     interface Intake {
         LoggedNetworkBoolean isEnabled =
-            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", false);
+            new LoggedNetworkBoolean("Toggles/Intake/IsEnabled", true);
         LoggedNetworkBoolean toggleVoltageOverride =
             new LoggedNetworkBoolean("Toggles/Intake/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
