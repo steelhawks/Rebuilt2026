@@ -26,7 +26,7 @@ public class VisionConstants {
     public static LoggedTunableNumber baselineDropOdomFactor
         = new LoggedTunableNumber("Vision/BaselineDropOdomFactor", 0.3);
 
-    public static final double NON_HUB_STDDEV_FACTOR = 1.1;
+    public static final double NON_HUB_STDDEV_FACTOR = 2.0;
 
     // Basic filtering thresholds
     public static final double MAX_AMBIGUITY = 0.2; // sas 0.3
