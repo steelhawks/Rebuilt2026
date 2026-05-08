@@ -41,7 +41,7 @@ public class Flywheel extends SubsystemBase {
 
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
-        new Debouncer(0.6, DebounceType.kBoth);
+        new Debouncer(0.1, DebounceType.kRising);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -63,8 +63,11 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kV;
 
     private static double redBullConstant;
+    private static final double ferryVelocityMultiplier = 1.61;
+    private static final double ferryLongDistanceMultiplier = 1.20;
+    private static final double ferryLongDistanceThresholdMeters = 8.0;
 
-    private boolean bumpUpSpeed = false;
+    private boolean bumpUpSpeed = true;
 
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
@@ -144,19 +147,32 @@ public class Flywheel extends SubsystemBase {
                     case SHOOTING_MOVING -> {
                         var sol = RobotState.getInstance().getMovingShotSolution();
                         if (sol != null) {
+                            boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
+                            double ferryDist = isFerry
+                                ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
+                                : 0.0;
+                            double ferryFactor = isFerry
+                                ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
+                                : 1.0;
                             double rps = ShooterStructure.linearToAngularVelocity(
-                                redBullConstant * sol.exitVelocity()
-                                     * (DriverStation.isAutonomous()
-                                        ? 1.06
-                                        : 1.0),
+                                redBullConstant * sol.exitVelocity() * ferryFactor
+                                    * (DriverStation.isAutonomous() ? 1.02 : 1.0),
                                 constants.flywheelRadius());
                             setTargetVelocity(rps);
                         }
                     }
                     case SHOOTING_STATIONARY -> {
                         double mps = getStationaryExitVelocityMps(hubCenter);
+                        boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
+                        double ferryDist = isFerry
+                            ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
+                            : 0.0;
+                        double ferryFactor = isFerry
+                            ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
+                            : 1.0;
                         double rps = ShooterStructure.linearToAngularVelocity(
-                            redBullConstant * mps, constants.flywheelRadius());
+                            redBullConstant * mps * ferryFactor,
+                            constants.flywheelRadius());
                         setTargetVelocity(rps);
                     }
                 }

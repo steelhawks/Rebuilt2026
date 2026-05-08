@@ -2,6 +2,7 @@ package org.steelhawks;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import org.steelhawks.Constants.RobotConstants;
 import org.steelhawks.subsystems.vision.VisionConstants;
@@ -54,6 +55,11 @@ public class FieldConstants {
             new Translation2d(Units.inchesToMeters(158.6 + (47.0 / 2.0)), FIELD_WIDTH / 2.0);
         public static final Translation3d HUB_CENTER_3D =
             new Translation3d(HUB_CENTER.getX(), HUB_CENTER.getY(), Units.inchesToMeters(72.0));
+
+        public static final Rectangle2d NEAR_HUB_TRIGGER_BOX =
+            new Rectangle2d(
+                new Translation2d(Units.inchesToMeters(158.6 - 2.0), (FIELD_WIDTH / 2.0) - Units.inchesToMeters(47.0 / 2.0) - Units.inchesToMeters(2.0)),
+                new Translation2d(Units.inchesToMeters(158.6 + 47.0 + 2.0), (FIELD_WIDTH / 2.0) + Units.inchesToMeters(47.0 / 2.0) + Units.inchesToMeters(2.0)));
 
         public static final double FUNNEL_RADIUS = Units.inchesToMeters(24.0);
         public static final double FERRY_CLEARANCE_FACTOR = Units.inchesToMeters(5.0);
@@ -111,5 +117,17 @@ public class FieldConstants {
                RobotConstants.ROBOT_WIDTH_WITH_BUMPERS / 2,
                Rotation2d.kZero
            );
+
+        public static Pose2d getLeftCorner() {
+            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue
+                ? LEFT_CORNER_2D
+                : RIGHT_CORNER_2D;
+        }
+
+        public static Pose2d getRightCorner() {
+            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue
+                ? RIGHT_CORNER_2D
+                : LEFT_CORNER_2D;
+        }
     }
 }

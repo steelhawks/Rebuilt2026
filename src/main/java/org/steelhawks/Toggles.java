@@ -22,9 +22,11 @@ public interface Toggles {
             bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
        if (RobotConfig.getConfig().hasVision) {
            bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
-               () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.LEFT_CORNER_2D))));
+                   () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getLeftCorner()))
+               .ignoringDisable(true));
            bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
-               () -> RobotState.getInstance().resetToPose(AllianceFlip.apply(FieldConstants.FieldCorners.RIGHT_CORNER_2D))));
+                   () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getRightCorner()))
+               .ignoringDisable(true));
        }
 
         bindMomentary("Dashboard/LUT/UseLUTHardBalls", Commands.runOnce(ShooterStructure::loadLUTHard).ignoringDisable(true));

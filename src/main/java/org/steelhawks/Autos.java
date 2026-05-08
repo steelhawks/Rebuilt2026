@@ -19,6 +19,7 @@ import org.steelhawks.commands.align.SwerveDriveAlignment;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.Intake.State;
+import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public final class Autos {
     }
 
     // Distance threshold to decide between pathfinding vs simple PID recovery
-    public static double replanDistanceRequirement = Units.inchesToMeters(15.0); // tune
+    public static double replanDistanceRequirement = Units.inchesToMeters(5.0); // tune
     private static boolean tuningOptionsAdded = false;
 
     /**
@@ -95,6 +96,7 @@ public final class Autos {
 //        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
+        autoChooser.addOption("Left Rebound Auton Q112", leftRebound112().cmd().withName(ChoreoTraj.LRebound.name() + "112"));
         autoChooser.addOption("Right Double Rebound Auton", rightDoubleRebound().cmd().withName(ChoreoTraj.RDoubleRebound.name()));
         autoChooser.addOption("Left Double Rebound Auton", leftDoubleRebound().cmd().withName(ChoreoTraj.LDoubleRebound.name()));
         autoChooser.addOption("Right OP Auton", rightOP().cmd().withName(ChoreoTraj.ROPAuton.name()));
@@ -103,6 +105,11 @@ public final class Autos {
         autoChooser.addOption("Left Not So OP Auton", leftNotSoOP().cmd().withName(ChoreoTraj.LNotSoOPAuton.name()));
         autoChooser.addOption("Middle Depot Auton", middleDepotAuton().cmd().withName(ChoreoTraj.MiddleDepotAuton.name()));
         autoChooser.addOption("Middle Depot Auton 2", middleDepotAuton2().cmd().withName(ChoreoTraj.MiddleDepotAuton2.name()));
+        autoChooser.addOption("Right Stuy Auton", rightStuy().cmd().withName(ChoreoTraj.RStuyAuton.name()));
+        autoChooser.addOption("Left Stuy Auton", leftStuy().cmd().withName(ChoreoTraj.LStuyAuton.name()));
+        autoChooser.addOption("Right Bump Hub Depot Auton", rightBumpHubDepot().cmd().withName(ChoreoTraj.RBumpHubDepot.name()));
+        autoChooser.addOption("Left Bump Hub Depot Auton", leftBumpHubDepot().cmd().withName(ChoreoTraj.LBumpHubDepot.name()));
+        autoChooser.addOption("Stationary Shoot", ShootingCommands.shoot());
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -286,6 +293,66 @@ public final class Autos {
         routine.active().onTrue(
             Commands.sequence(
                 trenchToMidToTrench.resetOdometry(),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE),
+                trenchToMidToTrench.spawnCmd()
+            )
+        );
+
+        trenchToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+        shootToMidToTrench.active().whileTrue(RobotContainer.s_Intake.runIntake());
+
+        trenchToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot1.spawnCmd()
+            )
+        );
+
+        trenchToShoot1.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+        trenchToShoot2.active().whileTrue(RobotContainer.s_Intake.outtakeIntake());
+
+        trenchToShoot1.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot1),
+                ShootingCommands.autonShoot().withTimeout(5.0),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                shootToMidToTrench.spawnCmd()
+            )
+        );
+
+        shootToMidToTrench.done().onTrue(
+            Commands.sequence(
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot2.spawnCmd()
+            )
+        );
+
+        trenchToShoot2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(RobotContainer.s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot2),
+                ShootingCommands.autonShoot(),
+                RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+            )
+        );
+
+        return routine;
+    }
+
+    public static AutoRoutine leftRebound112() {
+        AutoRoutine routine = factory.newRoutine("Left Rebound Auton 112");
+
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.LRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot1 = ChoreoTraj.LRebound$1.asAutoTraj(routine);
+        AutoTrajectory shootToMidToTrench = ChoreoTraj.LRebound$2.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot2 = ChoreoTraj.LRebound$3.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
+                ShootingCommands.shoot().withTimeout(10.0),
                 RobotContainer.s_Hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
                 RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE),
                 trenchToMidToTrench.spawnCmd()
@@ -703,6 +770,245 @@ public final class Autos {
                 ShootingCommands.autonShoot().withTimeout(5.0)
             )
         );
+
+        return routine;
+    }
+
+    public static AutoRoutine rightStuy() {
+        AutoRoutine routine = factory.newRoutine("Right Stuy Auton");
+
+        AutoTrajectory shootPreloaded = ChoreoTraj.RStuyAuton$0.asAutoTraj(routine);
+        AutoTrajectory collectFromNeutral = ChoreoTraj.RStuyAuton$1.asAutoTraj(routine);
+        AutoTrajectory shootingSection = ChoreoTraj.RStuyAuton$2.asAutoTraj(routine);
+        AutoTrajectory towerAlign = ChoreoTraj.RStuyAuton$3.asAutoTraj(routine);
+        AutoTrajectory shootIntoDepot = ChoreoTraj.RStuyAuton$4.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                shootPreloaded.resetOdometry(),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                shootPreloaded.spawnCmd()
+            )
+        );
+
+        shootPreloaded.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootPreloaded.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootPreloaded),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                collectFromNeutral.spawnCmd()
+            )
+        );
+
+        collectFromNeutral.active().whileTrue(s_Intake.runIntake());
+
+        collectFromNeutral.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(collectFromNeutral),
+                shootingSection.spawnCmd()
+            )
+        );
+
+        shootingSection.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootingSection.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootingSection),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                towerAlign.spawnCmd()
+            )
+        );
+
+        towerAlign.active().whileTrue(s_Intake.runIntake());
+
+        towerAlign.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(towerAlign),
+                shootIntoDepot.spawnCmd()
+            )
+        );
+
+        shootIntoDepot.active().whileTrue(ShootingCommands.shootWhileIntaking());
+
+        shootIntoDepot.done().onTrue(ShootingCommands.autonShoot());
+
+        return routine;
+    }
+
+    public static AutoRoutine leftStuy() {
+        AutoRoutine routine = factory.newRoutine("Left Stuy Auton");
+
+        AutoTrajectory shootPreloaded = ChoreoTraj.LStuyAuton$0.asAutoTraj(routine);
+        AutoTrajectory collectFromNeutral = ChoreoTraj.LStuyAuton$1.asAutoTraj(routine);
+        AutoTrajectory shootingSection = ChoreoTraj.LStuyAuton$2.asAutoTraj(routine);
+        AutoTrajectory shootIntoDepot = ChoreoTraj.LStuyAuton$3.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                shootPreloaded.resetOdometry(),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                shootPreloaded.spawnCmd()
+            )
+        );
+
+        shootPreloaded.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootPreloaded.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootPreloaded),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                collectFromNeutral.spawnCmd()
+            )
+        );
+
+        collectFromNeutral.active().whileTrue(s_Intake.runIntake());
+
+        collectFromNeutral.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(collectFromNeutral),
+                shootingSection.spawnCmd()
+            )
+        );
+
+        shootingSection.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootingSection.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootingSection),
+                shootIntoDepot.spawnCmd()
+            )
+        );
+
+        shootIntoDepot.active().whileTrue(ShootingCommands.shootWhileIntaking());
+
+        shootIntoDepot.done().onTrue(ShootingCommands.autonShoot());
+
+        return routine;
+    }
+
+    public static AutoRoutine rightBumpHubDepot() {
+        AutoRoutine routine = factory.newRoutine("Right Bump Hub Depot Auton");
+
+        AutoTrajectory shootPreloaded = ChoreoTraj.RBumpHubDepot$0.asAutoTraj(routine);
+        AutoTrajectory collectFromBackHub = ChoreoTraj.RBumpHubDepot$1.asAutoTraj(routine);
+        AutoTrajectory shootingSection = ChoreoTraj.RBumpHubDepot$2.asAutoTraj(routine);
+        AutoTrajectory towerAlign = ChoreoTraj.RBumpHubDepot$3.asAutoTraj(routine);
+        AutoTrajectory shootIntoDepot = ChoreoTraj.RBumpHubDepot$4.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                shootPreloaded.resetOdometry(),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                shootPreloaded.spawnCmd()
+            )
+        );
+
+        shootPreloaded.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootPreloaded.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootPreloaded),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                collectFromBackHub.spawnCmd()
+            )
+        );
+
+        collectFromBackHub.active().whileTrue(s_Intake.runIntake());
+
+        collectFromBackHub.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(collectFromBackHub),
+                shootingSection.spawnCmd()
+            )
+        );
+
+        shootingSection.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootingSection.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootingSection),
+                towerAlign.spawnCmd()
+            )
+        );
+
+        towerAlign.active().whileTrue(s_Intake.setDesiredStateCommand(State.INTAKE));
+
+        towerAlign.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(towerAlign),
+                shootIntoDepot.spawnCmd()
+            )
+        );
+
+        shootIntoDepot.active().whileTrue(ShootingCommands.shootWhileIntaking());
+
+        shootIntoDepot.done().onTrue(ShootingCommands.autonShoot());
+
+        return routine;
+    }
+
+    public static AutoRoutine leftBumpHubDepot() {
+        AutoRoutine routine = factory.newRoutine("Left Bump Hub Depot Auton");
+
+        AutoTrajectory shootPreloaded = ChoreoTraj.LBumpHubDepot$0.asAutoTraj(routine);
+        AutoTrajectory collectFromBackHub = ChoreoTraj.LBumpHubDepot$1.asAutoTraj(routine);
+        AutoTrajectory shootingSection = ChoreoTraj.LBumpHubDepot$2.asAutoTraj(routine);
+        AutoTrajectory shootIntoDepot = ChoreoTraj.LBumpHubDepot$3.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                shootPreloaded.resetOdometry(),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                shootPreloaded.spawnCmd()
+            )
+        );
+
+        shootPreloaded.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootPreloaded.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootPreloaded),
+                s_Intake.setDesiredStateCommand(State.INTAKE),
+                collectFromBackHub.spawnCmd()
+            )
+        );
+
+        collectFromBackHub.active().whileTrue(s_Intake.runIntake());
+
+        collectFromBackHub.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(collectFromBackHub),
+                shootingSection.spawnCmd()
+            )
+        );
+
+        shootingSection.active().whileTrue(ShootingCommands.autonShoot());
+
+        shootingSection.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(s_Swerve::stopWithX),
+                recoverToTrajectoryEnd(shootingSection),
+                shootIntoDepot.spawnCmd()
+            )
+        );
+
+        shootIntoDepot.active().whileTrue(ShootingCommands.shootWhileIntaking());
+
+        shootIntoDepot.done().onTrue(ShootingCommands.autonShoot());
 
         return routine;
     }

@@ -46,7 +46,8 @@ public class ShooterStructure {
     private static final double G = 9.81;
 
     static {
-        loadLUTHard();
+//        loadLUTHard();
+        loadLUTSoft();
     }
 
     public static boolean isNoSolution(ProjectileData data) {
