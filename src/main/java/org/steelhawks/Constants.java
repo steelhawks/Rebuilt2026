@@ -91,12 +91,17 @@ public final class Constants {
     public static final class SOTMConstants {
         public static final int MAX_ITERATIONS = 5;
         public static final double TIME_TOLERANCE = 0.01;
-        // Time between SOTM committing aim and ball physically leaving the shooter.
-        // From q37 logs: median 228ms from flywheel-ready to ball-gone, of which the
-        // ball is "aim-locked" only for the in-flywheel traversal (~tail end). Start at
-        // 0.1s and tune empirically; set to 0 to disable latency compensation.
+        // Time from feeder-fire to ball physically exiting the shooter, anchored
+        // empirically by combining the indexer-entry beam-break with the flywheel
+        // velocity dip (the dip = ball passing through the rollers = real "ball
+        // gone"). Across 5 worlds matches (q19,q37,q45,q54,q62), n=59 shots:
+        //     feeder→flywheel-dip: median 136ms, p25 103ms, p75 180ms
+        //     beam-fall→flywheel-dip: ~25ms (indexer→exit leg)
+        //     feeder→beam-fall: 111ms median (feeder→indexer leg)
+        // 0.135s is the empirical median; tune up if shots still trail under hard
+        // accel, down if they over-lead. Set to 0 to disable latency compensation.
         public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =
-            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.1);
+            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.135);
         // Low-pass filter time constant for the acceleration estimate fed into SOTM.
         // Trades responsiveness for jitter rejection on the differentiated velocity.
         public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
