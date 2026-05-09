@@ -357,7 +357,9 @@ public class Turret extends SubsystemBase {
                     var robot = getPose();
                     var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D);
                     var sol = RobotState.getInstance().getMovingShotSolution();
-                    if (sol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {
+                    if (sol != null) {
+                        // SOTM with zero velocity collapses to direct aim, so we use it
+                        // unconditionally instead of toggling paths on shooting state.
                         velocityTargetFF = sol.virtualTarget().toTranslation2d();
                         desiredRotation = findBestTurretAngle(
                             sol.turretAngle().getRadians(),
@@ -367,7 +369,7 @@ public class Turret extends SubsystemBase {
                             Logger.recordOutput("Turret/ScoreTrajectory", trajectory.toArray(new Translation3d[0]));
                         }
                     } else {
-                        // fallback aim directly at hub with no velocity compensation
+                        // First-loop fallback before SOTM has produced a solution.
                         velocityTargetFF = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER);
                         var turretTranslation = new Pose3d(robot)
                             .transformBy(RobotConstants.ROBOT_TO_TURRET)
@@ -391,7 +393,7 @@ public class Turret extends SubsystemBase {
                     var ferryGoal2d = ShooterStructure.Static.calculateFerryShotSetpoint();
                     var ferryGoal3d = new Translation3d(ferryGoal2d.getX(), ferryGoal2d.getY(), 0.0);
                     var ferrySol = RobotState.getInstance().getMovingShotSolution();
-                    if (ferrySol != null && RobotState.getInstance().getShootingState().equals(ShootingState.SHOOTING_MOVING)) {
+                    if (ferrySol != null) {
                         desiredRotation = findBestTurretAngle(
                             ferrySol.turretAngle().getRadians(),
                             getPosition().getRadians());
