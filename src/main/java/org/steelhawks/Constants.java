@@ -91,6 +91,16 @@ public final class Constants {
     public static final class SOTMConstants {
         public static final int MAX_ITERATIONS = 5;
         public static final double TIME_TOLERANCE = 0.01;
+        // Time between SOTM committing aim and ball physically leaving the shooter.
+        // From q37 logs: median 228ms from flywheel-ready to ball-gone, of which the
+        // ball is "aim-locked" only for the in-flywheel traversal (~tail end). Start at
+        // 0.1s and tune empirically; set to 0 to disable latency compensation.
+        public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =
+            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.1);
+        // Low-pass filter time constant for the acceleration estimate fed into SOTM.
+        // Trades responsiveness for jitter rejection on the differentiated velocity.
+        public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
+            new LoggedTunableNumber("SOTM/AccelLPFTimeConstantSec", 0.05);
     }
 
     public static final class RobotConstants {

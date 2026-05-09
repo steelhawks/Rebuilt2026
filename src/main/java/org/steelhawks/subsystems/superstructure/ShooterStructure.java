@@ -235,6 +235,7 @@ public class ShooterStructure {
         public static MovingShotSolution solveMovingShot(
             Translation3d actualTarget,
             Translation3d robotVelocity,
+            Translation3d fieldAcceleration,
             Rotation2d robotHeading,
             double chassisOmegaRadPerSec,
             int maxIterations,
@@ -253,9 +254,23 @@ public class ShooterStructure {
                     robotVelocity.getY() + (chassisOmegaRadPerSec * turretDx)) // omega could be negative
                 .rotateBy(robotHeading);
 
+            // Launch latency: aim commits "now" but the ball doesn't leave for D seconds.
+            // The hub is stationary, so the virtual target relative to the current turret
+            // position (turretXY) is:
+            //   vt = hub - v*(D + TOF) - a*D*TOF - 0.5*a*D^2
+            // derived from: launch_pos = current + v*D + 0.5*a*D^2 ; v_launch = v + a*D ;
+            // virtual target from launch = hub - v_launch * TOF ; rebased to current.
+            // Set D=0 to disable latency compensation.
+            double D = Constants.SOTMConstants.LAUNCH_LATENCY_SECONDS.get();
+            double accelX = fieldAcceleration.getX();
+            double accelY = fieldAcceleration.getY();
+
             double deltaH = actualTarget.getZ() - turretHeightAboveField();
             double velX = fieldRelativeVelocity.getX();
             double velY = fieldRelativeVelocity.getY();
+            // Position-only offset (independent of TOF): -v*D - 0.5*a*D^2
+            double posOffsetX = -velX * D - 0.5 * accelX * D * D;
+            double posOffsetY = -velY * D - 0.5 * accelY * D * D;
             Translation3d virtualTarget = actualTarget;
             double rawDist = turretXY.getDistance(actualTarget.toTranslation2d());
             double virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
@@ -268,9 +283,12 @@ public class ShooterStructure {
             double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
             int convergedAt = maxIterations;
             for (int i = 0; i < maxIterations; i++) {
+                // TOF-dependent offset: -v*TOF - a*D*TOF
+                double tofOffsetX = -velX * tGuess - accelX * D * tGuess;
+                double tofOffsetY = -velY * tGuess - accelY * D * tGuess;
                 virtualTarget = new Translation3d(
-                    actualTarget.getX() - velX * tGuess,
-                    actualTarget.getY() - velY * tGuess,
+                    actualTarget.getX() + posOffsetX + tofOffsetX,
+                    actualTarget.getY() + posOffsetY + tofOffsetY,
                     actualTarget.getZ());
                 rawDist = turretXY.getDistance(virtualTarget.toTranslation2d());
                 virtualDist = MathUtil.clamp(rawDist, minShootDistance, maxShootDistance);
@@ -291,6 +309,7 @@ public class ShooterStructure {
             Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
             Logger.recordOutput("SOTM/VirtualDistance", virtualDist);
             Logger.recordOutput("SOTM/TOF", tGuess);
+            Logger.recordOutput("SOTM/LaunchLatency", D);
             Logger.recordOutput("SOTM/ExitVelocity", v);
             Logger.recordOutput("SOTM/HoodAngleDeg", Math.toDegrees(theta));
             Logger.recordOutput("SOTM/ConvergedIterations", convergedAt);

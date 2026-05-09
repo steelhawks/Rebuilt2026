@@ -96,6 +96,9 @@ public class RobotState {
         TimeInterpolatableBuffer.createBuffer(intakeExtensionBufferSizeSec);
 
     private ChassisSpeeds currentChassisSpeeds = new ChassisSpeeds();
+    private double previousFieldVelocityTimestampSec = 0.0;
+    private Translation2d previousFieldVelocity = new Translation2d();
+    private Translation2d filteredFieldAcceleration = new Translation2d();
     private Rotation2d gyroRotation = new Rotation2d();
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveDriveKinematics kinematics =
@@ -258,9 +261,32 @@ public class RobotState {
             currentChassisSpeeds.vxMetersPerSecond,
             currentChassisSpeeds.vyMetersPerSecond,
             0.0);
+
+        Translation2d currentFieldVelocity =
+            new Translation2d(
+                currentChassisSpeeds.vxMetersPerSecond,
+                currentChassisSpeeds.vyMetersPerSecond)
+            .rotateBy(getRotation());
+        double now = Timer.getFPGATimestamp();
+        double dt = now - previousFieldVelocityTimestampSec;
+        if (previousFieldVelocityTimestampSec > 0.0 && dt > 1e-4 && dt < 0.1) {
+            Translation2d rawAccel = currentFieldVelocity.minus(previousFieldVelocity).div(dt);
+            double tau = Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_SEC.get();
+            double alpha = tau > 0.0 ? dt / (tau + dt) : 1.0;
+            filteredFieldAcceleration =
+                filteredFieldAcceleration.times(1.0 - alpha).plus(rawAccel.times(alpha));
+        }
+        previousFieldVelocity = currentFieldVelocity;
+        previousFieldVelocityTimestampSec = now;
+        Logger.recordOutput("SOTM/FieldAccelEstimate", filteredFieldAcceleration);
+
+        Translation3d fieldAcceleration = new Translation3d(
+            filteredFieldAcceleration.getX(), filteredFieldAcceleration.getY(), 0.0);
+
         movingShotSolution = ShooterStructure.Moving.solveMovingShot(
             target,
             robotVelocity,
+            fieldAcceleration,
             getRotation(),
             currentChassisSpeeds.omegaRadiansPerSecond,
             Constants.SOTMConstants.MAX_ITERATIONS,
@@ -283,13 +309,10 @@ public class RobotState {
         Logger.recordOutput("RobotState/PoseEstimation/PoseEstimation", poseEstimator.getEstimatedPosition());
         Logger.recordOutput("RobotState/PoseEstimation/Odometry", wheelOdometry.getPoseMeters());
 
-        // sotm update
-        ShootingState currentShootingState = getShootingState();
-        if (currentShootingState == ShootingState.SHOOTING_MOVING
-            || currentShootingState == ShootingState.SHOOTING
-        ) {
-            updateMovingShot();
-        }
+        // SOTM is now used unconditionally by the turret, so keep the solution fresh
+        // every loop instead of only while a shoot trigger is held. Solver is cheap
+        // (1–2 iterations typical, see SOTM/ConvergedIterations in logs).
+        updateMovingShot();
 
 //        if (DriverStation.isDisabled()) {
 //            timer.stop();
