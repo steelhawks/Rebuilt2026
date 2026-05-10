@@ -2,7 +2,9 @@ package org.steelhawks.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,8 +17,6 @@ import org.steelhawks.util.AllianceFlip;
 import org.steelhawks.util.LoggedTunableNumber;
 
 import java.util.function.DoubleSupplier;
-
-import static org.steelhawks.commands.DriveCommands.joystickLimiter;
 
 public class TeleopSwerve extends Command {
 
@@ -45,6 +45,9 @@ public class TeleopSwerve extends Command {
     private static Double bumpAngleSetpointSnapshot = null;
     private double sotmHeadingSnapshot = 0.0;
     private double sotmSpeedSnapshotNormalized = 0.0;
+    // Last commanded field-frame chassis velocity in m/s; used for slew-rate
+    // limiting the linear acceleration the driver can demand.
+    private Translation2d previousLinearMps = new Translation2d();
 
     public enum DriveState {
         NORMAL,
@@ -146,12 +149,8 @@ public class TeleopSwerve extends Command {
         }
         Translation2d linearVelocity =
             DriveCommands.getLinearVelocityFromJoysticks(
-                Toggles.rateLimitSwerveEnabled.get()
-                    ? joystickLimiter.calculate(xSupplier.getAsDouble())
-                    : xSupplier.getAsDouble(),
-                Toggles.rateLimitSwerveEnabled.get()
-                    ? joystickLimiter.calculate(ySupplier.getAsDouble())
-                    : ySupplier.getAsDouble());
+                xSupplier.getAsDouble(),
+                ySupplier.getAsDouble());
         double omega =
             MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Constants.Deadbands.DRIVE_DEADBAND);
         double currentRad = RobotState.getInstance().getRotation().getRadians();
@@ -212,9 +211,55 @@ public class TeleopSwerve extends Command {
                 Logger.recordOutput("TeleopSwerve/TurretAlign/ClampedTurretAngle", clampedTurretAngle);
             }
         }
-        DriveCommands.runVelocity(
-            linearVelocity,
-            MathUtil.applyDeadband(omega, Constants.Deadbands.ANGLE_DEADBAND));
+        // Convert normalized [-1,1] joystick output to a desired field-frame m/s vector.
+        // The drivetrain velocity / acceleration limits (maxMetersPerSec, maxMetersPerSecSq)
+        // are gated on ShootingState != NOTHING so they only apply during a shot attempt
+        // (where SOTM model accuracy depends on bounded v and a). Outside of shooting the
+        // driver gets full chassis speed.
+        double speedMult = s_Swerve.getSpeedMultiplier();
+        Translation2d desiredMps = new Translation2d(
+            linearVelocity.getX() * s_Swerve.getMaxLinearSpeedMetersPerSec() * speedMult,
+            linearVelocity.getY() * s_Swerve.getMaxLinearSpeedMetersPerSec() * speedMult);
+
+        boolean shootingLimitActive =
+            RobotState.getInstance().getShootingState() != RobotState.ShootingState.NOTHING;
+        if (shootingLimitActive) {
+            double maxMps = maxMetersPerSec.getAsDouble();
+            double mag = desiredMps.getNorm();
+            if (mag > maxMps && mag > 1e-6) {
+                desiredMps = desiredMps.times(maxMps / mag);
+            }
+
+            double maxDeltaMps = maxMetersPerSecSq.getAsDouble() * Constants.UPDATE_LOOP_DT;
+            Translation2d deltaMps = desiredMps.minus(previousLinearMps);
+            double deltaMag = deltaMps.getNorm();
+            if (deltaMag > maxDeltaMps && deltaMag > 1e-6) {
+                desiredMps = previousLinearMps.plus(deltaMps.times(maxDeltaMps / deltaMag));
+            }
+        }
+        // Track the actual commanded velocity every loop (gated or not) so the slew
+        // limiter has continuity if shooting kicks in mid-drive.
+        previousLinearMps = desiredMps;
+        Logger.recordOutput("TeleopSwerve/ShootingLimitActive", shootingLimitActive);
+
+        double finalOmega =
+            MathUtil.applyDeadband(omega, Constants.Deadbands.ANGLE_DEADBAND)
+                * s_Swerve.getMaxAngularSpeedRadPerSec()
+                * speedMult;
+
+        ChassisSpeeds fieldRel = new ChassisSpeeds(desiredMps.getX(), desiredMps.getY(), finalOmega);
+        Rotation2d driveYaw = AllianceFlip.shouldFlip()
+            ? RobotState.getInstance().getRotation().plus(Rotation2d.fromRadians(Math.PI))
+            : RobotState.getInstance().getRotation();
+        s_Swerve.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRel, driveYaw));
+    }
+
+    @Override
+    public void initialize() {
+        // Seed the slew limiter from the chassis's actual current velocity so a
+        // teleop resume after auton/pathfinding doesn't ramp up from zero while
+        // the robot is already moving.
+        previousLinearMps = RobotState.getInstance().getFieldRelativeVelocity();
     }
 
     @Override

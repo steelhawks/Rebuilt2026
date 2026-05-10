@@ -199,6 +199,14 @@ public class RobotState {
         this.currentChassisSpeeds = speeds;
     }
 
+    /** Current chassis translational velocity rotated into the field frame, in m/s. */
+    public Translation2d getFieldRelativeVelocity() {
+        return new Translation2d(
+            currentChassisSpeeds.vxMetersPerSecond,
+            currentChassisSpeeds.vyMetersPerSecond)
+            .rotateBy(getRotation());
+    }
+
     public void setAimState(AimState mode) {
         if (currentAimState != mode) {
             Logger.recordOutput("AimState/ModeChange",

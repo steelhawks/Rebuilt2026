@@ -4,7 +4,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,32 +19,23 @@ import org.steelhawks.Constants.AutonConstants;
 import org.steelhawks.Constants.Deadbands;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
-import org.steelhawks.RobotState.ShootingState;
-import org.steelhawks.Toggles;
 import org.steelhawks.subsystems.swerve.Swerve;
-import org.steelhawks.util.AllianceFlip;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 public class DriveCommands {
 
-    public static final SlewRateLimiter joystickLimiter = new SlewRateLimiter(0.8);
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
 
     private static final double FF_START_DELAY = 2.0; // Secs
     private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
-
-    private static Translation2d lastVelocity = new Translation2d();
 
     private DriveCommands() {}
 
@@ -59,93 +49,6 @@ public class DriveCommands {
         return new Pose2d(new Translation2d(), linearDirection)
             .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
             .getTranslation();
-    }
-
-    /**
-     * Field relative drive command using two joysticks (controlling linear and angular velocities).
-     */
-    public static Command joystickDrive(
-        DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
-        return Commands.run(
-            () -> {
-                Translation2d linearVelocity;
-                if (RobotState.getInstance().getShootingState() == ShootingState.NOTHING) {
-                    linearVelocity =
-                        getLinearVelocityFromJoysticks(
-                            Toggles.rateLimitSwerveEnabled.get()
-                                ? joystickLimiter.calculate(xSupplier.getAsDouble())
-                                : xSupplier.getAsDouble(),
-                            Toggles.rateLimitSwerveEnabled.get()
-                                ? joystickLimiter.calculate(ySupplier.getAsDouble())
-                                : ySupplier.getAsDouble());
-                    lastVelocity = linearVelocity;
-                } else if (RobotState.getInstance().getShootingState() == ShootingState.SHOOTING_MOVING) {
-                    double x = xSupplier.getAsDouble();
-                    double y = ySupplier.getAsDouble();
-                    double magnitude = Math.hypot(x, y);
-
-                    if (magnitude >= Deadbands.DRIVE_DEADBAND) {
-                        Rotation2d direction = new Rotation2d(Math.atan2(y, x));
-                        linearVelocity = new Pose2d(new Translation2d(), direction)
-                            .transformBy(new Transform2d(0.5, 0.0, new Rotation2d()))
-                            .getTranslation();
-                        lastVelocity = linearVelocity;
-                    }
-                }
-                double omega =
-                    MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Deadbands.DRIVE_DEADBAND);
-                omega = Math.copySign(Math.pow(omega, 2), omega);
-                runVelocity(lastVelocity, omega);
-            }, s_Swerve)
-        .withName("Teleop Drive");
-    }
-
-    /**
-     * Field relative drive command using joystick for linear control and PID for angular control.
-     * Possible use cases include snapping to an angle, aiming at a vision target, or controlling
-     * absolute rotation with a joystick.
-     */
-    public static Command joystickDriveAtAngle(
-        DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> rotationSupplier) {
-        ProfiledPIDController alignController = s_Swerve.getAlign();
-
-        return Commands.defer(() ->
-            Commands.run(
-            () -> {
-                Rotation2d validatedTarget = AllianceFlip.apply(rotationSupplier.get());
-
-                Translation2d linearVelocity =
-                    getLinearVelocityFromJoysticks(
-                        Toggles.rateLimitSwerveEnabled.get()
-                            ? joystickLimiter.calculate(xSupplier.getAsDouble())
-                            : xSupplier.getAsDouble(),
-                        Toggles.rateLimitSwerveEnabled.get()
-                            ? joystickLimiter.calculate(ySupplier.getAsDouble())
-                            : ySupplier.getAsDouble());
-
-                double omega =
-                    alignController.calculate(
-                        RobotState.getInstance().getRotation().getRadians(), validatedTarget.getRadians());
-
-                runVelocity(linearVelocity, omega);
-            }, s_Swerve)
-                .beforeStarting(() -> alignController.reset(RobotState.getInstance().getRotation().getRadians()))
-                    .withName("Align to Angle"),
-            Set.of(s_Swerve));
-    }
-
-    public static void runVelocity(Translation2d linearVelocity, double omega) {
-        ChassisSpeeds speeds =
-            new ChassisSpeeds(
-                linearVelocity.getX() * s_Swerve.getMaxLinearSpeedMetersPerSec() * s_Swerve.getSpeedMultiplier(),
-                linearVelocity.getY() * s_Swerve.getMaxLinearSpeedMetersPerSec() * s_Swerve.getSpeedMultiplier(),
-                omega * s_Swerve.getMaxAngularSpeedRadPerSec() * s_Swerve.getSpeedMultiplier());
-        s_Swerve.runVelocity(
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds,
-                AllianceFlip.shouldFlip()
-                    ? RobotState.getInstance().getRotation().plus(new Rotation2d(Math.PI))
-                        : RobotState.getInstance().getRotation()));
     }
 
     /**
