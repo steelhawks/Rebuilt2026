@@ -99,6 +99,11 @@ public class RobotState {
     private double previousFieldVelocityTimestampSec = 0.0;
     private Translation2d previousFieldVelocity = new Translation2d();
     private Translation2d filteredFieldAcceleration = new Translation2d();
+    // Gyro-derived linear acceleration in robot body frame, m/s^2 (gravity removed).
+    // gyroBodyAccelValid is true only when the IMU is connected AND reports valid
+    // linear-accel signals; otherwise SOTM falls back to the velocity-derivative path.
+    private Translation2d gyroBodyLinearAccelMps2 = new Translation2d();
+    private boolean gyroBodyAccelValid = false;
     private Rotation2d gyroRotation = new Rotation2d();
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveDriveKinematics kinematics =
@@ -207,6 +212,18 @@ public class RobotState {
             .rotateBy(getRotation());
     }
 
+    /**
+     * Pushes gravity-compensated body-frame linear acceleration from the IMU.
+     * Pass null + valid=false when the source is unavailable (sim, NavX, or
+     * Pigeon disconnect); SOTM will fall back to differentiating chassis velocity.
+     */
+    public void updateGyroAcceleration(Translation2d bodyFrameMps2, boolean valid) {
+        if (bodyFrameMps2 != null) {
+            this.gyroBodyLinearAccelMps2 = bodyFrameMps2;
+        }
+        this.gyroBodyAccelValid = valid;
+    }
+
     public void setAimState(AimState mode) {
         if (currentAimState != mode) {
             Logger.recordOutput("AimState/ModeChange",
@@ -277,16 +294,34 @@ public class RobotState {
             .rotateBy(getRotation());
         double now = Timer.getFPGATimestamp();
         double dt = now - previousFieldVelocityTimestampSec;
-        if (previousFieldVelocityTimestampSec > 0.0 && dt > 1e-4 && dt < 0.1) {
-            Translation2d rawAccel = currentFieldVelocity.minus(previousFieldVelocity).div(dt);
+
+        // Pick the acceleration source. Pigeon is preferred because it measures the
+        // robot's REAL body acceleration (including defense hits, wheel slip) with
+        // ~1ms latency, whereas the velocity derivative only sees motion the
+        // odometry can resolve. Falls back to the derivative if the IMU isn't
+        // reporting valid linear-accel signals.
+        Translation2d rawAccel = null;
+        String accelSource;
+        if (gyroBodyAccelValid) {
+            rawAccel = gyroBodyLinearAccelMps2.rotateBy(getRotation());
+            accelSource = "Pigeon";
+        } else if (previousFieldVelocityTimestampSec > 0.0 && dt > 1e-4 && dt < 0.1) {
+            rawAccel = currentFieldVelocity.minus(previousFieldVelocity).div(dt);
+            accelSource = "Derivative";
+        } else {
+            accelSource = "Hold";
+        }
+        if (rawAccel != null) {
             double tau = Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_SEC.get();
-            double alpha = tau > 0.0 ? dt / (tau + dt) : 1.0;
+            double effectiveDt = dt > 1e-4 ? dt : Constants.UPDATE_LOOP_DT;
+            double alpha = tau > 0.0 ? effectiveDt / (tau + effectiveDt) : 1.0;
             filteredFieldAcceleration =
                 filteredFieldAcceleration.times(1.0 - alpha).plus(rawAccel.times(alpha));
         }
         previousFieldVelocity = currentFieldVelocity;
         previousFieldVelocityTimestampSec = now;
         Logger.recordOutput("SOTM/FieldAccelEstimate", filteredFieldAcceleration);
+        Logger.recordOutput("SOTM/AccelSource", accelSource);
 
         Translation3d fieldAcceleration = new Translation3d(
             filteredFieldAcceleration.getX(), filteredFieldAcceleration.getY(), 0.0);

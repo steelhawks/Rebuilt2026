@@ -13,6 +13,14 @@ public interface GyroIO {
         public Rotation2d yawPosition = new Rotation2d();
         public double accelerationXInGs = 0.0;
         public double accelerationYInGs = 0.0;
+        // Gravity unit vector in sensor frame (g's). Combined with the raw
+        // acceleration above this yields gravity-compensated linear acceleration.
+        // Only the Pigeon path populates these; NavX/sim leave them at zero with
+        // linearAccelerationAvailable=false.
+        public double gravityVectorX = 0.0;
+        public double gravityVectorY = 0.0;
+        public double gravityVectorZ = 0.0;
+        public boolean linearAccelerationAvailable = false;
         public double yawVelocityRadPerSec = 0.0;
         public double[] odometryYawTimestamps = new double[]{};
         public Rotation2d[] odometryYawPositions = new Rotation2d[]{};

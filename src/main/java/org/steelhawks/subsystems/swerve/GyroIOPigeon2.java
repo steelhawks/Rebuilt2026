@@ -24,6 +24,9 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<Angle> yaw;
     private final StatusSignal<LinearAcceleration> accelerationX;
     private final StatusSignal<LinearAcceleration> accelerationY;
+    private final StatusSignal<Double> gravityVectorX;
+    private final StatusSignal<Double> gravityVectorY;
+    private final StatusSignal<Double> gravityVectorZ;
     private final DoubleRingBuffer yawPositionQueue;
     private final DoubleRingBuffer yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity;
@@ -36,8 +39,14 @@ public class GyroIOPigeon2 implements GyroIO {
         yaw = pigeon.getYaw();
         accelerationX = pigeon.getAccelerationX();
         accelerationY = pigeon.getAccelerationY();
+        gravityVectorX = pigeon.getGravityVectorX();
+        gravityVectorY = pigeon.getGravityVectorY();
+        gravityVectorZ = pigeon.getGravityVectorZ();
         yawVelocity = pigeon.getAngularVelocityZDevice();
 
+        // NOTE: mount pose must be calibrated separately so the firmware reports
+        // a correct gravity vector and tilt-aware yaw. Configure via
+        // Pigeon2Configuration.MountPose.{Yaw,Pitch,Roll} or the CTRE tuner.
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
         roll.setUpdateFrequency(50.0);
@@ -45,15 +54,21 @@ public class GyroIOPigeon2 implements GyroIO {
         yaw.setUpdateFrequency(Swerve.ODOMETRY_FREQUENCY);
 
         yawVelocity.setUpdateFrequency(50.0);
-        accelerationX.setUpdateFrequency(50.0);
-        accelerationY.setUpdateFrequency(50.0);
+        accelerationX.setUpdateFrequency(100.0);
+        accelerationY.setUpdateFrequency(100.0);
+        gravityVectorX.setUpdateFrequency(100.0);
+        gravityVectorY.setUpdateFrequency(100.0);
+        gravityVectorZ.setUpdateFrequency(100.0);
         pigeon.optimizeBusUtilization();
         yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(pigeon.getYaw());
 
         PhoenixUtil.registerSignals(
             canBus,
-            roll, pitch, yaw, accelerationX, accelerationY, yawVelocity);
+            roll, pitch, yaw,
+            accelerationX, accelerationY,
+            gravityVectorX, gravityVectorY, gravityVectorZ,
+            yawVelocity);
     }
 
     @Override
@@ -64,6 +79,11 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.accelerationXInGs = accelerationX.getValueAsDouble();
         inputs.accelerationYInGs = accelerationY.getValueAsDouble();
+        inputs.gravityVectorX = gravityVectorX.getValueAsDouble();
+        inputs.gravityVectorY = gravityVectorY.getValueAsDouble();
+        inputs.gravityVectorZ = gravityVectorZ.getValueAsDouble();
+        inputs.linearAccelerationAvailable =
+            BaseStatusSignal.isAllGood(accelerationX, accelerationY, gravityVectorX, gravityVectorY);
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
         Logger.recordOutput("Swerve/Gyro/AccelerationInGs", Math.hypot(inputs.accelerationXInGs, inputs.accelerationYInGs));

@@ -475,6 +475,23 @@ public class Swerve extends SubsystemBase {
 
         processOdometryObservations();
         robotState.updateChassisSpeeds(getChassisSpeeds());
+
+        // Push gyro-derived body-frame linear acceleration to RobotState. We subtract
+        // the gravity unit vector from the raw accelerometer reading (both in sensor
+        // frame, g's) and convert to m/s^2. Assumes the Pigeon sensor X/Y axes are
+        // aligned with the robot X/Y axes; if mount orientation differs, configure
+        // Pigeon2 MountPose for tilt and rotate here for any yaw offset.
+        boolean accelValid =
+            gyroInputs.connected && gyroInputs.linearAccelerationAvailable;
+        if (accelValid) {
+            double lxMps2 = (gyroInputs.accelerationXInGs - gyroInputs.gravityVectorX) * 9.80665;
+            double lyMps2 = (gyroInputs.accelerationYInGs - gyroInputs.gravityVectorY) * 9.80665;
+            robotState.updateGyroAcceleration(
+                new edu.wpi.first.math.geometry.Translation2d(lxMps2, lyMps2), true);
+        } else {
+            robotState.updateGyroAcceleration(null, false);
+        }
+
         FieldConstants.FIELD_2D.setRobotPose(RobotState.getInstance().getEstimatedPose());
 //        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.getMode() != Mode.SIM);
         LoopTimeUtil.record("Swerve");
