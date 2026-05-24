@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shot Solver — Steelhawks</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-name">SHOT SOLVER</span>
+      <span class="brand-sub">physics envelope · slip · LUT</span>
+    </div>
+    <div class="readout" id="readout">
+      <div class="rdo"><label>Optimal</label><span id="rd-optimal">—</span></div>
+      <div class="rdo"><label>Speed tol</label><span id="rd-speed-tol">—</span></div>
+      <div class="rdo"><label>Angle tol</label><span id="rd-angle-tol">—</span></div>
+      <div class="rdo"><label>Wheel cmd</label><span id="rd-rps">—</span></div>
+      <div class="rdo"><label>TOF</label><span id="rd-tof">—</span></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <details open>
+        <summary>Target</summary>
+        <div class="grid">
+          <label>Distance to hub (m) <input id="i-distance" type="number" step="0.01" min="0.5" max="10" value="4.5"/></label>
+          <label>Hub mouth height (m) <input id="i-hub-z" type="number" step="0.01" value="1.83"/></label>
+          <label>Hub mouth radius (m) <input id="i-hub-r" type="number" step="0.01" value="0.61"/></label>
+          <label>Funnel wall height (m) <input id="i-funnel-h" type="number" step="0.01" value="0.00"/></label>
+          <label>Clearance above rim (m) <input id="i-clearance" type="number" step="0.01" value="0.00"/></label>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Launcher</summary>
+        <div class="grid">
+          <label>Pivot height (m) <input id="i-launch-z" type="number" step="0.01" value="0.40"/></label>
+          <label>Pivot fwd offset (m) <input id="i-launch-x" type="number" step="0.01" value="0.0"/></label>
+          <label>Wheel radius (m) <input id="i-wheel-r" type="number" step="0.001" value="0.0508"/></label>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Slip &amp; ball condition</summary>
+        <div class="grid">
+          <label>Slip efficiency η
+            <span class="slider-row">
+              <input id="i-eta" type="range" min="0.40" max="1.00" step="0.01" value="0.75"/>
+              <output id="o-eta">0.75</output>
+            </span>
+          </label>
+          <label>Ball condition (hard ⇆ soft)
+            <span class="slider-row">
+              <input id="i-wear" type="range" min="0.70" max="1.00" step="0.01" value="1.00"/>
+              <output id="o-wear">1.00</output>
+            </span>
+          </label>
+          <label class="hint">η × condition = effective wheel→ball transfer. Soft balls drop the multiplier; raise commanded RPS by the same ratio.</label>
+          <label>Hood vs. ball angle bias (°)
+            <span class="slider-row">
+              <input id="i-angle-bias" type="range" min="-5" max="5" step="0.1" value="0"/>
+              <output id="o-angle-bias">+0.0</output>
+            </span>
+          </label>
+          <label class="hint">Slo-mo offset. Positive = hood reads higher than the ball actually launches (soft balls compress and flatten the launch). The hood command in the LUT = physics θ + this bias.</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Physics</summary>
+        <div class="grid">
+          <label>Gravity g (m/s²) <input id="i-g" type="number" step="0.01" value="9.81"/></label>
+          <label>Ball mass (kg) <input id="i-mass" type="number" step="0.001" value="0.215"/></label>
+          <label>Ball diameter (m) <input id="i-diameter" type="number" step="0.001" value="0.150"/></label>
+          <label>Air density (kg/m³) <input id="i-rho" type="number" step="0.001" value="1.225"/></label>
+          <label>Drag coefficient <input id="i-cd" type="number" step="0.01" value="0.50"/></label>
+          <label class="row-2"><input id="i-drag-enable" type="checkbox" checked/> Enable drag</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Search</summary>
+        <div class="grid">
+          <label>Angle min (°) <input id="i-th-min" type="number" step="1" value="40"/></label>
+          <label>Angle max (°) <input id="i-th-max" type="number" step="1" value="80"/></label>
+          <label>Angle steps <input id="i-th-n" type="number" step="1" value="40"/></label>
+          <label>Speed cap (m/s) <input id="i-v-cap" type="number" step="0.5" value="20"/></label>
+          <label class="row-2"><input id="i-show-all" type="checkbox" checked/> Show full envelope on trajectory plot</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>LUT export</summary>
+        <div class="grid">
+          <label>Distance min (m) <input id="i-lut-min" type="number" step="0.05" value="1.40"/></label>
+          <label>Distance max (m) <input id="i-lut-max" type="number" step="0.05" value="6.20"/></label>
+          <label>Steps <input id="i-lut-n" type="number" step="1" value="8"/></label>
+          <label>Variant name <input id="i-lut-name" type="text" value="loadLUTSolved"/></label>
+          <button id="b-gen-lut" class="primary">Generate LUT</button>
+          <button id="b-copy-lut">Copy Java</button>
+        </div>
+        <pre id="lut-output" class="lut-out" tabindex="0"></pre>
+      </details>
+    </aside>
+
+    <section class="plots">
+      <div class="plot-card">
+        <div class="plot-title">Trajectory envelope</div>
+        <div id="plot-traj" class="plot"></div>
+      </div>
+      <div class="plot-card">
+        <div class="plot-title">Speed × angle valid region</div>
+        <div id="plot-env" class="plot"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -55,8 +55,17 @@ public class ShooterStructure {
     }
 
     public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH) {
+        return calculateTimeOfFlight(v, theta, x, deltaH, true);
+    }
+
+    /**
+     * @param useLutIfEnabled Pass false to force kinematic TOF even when the LUT toggle is on.
+     *                        The TOF LUT is calibrated against hub shots; ferry shots (much
+     *                        higher arc) must skip it.
+     */
+    public static double calculateTimeOfFlight(double v, double theta, double x, double deltaH, boolean useLutIfEnabled) {
         // rearranged 0.5*g*t^2 - v*sin(theta)*t + deltaH = 0
-        if (Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
+        if (useLutIfEnabled && Toggles.useLUT.get() && !Toggles.useKinematicsTOF.get()) {
             return shootingTimeOfFlightMap.get(MathUtil.clamp(x, minShootDistance, maxShootDistance));
         }
         double a = 0.5 * G;
@@ -280,7 +289,7 @@ public class ShooterStructure {
                     : Static.calculateShot(actualTarget, actualTarget, false, rawDist);
             double v = projectile.exitVelocity();
             double theta = projectile.hoodAngle();
-            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry);
             int convergedAt = maxIterations;
             for (int i = 0; i < maxIterations; i++) {
                 // TOF-dependent offset: -v*TOF - a*D*TOF
@@ -297,7 +306,7 @@ public class ShooterStructure {
                     : Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
-                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH);
+                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry);
                 if (Math.abs(newTof - tGuess) < timeTolerance) {
                     convergedAt = i + 1;
                     tGuess = newTof;
