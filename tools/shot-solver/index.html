@@ -70,6 +70,19 @@
         </div>
       </details>
 
+      <details open>
+        <summary>Shot placement</summary>
+        <div class="grid">
+          <label>Aim bias (front ⇆ back rim)
+            <span class="slider-row">
+              <input id="i-placement-bias" type="range" min="0.00" max="1.00" step="0.01" value="0.75"/>
+              <output id="o-placement-bias">0.75 · back rim</output>
+            </span>
+          </label>
+          <label class="hint">Where to live inside the valid (θ, v) envelope. 0.5 = centroid (max symmetric tolerance). &gt;0.5 = bias toward the back rim with higher v and steeper θ. Real errors (drag, wear, voltage sag, range bias) almost all pull the ball short — biasing back converts "short of intended" into "lands in center" instead of "rim-out front."</label>
+        </div>
+      </details>
+
       <details>
         <summary>Physics</summary>
         <div class="grid">

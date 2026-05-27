@@ -1,52 +1,91 @@
 # Tuning the shot-solver
 
-This doc covers the three sliders that don't come from physics first principles:
+This doc covers the four sliders that don't come from physics first principles:
 
-- `η` (slip efficiency)
-- `wear` (ball condition)
-- `angle bias` (hood ↔ ball-launch offset)
+- `η` (slip efficiency) — wheel-to-ball energy transfer
+- `wear` (ball condition) — degrades η over the event
+- `angle bias` (hood ↔ ball-launch offset) — measurement, set from slo-mo
+- `shot placement bias` (front rim ↔ back rim) — strategic choice
 
 If your physical constants (mass, diameter, Cd, ρ, g, hub geometry, launch
-height) are correct, these three knobs are the only things you should be
+height) are correct, these four knobs are the only things you should be
 touching to make the solver match the real robot.
 
 ---
 
 ## The core idea
 
-The solver gives you a physics-optimal (θ, v) for any distance. Real shooters
-have unmodeled losses — wheel slip, ball compression, backspin, hood
-mechanical offset — that no amount of constants tweaking will perfectly
-capture. Instead of trying to model every loss, **collapse all of them into
-two scalars** that you tune from physical measurement:
+The solver gives you a valid (θ, v) **envelope** for any distance — a band
+inside which any shot makes the goal. Inside that envelope there's a single
+strategic choice (where in the band to live) and two measurements that bake
+all unmodeled losses (slip, ball compression, hood encoder offset, drag bias)
+into scalars.
 
-- **angle bias**: hood encoder reads one angle, ball actually leaves at another.
-  Measure with **slo-mo video**.
+The whole workflow comes down to three knobs:
+
+- **shot placement bias**: where in the valid envelope to aim — front rim,
+  center, or back rim. Strategic choice, set once.
+- **angle bias**: hood encoder vs actual ball-launch angle. Measure with
+  **slo-mo video**.
 - **η × wear** (the slip ratio): wheel surface m/s vs ball exit m/s. Tune by
   **shooting the robot** until balls go in.
 
-This is the approach Hightide used in 2025. Their summary, paraphrased:
+Hightide's 2025 approach used the centroid (placement = 0.5) and the two
+measurements:
 
 > "The goal is not to eliminate empirical tuning — it's to bake the magic
 > black-box numbers into a single value we can tune."
 
-Two scalars. That's the whole tune.
+We push one step further with **back-rim biased placement** (placement ≈ 0.75)
+because real errors aren't symmetric — see the next section.
 
 ---
+
+## Why back-rim bias
+
+The valid envelope is a band of (θ, v) pairs that all make the goal. The
+centroid maximizes symmetric tolerance — equal slack in every direction.
+That's the right pick if errors are symmetric. **They aren't.**
+
+Almost every real-world error pulls the ball **short**:
+
+- Drag is always there and unmodeled drag underestimates the slowdown.
+- Worn balls have lower transfer ratio → lower exit velocity → land short.
+- Voltage sag on a heavy command spike → flywheel undershoots → lands short.
+- Backspin generates lift but backspin itself varies; less spin than expected
+  → lands short.
+- Vision range estimate at oblique tag angles tends to read further than
+  reality → solver thinks it needs less speed → ball lands short.
+
+Aiming at the centroid: those errors push you toward the front rim or short
+of the goal entirely.
+
+Aiming at the back rim: the *same errors* push you toward the center.
+
+The placement bias is one slider that does this:
+
+- `0.5` = centroid (Hightide / classic robustness)
+- `0.75` = back-rim biased (default — converts short-bias errors into makes)
+- `1.0 − safety` = aim at the back-rim edge (most aggressive — minimal headroom)
+
+Side effect: the back-rim biased shot is also slightly faster to spin up at
+some distances, because v at high bias can be lower than v_far on angles
+where the envelope is asymmetric. This is a small bonus, not the point.
 
 ## The workflow (do this in order)
 
 ### Step 1 — generate the LUT from the solver
 
-Set `angle bias = 0` and `η × wear` to a reasonable starting guess (0.6–0.7
-for a typical compliant-wheel shooter). Run the LUT generator. Paste the
-output into `ShooterStructure.java` as `loadLUTSolved`.
+Set `angle bias = 0`, `placement bias ≈ 0.75`, and `η × wear` to a reasonable
+starting guess (0.6–0.7 for a typical compliant-wheel shooter). Run the LUT
+generator. Paste the output into `ShooterStructure.java` as `loadLUTSolved`.
 
-**Do not try to make this match `loadLUTSoft` row-by-row.** They are different
-optimization problems. `loadLUTSoft` is whatever (θ, v) the drivers settled on
-inside the valid envelope; the solver picks the robustness-optimum inside the
-same envelope. Both make shots. Their rows will not agree, and they don't
-need to.
+**Do not try to make this match `loadLUTSoft` row-by-row.** Although: with
+placement bias around 0.75, the generated LUT will look *much* more like
+`loadLUTSoft` than the centroid version did, because experienced hand-tuners
+implicitly converge on back-rim-biased shots for the same asymmetric-error
+reason. If the bias LUT and the soft LUT agree within ~2° / ~0.3 m/s, that's
+strong evidence the physics is right and the bias matches the team's intuition.
 
 ### Step 2 — tune `angle bias` from slo-mo
 
@@ -212,11 +251,13 @@ mass, new field) where you don't yet have empirical data. It gets you to
 
 | Symptom | Fix |
 |---|---|
-| Setting up a new shooter, no LUT exists | Generate from solver, then Steps 2–3 |
+| Setting up a new shooter, no LUT exists | Generate from solver with `placement bias ≈ 0.75`, then Steps 2–3 |
 | Balls consistently short | Lower `η × wear` |
 | Balls consistently long | Raise `η × wear` |
+| Balls clear the goal cleanly half the time, rim-out front the other half | Raise `placement bias` — you're at centroid, errors are pulling you toward front rim |
+| Balls fly long when fresh, short when worn | Re-tune `wear` (Step 4) |
 | Balls go short at near range, long at far (or vice versa) | Slip varies with speed — go to "When one scalar isn't enough" |
 | Hood reads X° but slo-mo shows ball leaving at Y° | Set `angle bias = Y − X` |
-| Trying to match an existing empirical LUT row-by-row | Don't. They won't match. Tune from the real robot. |
+| Trying to match an existing empirical LUT row-by-row | If hand-tuned LUT looks faster + steeper than centroid LUT, set `placement bias ≈ 0.75` and regenerate — they should agree |
 | New ball stock mid-event, robot starts missing | Re-tune `wear` only (Step 3 with the new ball) |
 | Flat plateau in solver hood angle across distance | Bump `i-th-n` (theta search steps) — grid resolution |

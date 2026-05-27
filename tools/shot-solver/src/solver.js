@@ -109,16 +109,29 @@ export function solveEnvelope(geom, search, env) {
 }
 
 /**
- * Pick the most-robust shot inside the envelope.
+ * Pick a shot inside the envelope, biased toward the front (close rim) or back
+ * (far rim) of the goal mouth.
  *
- * Robustness metric: at each candidate (θ, v) inside the band, measure the four
- * axis-aligned distances to the nearest boundary — increasing v, decreasing v,
- * increasing θ (until v leaves the band), decreasing θ. Normalize by overall
- * envelope span and take the geometric mean of the (smaller of each pair).
- * Geometric mean rewards points whose smaller dimension is non-trivial, so it
- * doesn't reward "wide v band right at the search-range corner."
+ * `bias` ∈ [0, 1]:
+ *   0.0 → close-rim biased  (v near v_close, shallower θ)
+ *   0.5 → centroid          (geometric mean of margins, classic robustness pick)
+ *   1.0 → far-rim biased    (v near v_far, steeper θ)
+ *
+ * Why this matters: real-world errors (drag, wear, voltage sag, vision range bias,
+ * lost backspin) almost all pull the ball SHORT. Aiming at the back rim converts
+ * "short of intended" into "lands in center" instead of "lands on / past the
+ * front rim." See TUNING.md.
+ *
+ * Selection logic:
+ *   - For each candidate θ, v_pick(θ) = v_close + bias_clamped · (v_far - v_close).
+ *   - Score that (θ, v_pick) by  sqrt(angle_margin · v_band_width) · tilt(θ),
+ *     where tilt rewards θ in the bias direction (linear, neutral at bias=0.5).
+ *   - Pick the θ that maximises the score.
+ *
+ * Bias is clamped a few percent in from each edge so the picked v has some
+ * headroom for sensor noise; aiming literally at v_far is asking for a graze.
  */
-export function pickOptimal(env) {
+export function pickOptimal(env, bias = 0.5) {
   const { thetas, vClose, vFar, valid } = env;
   let thLo = Infinity, thHi = -Infinity, vLo = Infinity, vHi = -Infinity;
   for (let i = 0; i < thetas.length; i++) {
@@ -132,6 +145,11 @@ export function pickOptimal(env) {
   const thSpan = Math.max(thHi - thLo, 1e-6);
   const vSpan = Math.max(vHi - vLo, 1e-6);
 
+  // Keep some headroom from each rim — picking literally at v_close or v_far
+  // has zero margin and will miss the moment anything wobbles.
+  const SAFETY = 0.05;
+  const b = Math.max(SAFETY, Math.min(1 - SAFETY, bias));
+
   function angleRangeFor(v, thStar) {
     let iStar = 0, best = Infinity;
     for (let i = 0; i < thetas.length; i++) {
@@ -140,41 +158,42 @@ export function pickOptimal(env) {
     }
     let iLo = iStar;
     while (iLo > 0) {
-      const a = vClose[iLo - 1], b = vFar[iLo - 1];
-      if (!valid[iLo - 1] || a == null || b == null || v < a || v > b) break;
+      const a = vClose[iLo - 1], bb = vFar[iLo - 1];
+      if (!valid[iLo - 1] || a == null || bb == null || v < a || v > bb) break;
       iLo--;
     }
     let iHi = iStar;
     while (iHi < thetas.length - 1) {
-      const a = vClose[iHi + 1], b = vFar[iHi + 1];
-      if (!valid[iHi + 1] || a == null || b == null || v < a || v > b) break;
+      const a = vClose[iHi + 1], bb = vFar[iHi + 1];
+      if (!valid[iHi + 1] || a == null || bb == null || v < a || v > bb) break;
       iHi++;
     }
     return { low: thStar - thetas[iLo], high: thetas[iHi] - thStar };
   }
 
+  // Tilt: at bias=0.5 it's neutral; at bias=1, high-θ candidates get up to 1.5×
+  // boost and low-θ get 0.5×. Symmetric at bias=0.
+  const tiltSign = 2 * (b - 0.5); // -1 .. +1
+
   let best = null;
-  const N_V = 24;
   for (let i = 0; i < thetas.length; i++) {
     if (!valid[i]) continue;
     const th = thetas[i];
     const vC = vClose[i];
     const vF = vFar[i];
-    for (let j = 1; j < N_V - 1; j++) {
-      const v = vC + (vF - vC) * (j / (N_V - 1));
-      const ar = angleRangeFor(v, th);
-      const sLo = (v - vC) / vSpan;
-      const sHi = (vF - v) / vSpan;
-      const aLo = ar.low / thSpan;
-      const aHi = ar.high / thSpan;
-      // Score = geometric mean of (min speed margin) and (min angle margin).
-      // A point at the search-range edge has aLo or aHi = 0, killing the score.
-      const sMin = Math.min(sLo, sHi);
-      const aMin = Math.min(aLo, aHi);
-      const score = Math.sqrt(sMin * aMin);
-      if (best == null || score > best.score) {
-        best = { thetaRad: th, v0: v, score };
-      }
+    const v = vC + (vF - vC) * b;
+
+    const ar = angleRangeFor(v, th);
+    const aMin = Math.min(ar.low, ar.high) / thSpan;
+    if (aMin <= 0) continue;
+    const vWidth = (vF - vC) / vSpan;
+
+    const thetaNorm = (th - thLo) / thSpan;
+    const tiltBoost = 1 + tiltSign * (thetaNorm - 0.5);
+
+    const score = Math.sqrt(aMin * vWidth) * tiltBoost;
+    if (best == null || score > best.score) {
+      best = { thetaRad: th, v0: v, score };
     }
   }
   return best;

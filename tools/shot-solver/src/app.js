@@ -13,7 +13,7 @@ const $ = (id) => document.getElementById(id);
 const NUM_IDS = [
   "i-distance", "i-hub-z", "i-hub-r", "i-funnel-h", "i-clearance",
   "i-launch-z", "i-launch-x", "i-wheel-r",
-  "i-eta", "i-wear", "i-angle-bias",
+  "i-eta", "i-wear", "i-angle-bias", "i-placement-bias",
   "i-g", "i-mass", "i-diameter", "i-rho", "i-cd",
   "i-th-min", "i-th-max", "i-th-n", "i-v-cap",
   "i-lut-min", "i-lut-max", "i-lut-n",
@@ -33,6 +33,7 @@ function readInputs() {
     },
     slip: { eta: num("i-eta"), wear: num("i-wear") },
     angleBiasDeg: num("i-angle-bias"),
+    placementBias: num("i-placement-bias"),
     wheelRadius: num("i-wheel-r"),
     env: {
       g: num("i-g"),
@@ -60,13 +61,18 @@ function updateSliderLabels() {
   $("o-wear").textContent = parseFloat($("i-wear").value).toFixed(2);
   const bias = parseFloat($("i-angle-bias").value);
   $("o-angle-bias").textContent = (bias >= 0 ? "+" : "") + bias.toFixed(1);
+  const placement = parseFloat($("i-placement-bias").value);
+  const label = placement < 0.45 ? "front rim"
+              : placement > 0.55 ? "back rim"
+              : "centroid";
+  $("o-placement-bias").textContent = placement.toFixed(2) + " · " + label;
 }
 
 function recompute() {
   updateSliderLabels();
   const inp = readInputs();
   const env = solveEnvelope(inp.geom, inp.search, inp.env);
-  const opt = pickOptimal(env);
+  const opt = pickOptimal(env, inp.placementBias);
   const tol = opt ? tolerances(env, opt) : null;
 
   // Geometry passed to the trajectory drawer needs physics + geometry merged.
@@ -125,8 +131,14 @@ function runLUT() {
     steps: Math.max(2, Math.floor(parseFloat($("i-lut-n").value))),
   };
   const { distance, ...geomBase } = inp.geom;
-  const rows = generateLUT(sweep, geomBase, inp.search, inp.env, inp.slip, inp.wheelRadius, inp.angleBiasDeg);
-  const java = toJava($("i-lut-name").value || "loadLUTSolved", rows);
+  const rows = generateLUT(sweep, geomBase, inp.search, inp.env, inp.slip, inp.wheelRadius, inp.angleBiasDeg, inp.placementBias);
+  const java = toJava($("i-lut-name").value || "loadLUTSolved", rows, {
+    placementBias: inp.placementBias,
+    slip: inp.slip,
+    angleBiasDeg: inp.angleBiasDeg,
+    wheelRadius: inp.wheelRadius,
+    env: inp.env,
+  });
   const preview = toPreview(rows);
   $("lut-output").textContent = preview + "\n\n" + java;
   $("lut-output").dataset.java = java;
