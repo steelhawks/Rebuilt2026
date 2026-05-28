@@ -283,9 +283,17 @@ public class ShooterStructure {
             Rotation2d robotHeading,
             double chassisOmegaRadPerSec,
             int maxIterations,
-            double timeTolerance
+            double timeTolerance,
+            double tofSpeedScale
         ) {
             boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
+            // Correct the LUT time-of-flight (hub shots only) for the actual launch
+            // speed. The TOF LUT is calibrated at the commanded setpoint; if the
+            // wheel fires off-setpoint (band gate during spin-up / sag) the real
+            // flight time differs, and the turret lead would otherwise be wrong.
+            // tofSpeedScale = setpoint/measured ≈ 1 when settled, so this is a no-op
+            // for a steady-state shot. Ferry uses a kinematic TOF and is left alone.
+            double tofScale = isFerry ? 1.0 : tofSpeedScale;
             Translation2d turretXY = getTurretTranslation();
             // add turrets tangential velocity from chassis rotation.
             // for a point at (dx, dy) in robot frame rotating at omega rad/s:
@@ -324,7 +332,7 @@ public class ShooterStructure {
                     : Static.calculateShot(actualTarget, actualTarget, false, rawDist);
             double v = projectile.exitVelocity();
             double theta = projectile.hoodAngle();
-            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry);
+            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry) * tofScale;
             int convergedAt = maxIterations;
             for (int i = 0; i < maxIterations; i++) {
                 // TOF-dependent offset: -v*TOF - a*D*TOF
@@ -341,7 +349,7 @@ public class ShooterStructure {
                     : Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
-                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry);
+                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry) * tofScale;
                 if (Math.abs(newTof - tGuess) < timeTolerance) {
                     convergedAt = i + 1;
                     tGuess = newTof;
@@ -353,6 +361,7 @@ public class ShooterStructure {
             Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
             Logger.recordOutput("SOTM/VirtualDistance", virtualDist);
             Logger.recordOutput("SOTM/TOF", tGuess);
+            Logger.recordOutput("SOTM/TofScaleApplied", tofScale);
             Logger.recordOutput("SOTM/LaunchLatency", D);
             Logger.recordOutput("SOTM/ExitVelocity", v);
             Logger.recordOutput("SOTM/HoodAngleDeg", Math.toDegrees(theta));

@@ -326,6 +326,9 @@ public class RobotState {
         Translation3d fieldAcceleration = new Translation3d(
             filteredFieldAcceleration.getX(), filteredFieldAcceleration.getY(), 0.0);
 
+        double tofSpeedScale = RobotContainer.s_Flywheel != null
+            ? RobotContainer.s_Flywheel.getTofSpeedScale()
+            : 1.0;
         movingShotSolution = ShooterStructure.Moving.solveMovingShot(
             target,
             robotVelocity,
@@ -333,7 +336,8 @@ public class RobotState {
             getRotation(),
             currentChassisSpeeds.omegaRadiansPerSecond,
             Constants.SOTMConstants.MAX_ITERATIONS,
-            Constants.SOTMConstants.TIME_TOLERANCE
+            Constants.SOTMConstants.TIME_TOLERANCE,
+            tofSpeedScale
         );
     }
 

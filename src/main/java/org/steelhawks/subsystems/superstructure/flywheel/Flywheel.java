@@ -228,6 +228,21 @@ public class Flywheel extends SubsystemBase {
         return nearTargetVelocity;
     }
 
+    /**
+     * Ratio of commanded setpoint to actual wheel speed, for correcting the SOTM
+     * time-of-flight (and therefore the turret lead) when firing off-setpoint —
+     * e.g. a band-gated shot taken mid spin-up. 1.0 when settled at the setpoint
+     * (no-op, preserves the drag-calibrated LUT TOF). >1 when the wheel is below
+     * setpoint (slower ball -> longer flight -> more lead needed). Clamped, and
+     * 1.0 when not spun up so it never perturbs idle/aim.
+     */
+    @AutoLogOutput(key = "Flywheel/TofSpeedScale")
+    public double getTofSpeedScale() {
+        double measured = (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
+        if (targetVelocityRadPerSec < 1.0 || measured < 1.0) return 1.0;
+        return Math.max(0.7, Math.min(1.4, targetVelocityRadPerSec / measured));
+    }
+
     private double getStationaryExitVelocityMps(Translation3d hubCenter) {
         if (!RobotState.getInstance().getAimState().equals(AimState.TO_HUB)) {
             return ShooterStructure.Static.calculateFerryShot(ShooterStructure.Static.calculateFerryShotSetpoint()).exitVelocity();
