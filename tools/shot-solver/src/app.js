@@ -138,6 +138,7 @@ function runLUT() {
     angleBiasDeg: inp.angleBiasDeg,
     wheelRadius: inp.wheelRadius,
     env: inp.env,
+    emitEnvelope: $("i-emit-envelope").checked,
   });
   const preview = toPreview(rows);
   $("lut-output").textContent = preview + "\n\n" + java;

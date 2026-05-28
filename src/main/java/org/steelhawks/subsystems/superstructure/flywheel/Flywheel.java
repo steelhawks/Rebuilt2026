@@ -42,6 +42,8 @@ public class Flywheel extends SubsystemBase {
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
         new Debouncer(0.1, DebounceType.kRising);
+    private final Debouncer bandDebouncer =
+        new Debouncer(0.1, DebounceType.kRising);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -50,6 +52,9 @@ public class Flywheel extends SubsystemBase {
     private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
     private boolean nearTargetVelocity = false;
+    private boolean inVelocityBand = false;
+    private double bandLoRadPerSec = Double.NaN;
+    private double bandHiRadPerSec = Double.NaN;
     private double targetVelocityRadPerSec = 0.0;
 
     private double cachedStationaryMps = Double.NaN;
@@ -103,9 +108,37 @@ public class Flywheel extends SubsystemBase {
         Logger.recordOutput("Flywheel/BumpSpeed", bumpUpSpeed);
         redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.04 : 1.0)) : constants.stationaryHoodVelocityFactor();
 
+        double avgVelocityRadPerSec = (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
         nearTargetVelocity =
             setpointDebouncer.calculate(
-                Maths.epsilonEquals((inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0, targetVelocityRadPerSec, velocityTolerance.get()));
+                Maths.epsilonEquals(avgVelocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
+
+        // Envelope band gate: accept any wheel speed inside the physics-valid
+        // [close, far] band for the current distance. The band edges come from the
+        // LUT as ratios of the centroid velocity, so scaling by the actual
+        // commanded target carries through every multiplier (redbull/ferry/auton).
+        // Only active for to-hub shots with an envelope-carrying LUT; otherwise
+        // bandLo stays NaN and isReadyToShoot() falls back to the symmetric check.
+        bandLoRadPerSec = Double.NaN;
+        bandHiRadPerSec = Double.NaN;
+        boolean rawInBand = false;
+        if (Toggles.Flywheel.useEnvelopeGate.get()
+                && Toggles.useLUT.get()
+                && targetVelocityRadPerSec > 0.0
+                && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)) {
+            double dist = ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D));
+            double[] ratios = ShooterStructure.getVelocityBandRatios(dist);
+            if (ratios != null) {
+                bandLoRadPerSec = targetVelocityRadPerSec * ratios[0];
+                bandHiRadPerSec = targetVelocityRadPerSec * ratios[1];
+                rawInBand = avgVelocityRadPerSec >= bandLoRadPerSec
+                    && avgVelocityRadPerSec <= bandHiRadPerSec;
+            }
+        }
+        inVelocityBand = bandDebouncer.calculate(rawInBand);
+        Logger.recordOutput("Flywheel/BandLoRadPerSec", bandLoRadPerSec);
+        Logger.recordOutput("Flywheel/BandHiRadPerSec", bandHiRadPerSec);
+        Logger.recordOutput("Flywheel/InVelocityBand", inVelocityBand);
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -185,6 +218,13 @@ public class Flywheel extends SubsystemBase {
 
     @AutoLogOutput(key = "Flywheel/ReadyToShoot")
     public boolean isReadyToShoot() {
+        // Prefer the physics-valid band when the active LUT carries one; the band
+        // is distance-correct and asymmetric (back-rim biased). Fall back to the
+        // symmetric velocity tolerance when no band is available (hard/soft LUT,
+        // ferry shots, or the gate toggled off).
+        if (Toggles.Flywheel.useEnvelopeGate.get() && !Double.isNaN(bandLoRadPerSec)) {
+            return inVelocityBand;
+        }
         return nearTargetVelocity;
     }
 
