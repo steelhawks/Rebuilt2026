@@ -38,9 +38,10 @@
       <details open>
         <summary>Launcher</summary>
         <div class="grid">
-          <label>Pivot height (m) <input id="i-launch-z" type="number" step="0.01" value="0.40"/></label>
-          <label>Pivot fwd offset (m) <input id="i-launch-x" type="number" step="0.01" value="0.0"/></label>
+          <label>Turret height (m) <input id="i-launch-z" type="number" step="0.01" value="0.432"/></label>
+          <label>Fwd offset from turret (m) <input id="i-launch-x" type="number" step="0.01" value="0.0"/></label>
           <label>Wheel radius (m) <input id="i-wheel-r" type="number" step="0.001" value="0.0508"/></label>
+          <label class="hint">Distance and height are referenced from the TURRET CENTER, matching the robot's LUT lookup (ROBOT_TO_TURRET = 17&quot; high). Keep fwd offset at 0 — the robot doesn't model the exit point being forward of the turret axis, so neither should we; that offset gets absorbed into the slip + angle-bias tune.</label>
         </div>
       </details>
 
