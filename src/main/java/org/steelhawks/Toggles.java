@@ -28,9 +28,6 @@ public interface Toggles {
                    () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getRightCorner()))
                .ignoringDisable(true));
        }
-
-        bindMomentary("Dashboard/LUT/UseLUTHardBalls", Commands.runOnce(ShooterStructure::loadLUTHard).ignoringDisable(true));
-        bindMomentary("Dashboard/LUT/UseLUTSoftBalls", Commands.runOnce(ShooterStructure::loadLUTSoft).ignoringDisable(true));
     }
 
     private static void bindMomentary(String key, Command command) {
