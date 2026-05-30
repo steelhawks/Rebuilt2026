@@ -78,7 +78,15 @@ public final class Constants {
         };
     }
 
+    private static RobotType robotTypeOverride = null;
+
+    /** Test-only hook so RobotContainerTest can exercise every RobotType. */
+    public static void overrideRobotForTest(RobotType type) {
+        robotTypeOverride = type;
+    }
+
     public static RobotType getRobot() {
+        if (robotTypeOverride != null) return robotTypeOverride;
         if (RobotBase.isReal() && ROBOT_TYPE == RobotType.SIMBOT) {
 //            new Alert("Invalid robot selected, using omega robot as default.", AlertType.kError)
 //                .set(true);

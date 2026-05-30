@@ -194,7 +194,7 @@ public class Vision extends SubsystemBase {
                 if (cameraIndex < Objects.requireNonNull(VisionConstants.getCameraConfig()).length) {
                     double cameraLinearFactor = getCameraConfig()[cameraIndex].factors().getFactors()[0];
                     double cameraAngularFactor = getCameraConfig()[cameraIndex].factors().getFactors()[1];
-                    if (RobotContainer.s_Swerve.isOnBump()) {
+                    if (Subsystems.swerve().isOnBump()) {
                         linearStdDev *= VisionConstants.baselineDropOdomFactor.get();
                         angularStdDev *= VisionConstants.baselineDropOdomFactor.get();
                     } else {

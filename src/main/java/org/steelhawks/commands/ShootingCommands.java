@@ -3,46 +3,63 @@ package org.steelhawks.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.RobotState.ShootingState;
+import org.steelhawks.Subsystems;
+import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
+import org.steelhawks.subsystems.superstructure.turret.Turret;
+import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.subsystems.vision.Vision;
 import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AllianceFlip;
 
 public class ShootingCommands {
 
-    public static Command shootWhileIntaking() {
-        return shoot()
-            .alongWith(
-                RobotContainer.s_Intake.runIntake()
-                    .alongWith(RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE)))
-            .beforeStarting(RobotContainer.s_Swerve.toggleLowGear())
-            .finallyDo(() -> CommandScheduler.getInstance().schedule(RobotContainer.s_Swerve.toggleNormal()));
+    private final Swerve swerve;
+    private final Intake intake;
+    private final Indexer indexer;
+    private final Flywheel flywheel;
+    private final Turret turret;
+
+    public ShootingCommands(Subsystems s) {
+        this.swerve = Subsystems.swerve();
+        this.intake = Subsystems.intake();
+        this.indexer = Subsystems.indexer();
+        this.flywheel = Subsystems.flywheel();
+        this.turret = Subsystems.turret();
     }
 
-    public static Command autonShootWhileIntaking() {
+    public Command shootWhileIntaking() {
+        return shoot()
+            .alongWith(
+                intake.runIntake()
+                    .alongWith(intake.setDesiredStateCommand(Intake.State.INTAKE)))
+            .beforeStarting(swerve.toggleLowGear())
+            .finallyDo(() -> CommandScheduler.getInstance().schedule(swerve.toggleNormal()));
+    }
+
+    public Command autonShootWhileIntaking() {
         return Commands.sequence(
-            RobotContainer.s_Indexer.agitateSpindexer().withTimeout(0.4),
+            indexer.agitateSpindexer().withTimeout(0.4),
             shootWhileIntaking());
     }
 
-    public static Command autonShoot() {
+    public Command autonShoot() {
         return Commands.sequence(
-//            RobotContainer.s_Indexer.agitateSpindexer().withTimeout(0.4),
             shoot()
                 .alongWith(
                     Commands.waitSeconds(1.5)
-                        .andThen(RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.HOME))));
+                        .andThen(intake.setDesiredStateCommand(Intake.State.HOME))));
     }
 
-    public static Command shoot() {
+    public Command shoot() {
         return Commands.sequence(
             Commands.runOnce(() ->
                 RobotState.getInstance().setShootingState(ShootingState.SHOOTING)),
-            Commands.runOnce(() -> RobotContainer.s_Indexer.resetBeamState()),
+            Commands.runOnce(() -> indexer.resetBeamState()),
             Commands.runOnce(() -> {
                 if (AllianceFlip.shouldFlip()
                     && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
@@ -53,22 +70,22 @@ public class ShootingCommands {
                 }
             }),
             Commands.waitUntil(() ->
-                (RobotContainer.s_Flywheel.isReadyToShoot()
-                    && !RobotContainer.s_Turret.isTraversing()
-                    && RobotContainer.s_Turret.atGoal())
+                (flywheel.isReadyToShoot()
+                    && !turret.isTraversing()
+                    && turret.atGoal())
                     || RobotState.getInstance().getAimState().equals(AimState.FERRY)),
-            RobotContainer.s_Indexer.feed()
+            indexer.feed()
                 .alongWith(
-                    Commands.waitUntil(() -> RobotContainer.s_Indexer.emptyFuel())
+                    Commands.waitUntil(() -> indexer.emptyFuel())
                         .andThen(Commands.waitSeconds(0.05))
-                        .andThen(RobotContainer.s_Intake.agitate()
-                            .onlyIf(() -> !RobotContainer.s_Intake.isRollersRunning())))
+                        .andThen(intake.agitate()
+                            .onlyIf(() -> !intake.isRollersRunning())))
                 .repeatedly()
         ).finallyDo(() -> {
             RobotState.getInstance().setShootingState(ShootingState.NOTHING);
             Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
             CommandScheduler.getInstance().schedule(
-                RobotContainer.s_Intake.setDesiredStateCommand(Intake.State.INTAKE));
+                intake.setDesiredStateCommand(Intake.State.INTAKE));
         });
     }
 }

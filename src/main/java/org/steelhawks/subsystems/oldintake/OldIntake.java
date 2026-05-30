@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
 import org.steelhawks.Robot;
 import org.steelhawks.RobotContainer;
+import org.steelhawks.Subsystems;
 import org.steelhawks.Toggles;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -129,8 +130,8 @@ public class OldIntake extends SubsystemBase {
 				io.stopPivot();
 			} else {
 				double acceleration = (setpoint.velocity - previousVelocity) / Constants.UPDATE_LOOP_DT;
-                double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
-                double drivetrainAccelG = rawAccelY - Math.sin(RobotContainer.s_Swerve.getPitch().getRadians());
+                double rawAccelY = Subsystems.swerve().getRobotRelativeYAccelGs();
+                double drivetrainAccelG = rawAccelY - Math.sin(Subsystems.swerve().getPitch().getRadians());
                 double drivetrainAccel = drivetrainAccelG * 9.81;
                 double kT = DCMotor.getKrakenX44Foc(2).KtNMPerAmp * OldIntakeConstants.REDUCTION;
 				io.runPivotPosition(

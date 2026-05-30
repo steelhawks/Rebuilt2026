@@ -14,7 +14,9 @@ import static org.steelhawks.Robot.RobotState.*;
 
 public class LEDCommands {
 
-    private static final LEDMatrix s_Matrix = RobotContainer.s_Matrix;
+    // NOTE: LEDCommands is currently unreferenced. If revived, resolve via
+    // Subsystems.matrixIfPresent() and gate bindings on presence.
+    private static final LEDMatrix s_Matrix = null;
     private LEDCommands() {}
 
     public static void configureTriggers(Trigger toggleMatchData) {
@@ -95,14 +97,14 @@ public class LEDCommands {
                 Commands.runOnce(() -> s_Matrix.playAnimation(new LEDMatrix.StaticText("SELECT", Color.RED)), s_Matrix),
                 Commands.waitSeconds(1.0),
                 s_Matrix.flashCommand(Color.BLACK, 0.0, 0.5)
-            ).repeatedly().until(() -> Autos.getAuto() != null),
+            ).repeatedly().until(() -> false),   // formerly Autos.getAuto() != null; rewire when LEDCommands is revived
 
             // Show name of seelcted auton once
             Commands.runOnce(() -> {
                 s_Matrix.clearOverlay();
                 s_Matrix.playAnimation(new LEDMatrix.ScrollingText("", Color.WHITE, 1));
             }, s_Matrix),
-            Commands.run(() -> s_Matrix.updateText(Autos.getAuto().getName()))
+            Commands.run(() -> s_Matrix.updateText(""))   // formerly Autos.getAuto().getName(); rewire when LEDCommands is revived
                 .withTimeout(4.0),
 
             s_Matrix.clearCommand(),
@@ -116,7 +118,7 @@ public class LEDCommands {
                     ARROW_START_X, ARROW_REGION_W));
             }, s_Matrix),
             Commands.run(() -> {
-                Autos.Misalignment misalignment = Autos.getMisalignment();
+                Autos.Misalignment misalignment = Autos.Misalignment.NONE;   // formerly Autos.getMisalignment(); rewire when LEDCommands is revived
                 String label = switch (misalignment) {
                     case NONE -> "ALIGNED";
                     case X_LEFT -> "GO LEFT";
@@ -143,7 +145,7 @@ public class LEDCommands {
                     };
                     updateArrowInterval(getOscillateInterval(errorMag, 1.0));
                 }
-            }).until(() -> Autos.getAuto() == null),
+            }).until(() -> true),   // formerly Autos.getAuto() == null; rewire when LEDCommands is revived
             Commands.runOnce(s_Matrix::clearOverlay),
             s_Matrix.clearCommand())
         .repeatedly().ignoringDisable(true);

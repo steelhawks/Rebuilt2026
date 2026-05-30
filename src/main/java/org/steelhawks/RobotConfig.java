@@ -289,7 +289,7 @@ public class RobotConfig {
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.AlphaBot.INTAKE)
                 .withIndexer(true, SubsystemConstants.AlphaBot.INDEXER)
-                .withAutos(true)
+                .withAutos(false)
                 .withFactory(new ReplayFactory())
                 .build();
 
@@ -304,7 +304,7 @@ public class RobotConfig {
                 .withOldIntake(false)
                 .withIntake(true, IntakeConstants.UNSET)
                 .withIndexer(true, IndexerConstants.UNSET)
-                .withAutos(true)
+                .withAutos(false)
                 .withFactory(new ReplayFactory())
                 .build();
         };

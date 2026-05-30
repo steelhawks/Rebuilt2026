@@ -14,20 +14,22 @@ import java.util.Map;
 public interface Toggles {
 
     static void configureOverrides() {
-        if (RobotConfig.getConfig().hasTurret && Constants.getRobot() != Constants.RobotType.OMEGABOT)
-            bindMomentary("Dashboard/Zero/Turret", RobotContainer.s_Turret.zeroTurret());
-        if (RobotConfig.getConfig().hasHood)
-            bindMomentary("Dashboard/Zero/Hood", RobotContainer.s_Hood.zeroHood());
-        if (RobotConfig.getConfig().hasIntake)
-            bindMomentary("Dashboard/Zero/Intake", RobotContainer.s_Intake.zeroIntake());
-       if (RobotConfig.getConfig().hasVision) {
-           bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
-                   () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getLeftCorner()))
-               .ignoringDisable(true));
-           bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
-                   () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getRightCorner()))
-               .ignoringDisable(true));
-       }
+        if (Constants.getRobot() != Constants.RobotType.OMEGABOT) {
+            Subsystems.turretIfPresent().ifPresent(t ->
+                bindMomentary("Dashboard/Zero/Turret", t.zeroTurret()));
+        }
+        Subsystems.hoodIfPresent().ifPresent(h ->
+            bindMomentary("Dashboard/Zero/Hood", h.zeroHood()));
+        Subsystems.intakeIfPresent().ifPresent(i ->
+            bindMomentary("Dashboard/Zero/Intake", i.zeroIntake()));
+        Subsystems.visionIfPresent().ifPresent(v -> {
+            bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
+                    () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getLeftCorner()))
+                .ignoringDisable(true));
+            bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
+                    () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getRightCorner()))
+                .ignoringDisable(true));
+        });
 
         bindMomentary("Dashboard/LUT/UseLUTHardBalls", Commands.runOnce(ShooterStructure::loadLUTHard).ignoringDisable(true));
         bindMomentary("Dashboard/LUT/UseLUTSoftBalls", Commands.runOnce(ShooterStructure::loadLUTSoft).ignoringDisable(true));

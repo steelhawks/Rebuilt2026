@@ -186,7 +186,7 @@ public class Turret extends SubsystemBase {
             .getTranslation();
         var chassisSpeeds =
             ChassisSpeeds.fromRobotRelativeSpeeds(
-                RobotContainer.s_Swerve.getChassisSpeeds(),
+                Subsystems.swerve().getChassisSpeeds(),
                 RobotState.getInstance().getRotation());
         double omegaRobot = chassisSpeeds.omegaRadiansPerSecond;
         // velocity of shooter = linear velocity + (omega * r_offset)

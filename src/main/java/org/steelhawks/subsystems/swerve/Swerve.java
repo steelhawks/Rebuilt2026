@@ -714,9 +714,7 @@ public class Swerve extends SubsystemBase {
             DRIVE_SIMULATION.setSimulationWorldPose(pose);
         }
         robotState.resetPose(pose, rawGyroRotation, getModulePositions());
-        if (RobotContainer.s_ObjVision != null) {
-            RobotContainer.s_ObjVision.reset();
-        }
+        Subsystems.objVisionIfPresent().ifPresent(ov -> ov.reset());
     }
 
     public double getMaxLinearSpeedMetersPerSec() {

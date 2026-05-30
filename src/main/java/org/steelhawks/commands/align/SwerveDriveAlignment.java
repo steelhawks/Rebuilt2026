@@ -20,8 +20,8 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.AutonConstants;
 import org.steelhawks.FieldConstants;
 import org.steelhawks.Robot;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.Subsystems;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -42,7 +42,7 @@ public class SwerveDriveAlignment extends Command {
     // drive in straight line in auton, do not curve at any distance
     private static final double BEELINE_RADIUS_AUTON = Double.POSITIVE_INFINITY; // cm
 
-    protected static final Swerve s_Swerve = RobotContainer.s_Swerve;
+    protected static Swerve s_Swerve() { return Subsystems.swerve(); }
     private static final APConstraints CONSTRAINTS = new APConstraints()
         .withAcceleration(MAX_ACCELERATION)
         .withJerk(MAX_JERK);
@@ -74,7 +74,7 @@ public class SwerveDriveAlignment extends Command {
     }
 
     public SwerveDriveAlignment(Supplier<Pose2d> targetPose, boolean endsWhenAligned) {
-        addRequirements(s_Swerve);
+        addRequirements(s_Swerve());
         dashboardTargetPosePublisher = FieldConstants.FIELD_2D.getObject("Trajectory Setpoint");
         this.targetPose = targetPose;
         this.debouncer = new Debouncer(0.2, Debouncer.DebounceType.kRising);
@@ -121,8 +121,8 @@ public class SwerveDriveAlignment extends Command {
     public void initialize() {
         startingPose = RobotState.getInstance().getEstimatedPose();
         angleController.reset(startingPose.getRotation().getRadians());
-//        autopilot.calculate(s_Swerve.getPose(), s_Swerve.getChassisSpeeds(), new APTarget(s_Swerve.getPose()));
-        s_Swerve.setPathfinding(true);
+//        autopilot.calculate(s_Swerve().getPose(), s_Swerve().getChassisSpeeds(), new APTarget(s_Swerve().getPose()));
+        s_Swerve().setPathfinding(true);
     }
 
     /**
@@ -131,7 +131,7 @@ public class SwerveDriveAlignment extends Command {
      * @return The ChassisSpeeds output
      */
     protected ChassisSpeeds getOutput() {
-        ChassisSpeeds robotRelativeSpeeds = s_Swerve.getChassisSpeeds();
+        ChassisSpeeds robotRelativeSpeeds = s_Swerve().getChassisSpeeds();
         Pose2d currPose = RobotState.getInstance().getEstimatedPose();
         target = new APTarget(targetPose.get())
             .withEntryAngle(Rotation2d.kZero);
@@ -158,7 +158,7 @@ public class SwerveDriveAlignment extends Command {
 
     protected void log() {
         dashboardTargetPosePublisher.setPose(targetPose.get());
-        var speeds = s_Swerve.getChassisSpeeds();
+        var speeds = s_Swerve().getChassisSpeeds();
         velocityError =
             target.getVelocity() -
                 Math.hypot(
@@ -204,7 +204,7 @@ public class SwerveDriveAlignment extends Command {
 
     @Override
     public void execute() {
-        s_Swerve.runVelocity(getOutput());
+        s_Swerve().runVelocity(getOutput());
         updateProfile();
         updatePID();
         log();
@@ -218,7 +218,7 @@ public class SwerveDriveAlignment extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        s_Swerve.runVelocity(new ChassisSpeeds());
-        s_Swerve.setPathfinding(false);
+        s_Swerve().runVelocity(new ChassisSpeeds());
+        s_Swerve().setPathfinding(false);
     }
 }

@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import org.json.simple.parser.ParseException;
 import org.steelhawks.Constants.AutonConstants;
 import org.steelhawks.Constants.Deadbands;
-import org.steelhawks.RobotContainer;
 import org.steelhawks.RobotState;
+import org.steelhawks.Subsystems;
 import org.steelhawks.subsystems.swerve.Swerve;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ import java.util.function.BooleanSupplier;
 
 public class DriveCommands {
 
-    private static final Swerve s_Swerve = RobotContainer.s_Swerve;
+    private static Swerve s_Swerve() { return Subsystems.swerve(); }
 
     private static final double FF_START_DELAY = 2.0; // Secs
     private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
@@ -62,9 +62,9 @@ public class DriveCommands {
      */
     public static Command driveToPosition(Pose2d target, PathConstraints constraints, BooleanSupplier emergencyStop) {
         return AutoBuilder.pathfindToPose(target, constraints)
-            .onlyWhile(() -> s_Swerve.shouldContinuePathfinding(emergencyStop))
-            .beforeStarting(() -> s_Swerve.setPathfinding(true))
-            .finallyDo(() -> s_Swerve.setPathfinding(false))
+            .onlyWhile(() -> s_Swerve().shouldContinuePathfinding(emergencyStop))
+            .beforeStarting(() -> s_Swerve().setPathfinding(true))
+            .finallyDo(() -> s_Swerve().setPathfinding(false))
             .withName("Drive to Position");
     }
 
@@ -114,9 +114,9 @@ public class DriveCommands {
      */
     public static Command driveToPath(PathPlannerPath path, BooleanSupplier emergencyStop) {
         return AutoBuilder.pathfindThenFollowPath(path, AutonConstants.CONSTRAINTS)
-            .onlyWhile(() -> s_Swerve.shouldContinuePathfinding(emergencyStop))
-                .beforeStarting(() -> s_Swerve.setPathfinding(true))
-                    .finallyDo(() -> s_Swerve.setPathfinding(false))
+            .onlyWhile(() -> s_Swerve().shouldContinuePathfinding(emergencyStop))
+                .beforeStarting(() -> s_Swerve().setPathfinding(true))
+                    .finallyDo(() -> s_Swerve().setPathfinding(false))
                         .withName("Drive to Path");
     }
 

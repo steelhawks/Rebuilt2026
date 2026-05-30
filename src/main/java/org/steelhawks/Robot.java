@@ -253,10 +253,10 @@ public class Robot extends LoggedRobot {
         if ((Constants.getMode() == Mode.SIM)
             || (!RobotConfig.getConfig().hasSwerve && RobotBase.isReal())
         ) {
-            RobotContainer.s_Swerve.updatePhysicsSimulation();
+            Subsystems.swerve().updatePhysicsSimulation();
         }
-        if (DriverStation.isDisabled()) {
-            Autos.pollTuningMode();
+        if (DriverStation.isDisabled() && robotContainer.autos() != null) {
+            robotContainer.autos().pollTuningMode();
         }
         if (DriverStation.isEnabled()) {
             Logger.recordOutput("Robot/DistanceToHub", ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D)));
@@ -307,7 +307,7 @@ public class Robot extends LoggedRobot {
     public void autonomousInit() {
         setState(RobotState.AUTON);
 //        Elastic.selectTab("Autonomous");
-        autonomousCommand = Autos.getAuto();
+        autonomousCommand = robotContainer.autos() != null ? robotContainer.autos().getAuto() : null;
 
 
         if (autonomousCommand != null)
@@ -340,7 +340,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationInit() {
         if (Constants.getMode() == Mode.SIM) {
-            RobotContainer.s_Swerve.resetSimulation(new Pose2d(3, 3, new Rotation2d()));
+            Subsystems.swerve().resetSimulation(new Pose2d(3, 3, new Rotation2d()));
         }
     }
 }

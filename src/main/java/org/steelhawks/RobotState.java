@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -35,7 +36,9 @@ public class RobotState {
                 .withExtension(new RobotFootprint.Extension(
                 "Intake",
                     Rotation2d.fromDegrees(0.0),
-                () -> RobotContainer.s_Intake == null ? 0.0 : RobotContainer.s_Intake.getPosition()));
+                () -> Subsystems.intakeIfPresent()
+                    .map(Intake::getPosition)
+                    .orElse(0.0)));
 
     private static final double movingVelocityThreshold = 0.1; // m/s
     private static final double poseBufferSizeSec = 2.0;
@@ -171,8 +174,9 @@ public class RobotState {
             .debounce(0.3);
         turretStuckTrigger =
             new Trigger(
-                () -> RobotContainer.s_Turret != null
-                    && RobotContainer.s_Turret.isJammedOrInDeadSpot()
+                () -> Subsystems.turretIfPresent()
+                    .map(org.steelhawks.subsystems.superstructure.turret.Turret::isJammedOrInDeadSpot)
+                    .orElse(false)
                     && shootingState != ShootingState.NOTHING);
     }
 
@@ -409,7 +413,7 @@ public class RobotState {
     }
 
     public boolean isAimedToScore() {
-        return RobotContainer.s_Turret.atGoal() && !RobotContainer.s_Turret.isTraversing();
+        return Subsystems.turret().atGoal() && !Subsystems.turret().isTraversing();
     }
 
     private AimState calculateDesiredMode() {

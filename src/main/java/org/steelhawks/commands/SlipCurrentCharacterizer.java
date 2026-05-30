@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import org.steelhawks.RobotContainer;
+import org.steelhawks.Subsystems;
 
 /**
  * A characterizer for the current for the wheels to start slipping when against a wall on carpet
@@ -57,7 +57,7 @@ public class SlipCurrentCharacterizer extends Command {
         timer.start();
 
         fracRamp = Math.min(fracRamp + rampRate * dt, 1.0);
-        commandedSpeed = fracRamp * RobotContainer.s_Swerve.getMaxLinearSpeedMetersPerSec();
+        commandedSpeed = fracRamp * Subsystems.swerve().getMaxLinearSpeedMetersPerSec();
         currentStatorCurrent = current.getAsDouble();
 
         consumer.accept(new ChassisSpeeds(commandedSpeed, 0, 0));

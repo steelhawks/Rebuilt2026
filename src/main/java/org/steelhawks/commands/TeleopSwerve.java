@@ -187,7 +187,7 @@ public class TeleopSwerve extends Command {
                 omega = angleController.calculate(currentRad, bumpAngleSetpointSnapshot);
             }
             case TURRET_ALIGN -> {
-                RobotContainer.s_Turret.freezeAtCurrentPosition();
+                Subsystems.turret().freezeAtCurrentPosition();
                 var hubCenter = AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER);
                 var robotTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
                 double turretMountingYaw = Constants.RobotConstants.ROBOT_TO_TURRET.getRotation().getZ();
@@ -199,8 +199,8 @@ public class TeleopSwerve extends Command {
                     targetFieldAngle - currentRad - turretMountingYaw);
                 double clampedTurretAngle = MathUtil.clamp(
                     requiredTurretAngle,
-                    RobotContainer.s_Turret.getMinRotation().getRadians() + Turret.tolerance,
-                    RobotContainer.s_Turret.getMaxRotation().getRadians() - Turret.tolerance);
+                    Subsystems.turret().getMinRotation().getRadians() + Turret.tolerance,
+                    Subsystems.turret().getMaxRotation().getRadians() - Turret.tolerance);
                 double desiredRobotAngle = MathUtil.angleModulus(
                     targetFieldAngle - turretMountingYaw - clampedTurretAngle);
 

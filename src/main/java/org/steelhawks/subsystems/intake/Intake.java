@@ -240,8 +240,8 @@ public class Intake extends SubsystemBase {
             if (atGoal) {
                 io.stopRack();
             } else {
-                double rawAccelY = RobotContainer.s_Swerve.getRobotRelativeYAccelGs();
-                double pitchRadians = RobotContainer.s_Swerve.getPitch().getRadians();
+                double rawAccelY = Subsystems.swerve().getRobotRelativeYAccelGs();
+                double pitchRadians = Subsystems.swerve().getPitch().getRadians();
                 double drivetrainAccelG = rawAccelY - Math.sin(pitchRadians);
                 double drivetrainAccel = drivetrainAccelG * 9.81;
 

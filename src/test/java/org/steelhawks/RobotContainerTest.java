@@ -1,20 +1,35 @@
-
-
 package org.steelhawks;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 public class RobotContainerTest {
 
-    @Test
-    public void createRobotContainer() {
+    @AfterEach
+    public void resetRegistry() {
+        Constants.overrideRobotForTest(null);
+        Subsystems.install(null);
+    }
+
+    /**
+     * The regression gate that would have caught the prior Alpha-boot NPE:
+     * every RobotType must construct cleanly without exception. Bindings that
+     * reference a subsystem the current robot doesn't have must be guarded
+     * via Subsystems.xIfPresent() rather than failing at construction.
+     */
+    @ParameterizedTest
+    @EnumSource(Constants.RobotType.class)
+    public void createRobotContainerForEveryRobot(Constants.RobotType type) {
+        Constants.overrideRobotForTest(type);
+        Subsystems.install(null);
         try {
             new RobotContainer();
         } catch (Exception e) {
             e.printStackTrace();
-            fail("RobotContainer creation failed");
+            fail("RobotContainer creation failed for " + type + ": " + e);
         }
     }
 }
