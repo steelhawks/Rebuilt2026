@@ -68,12 +68,10 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kV;
 
     private static double redBullConstant;
+    private static double manualRequestedSpeedInc = 1.0;
     private static final double ferryVelocityMultiplier = 1.61;
     private static final double ferryLongDistanceMultiplier = 1.20;
     private static final double ferryLongDistanceThresholdMeters = 8.0;
-
-    private boolean bumpUpSpeed = true;
-
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
 
@@ -86,6 +84,7 @@ public class Flywheel extends SubsystemBase {
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
         redBullConstant = constants.stationaryHoodVelocityFactor();
+        Logger.recordOutput("Flywheel/RedBullConstant", redBullConstant);
         velocityTolerance =
             new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         routine =
@@ -105,8 +104,7 @@ public class Flywheel extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
         BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
-        Logger.recordOutput("Flywheel/BumpSpeed", bumpUpSpeed);
-        redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.04 : 1.0)) : constants.stationaryHoodVelocityFactor();
+        redBullConstant = Toggles.useLUT.get() ? manualRequestedSpeedInc : constants.stationaryHoodVelocityFactor();
 
         double avgVelocityRadPerSec = (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
         nearTargetVelocity =
@@ -189,8 +187,7 @@ public class Flywheel extends SubsystemBase {
                                 ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
                                 : 1.0;
                             double rps = ShooterStructure.linearToAngularVelocity(
-                                redBullConstant * sol.exitVelocity() * ferryFactor
-                                    * (DriverStation.isAutonomous() ? 1.02 : 1.0),
+                                redBullConstant * sol.exitVelocity() * ferryFactor,
                                 constants.flywheelRadius());
                             setTargetVelocity(rps);
                         }
@@ -277,10 +274,24 @@ public class Flywheel extends SubsystemBase {
     /* COMMAND FACTORIES */
     ///////////////////////
 
-    public Command toggleBumpUp() {
-        return Commands.runOnce(
-            () -> bumpUpSpeed = !bumpUpSpeed)
-            .alongWith(RumbleAPI.steady(1.0, 1.0));
+    public Command requestSpeedMultiplier(double multiplier) {
+        return Commands.runOnce(() -> {
+            manualRequestedSpeedInc += multiplier;
+        }, this);
+    }
+
+    public Command speedUp() {
+        return requestSpeedMultiplier(0.05);
+    }
+
+    public Command speedDown() {
+        return requestSpeedMultiplier(-0.05);
+    }
+
+    public Command reset() {
+        return Commands.runOnce(() -> {
+            manualRequestedSpeedInc = 1.0;
+        }, this);
     }
 
     public Command simFire() {
