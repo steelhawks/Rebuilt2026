@@ -43,7 +43,7 @@ public class Flywheel extends SubsystemBase {
     private final Debouncer setpointDebouncer =
         new Debouncer(0.1, DebounceType.kRising);
     private final Debouncer bandDebouncer =
-        new Debouncer(0.1, DebounceType.kRising);
+        new Debouncer(0.05, DebounceType.kRising);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -125,7 +125,8 @@ public class Flywheel extends SubsystemBase {
         if (Toggles.Flywheel.useEnvelopeGate.get()
                 && Toggles.useLUT.get()
                 && targetVelocityRadPerSec > 0.0
-                && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)) {
+                && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
+        ) {
             double dist = ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D));
             double[] ratios = ShooterStructure.getVelocityBandRatios(dist);
             if (ratios != null) {
@@ -182,7 +183,7 @@ public class Flywheel extends SubsystemBase {
                         if (sol != null) {
                             boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
                             double ferryDist = isFerry
-                                ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
+                                ? ShooterStructure.distanceToTarget(ShooterStructure.Static.calculateFerryShot(ShooterStructure.Static.calculateFerryShotSetpoint()).target())
                                 : 0.0;
                             double ferryFactor = isFerry
                                 ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
@@ -198,7 +199,7 @@ public class Flywheel extends SubsystemBase {
                         double mps = getStationaryExitVelocityMps(hubCenter);
                         boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
                         double ferryDist = isFerry
-                            ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
+                            ? ShooterStructure.distanceToTarget(ShooterStructure.Static.calculateFerryShot(ShooterStructure.Static.calculateFerryShotSetpoint()).target())
                             : 0.0;
                         double ferryFactor = isFerry
                             ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
