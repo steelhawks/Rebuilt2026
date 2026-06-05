@@ -1,6 +1,7 @@
 package org.steelhawks;
 
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -106,6 +107,8 @@ public final class Constants {
         // Trades responsiveness for jitter rejection on the differentiated velocity.
         public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
             new LoggedTunableNumber("SOTM/AccelLPFTimeConstantSec", 0.05);
+        public static final LoggedTunableNumber DRAG_COEFFICIENT =
+            new LoggedTunableNumber("SOTMConstants/DragCoefficient");
     }
 
     public static final class RobotConstants {

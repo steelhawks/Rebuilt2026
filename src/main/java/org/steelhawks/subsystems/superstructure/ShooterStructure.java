@@ -336,8 +336,15 @@ public class ShooterStructure {
             int convergedAt = maxIterations;
             for (int i = 0; i < maxIterations; i++) {
                 // TOF-dependent offset: -v*TOF - a*D*TOF
-                double tofOffsetX = -velX * tGuess - accelX * D * tGuess;
-                double tofOffsetY = -velY * tGuess - accelY * D * tGuess;
+                // add drag compensation instead of just v * dt + 1/2at^2
+                // derived from a linear drag ODE
+                // separate and integrate to get displacement
+                double dragC = Constants.SOTMConstants.DRAG_COEFFICIENT.get();
+                double driftTOF = dragC > 1e-6
+                    ? (1.0 - Math.exp(-dragC * tGuess)) / dragC
+                    : tGuess;
+                double tofOffsetX = -velX * driftTOF - accelX * D * tGuess;
+                double tofOffsetY = -velY * driftTOF - accelY * D * tGuess;
                 virtualTarget = new Translation3d(
                     actualTarget.getX() + posOffsetX + tofOffsetX,
                     actualTarget.getY() + posOffsetY + tofOffsetY,
