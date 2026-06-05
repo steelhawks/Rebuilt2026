@@ -313,7 +313,7 @@ public class ShooterStructure {
             // derived from: launch_pos = current + v*D + 0.5*a*D^2 ; v_launch = v + a*D ;
             // virtual target from launch = hub - v_launch * TOF ; rebased to current.
             // Set D=0 to disable latency compensation.
-            double D = Constants.SOTMConstants.LAUNCH_LATENCY_SECONDS.get();
+            final double D = Constants.SOTMConstants.LAUNCH_LATENCY_SECONDS.get();
             double accelX = fieldAcceleration.getX();
             double accelY = fieldAcceleration.getY();
 
@@ -335,10 +335,6 @@ public class ShooterStructure {
             double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry) * tofScale;
             int convergedAt = maxIterations;
             for (int i = 0; i < maxIterations; i++) {
-                // TOF-dependent offset: -v*TOF - a*D*TOF
-                // add drag compensation instead of just v * dt + 1/2at^2
-                // derived from a linear drag ODE
-                // separate and integrate to get displacement
                 double dragC = Constants.SOTMConstants.DRAG_COEFFICIENT.get();
                 double driftTOF = dragC > 1e-6
                     ? (1.0 - Math.exp(-dragC * tGuess)) / dragC
@@ -357,12 +353,49 @@ public class ShooterStructure {
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
                 double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry) * tofScale;
-                if (Math.abs(newTof - tGuess) < timeTolerance) {
+
+                // Newton step: f(t) = LUT(d(t)) - t = 0
+                // f'(t) estimated via central finite difference on the TOF function,
+                // chained through the virtual distance which itself depends on t.
+                // dPrime = d/dt [ LUT(d(t)) ] = (dLUT/dd) * (dd/dt)
+                // dd/dt = d/dt ||hub - v*g(t)|| = -(v . (hub - v*g(t))) / d * e^(-c*t)
+                // where e^(-c*t) = d/dt g(t)
+                final double H = 0.005; // 5ms finite difference step
+                double tofHigh = calculateTimeOfFlight(
+                    projectile.exitVelocity(), projectile.hoodAngle(),
+                    MathUtil.clamp(
+                        turretXY.getDistance(new Translation3d(
+                            actualTarget.getX() + posOffsetX + (-velX * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess + H))) / dragC : (tGuess + H))),
+                            actualTarget.getY() + posOffsetY + (-velY * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess + H))) / dragC : (tGuess + H))),
+                            actualTarget.getZ()).toTranslation2d()),
+                        minShootDistance, maxShootDistance),
+                    deltaH, !isFerry) * tofScale;
+                double tofLow = calculateTimeOfFlight(
+                    projectile.exitVelocity(), projectile.hoodAngle(),
+                    MathUtil.clamp(
+                        turretXY.getDistance(new Translation3d(
+                            actualTarget.getX() + posOffsetX + (-velX * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess - H))) / dragC : (tGuess - H))),
+                            actualTarget.getY() + posOffsetY + (-velY * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess - H))) / dragC : (tGuess - H))),
+                            actualTarget.getZ()).toTranslation2d()),
+                        minShootDistance, maxShootDistance),
+                    deltaH, !isFerry) * tofScale;
+                double dPrime = (tofHigh - tofLow) / (2.0 * H);
+                // f(t) = newTof - tGuess, f'(t) = dPrime - 1
+                double f = newTof - tGuess;
+                double fPrime = dPrime - 1.0;
+                double nextTof;
+                if (Math.abs(fPrime) > 0.01) {
+                    nextTof = tGuess - f / fPrime;
+                } else {
+                    nextTof = newTof; // fallback to fixed-point if derivative is degenerate
+                }
+                nextTof = MathUtil.clamp(nextTof, 0.05, 2.0);
+                if (Math.abs(nextTof - tGuess) < timeTolerance) {
                     convergedAt = i + 1;
-                    tGuess = newTof;
+                    tGuess = nextTof;
                     break;
                 }
-                tGuess = newTof;
+                tGuess = nextTof;
             }
 
             Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
