@@ -19,7 +19,7 @@ const NUM_IDS = [
   "i-lut-min", "i-lut-max", "i-lut-n",
 ];
 
-function readInputs() {
+export function readInputs() {
   const num = (id) => parseFloat($(id).value);
   return {
     geom: {
@@ -123,7 +123,9 @@ function scheduleRecompute() {
 }
 
 // ─── LUT generation ─────────────────────────────────────────────────────────
-function runLUT() {
+// Build the LUT rows from the current solver inputs. Shared with the /tuner
+// overlay so the pushed table is byte-for-byte the same the generator shows.
+export function buildLUT() {
   const inp = readInputs();
   const sweep = {
     distMin: parseFloat($("i-lut-min").value),
@@ -132,6 +134,11 @@ function runLUT() {
   };
   const { distance, ...geomBase } = inp.geom;
   const rows = generateLUT(sweep, geomBase, inp.search, inp.env, inp.slip, inp.wheelRadius, inp.angleBiasDeg, inp.placementBias);
+  return { inp, sweep, rows };
+}
+
+function runLUT() {
+  const { inp, rows } = buildLUT();
   const java = toJava($("i-lut-name").value || "loadLUTSolved", rows, {
     placementBias: inp.placementBias,
     slip: inp.slip,

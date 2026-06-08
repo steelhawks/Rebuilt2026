@@ -516,4 +516,57 @@ public class ShooterStructure {
         shootingFlywheelVelocityFarMap.put(5.857, 14.31);
         shootingFlywheelVelocityFarMap.put(6.200, 14.71);
     }
+
+    /**
+     * Hot-load a LUT generated externally (shot-solver / GeneratedLUTTuner) over NT.
+     * Replaces every active map in RAM so the normal shoot path immediately uses the
+     * new table; a reboot/redeploy restores {@link #loadLUTSolved()}.
+     *
+     * <p>Fully validates before mutating, so a malformed table never half-applies —
+     * on a thrown exception the currently-active maps are untouched.
+     *
+     * @throws IllegalArgumentException if arrays mismatch in length, have fewer than
+     *     two rows, or distances are not strictly increasing.
+     */
+    public static void applyExternalLUT(
+        double[] dist, double[] flywheel, double[] hoodDeg, double[] tof,
+        double[] close, double[] far) {
+        int n = dist.length;
+        if (n < 2)
+            throw new IllegalArgumentException("LUT needs at least 2 rows, got " + n);
+        if (flywheel.length != n || hoodDeg.length != n || tof.length != n
+            || close.length != n || far.length != n)
+            throw new IllegalArgumentException("LUT column lengths must all equal " + n);
+        for (int i = 1; i < n; i++) {
+            if (dist[i] <= dist[i - 1])
+                throw new IllegalArgumentException(
+                    "LUT distances must be strictly increasing: index " + i
+                        + " (" + dist[i] + ") <= " + dist[i - 1]);
+        }
+        for (int i = 0; i < n; i++) {
+            if (!Double.isFinite(dist[i]) || !Double.isFinite(flywheel[i])
+                || !Double.isFinite(hoodDeg[i]) || !Double.isFinite(tof[i])
+                || !Double.isFinite(close[i]) || !Double.isFinite(far[i]))
+                throw new IllegalArgumentException("LUT contains non-finite value at index " + i);
+        }
+
+        // validation passed it is safe to mutate.
+        minShootDistance = dist[0];
+        maxShootDistance = dist[n - 1];
+
+        shootingFlywheelVelocityMap.clear();
+        shootingHoodAngleMap.clear();
+        shootingTimeOfFlightMap.clear();
+        shootingFlywheelVelocityCloseMap.clear();
+        shootingFlywheelVelocityFarMap.clear();
+
+        for (int i = 0; i < n; i++) {
+            shootingFlywheelVelocityMap.put(dist[i], flywheel[i]);
+            shootingHoodAngleMap.put(dist[i], Rotation2d.fromDegrees(hoodDeg[i]));
+            shootingTimeOfFlightMap.put(dist[i], tof[i]);
+            shootingFlywheelVelocityCloseMap.put(dist[i], close[i]);
+            shootingFlywheelVelocityFarMap.put(dist[i], far[i]);
+        }
+        hasEnvelopeBand = true;
+    }
 }

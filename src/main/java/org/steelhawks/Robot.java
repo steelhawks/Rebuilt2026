@@ -31,6 +31,7 @@ import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
 import org.steelhawks.Constants.Mode;
+import org.steelhawks.subsystems.superstructure.GeneratedLUTTuner;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.ShooterTuner;
 import org.steelhawks.subsystems.vision.VisionConstants;
@@ -239,6 +240,7 @@ public class Robot extends LoggedRobot {
         if (Toggles.shooterTuningMode.get()) {
             ShooterTuner.getInstance().periodic();
         }
+        GeneratedLUTTuner.getInstance().periodic();
         CommandScheduler.getInstance().run();
         LoopTimeUtil.record("Commands");
 
