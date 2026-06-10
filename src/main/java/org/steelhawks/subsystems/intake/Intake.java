@@ -142,7 +142,7 @@ public class Intake extends SubsystemBase {
         Logger.processInputs("Intake", inputs);
         BatteryUtil.recordCurrentUsage(
             "Intake",
-            inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps + inputs.leftTorqueCurrentAmps + inputs.rightTorqueCurrentAmps);
+            inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
         if (Constants.getRobot().equals(Constants.RobotType.SIMBOT) && !isHomed && !isZeroed) {
             isHomed = true;
             io.setPosition(0);
