@@ -2,3 +2,4 @@
 2. Build a Path Builder for Swerve, SwervePose, ChassisSpeeds, and 3 PID Controllers for: translation, rotation
 and cross track (perpendicular deviations)
 3. Create paths (or multiple) that do something between paths, or use Event Triggers to do stuff during each path
+4. Auto Orient Robot Immediately
