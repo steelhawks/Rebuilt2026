@@ -175,6 +175,7 @@ tasks.register("replayWatch", JavaExec) {
 }
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 //    maven { url "https://frcmaven.wpi.edu/release" }
 }
 kotlin {
