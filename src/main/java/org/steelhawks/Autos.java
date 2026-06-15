@@ -4,12 +4,16 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.lib.BLine.FollowPath;
+import frc.robot.lib.BLine.Path;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -19,7 +23,6 @@ import org.steelhawks.commands.align.SwerveDriveAlignment;
 import org.steelhawks.subsystems.indexer.Indexer;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.Intake.State;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
 import java.io.IOException;
@@ -33,6 +36,18 @@ public final class Autos {
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
     private static final Intake s_Intake = RobotContainer.s_Intake;
     private static final Indexer s_Indexer = RobotContainer.s_Indexer;
+
+
+    static FollowPath.Builder pathBuilder = new FollowPath.Builder(
+            s_Swerve,
+            () -> RobotState.getInstance().getEstimatedPose(),
+            s_Swerve::getChassisSpeeds,
+            s_Swerve::runVelocity,
+            new PIDController(3.0, 0, 0),
+            new PIDController(3.0, 0, 0),
+            new PIDController(5.0, 0, 0)
+    )
+            .withDefaultShouldFlip();
 
     private static final LoggedDashboardChooser<Command> autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser");
@@ -67,6 +82,20 @@ public final class Autos {
     // Distance threshold to decide between pathfinding vs simple PID recovery
     public static double replanDistanceRequirement = Units.inchesToMeters(5.0); // tune
     private static boolean tuningOptionsAdded = false;
+
+
+    /**
+     * Adjusts the angle of robot before every auto (b-line) to match the rotation required by auto routine
+     * Call after initializing each auto
+    */
+    public static void autoRotate(Path path) {
+        Rotation2d initialDirection = path.getInitialModuleDirection();
+        Translation2d originalTranslation = RobotState.getInstance().getEstimatedPose().getTranslation();
+        Pose2d newPose = new Pose2d(originalTranslation, initialDirection);
+        s_Swerve.setPose(newPose);
+    }
+
+
 
     /**
      * After a trajectory finishes, checks if the robot was bumped away from the
@@ -110,6 +139,8 @@ public final class Autos {
         autoChooser.addOption("Right Bump Hub Depot Auton", rightBumpHubDepot().cmd().withName(ChoreoTraj.RBumpHubDepot.name()));
         autoChooser.addOption("Left Bump Hub Depot Auton", leftBumpHubDepot().cmd().withName(ChoreoTraj.LBumpHubDepot.name()));
         autoChooser.addOption("Stationary Shoot", ShootingCommands.shoot());
+
+        autoChooser.addOption("b-line test", firstAuto());
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -1011,5 +1042,12 @@ public final class Autos {
         shootIntoDepot.done().onTrue(ShootingCommands.autonShoot());
 
         return routine;
+    }
+
+    public static Command firstAuto() {
+        Path firstPath = new Path("first-path");
+        autoRotate(firstPath);
+
+        return pathBuilder.build(firstPath);
     }
 }
