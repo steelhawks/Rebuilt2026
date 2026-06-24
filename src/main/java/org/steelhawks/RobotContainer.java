@@ -54,8 +54,14 @@ public class RobotContainer {
 
         leds.bind(RobotModeTriggers.disabled(), LedPattern.rainbow(), LedPriority.DEFAULT);
         leds.bind(RobotModeTriggers.autonomous(), LedPattern.autonTimer(), LedPriority.DEFAULT);
-
-//            .onFalse(Commands.runOnce(leds::clearRequests));
+        leds.bind(RobotModeTriggers.teleop()
+                .and(new Trigger(() -> RobotState.getInstance().shiftStateChanged()))
+                .and(new Trigger(() -> RobotState.getInstance().isShift())),
+            LedPattern.flash(() -> RobotState.getInstance().isOurHubActive() ? Color.kGreen : Color.kRed),
+            LedPriority.HIGH);
+        leds.bind(RobotModeTriggers.teleop()
+                .and(new Trigger(() -> RobotState.getInstance().shiftStateChanged())),
+            LedPattern.countdown(RobotState.getInstance().getShiftState().getTime()));
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 /**
  * An immutable LED request: which pattern, what color, and (for time-based
@@ -57,6 +58,10 @@ public record LedPattern(
 
   public static LedPattern flash(Color color) {
     return flash(new Color8Bit(color));
+  }
+
+  public static LedPattern flash(Supplier<Color> color) {
+      return flash(color.get());
   }
 
   public static LedPattern bounce(Color8Bit color) {
