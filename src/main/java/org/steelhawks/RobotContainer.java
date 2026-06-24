@@ -1,19 +1,21 @@
 package org.steelhawks;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
 import org.steelhawks.commands.rumble.RumbleAPI;
+import org.steelhawks.hawklights.HawkLights;
+import org.steelhawks.hawklights.LedPattern;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.steelhawks.Constants.*;
 import org.steelhawks.subsystems.indexer.Indexer;
-import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
@@ -25,6 +27,7 @@ import org.steelhawks.util.AllianceFlip;
 
 public class RobotContainer {
 
+    private final HawkLights leds = new HawkLights();
     private final RobotConfig config = RobotConfig.getConfig();
 
     public static LEDMatrix s_Matrix = null;
@@ -45,6 +48,7 @@ public class RobotContainer {
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
         RumbleAPI.register(driver);
+        leds.setIdle(LedPattern.bounce(Color.kRed));
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();

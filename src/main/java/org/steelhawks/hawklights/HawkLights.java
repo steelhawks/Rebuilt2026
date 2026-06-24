@@ -1,4 +1,4 @@
-package org.hawklights.leds;
+package org.steelhawks.hawklights;
 
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.IntegerPublisher;

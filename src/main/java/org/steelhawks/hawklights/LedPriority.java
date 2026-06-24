@@ -1,4 +1,4 @@
-package org.hawklights.leds;
+package org.steelhawks.hawklights;
 
 /**
  * Relative importance of an LED request. When several requests are active at

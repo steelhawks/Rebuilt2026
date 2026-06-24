@@ -1,4 +1,4 @@
-package org.hawklights.leds;
+package org.steelhawks.hawklights;
 
 /**
  * LED patterns the Pico knows how to render. The {@link #value()} ordinals must

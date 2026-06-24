@@ -1,4 +1,4 @@
-package org.hawklights.leds;
+package org.steelhawks.hawklights;
 
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
