@@ -1,6 +1,7 @@
 package org.steelhawks.hawklights;
 
 import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -47,6 +48,8 @@ public class HawkLights extends SubsystemBase {
   private final IntegerPublisher gPub;
   private final IntegerPublisher bPub;
   private final IntegerPublisher intervalPub;
+  private final DoublePublisher timerRemainingPub;
+  private final DoublePublisher timerTotalPub;
   private final BooleanPublisher activePub;
 
   private final List<Request> requests = new ArrayList<>();
@@ -62,6 +65,8 @@ public class HawkLights extends SubsystemBase {
     gPub = table.getIntegerTopic("g").publish();
     bPub = table.getIntegerTopic("b").publish();
     intervalPub = table.getIntegerTopic("intervalMs").publish();
+    timerRemainingPub = table.getDoubleTopic("timerRemaining").publish();
+    timerTotalPub = table.getDoubleTopic("timerTotal").publish();
     activePub = table.getBooleanTopic("active").publish();
     activePub.set(false);
   }
@@ -111,6 +116,10 @@ public class HawkLights extends SubsystemBase {
     idle = null;
   }
 
+  public void clearRequests() {
+      requests.clear();
+  }
+
   // ---- Resolution + publishing ---------------------------------------------
 
   @Override
@@ -131,6 +140,10 @@ public class HawkLights extends SubsystemBase {
     gPub.set(p.color().green);
     bPub.set(p.color().blue);
     intervalPub.set(p.intervalMs());
+    if (p.state() == LedState.TIMER && p.timerTotal() != null && p.timerRemaining() != null) {
+      timerTotalPub.set(p.timerTotal().getAsDouble());
+      timerRemainingPub.set(p.timerRemaining().getAsDouble());
+    }
     activePub.set(true);
   }
 

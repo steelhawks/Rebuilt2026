@@ -4,12 +4,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.steelhawks.RobotState.AimState;
 import org.steelhawks.commands.*;
 import org.steelhawks.commands.rumble.RumbleAPI;
 import org.steelhawks.hawklights.HawkLights;
 import org.steelhawks.hawklights.LedPattern;
+import org.steelhawks.hawklights.LedPriority;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.led.LEDMatrix;
 import org.steelhawks.subsystems.oldintake.OldIntake;
@@ -49,6 +51,11 @@ public class RobotContainer {
         SmartDashboard.putData("Field", FieldConstants.FIELD_2D);
         RumbleAPI.register(driver);
         leds.setIdle(LedPattern.bounce(Color.kRed));
+
+        leds.bind(RobotModeTriggers.disabled(), LedPattern.rainbow(), LedPriority.DEFAULT);
+        leds.bind(RobotModeTriggers.autonomous(), LedPattern.autonTimer(), LedPriority.DEFAULT);
+
+//            .onFalse(Commands.runOnce(leds::clearRequests));
 
         s_Matrix = config.createLEDMatrix().orElse(null);
         s_Swerve = config.createSwerve();
