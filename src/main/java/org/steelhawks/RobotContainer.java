@@ -87,7 +87,8 @@ public class RobotContainer {
             .onFalse(Commands.runOnce(() -> RobotState.getInstance().setAimState(AimState.TO_HUB)));
 
         driver.povRight()
-            .whileTrue(s_Indexer.outtake());
+            .whileTrue(s_Indexer.
+                outtake());
 
         driver.rightBumper()
             .whileTrue(s_Intake.outtakeIntake());

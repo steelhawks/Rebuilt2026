@@ -43,8 +43,8 @@ public final class Autos {
             () -> RobotState.getInstance().getEstimatedPose(),
             s_Swerve::getChassisSpeeds,
             s_Swerve::runVelocity,
-            new PIDController(2.0, 0, 0),
-            new PIDController(1.0, 0, 0),
+            new PIDController(2.68, 0, 0.5), // translation
+            new PIDController(3.8, 0, 0.2), // rotation
             new PIDController(0.2, 0, 0)
     )
             .withDefaultShouldFlip()
@@ -120,10 +120,24 @@ public final class Autos {
     }
 
     public static void init() {
+
+        FollowPath.setBooleanLoggingConsumer(
+            value -> Logger.recordOutput(value.getFirst(), value.getSecond())
+        );
+        FollowPath.setDoubleLoggingConsumer(
+            value -> Logger.recordOutput(value.getFirst(), value.getSecond())
+        );
+        FollowPath.setPoseLoggingConsumer(
+            value -> Logger.recordOutput(value.getFirst(), value.getSecond())
+        );
+        FollowPath.setTranslationListLoggingConsumer(
+            value -> Logger.recordOutput(value.getFirst(), value.getSecond())
+        );
+
         autoChooser.addOption("No Auton", Commands.none().withName("No Auton"));
-//        autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName(ChoreoTraj.FourMeterTest.name()));
-//        autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
-//        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
+        autoChooser.addOption("4 Meter Test", fourMeterTest().cmd().withName(ChoreoTraj.FourMeterTest.name()));
+        autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
+        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Left Rebound Auton Q112", leftRebound112().cmd().withName(ChoreoTraj.LRebound.name() + "112"));
@@ -141,7 +155,8 @@ public final class Autos {
         autoChooser.addOption("Left Bump Hub Depot Auton", leftBumpHubDepot().cmd().withName(ChoreoTraj.LBumpHubDepot.name()));
         autoChooser.addOption("Stationary Shoot", ShootingCommands.shoot());
 
-        autoChooser.addOption("b-line test", firstAuto());
+        autoChooser.addOption("square", firstAuto());
+        autoChooser.addOption("rotation", secondAuto());
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -1045,10 +1060,19 @@ public final class Autos {
         return routine;
     }
 
+    // square
     public static Command firstAuto() {
         Path firstPath = new Path("first-path");
 //        autoRotate(firstPath);
 
         return pathBuilder.build(firstPath);
+    }
+
+    // rotation PID tuner
+    public static Command secondAuto() {
+        Path secondPath = new Path("second-path");
+//        autoRotate(firstPath);
+
+        return pathBuilder.build(secondPath);
     }
 }

@@ -212,7 +212,7 @@ public class RobotConfig {
                 .withOldIntake(false)
                 .withIntake(false, null)
                 .withIndexer(false, null)
-                .withAutos(false)
+                .withAutos(true)
                 .withFactory(new ChassisBotFactory())
                 .build();
 
