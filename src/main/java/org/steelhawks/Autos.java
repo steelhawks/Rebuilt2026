@@ -43,11 +43,12 @@ public final class Autos {
             () -> RobotState.getInstance().getEstimatedPose(),
             s_Swerve::getChassisSpeeds,
             s_Swerve::runVelocity,
-            new PIDController(3.0, 0, 0),
-            new PIDController(3.0, 0, 0),
-            new PIDController(5.0, 0, 0)
+            new PIDController(2.0, 0, 0),
+            new PIDController(1.0, 0, 0),
+            new PIDController(0.2, 0, 0)
     )
-            .withDefaultShouldFlip();
+            .withDefaultShouldFlip()
+            .withTRatioBasedTranslationHandoffs(true);
 
     private static final LoggedDashboardChooser<Command> autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser");
@@ -1046,7 +1047,7 @@ public final class Autos {
 
     public static Command firstAuto() {
         Path firstPath = new Path("first-path");
-        autoRotate(firstPath);
+//        autoRotate(firstPath);
 
         return pathBuilder.build(firstPath);
     }
