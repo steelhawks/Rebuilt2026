@@ -25,6 +25,8 @@ import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.Intake.State;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
+import org.steelhawks.util.LoggedTunableNumber;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +39,10 @@ public final class Autos {
     private static final Intake s_Intake = RobotContainer.s_Intake;
     private static final Indexer s_Indexer = RobotContainer.s_Indexer;
 
+    static LoggedTunableNumber controllerkP = new  LoggedTunableNumber("controllerkP", 3.8);
+    static LoggedTunableNumber controllerkI = new  LoggedTunableNumber("controllerkI", 0.0);
+    static LoggedTunableNumber controllerkD = new  LoggedTunableNumber("controllerkD", 0.2);
+
 
     static FollowPath.Builder pathBuilder = new FollowPath.Builder(
             s_Swerve,
@@ -44,7 +50,7 @@ public final class Autos {
             s_Swerve::getChassisSpeeds,
             s_Swerve::runVelocity,
             new PIDController(2.68, 0, 0.5), // translation
-            new PIDController(3.8, 0, 0.2), // rotation
+            new PIDController(controllerkP.getAsDouble(), controllerkI.getAsDouble(), controllerkD.getAsDouble()), // rotation
             new PIDController(0.2, 0, 0)
     )
             .withDefaultShouldFlip()
