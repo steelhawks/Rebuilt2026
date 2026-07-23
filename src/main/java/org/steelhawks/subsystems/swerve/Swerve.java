@@ -360,24 +360,28 @@ public class Swerve extends SubsystemBase {
             });
         PhoenixOdometryThread.getInstance().start(bus);
 
-        // Configure AutoBuilder to use RobotState
-        AutoBuilder.configure(
-            robotState::getEstimatedPose,
-            this::setPose,
-            this::getChassisSpeeds,
-            this::runVelocity,
-            new PPHolonomicDriveController(
-                new PIDConstants(
-                    AutonConstants.TRANSLATION_KP.get(),
-                    AutonConstants.TRANSLATION_KI.get(),
-                    AutonConstants.TRANSLATION_KD.get()),
-                new PIDConstants(
-                    AutonConstants.ROTATION_KP.get(),
-                    AutonConstants.ROTATION_KI.get(),
-                    AutonConstants.ROTATION_KD.get())),
-            PP_CONFIG,
-            () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-            this);
+        // Configure AutoBuilder to use RobotState. AutoBuilder holds global state and
+        // throws if configured twice, so guard against a second Swerve being built in
+        // the same JVM (e.g. the per-robot construction test).
+        if (!AutoBuilder.isConfigured()) {
+            AutoBuilder.configure(
+                robotState::getEstimatedPose,
+                this::setPose,
+                this::getChassisSpeeds,
+                this::runVelocity,
+                new PPHolonomicDriveController(
+                    new PIDConstants(
+                        AutonConstants.TRANSLATION_KP.get(),
+                        AutonConstants.TRANSLATION_KI.get(),
+                        AutonConstants.TRANSLATION_KD.get()),
+                    new PIDConstants(
+                        AutonConstants.ROTATION_KP.get(),
+                        AutonConstants.ROTATION_KI.get(),
+                        AutonConstants.ROTATION_KD.get())),
+                PP_CONFIG,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this);
+        }
 
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
