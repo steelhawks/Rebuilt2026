@@ -96,6 +96,16 @@ public class LEDMatrix extends SubsystemBase {
         setBrightness(0.25);
     }
 
+    /**
+     * Releases the underlying HAL {@link AddressableLED} allocation. Needed so the PWM
+     * port can be reused when multiple robots are constructed in one JVM (e.g. the
+     * per-robot construction test); otherwise a second allocation throws
+     * AllocationException.
+     */
+    public void close() {
+        ledStrip.close();
+    }
+
     public LEDMatrix(int width, int height) {
         this(LEDConstants.PORT, width, height, MatrixLayout.SERPENTINE);
     }

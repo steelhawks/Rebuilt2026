@@ -5,11 +5,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.steelhawks.subsystems.led.LEDMatrix;
+import org.steelhawks.subsystems.led.LEDStrip;
 
 public class RobotContainerTest {
 
     @AfterEach
     public void resetRegistry() {
+        // Free HAL-allocated LED ports so the next robot's construction can reuse them.
+        // Without this, the second robot to allocate the same AddressableLED port throws
+        // AllocationException and fails the test.
+        Subsystems.stripIfPresent().ifPresent(LEDStrip::close);
+        Subsystems.matrixIfPresent().ifPresent(LEDMatrix::close);
         Constants.overrideRobotForTest(null);
         Subsystems.install(null);
     }

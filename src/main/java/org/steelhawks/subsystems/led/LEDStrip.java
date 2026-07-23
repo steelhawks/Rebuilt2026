@@ -57,6 +57,16 @@ public class LEDStrip extends SubsystemBase {
         LEDStrip.start();
     }
 
+    /**
+     * Releases the underlying HAL {@link AddressableLED} allocation. Needed so the PWM
+     * port can be reused when multiple robots are constructed in one JVM (e.g. the
+     * per-robot construction test); otherwise a second allocation throws
+     * AllocationException.
+     */
+    public void close() {
+        LEDStrip.close();
+    }
+
     public void setColor(Color color) {
         for (int i = 0; i < LEDBuffer.getLength(); i++) {
             LEDBuffer.setRGB(i, color.r, color.g, color.b);
