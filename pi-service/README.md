@@ -14,16 +14,19 @@ the wire schema and the full design.
   GTSAM. Built by CMake, on the Pi.
 
 ## Slice status
-**Slice 1 (done): scaffolding + bring-up smoke test.** Proves the two riskiest
-unknowns before any GTSAM logic:
-1. AdvantageKit's **linuxarm64** native actually runs on the Pi (`Logger.start()`).
-2. **JNI** loads `libposelink_gtsam.so` and round-trips.
-
-The native side (`cpp/poselink_gtsam.cpp`) is a **stub** — correct JNI surface,
-no factor graph yet. Slice 2 replaces its guts with a
-`gtsam::IncrementalFixedLagSmoother` (SE(2); odom `BetweenFactor` with gyro
-rotation; vision `PriorFactor` via splice-or-attach) behind the **same**
-signatures.
+- **Slice 1 (done):** scaffolding + bring-up smoke test (akit-on-arm64 +
+  JNI load).
+- **Slice 2 (this):** the real estimator. `cpp/pose_graph.{h,cpp}` is a SE(2)
+  `IncrementalFixedLagSmoother` — odom `BetweenFactor` (gyro in the rotation),
+  each accepted tag an absolute `PriorFactor`, with splice-or-attach. Splicing
+  is done in a **staging window** (`stageWindow_`, ~150 ms): recent odom edges
+  are held out of the smoother so a late tag splits an edge still in our own
+  buffer, and the reported pose is the last smoothed frontier forward-composed
+  over the staged deltas (which latency-compensates the output). No GTSAM factor
+  is ever removed. **Requires GTSAM on the build host — validated on the Pi**
+  (not compilable on a stock dev box without GTSAM installed).
+- **Slice 3 (next):** Java IO layers (UDP `RobotOdomInputs`, PhotonVision), the
+  `Vision.java` rejection/stddev port, and `FusedPoseOutput` emit.
 
 ## Prerequisites on the Pi (aarch64 / linuxarm64)
 - JDK **17** aarch64 (Liberica/Temurin) — matches the toolchain.
@@ -49,12 +52,12 @@ java -Djava.library.path=pi-service/cpp/build \
 
 **Expected output (smoke test passing):**
 ```
-[poselink] native: poselink_gtsam stub 0.1 (no GTSAM linked yet)
-[poselink] round-trip: x=1.100 y=2.000 theta=0.000 status=0 nodes=2
+[poselink] native: poselink_gtsam 1.0 (GTSAM 4.x.x)
+[poselink] round-trip: x=1.5xx y=2.000 theta=0.000 status=0 nodes=... factors=...
 ```
-plus a `.wpilog` written by `WPILOGWriter`. If those two lines print and the log
-appears, **akit-on-arm64 and JNI both work** and slice 2 can proceed on the
-LoggedRobot backend (design Q9).
+(x advances ~0.5 m in +x from the reset pose; exact node/factor counts depend on
+the staging window.) Plus a `.wpilog` from `WPILOGWriter`. If those lines print,
+the GTSAM solver ran and **akit-on-arm64 + JNI both work**.
 
 ### If `Logger.start()` fails to load akit native on arm64
 That's the documented fork from Q9: keep the same IO-pure structure but swap the

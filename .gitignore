@@ -189,3 +189,4 @@ src/main/java/org/steelhawks/BuildConstants.java
 /common/build
 /pi-service/build
 /pi-service/cpp/build
+/pi-service/cpp/cmake-build-*

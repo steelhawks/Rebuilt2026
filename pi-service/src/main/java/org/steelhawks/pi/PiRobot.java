@@ -32,15 +32,22 @@ public class PiRobot extends LoggedRobot {
         Logger.start();
 
         // ---- JNI + native round-trip smoke test ----
+        // Drives enough odom to age past the staging window so the smoother
+        // actually commits and solves. Expect the frontier to advance ~0.5 m in
+        // +x from the reset pose (1, 2).
         System.out.println("[poselink] native: " + NativePoseEstimator.version());
         estimator = new NativePoseEstimator(1.5);
         estimator.reset(1.0, 2.0, 0.0, 0.01, 0.01, 0.02);
-        estimator.addOdometry(0.02, 0.10, 0.0, 0.0, 0.02, 0.02, 0.02);
-        estimator.update();
+        double t = 0.0;
+        for (int i = 0; i < 12; i++) {
+            t += 0.02;
+            estimator.addOdometry(t, 0.05, 0.0, 0.0, 0.02, 0.02, 0.02);
+            estimator.update();
+        }
         NativePoseEstimator.Result r = estimator.getResult();
         System.out.printf(
-            "[poselink] round-trip: x=%.3f y=%.3f theta=%.3f status=%d nodes=%d%n",
-            r.x(), r.y(), r.theta(), r.status(), r.nodeCount());
+            "[poselink] round-trip: x=%.3f y=%.3f theta=%.3f status=%d nodes=%d factors=%d%n",
+            r.x(), r.y(), r.theta(), r.status(), r.nodeCount(), r.factorCount());
     }
 
     @Override

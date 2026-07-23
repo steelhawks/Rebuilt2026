@@ -3,15 +3,11 @@ package org.steelhawks.pi.gtsam;
 /**
  * JNI wrapper over the narrow C++ GTSAM shim ({@code libposelink_gtsam.so}).
  *
- * <p>The C++ side owns the {@code IncrementalFixedLagSmoother} and all GTSAM
- * types; this class is a thin handle-based facade. Per the design (Q2/S1), the
- * shim is "dumb": it takes already-accepted {@code (Pose2, covariance)}
- * measurements and returns pose + marginal covariance. Whitelisting, rejection,
- * and stddev weighting stay in Java.
- *
- * <p><b>Slice-1 status:</b> the native side is a STUB that validates JNI load
- * and the call surface only; it does not yet build a factor graph. Real GTSAM
- * lands in slice 2.
+ * <p>The C++ side ({@code poselink::PoseGraph}) owns the
+ * {@code IncrementalFixedLagSmoother} and all GTSAM types; this class is a thin
+ * handle-based facade. The shim is "dumb": it takes already-accepted
+ * {@code (Pose2, covariance)} measurements and returns pose + marginal
+ * covariance. Whitelisting, rejection, and stddev weighting stay in Java.
  */
 public final class NativePoseEstimator implements AutoCloseable {
 
