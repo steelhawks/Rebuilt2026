@@ -8,8 +8,8 @@ import org.steelhawks.subsystems.oldintake.OldIntake;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.hood.Hood;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
+import org.steelhawks.subsystems.poselink.PoseLink;
 import org.steelhawks.subsystems.swerve.Swerve;
-import org.steelhawks.subsystems.vision.Vision;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 
 import java.util.Optional;
@@ -63,7 +63,7 @@ public final class Subsystems {
     }
 
     private Swerve swerve;
-    private Vision vision;
+    private PoseLink poseLink;
     private ObjectVision objVision;
     private Flywheel flywheel;
     private Turret turret;
@@ -77,7 +77,7 @@ public final class Subsystems {
     private Subsystems() {}
 
     public Subsystems setSwerve(Swerve s)        { this.swerve = s; return this; }
-    public Subsystems setVision(Vision v)        { this.vision = v; return this; }
+    public Subsystems setPoseLink(PoseLink p)    { this.poseLink = p; return this; }
     public Subsystems setObjVision(ObjectVision o){ this.objVision = o; return this; }
     public Subsystems setFlywheel(Flywheel f)    { this.flywheel = f; return this; }
     public Subsystems setTurret(Turret t)        { this.turret = t; return this; }
@@ -91,7 +91,7 @@ public final class Subsystems {
     // ---- Throwing accessors (the default) ----
 
     public static Swerve swerve()             { return require(get().swerve, "Swerve"); }
-    public static Vision vision()             { return require(get().vision, "Vision"); }
+    public static PoseLink poseLink()         { return require(get().poseLink, "PoseLink"); }
     public static ObjectVision objVision()    { return require(get().objVision, "ObjectVision"); }
     public static Flywheel flywheel()         { return require(get().flywheel, "Flywheel"); }
     public static Turret turret()             { return require(get().turret, "Turret"); }
@@ -104,7 +104,7 @@ public final class Subsystems {
 
     // ---- Optional accessors: only for sites where absence is a legitimate skip ----
 
-    public static Optional<Vision> visionIfPresent()         { return Optional.ofNullable(get().vision); }
+    public static Optional<PoseLink> poseLinkIfPresent()     { return Optional.ofNullable(get().poseLink); }
     public static Optional<ObjectVision> objVisionIfPresent(){ return Optional.ofNullable(get().objVision); }
     public static Optional<Flywheel> flywheelIfPresent()     { return Optional.ofNullable(get().flywheel); }
     public static Optional<Turret> turretIfPresent()         { return Optional.ofNullable(get().turret); }

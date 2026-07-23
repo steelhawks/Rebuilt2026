@@ -420,29 +420,6 @@ public class VisionConstants {
         };
     }
 
-    public static VisionIO[] getIO() {
-        CameraConfig[] config = getCameraConfig();
-        VisionIO[] io = new VisionIO[config.length];
-        for (int i = 0; i < config.length; i++) {
-            if (RobotBase.isReal()) {
-                switch (config[i].cameraType) {
-                    case LIMELIGHT -> io[i] = new VisionIOLimelight(config[i].name, RobotState.getInstance()::getRotation);
-                    case PHOTON -> io[i] = new VisionIOPhoton(config[i].name, config[i].robotToCamera);
-                }
-            } else if ((Constants.getRobot() == Constants.RobotType.SIMBOT && !RobotBase.isReal())
-                || (RobotBase.isReal() && !RobotConfig.getConfig().hasVision)
-            ) {
-                io[i] = new VisionIOPhotonSim(
-                    config[i].name,
-                    config[i].robotToCamera,
-                    Swerve.getDriveSimulation()::getSimulatedDriveTrainPose);
-            } else if (Constants.getRobot() != Constants.RobotType.SIMBOT && !RobotBase.isReal()) {
-                io[i] = new VisionIO() {};
-            }
-        }
-        return io;
-    }
-
     public static ObjectVisionIO[] getObjIO() {
         CameraConfig[] config = getObjDetectConfig();
         assert config != null;

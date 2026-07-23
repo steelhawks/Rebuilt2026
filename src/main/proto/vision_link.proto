@@ -1,0 +1,120 @@
+// Steel Hawks RIO <-> Orange Pi vision/pose-estimation link.
+//
+// Wire contract between the roboRIO (thin odometry client) and the Orange Pi
+// (full vision + GTSAM iSAM2 pose-estimation service). Sent over UDP, one
+// message per cycle in each direction. Both ends are Java: the RIO uses the
+// generated classes directly; the Pi service (GTSAM via JNI) links the same
+// generated Java. Keep this file the single source of truth for both.
+//
+// IMPORTANT: every timestamp is a SAMPLE time (FPGA/match time in seconds),
+// never a send time. GTSAM factor-graph correctness depends on this, and it
+// matches how the existing PoseObservation.timestamp() already behaved.
+//
+// Regenerate: handled by the `com.google.protobuf` Gradle plugin at build time
+// (see build.gradle). Do not hand-edit generated sources.
+
+syntax = "proto3";
+
+package steelhawks.vision;
+
+option java_package = "org.steelhawks.proto";
+option java_multiple_files = true;
+option java_outer_classname = "VisionLinkProto";
+
+// Alliance drives AprilTag whitelisting on the Pi. UNKNOWN means the RIO has
+// no alliance yet (FMS not connected); the Pi should treat it as "accept all
+// whitelisted tags" rather than rejecting everything.
+enum AllianceColor {
+  ALLIANCE_UNKNOWN = 0;
+  ALLIANCE_BLUE = 1;
+  ALLIANCE_RED = 2;
+}
+
+// One swerve module's odometry sample. Equivalent to WPILib
+// SwerveModulePosition (drive distance + steer angle).
+message SwerveModuleSample {
+  double distance_meters = 1;
+  double angle_radians = 2;
+}
+
+// Chassis-relative velocity. Optional on the RIO side, but useful as a motion
+// prior for GTSAM between AprilTag observations.
+message ChassisSpeeds {
+  double vx_mps = 1;
+  double vy_mps = 2;
+  double omega_radps = 3;
+}
+
+// RIO -> Pi. Sent every link cycle (~50Hz; does not need to match the RIO's
+// full loop rate). Carries the odometry the Pi fuses, plus the alliance/config
+// context and an (optional) pose-reset command.
+message RobotOdomInputs {
+  // Increments every packet. The Pi uses this to detect drops/reordering and
+  // must never fuse a packet older (by seqnum or timestamp) than the last.
+  int64 seqnum = 1;
+
+  // Sample time of this odometry (FPGA/match seconds), NOT send time.
+  double timestamp = 2;
+
+  // Exactly 4 modules, in the RIO's module order (FL, FR, BL, BR).
+  repeated SwerveModuleSample wheel_positions = 3;
+
+  // Fused gyro yaw, radians (already continuous / unwrapped).
+  double gyro_angle_radians = 4;
+
+  ChassisSpeeds chassis_speeds = 5;
+
+  // True while the robot is crossing a field bump; the Pi scales AprilTag
+  // trust down (mirrors the old baselineDropOdomFactor behaviour).
+  bool is_on_bump = 6;
+
+  AllianceColor alliance = 7;
+
+  // Hash of RIO-side vision config (field layout version + alliance tag sets).
+  // The Pi compares this to its own; on mismatch it logs loudly and keeps the
+  // last matching state rather than silently fusing against a stale layout.
+  int64 config_hash = 8;
+
+  // Pose-reset command. reset_seqnum increments each time the RIO issues a new
+  // reset (e.g. at auto start or a dashboard corner-reset). The Pi applies a
+  // reset only when it sees a reset_seqnum it has not applied yet (idempotent),
+  // then echoes it back in FusedPoseOutput.ack_reset_seqnum.
+  int64 reset_seqnum = 9;
+  double reset_x = 10;
+  double reset_y = 11;
+  double reset_theta = 12;
+}
+
+// Pi -> RIO. Sent every link cycle. Carries the fused pose the RIO consumes in
+// place of its old local SwerveDrivePoseEstimator.
+message FusedPoseOutput {
+  // Independent sequence counter from the Pi. The RIO uses it (together with
+  // timestamp) to reject drops/reordering and never apply an older pose.
+  int64 seqnum = 1;
+
+  // Time the fused pose corresponds to (FPGA/match seconds), NOT send time.
+  double timestamp = 2;
+
+  double x = 3;
+  double y = 4;
+  double theta = 5;
+
+  // Compact trust signal derived from GTSAM's marginal covariance, in [0, 1]
+  // (1 = fully trusted). The RIO may use it for telemetry / optional weighting.
+  double quality_score = 6;
+
+  // Marginal covariance diagonal, if the RIO wants the raw values.
+  double cov_xx = 7;
+  double cov_yy = 8;
+  double cov_theta = 9;
+
+  // Pi's own config hash, checked against what it last received from the RIO.
+  int64 config_hash = 10;
+
+  // GTSAM solve time for this update, for tuning/diagnostics.
+  double solve_latency_ms = 11;
+
+  // Echoes the last RobotOdomInputs.reset_seqnum the Pi has applied, so the RIO
+  // knows its reset landed.
+  int64 ack_reset_seqnum = 12;
+}

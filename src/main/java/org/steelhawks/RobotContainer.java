@@ -39,7 +39,7 @@ public class RobotContainer {
 
         Swerve swerve = config.createSwerve();
         subsystems.setSwerve(swerve);
-        config.createVision().ifPresent(subsystems::setVision);
+        config.createPoseLink().ifPresent(subsystems::setPoseLink);
         config.createObjectVision().ifPresent(subsystems::setObjVision);
         config.createFlywheel().ifPresent(subsystems::setFlywheel);
         config.createTurret(RobotState.getInstance()::getEstimatedPose).ifPresent(subsystems::setTurret);

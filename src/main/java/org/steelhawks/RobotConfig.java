@@ -32,6 +32,7 @@ import org.steelhawks.subsystems.superstructure.turret.TurretIO;
 import org.steelhawks.subsystems.superstructure.turret.TurretIOSim;
 import org.steelhawks.subsystems.superstructure.turret.TurretIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
+import org.steelhawks.subsystems.poselink.PoseLink;
 import org.steelhawks.subsystems.vision.*;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVision;
 import org.steelhawks.SubsystemConstants.HoodConstants;
@@ -110,11 +111,11 @@ public class RobotConfig {
         return Optional.ofNullable(factory.createLEDStrip());
     }
 
-    public Optional<Vision> createVision() {
+    public Optional<PoseLink> createPoseLink() {
         if (!hasVision) {
             return Optional.empty();
         }
-        return Optional.ofNullable(factory.createVision());
+        return Optional.ofNullable(factory.createPoseLink());
     }
 
     public Optional<ObjectVision> createObjectVision() {
@@ -432,7 +433,7 @@ public class RobotConfig {
         Swerve createSwerve();
         LEDMatrix createLEDMatrix();
         LEDStrip createLEDStrip();
-        Vision createVision();
+        PoseLink createPoseLink();
         ObjectVision createObjectVision();
         Flywheel createFlywheel(FlywheelConstants c);
         Turret createTurret(Supplier<Pose2d> poseSupplier, TurretConstants c);
@@ -466,8 +467,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision();
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override
@@ -528,8 +529,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision(false);
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override
@@ -591,8 +592,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision(false);
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override
@@ -653,8 +654,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision(false);
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override
@@ -717,8 +718,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision(false);
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override
@@ -780,8 +781,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision(true);
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override
@@ -841,8 +842,8 @@ public class RobotConfig {
         }
 
         @Override
-        public Vision createVision() {
-            return new Vision(false);
+        public PoseLink createPoseLink() {
+            return new PoseLink();
         }
 
         @Override

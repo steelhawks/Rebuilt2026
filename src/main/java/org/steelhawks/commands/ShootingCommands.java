@@ -12,9 +12,6 @@ import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.superstructure.flywheel.Flywheel;
 import org.steelhawks.subsystems.superstructure.turret.Turret;
 import org.steelhawks.subsystems.swerve.Swerve;
-import org.steelhawks.subsystems.vision.Vision;
-import org.steelhawks.subsystems.vision.VisionConstants;
-import org.steelhawks.util.AllianceFlip;
 
 public class ShootingCommands {
 
@@ -60,15 +57,10 @@ public class ShootingCommands {
             Commands.runOnce(() ->
                 RobotState.getInstance().setShootingState(ShootingState.SHOOTING)),
             Commands.runOnce(() -> indexer.resetBeamState()),
-            Commands.runOnce(() -> {
-                if (AllianceFlip.shouldFlip()
-                    && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
-                ) {
-                    Vision.whitelistTagIds(VisionConstants.RED_TAGS);
-                } else {
-                    Vision.whitelistTagIds(VisionConstants.BLUE_TAGS);
-                }
-            }),
+            // AprilTag whitelisting now lives on the Orange Pi, driven by the
+            // alliance sent in RobotOdomInputs (see subsystems/poselink). The Pi
+            // rejects opposing-alliance tags continuously, so the old mid-shot
+            // Vision.whitelistTagIds() narrowing is no longer needed here.
             Commands.waitUntil(() ->
                 (flywheel.isReadyToShoot()
                     && !turret.isTraversing()
@@ -83,7 +75,6 @@ public class ShootingCommands {
                 .repeatedly()
         ).finallyDo(() -> {
             RobotState.getInstance().setShootingState(ShootingState.NOTHING);
-            Vision.whitelistTagIds(VisionConstants.ALL_ALLOWED_TAGS);
             CommandScheduler.getInstance().schedule(
                 intake.setDesiredStateCommand(Intake.State.INTAKE));
         });

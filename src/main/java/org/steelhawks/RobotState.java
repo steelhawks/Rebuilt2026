@@ -1,14 +1,11 @@
 package org.steelhawks;
 
-import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -119,10 +116,28 @@ public class RobotState {
             new SwerveModulePosition()
         };
 
-    private final SwerveDrivePoseEstimator poseEstimator =
-        new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+    // Wheel-only dead-reckoning pose. This runs continuously the whole match
+    // and is the fallback estimate the RIO uses whenever the Pi's fused pose is
+    // stale (link drop) - never frozen, so recovery is seamless.
     private final SwerveDriveOdometry wheelOdometry =
         new SwerveDriveOdometry(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+
+    // ---- Fused pose from the Orange Pi (GTSAM), applied via PoseLink ----
+    /** Staleness threshold; past this, getEstimatedPose() falls back to wheel odometry. */
+    public static final double FUSED_STALENESS_TIMEOUT_SEC = 0.2;
+
+    private Pose2d fusedPose = new Pose2d();
+    private double fusedSampleTimestamp = 0.0;
+    private long fusedSeqnum = -1;
+    private double fusedAppliedWallClock = Double.NEGATIVE_INFINITY;
+
+    // Latest odometry sample, handed to PoseLink to ship to the Pi.
+    private OdometryObservation latestOdometry = null;
+
+    // Pose-reset command for the Pi. resetRequestSeqnum bumps on every resetPose;
+    // PoseLink forwards it until the Pi acknowledges the seqnum.
+    private long resetRequestSeqnum = 0;
+    private Pose2d resetRequestPose = new Pose2d();
 
     private final List<TimestampedObjectList> objectHistory;
     private List<DetectedObject> currentDetectedObjects;
@@ -353,8 +368,10 @@ public class RobotState {
     }
 
     public void periodic() {
-        Logger.recordOutput("RobotState/PoseEstimation/PoseEstimation", poseEstimator.getEstimatedPosition());
+        Logger.recordOutput("RobotState/PoseEstimation/PoseEstimation", getEstimatedPose());
         Logger.recordOutput("RobotState/PoseEstimation/Odometry", wheelOdometry.getPoseMeters());
+        Logger.recordOutput("RobotState/PoseEstimation/FusedPose", fusedPose);
+        Logger.recordOutput("RobotState/PoseEstimation/UsingFallback", !isFusedPoseFresh());
 
         // SOTM is now used unconditionally by the turret, so keep the solution fresh
         // every loop instead of only while a shoot trigger is held. Solver is cheap
@@ -495,8 +512,19 @@ public class RobotState {
     public void resetPose(Pose2d pose, Rotation2d gyroAngle, SwerveModulePosition[] modulePositions) {
         gyroRotation = gyroAngle;
         rawGyroRotation = gyroAngle;
-        poseEstimator.resetPosition(gyroAngle, modulePositions, pose);
         wheelOdometry.resetPosition(gyroAngle, modulePositions, pose);
+
+        // Seed the fused pose to the reset so getEstimatedPose() is correct
+        // immediately, but mark it stale so we run on wheel odometry (also just
+        // reset to `pose`) until the Pi confirms the reset with fresh output.
+        fusedPose = pose;
+        fusedSampleTimestamp = 0.0;
+        fusedSeqnum = -1;
+        fusedAppliedWallClock = Double.NEGATIVE_INFINITY;
+
+        // Tell the Pi to reset its factor graph to this pose.
+        resetRequestSeqnum++;
+        resetRequestPose = pose;
 
         // clear and reinit buffers
         poseBuffer.clear();
@@ -519,19 +547,62 @@ public class RobotState {
             gyroRotation = observation.gyroAngle();
             rawGyroRotation = observation.gyroAngle();
         }
-        Pose2d estimatedPose = poseEstimator.updateWithTime(
-            observation.timestamp(), gyroRotation, observation.wheelPositions());
         wheelOdometry.update(gyroRotation, observation.wheelPositions());
-        poseBuffer.addSample(observation.timestamp(), estimatedPose);
+        latestOdometry = observation;
+        // Buffer whatever the current best estimate is (fused when fresh, else
+        // wheel-only) so RIO-side consumers (SOTM etc.) can query by timestamp.
+        poseBuffer.addSample(observation.timestamp(), getEstimatedPose());
     }
 
-    public void addVisionObservation(VisionObservation observation) {
-        poseEstimator.addVisionMeasurement(
-            observation.robotPose(),
-            observation.timestamp(),
-            observation.stdDevs()
-        );
-        Logger.recordOutput("RobotState/LatestVisionPose", observation.robotPose());
+    /**
+     * Apply a fused pose received from the Orange Pi (via {@link
+     * org.steelhawks.subsystems.poselink.PoseLink}). Rejects any observation
+     * that is not strictly newer than the last applied one (by seqnum and
+     * timestamp), so a reordered or duplicate UDP packet can never move the
+     * pose backwards.
+     *
+     * @return true if the observation was applied.
+     */
+    public boolean applyFusedPose(FusedPoseObservation observation) {
+        if (observation.seqnum() <= fusedSeqnum
+            || observation.timestamp() < fusedSampleTimestamp) {
+            Logger.recordOutput("RobotState/PoseLink/RejectedStale", true);
+            return false;
+        }
+        fusedSeqnum = observation.seqnum();
+        fusedSampleTimestamp = observation.timestamp();
+        fusedPose = observation.pose();
+        fusedAppliedWallClock = Timer.getFPGATimestamp();
+        Logger.recordOutput("RobotState/PoseLink/RejectedStale", false);
+        Logger.recordOutput("RobotState/PoseLink/AppliedPose", fusedPose);
+        Logger.recordOutput("RobotState/PoseLink/QualityScore", observation.qualityScore());
+        return true;
+    }
+
+    /** True while the last fused pose is within the staleness window. */
+    public boolean isFusedPoseFresh() {
+        return (Timer.getFPGATimestamp() - fusedAppliedWallClock) <= FUSED_STALENESS_TIMEOUT_SEC;
+    }
+
+    /** Latest odometry sample for PoseLink to forward to the Pi. */
+    public Optional<OdometryObservation> getLatestOdometry() {
+        return Optional.ofNullable(latestOdometry);
+    }
+
+    public Rotation2d getRawGyroRotation() {
+        return rawGyroRotation;
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        return currentChassisSpeeds;
+    }
+
+    public long getResetRequestSeqnum() {
+        return resetRequestSeqnum;
+    }
+
+    public Pose2d getResetRequestPose() {
+        return resetRequestPose;
     }
 
     public void addObjectDetections(List<DetectedObject> objects, double timestamp) {
@@ -551,9 +622,15 @@ public class RobotState {
         intakeExtensionBuffer.addSample(timestamp, new Translation2d(distanceMeters, 0.0));
     }
 
+    /**
+     * The robot's best field pose: the Pi's fused pose while it is fresh,
+     * otherwise the locally-maintained wheel-only dead-reckoning pose. The
+     * fallback runs continuously, so this recovers automatically the moment
+     * fresh fused data resumes.
+     */
     @AutoLogOutput(key = "RobotState/PoseEstimation/PoseEstimation")
     public Pose2d getEstimatedPose() {
-        return poseEstimator.getEstimatedPosition();
+        return isFusedPoseFresh() ? fusedPose : wheelOdometry.getPoseMeters();
     }
 
     public Rotation2d getRotation() {
@@ -629,10 +706,12 @@ public class RobotState {
     public record OdometryObservation(
         double timestamp, SwerveModulePosition[] wheelPositions, Rotation2d gyroAngle) {}
 
-    public record VisionObservation(
+    /** A fused pose received from the Orange Pi over the vision link. */
+    public record FusedPoseObservation(
+        long seqnum,
         double timestamp,
-        Pose2d robotPose,
-        Vector<N3> stdDevs) {}
+        Pose2d pose,
+        double qualityScore) {}
 
     /** Represents a robot pose sample used for pose estimation. */
     public record PoseObservation(

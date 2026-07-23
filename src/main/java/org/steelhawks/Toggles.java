@@ -22,7 +22,7 @@ public interface Toggles {
             bindMomentary("Dashboard/Zero/Hood", h.zeroHood()));
         Subsystems.intakeIfPresent().ifPresent(i ->
             bindMomentary("Dashboard/Zero/Intake", i.zeroIntake()));
-        Subsystems.visionIfPresent().ifPresent(v -> {
+        Subsystems.poseLinkIfPresent().ifPresent(v -> {
             bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
                     () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getLeftCorner()))
                 .ignoringDisable(true));
