@@ -1,0 +1,65 @@
+// Orange Pi vision/pose service. Runs a headless AdvantageKit LoggedRobot off
+// the RIO (Idun pattern). GradleRIO is applied only to resolve WPILib + vendordep
+// dependencies and to provide the `simulateJava` run task; there is NO roboRIO
+// deploy target - the Pi is deployed over SSH via deploy_pi.sh (slice 4).
+plugins {
+    id "java"
+    id "edu.wpi.first.GradleRIO" version "2026.2.1"
+}
+
+def ROBOT_MAIN_CLASS = "org.steelhawks.pi.PiMain"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// No roboRIO artifact for this project; intentionally empty.
+deploy {
+    targets {
+    }
+}
+
+wpi.java.debugJni = false
+
+dependencies {
+    // Shared wire contract (protobuf classes + VisionLinkConfig / CONFIG_HASH).
+    implementation project(':common')
+
+    annotationProcessor wpi.java.deps.wpilibAnnotations()
+    implementation wpi.java.deps.wpilib()
+    implementation wpi.java.vendor.java()
+
+    // Desktop natives so the service can run / replay on a dev box. On the Pi
+    // (linuxarm64) the native libs are provided by the WPILib arm64 artifacts at
+    // deploy time; see pi-service/README.md.
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+    simulationDebug wpi.sim.enableDebug()
+
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+    simulationRelease wpi.sim.enableRelease()
+
+    def akitJson = new groovy.json.JsonSlurper()
+        .parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
+    annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+}
+
+// Fat jar carrying the whole service + deps, deployed to the Pi alongside
+// libposelink_gtsam.so.
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from sourceSets.main.allSource
+    manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+wpi.java.configureExecutableTasks(jar)
+
+repositories {
+    mavenCentral()
+}

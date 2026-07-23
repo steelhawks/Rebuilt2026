@@ -186,3 +186,6 @@ compile_commands.json
 # Version file
 src/main/java/org/steelhawks/BuildConstants.java
 /.kotlin/
+/common/build
+/pi-service/build
+/pi-service/cpp/build

@@ -34,3 +34,9 @@ plugins {
 
 Properties props = System.getProperties();
 props.setProperty("org.gradle.internal.native.headers.unresolved.dependencies.ignore", "true");
+
+// Shared vision-link contract module (protobuf + config-hash inputs), consumed
+// by both the RIO root project and the Orange Pi service.
+include 'common'
+// Orange Pi vision/pose-estimation service (headless AdvantageKit LoggedRobot).
+include 'pi-service'

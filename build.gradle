@@ -5,19 +5,11 @@ plugins {
     id "com.diffplug.spotless" version "6.12.0"
     id 'org.jetbrains.kotlin.jvm'
     // id 'org.jetbrains.kotlin.jvm'
-    // Codegen for the RIO <-> Orange Pi vision/pose link (src/main/proto).
-    id "com.google.protobuf" version "0.9.4"
 }
 
-// Protobuf codegen for the vision link. protoc is pulled from Maven Central
-// (see repositories block); generated Java lands in
-// build/generated/source/proto/main/java and is compiled into the robot jar.
-def protobufVersion = "3.25.5"
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:${protobufVersion}"
-    }
-}
+// The RIO <-> Orange Pi vision-link protobuf contract + config-hash inputs now
+// live in the shared :common module (see dependencies below); codegen happens
+// there, and the generated classes arrive on this project's classpath.
 
 java {
 }
@@ -106,10 +98,10 @@ dependencies {
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    // Runtime for the generated vision-link protobuf classes. WPILib already
-    // ships protobuf-java transitively for its own struct/proto support; pin it
-    // here so the generated sources compile against a known version.
-    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+    // Shared vision-link contract: brings in the generated protobuf classes
+    // (org.steelhawks.proto.*) and VisionLinkConfig, with protobuf-java runtime
+    // transitively (declared `api` in :common).
+    implementation project(':common')
 }
 
 test {

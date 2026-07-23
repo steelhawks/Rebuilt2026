@@ -18,8 +18,6 @@ import org.steelhawks.subsystems.vision.objdetect.ObjectVisionIOPhoton;
 import org.steelhawks.subsystems.vision.objdetect.ObjectVisionSim;
 import org.steelhawks.util.LoggedTunableNumber;
 
-import java.util.HashSet;
-import java.util.Set;
 
 public class VisionConstants {
 
@@ -46,32 +44,9 @@ public class VisionConstants {
     public static AprilTagFieldLayout APRIL_TAG_LAYOUT =
         AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    public static final int[] BLUE_TAGS = new int[]  {
-        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
-    };
-
-    public static final int[] BLUE_HUB_ONLY = new int[] {
-        18, 19, 20, 21, 24, 25, 26, 27
-    };
-
-    public static final int[] RED_TAGS = new int[] {
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
-    };
-
-    public static final int[] RED_HUB_ONLY = new int[] {
-        2, 3, 4, 5, 8, 9, 10, 11
-    };
-
-    public static final int[] ALL_ALLOWED_TAGS = new int[] {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
-    };
-
-    public static final Set<Integer> HUB_TAG_IDS = new HashSet<>();
-
-    static {
-        for (int id : BLUE_HUB_ONLY) HUB_TAG_IDS.add(id);
-        for (int id : RED_HUB_ONLY) HUB_TAG_IDS.add(id);
-    }
+    // Tag sets + config-hash inputs moved to the shared org.steelhawks.common
+    // .VisionLinkConfig (compiled by both the RIO and the Pi). Reference them
+    // there; they are intentionally no longer duplicated here.
 
     public interface Factors {
         default Double[] getFactors() {

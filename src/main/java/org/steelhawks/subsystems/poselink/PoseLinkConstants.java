@@ -1,23 +1,16 @@
 package org.steelhawks.subsystems.poselink;
 
-import java.util.Arrays;
-import java.util.Objects;
-import org.steelhawks.subsystems.vision.VisionConstants;
+import org.steelhawks.common.VisionLinkConfig;
 
 /**
  * Configuration for the RIO side of the vision/pose-estimation link to the
- * Orange Pi. See {@code src/main/proto/vision_link.proto} and the package
- * README for the wire contract.
+ * Orange Pi. See {@code common/src/main/proto/vision_link.proto} and the package
+ * README for the wire contract. The tag sets / config-hash inputs live in the
+ * shared {@link VisionLinkConfig} so the RIO and Pi can never disagree by value.
  */
 public final class PoseLinkConstants {
 
     private PoseLinkConstants() {}
-
-    /**
-     * Bump this whenever the wire contract or the tag/layout config below
-     * changes in a way the Pi must know about. Combined into {@link #CONFIG_HASH}.
-     */
-    public static final int CONFIG_VERSION = 1;
 
     /** Hostname/IP of the Orange Pi vision service on the robot network. */
     public static final String PI_HOST = "10.26.1.11";
@@ -43,21 +36,9 @@ public final class PoseLinkConstants {
     public static final double LINK_PERIOD_SEC = 0.02;
 
     /**
-     * Hash of the RIO-side vision config the Pi must agree on: the config
-     * version plus the alliance tag sets and hub-tag set that drive
-     * whitelisting. If the Pi computes a different value, poses are logged and
-     * flagged rather than silently trusted.
+     * Fingerprint of the config the Pi must agree on (tag sets + version),
+     * computed from the shared {@link VisionLinkConfig}. If the Pi reports a
+     * different value, poses are logged and flagged rather than silently trusted.
      */
-    public static final long CONFIG_HASH = computeConfigHash();
-
-    private static long computeConfigHash() {
-        return ((long) Objects.hash(
-                CONFIG_VERSION,
-                Arrays.hashCode(VisionConstants.BLUE_TAGS),
-                Arrays.hashCode(VisionConstants.RED_TAGS),
-                Arrays.hashCode(VisionConstants.BLUE_HUB_ONLY),
-                Arrays.hashCode(VisionConstants.RED_HUB_ONLY),
-                VisionConstants.HUB_TAG_IDS.hashCode()))
-            & 0xFFFFFFFFL;
-    }
+    public static final long CONFIG_HASH = VisionLinkConfig.CONFIG_HASH;
 }

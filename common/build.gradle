@@ -1,0 +1,31 @@
+// Shared contract module: the RIO <-> Orange Pi vision-link protobuf schema and
+// the config-hash inputs. Depended on by both the RIO root project and
+// :pi-service so the wire format and CONFIG_HASH have a single source of truth.
+plugins {
+    id "java-library"
+    id "com.google.protobuf" version "0.9.4"
+}
+
+def protobufVersion = "3.25.5"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // `api` so consumers (RIO, pi-service) get the generated protobuf classes'
+    // runtime transitively.
+    api "com.google.protobuf:protobuf-java:${protobufVersion}"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+}
