@@ -358,7 +358,7 @@ public class RobotState {
 
         // SOTM is now used unconditionally by the turret, so keep the solution fresh
         // every loop instead of only while a shoot trigger is held. Solver is cheap
-        // (1–2 iterations typical, see SOTM/ConvergedIterations in logs).
+        // (1-2 iterations typical, see SOTM/ConvergedIterations in logs).
         updateMovingShot();
 
 //        if (DriverStation.isDisabled()) {

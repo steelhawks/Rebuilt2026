@@ -101,7 +101,7 @@ public static FrameAnimation myAnimation() {
 }
 
 
-Method 2: Use Python script to convert GIF → Java array
+Method 2: Use Python script to convert GIF -> Java array
 --------------------------------------------------------
 Create a Python script to pre-process GIFs into frame arrays:
 
@@ -191,15 +191,15 @@ private void configureBindings() {
 
 PERFORMANCE:
 -----------
-✅ Pre-computed frames: Fast
-✅ Simple array lookups: Minimal CPU
-✅ No file I/O during match: Safe
-✅ Memory usage: Reasonable (a 32x8x30-frame animation ≈ 7.6KB)
+- Pre-computed frames: Fast
+- Simple array lookups: Minimal CPU
+- No file I/O during match: Safe
+- Memory usage: Reasonable (a 32x8x30-frame animation ~ 7.6KB)
 
 MEMORY CALCULATION:
 ------------------
-Memory per animation = width × height × frames × 4 bytes
-32×8×30 = 7,680 pixels × 4 bytes = ~31KB
+Memory per animation = width x height x frames x 4 bytes
+32x8x30 = 7,680 pixels x 4 bytes = ~31KB
 
 Keep total animations under 500KB to be safe on roboRIO.
 */

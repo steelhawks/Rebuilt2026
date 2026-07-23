@@ -111,7 +111,7 @@ public class ShooterTuner {
             saveTrigger.set(false);
             savedPoints.add(new double[]{activeDistance, manualHoodAngleDeg.get(), manualFlywheelSpeed.get(), lastTof});
             System.out.printf(
-                "[ShooterTuner] Saved point #%d → dist=%.2fm, hood=%.1f°, flywheel=%.1f, ToF=%s%n",
+                "[ShooterTuner] Saved point #%d -> dist=%.2fm, hood=%.1f deg, flywheel=%.1f, ToF=%s%n",
                 savedPoints.size(), activeDistance, manualHoodAngleDeg.get(), manualFlywheelSpeed.get(),
                 Double.isNaN(lastTof) ? "N/A" : String.format("%.4fs", lastTof));
             logAllSavedPoints();

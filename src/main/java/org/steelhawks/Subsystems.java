@@ -31,10 +31,10 @@ import java.util.Optional;
  *
  * <p>Two access patterns:
  * <ul>
- *   <li>{@code Subsystems.hood()} — direct accessor, throws with a descriptive
+ *   <li>{@code Subsystems.hood()} - direct accessor, throws with a descriptive
  *       error if the subsystem isn't configured for this robot. The default;
  *       use everywhere the subsystem is logically required.</li>
- *   <li>{@code Subsystems.hoodIfPresent()} — returns {@code Optional<Hood>}.
+ *   <li>{@code Subsystems.hoodIfPresent()} - returns {@code Optional<Hood>}.
  *       Use only where missing-subsystem is a legitimate runtime semantic
  *       (binding setup, dashboard overrides, footprint extensions).</li>
  * </ul>
@@ -57,7 +57,7 @@ public final class Subsystems {
     public static Subsystems get() {
         if (instance == null) {
             throw new IllegalStateException(
-                "Subsystems registry not yet installed — RobotContainer hasn't started constructing");
+                "Subsystems registry not yet installed - RobotContainer hasn't started constructing");
         }
         return instance;
     }

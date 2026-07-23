@@ -18,8 +18,8 @@ import static edu.wpi.first.units.Units.Meters;
  *
  * <p>Two activation modes are supported:
  * <ul>
- *   <li>{@link Mode#CENTER_ONLY} — triggers when the robot's odometry center enters the zone.</li>
- *   <li>{@link Mode#PERIMETER} — triggers when any point of the robot's dynamic footprint
+ *   <li>{@link Mode#CENTER_ONLY} - triggers when the robot's odometry center enters the zone.</li>
+ *   <li>{@link Mode#PERIMETER} - triggers when any point of the robot's dynamic footprint
  *       (bumpers + extended mechanisms) touches or enters the zone.</li>
  * </ul>
  */
@@ -73,7 +73,7 @@ public class Boundary {
     }
 
     /**
-     * Convenience factory — creates a {@link Trigger} directly without holding
+     * Convenience factory - creates a {@link Trigger} directly without holding
      * a {@code Boundary} reference.
      *
      * @param boundary the rectangular field zone

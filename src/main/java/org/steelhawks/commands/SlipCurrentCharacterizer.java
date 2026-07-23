@@ -21,7 +21,7 @@ public class SlipCurrentCharacterizer extends Command {
 
     private final LinearFilter filter = LinearFilter.movingAverage(10);
     private final Timer timer = new Timer();
-    private final double rampRate = 0.25; // m/s²
+    private final double rampRate = 0.25; // m/s^2
     private double commandedSpeed = 0.0;
     private double fracRamp = 0.0;
     private double currentStatorCurrent = 0.0;
