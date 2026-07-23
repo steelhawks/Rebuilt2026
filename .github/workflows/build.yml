@@ -15,4 +15,7 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
       - name: Build robot code
-        run: ./gradlew build
+        # :pi-service is a coprocessor app deployed to the Orange Pi over SSH, not
+        # a roboRIO artifact - it isn't built in the roboRIO CI. :common (the
+        # shared protobuf/config module) still builds since the RIO depends on it.
+        run: ./gradlew build -x :pi-service:build

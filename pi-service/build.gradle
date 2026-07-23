@@ -50,6 +50,7 @@ dependencies {
 // Fat jar carrying the whole service + deps, deployed to the Pi alongside
 // libposelink_gtsam.so.
 jar {
+    dependsOn configurations.runtimeClasspath
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
