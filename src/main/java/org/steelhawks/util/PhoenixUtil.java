@@ -48,27 +48,29 @@ public final class PhoenixUtil {
     }
 
     public static void registerSignals(CANBus bus, BaseStatusSignal... signals) {
-        if (bus.isNetworkFD()) {
-            var selectedBusSignals = bus.equals(RobotConfig.CANBusList.kDrivetrainBus)
-                ? drivetrainCanivoreSignals
-                : turretCanivoreSignals;
-            BaseStatusSignal[] newSignals = new BaseStatusSignal[selectedBusSignals.length + signals.length];
-            System.arraycopy(selectedBusSignals, 0, newSignals, 0, selectedBusSignals.length);
-            System.arraycopy(signals, 0, newSignals, selectedBusSignals.length, signals.length);
-            if (bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
-                drivetrainCanivoreSignals = newSignals;
-            } else if (bus.equals(RobotConfig.CANBusList.kTurretBus)) {
-                turretCanivoreSignals = newSignals;
-            } else {
-                DriverStation.reportWarning("Unknown CANivore bus: " + bus.getName(), false);
-                throw new RuntimeException("Unknown CANivore bus: " + bus.getName());
-            }
+        if (bus.isNetworkFD() && bus.equals(RobotConfig.CANBusList.kDrivetrainBus)) {
+            drivetrainCanivoreSignals = append(drivetrainCanivoreSignals, signals);
+        } else if (bus.isNetworkFD() && bus.equals(RobotConfig.CANBusList.kTurretBus)) {
+            turretCanivoreSignals = append(turretCanivoreSignals, signals);
         } else {
-            BaseStatusSignal[] newSignals = new BaseStatusSignal[rioSignals.length + signals.length];
-            System.arraycopy(rioSignals, 0, newSignals, 0, rioSignals.length);
-            System.arraycopy(signals, 0, newSignals, rioSignals.length, signals.length);
-            rioSignals = newSignals;
+            // Falls here for the RIO bus and for any bus we don't specifically recognize.
+            // Some simulation/CI backends report the RIO bus as CAN FD, which previously
+            // matched neither known CANivore bus and threw, killing robot construction.
+            // Register those signals on the RIO bucket instead of crashing.
+            if (bus.isNetworkFD()) {
+                DriverStation.reportWarning(
+                    "Unrecognized CAN FD bus '" + bus.getName()
+                        + "'; registering its signals on the RIO bus.", false);
+            }
+            rioSignals = append(rioSignals, signals);
         }
+    }
+
+    private static BaseStatusSignal[] append(BaseStatusSignal[] existing, BaseStatusSignal[] added) {
+        BaseStatusSignal[] combined = new BaseStatusSignal[existing.length + added.length];
+        System.arraycopy(existing, 0, combined, 0, existing.length);
+        System.arraycopy(added, 0, combined, existing.length, added.length);
+        return combined;
     }
 
     /** Refresh all registered signals. */

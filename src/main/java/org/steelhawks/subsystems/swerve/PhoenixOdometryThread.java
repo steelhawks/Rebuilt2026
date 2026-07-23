@@ -51,7 +51,11 @@ public class PhoenixOdometryThread extends Thread {
         if (isCANFD == null) {
             throw new RuntimeException("You must call start(CANbus bus) to instatiate the CANbus for this util to work properly.");
         }
-        if (!timestampQueues.isEmpty()) {
+        // Guard against a second start(): the thread is a long-lived singleton, so
+        // re-invoking super.start() (e.g. when multiple Swerve instances are constructed
+        // in the same JVM, as the per-robot construction test does) throws
+        // IllegalThreadStateException. Starting once is also the only correct runtime behavior.
+        if (!timestampQueues.isEmpty() && !isAlive()) {
             super.start();
         }
     }
