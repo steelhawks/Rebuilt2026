@@ -1,7 +1,5 @@
 package org.steelhawks.subsystems.poselink;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Timer;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.proto.FusedPoseOutput;
 import org.steelhawks.proto.RobotOdomInputs;
-import org.steelhawks.proto.SwerveModuleSample;
 
 /**
  * Real UDP + Protobuf implementation of the vision link. Receives
@@ -144,38 +141,25 @@ public class PoseLinkIOUDP implements PoseLinkIO {
         if (!bound || socket.isClosed()) {
             return;
         }
-        RobotOdomInputs.Builder b =
+        RobotOdomInputs out =
             RobotOdomInputs.newBuilder()
                 .setSeqnum(packet.seqnum())
                 .setTimestamp(packet.timestamp())
-                .setGyroAngleRadians(packet.gyroAngleRadians())
+                .setOdomX(packet.odomPose().getX())
+                .setOdomY(packet.odomPose().getY())
+                .setOdomTheta(packet.odomPose().getRotation().getRadians())
                 .setIsOnBump(packet.isOnBump())
                 .setAlliance(packet.alliance())
                 .setConfigHash(packet.configHash())
                 .setResetSeqnum(packet.resetSeqnum())
                 .setResetX(packet.resetPose().getX())
                 .setResetY(packet.resetPose().getY())
-                .setResetTheta(packet.resetPose().getRotation().getRadians());
+                .setResetTheta(packet.resetPose().getRotation().getRadians())
+                .build();
 
-        for (SwerveModulePosition pos : packet.wheelPositions()) {
-            b.addWheelPositions(
-                SwerveModuleSample.newBuilder()
-                    .setDistanceMeters(pos.distanceMeters)
-                    .setAngleRadians(pos.angle.getRadians())
-                    .build());
-        }
-
-        ChassisSpeeds speeds = packet.chassisSpeeds();
-        b.setChassisSpeeds(
-            org.steelhawks.proto.ChassisSpeeds.newBuilder()
-                .setVxMps(speeds.vxMetersPerSecond)
-                .setVyMps(speeds.vyMetersPerSecond)
-                .setOmegaRadps(speeds.omegaRadiansPerSecond)
-                .build());
-
-        byte[] out = b.build().toByteArray();
+        byte[] bytes = out.toByteArray();
         try {
-            socket.send(new DatagramPacket(out, out.length, piAddress));
+            socket.send(new DatagramPacket(bytes, bytes.length, piAddress));
             packetsSent.incrementAndGet();
         } catch (IOException e) {
             Logger.recordOutput("PoseLink/SocketError", "tx: " + e.getMessage());

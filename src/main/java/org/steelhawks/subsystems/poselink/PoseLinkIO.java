@@ -1,8 +1,6 @@
 package org.steelhawks.subsystems.poselink;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import org.littletonrobotics.junction.AutoLog;
 import org.steelhawks.proto.AllianceColor;
 
@@ -24,9 +22,7 @@ public interface PoseLinkIO {
     record OdomPacket(
         long seqnum,
         double timestamp,
-        SwerveModulePosition[] wheelPositions,
-        double gyroAngleRadians,
-        ChassisSpeeds chassisSpeeds,
+        Pose2d odomPose,
         boolean isOnBump,
         AllianceColor alliance,
         long configHash,

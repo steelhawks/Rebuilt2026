@@ -58,7 +58,9 @@ public class PoseLink extends SubsystemBase {
     public void periodic() {
         RobotState rs = RobotState.getInstance();
 
-        // ---- RIO -> Pi: ship the latest odometry sample + context ----
+        // ---- RIO -> Pi: ship the cumulative wheel-odometry pose + context ----
+        // The Pi differences consecutive poses into odometry between-factors, so
+        // it needs no drivetrain kinematics of its own.
         Optional<RobotState.OdometryObservation> latestOdom = rs.getLatestOdometry();
         if (latestOdom.isPresent()) {
             RobotState.OdometryObservation odom = latestOdom.get();
@@ -66,9 +68,7 @@ public class PoseLink extends SubsystemBase {
                 new PoseLinkIO.OdomPacket(
                     txSeqnum++,
                     odom.timestamp(),
-                    odom.wheelPositions(),
-                    rs.getRawGyroRotation().getRadians(),
-                    rs.getChassisSpeeds(),
+                    rs.getWheelOdometryPose(),
                     Subsystems.swerve().isOnBump(),
                     toProto(DriverStation.getAlliance()),
                     PoseLinkConstants.CONFIG_HASH,

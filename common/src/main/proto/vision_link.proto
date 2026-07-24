@@ -30,21 +30,6 @@ enum AllianceColor {
   ALLIANCE_RED = 2;
 }
 
-// One swerve module's odometry sample. Equivalent to WPILib
-// SwerveModulePosition (drive distance + steer angle).
-message SwerveModuleSample {
-  double distance_meters = 1;
-  double angle_radians = 2;
-}
-
-// Chassis-relative velocity. Optional on the RIO side, but useful as a motion
-// prior for GTSAM between AprilTag observations.
-message ChassisSpeeds {
-  double vx_mps = 1;
-  double vy_mps = 2;
-  double omega_radps = 3;
-}
-
 // RIO -> Pi. Sent every link cycle (~50Hz; does not need to match the RIO's
 // full loop rate). Carries the odometry the Pi fuses, plus the alliance/config
 // context and an (optional) pose-reset command.
@@ -53,16 +38,17 @@ message RobotOdomInputs {
   // must never fuse a packet older (by seqnum or timestamp) than the last.
   int64 seqnum = 1;
 
-  // Sample time of this odometry (FPGA/match seconds), NOT send time.
+  // Sample time of the odometry pose (FPGA/match seconds), NOT send time.
   double timestamp = 2;
 
-  // Exactly 4 modules, in the RIO's module order (FL, FR, BL, BR).
-  repeated SwerveModuleSample wheel_positions = 3;
-
-  // Fused gyro yaw, radians (already continuous / unwrapped).
-  double gyro_angle_radians = 4;
-
-  ChassisSpeeds chassis_speeds = 5;
+  // The RIO's cumulative wheel-only odometry pose, in the RIO's odom frame.
+  // The Pi differences consecutive samples to form odometry between-factors -
+  // drop-robust (a lost packet just widens the next interval) and needs no
+  // drivetrain kinematics on the Pi. Gyro is already folded into the heading by
+  // the RIO's SwerveDriveOdometry.
+  double odom_x = 3;
+  double odom_y = 4;
+  double odom_theta = 5;
 
   // True while the robot is crossing a field bump; the Pi scales AprilTag
   // trust down (mirrors the old baselineDropOdomFactor behaviour).

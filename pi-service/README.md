@@ -25,8 +25,19 @@ the wire schema and the full design.
   over the staged deltas (which latency-compensates the output). No GTSAM factor
   is ever removed. **Requires GTSAM on the build host — validated on the Pi**
   (not compilable on a stock dev box without GTSAM installed).
-- **Slice 3 (next):** Java IO layers (UDP `RobotOdomInputs`, PhotonVision), the
-  `Vision.java` rejection/stddev port, and `FusedPoseOutput` emit.
+- **Slice 3 (this):** the Java fusion loop. `link/RioLink` (UDP: decode
+  `RobotOdomInputs`, send `FusedPoseOutput`), `vision/PhotonVisionIOReal`
+  (photonlib multi-tag + single-tag decode), `vision/VisionFilter` (the
+  `Vision.java` whitelist/rejection/stddev port), `vision/TimeSync` (RIO clock
+  via NT offset). `PiRobot.robotPeriodic` runs it at 50 Hz: odom -> BetweenFactor,
+  filtered tags -> PriorFactor, solve, emit (withheld until anchored). Compiles
+  against real WPILib/photonlib; **runs on the Pi** (needs the RIO + PhotonVision).
+- **Slice 4 (next):** deploy (systemd + `deploy_pi.sh`).
+
+### Config to fill in before running on the robot
+`PiVisionConstants`: the full camera list + extrinsics (only 2 ported so far),
+`TEAM_NUMBER`, and `RIO_HOST`. (No drivetrain geometry needed - the RIO sends its
+cumulative odometry pose and the Pi differences consecutive samples.)
 
 ## Prerequisites on the Pi (aarch64 / linuxarm64)
 - JDK **17** aarch64 (Liberica/Temurin) — matches the toolchain.

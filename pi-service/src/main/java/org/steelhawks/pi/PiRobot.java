@@ -1,65 +1,147 @@
 package org.steelhawks.pi;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.steelhawks.common.VisionLinkConfig;
 import org.steelhawks.pi.gtsam.NativePoseEstimator;
+import org.steelhawks.pi.link.OdomSample;
+import org.steelhawks.pi.link.RioLink;
+import org.steelhawks.pi.vision.AcceptedObservation;
+import org.steelhawks.pi.vision.CameraObservation;
+import org.steelhawks.pi.vision.PhotonVisionIO;
+import org.steelhawks.pi.vision.PhotonVisionIOReal;
+import org.steelhawks.pi.vision.VisionFilter;
+import org.steelhawks.proto.AllianceColor;
 
 /**
- * Slice-1 skeleton. Its only job right now is the bring-up smoke test:
- * <ol>
- *   <li>start AdvantageKit logging on the Pi (validates akit's linuxarm64
- *       native — the riskiest infra unknown), and</li>
- *   <li>load {@code libposelink_gtsam.so} and run a native round trip
- *       (validates JNI).</li>
- * </ol>
- *
- * <p>Slice 2+ fills in: UDP {@code RobotOdomInputs} IO, PhotonVision IO,
- * the Java rejection/stddev port, the GTSAM graph, and {@code FusedPoseOutput}
- * emit - all inside this {@code periodic()} loop (design Q12).
+ * The Pi vision/pose service loop. Each cycle: drain odometry from the RIO and
+ * feed it as BetweenFactors, poll + filter PhotonVision and feed accepted tags
+ * as PriorFactors, solve the GTSAM graph, and send the fused pose back. Output
+ * is withheld until the graph is anchored.
  */
 public class PiRobot extends LoggedRobot {
 
+    private RioLink link;
+    private PhotonVisionIO photon;
     private NativePoseEstimator estimator;
-    private long loopCount = 0;
+
+    // Previous cumulative odometry pose, differenced into between-factors.
+    private Pose2d lastOdomPose = null;
+    private long appliedResetSeqnum = -1;
+
+    // Context carried between odom and vision within a cycle
+    private AllianceColor alliance = AllianceColor.ALLIANCE_UNKNOWN;
+    private boolean isOnBump = false;
+    private double lastOdomTimestamp = 0.0;
+    private Pose2d currentEstimate = new Pose2d();
+    private long txSeqnum = 0;
 
     @Override
     public void robotInit() {
+        NetworkTableInstance nt = NetworkTableInstance.getDefault();
+        nt.startClient4("poselink-pi");
+        nt.setServerTeam(PiVisionConstants.TEAM_NUMBER);
+
         Logger.recordMetadata("Service", "poselink-pi");
         Logger.recordMetadata("ConfigHash", Long.toString(VisionLinkConfig.CONFIG_HASH));
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.start();
 
-        // ---- JNI + native round-trip smoke test ----
-        // Drives enough odom to age past the staging window so the smoother
-        // actually commits and solves. Expect the frontier to advance ~0.5 m in
-        // +x from the reset pose (1, 2).
-        System.out.println("[poselink] native: " + NativePoseEstimator.version());
-        estimator = new NativePoseEstimator(1.5);
-        estimator.reset(1.0, 2.0, 0.0, 0.01, 0.01, 0.02);
-        double t = 0.0;
-        for (int i = 0; i < 12; i++) {
-            t += 0.02;
-            estimator.addOdometry(t, 0.05, 0.0, 0.0, 0.02, 0.02, 0.02);
-            estimator.update();
-        }
-        NativePoseEstimator.Result r = estimator.getResult();
-        System.out.printf(
-            "[poselink] round-trip: x=%.3f y=%.3f theta=%.3f status=%d nodes=%d factors=%d%n",
-            r.x(), r.y(), r.theta(), r.status(), r.nodeCount(), r.factorCount());
+        link = new RioLink();
+        photon = new PhotonVisionIOReal();
+        estimator = new NativePoseEstimator(PiVisionConstants.LAG_SECONDS);
     }
 
     @Override
     public void robotPeriodic() {
-        // Heartbeat until the real fusion loop lands in slice 2.
-        Logger.recordOutput("PoseLinkPi/LoopCount", ++loopCount);
+        for (OdomSample s : link.drain()) {
+            ingestOdometry(s);
+        }
+        for (CameraObservation obs : photon.poll()) {
+            VisionFilter.filter(obs, alliance, isOnBump, currentEstimate).ifPresent(a -> {
+                estimator.addVisionMeasurement(
+                    a.timestamp(), a.x(), a.y(), a.theta(), a.varX(), a.varY(), a.varTheta());
+            });
+        }
+
+        long t0 = System.nanoTime();
+        int status = estimator.update();
+        double solveMs = (System.nanoTime() - t0) / 1e6;
+
+        NativePoseEstimator.Result r = estimator.getResult();
+        if (status == NativePoseEstimator.STATUS_OK) {
+            currentEstimate = new Pose2d(r.x(), r.y(), new Rotation2d(r.theta()));
+            link.sendFusedPose(
+                txSeqnum++,
+                lastOdomTimestamp,
+                currentEstimate,
+                quality(r),
+                r.covXX(), r.covYY(), r.covTheta(),
+                VisionLinkConfig.CONFIG_HASH,
+                solveMs,
+                appliedResetSeqnum);
+        }
+
+        Logger.recordOutput("PoseLinkPi/Status", status);
+        Logger.recordOutput("PoseLinkPi/FusedPose", currentEstimate);
+        Logger.recordOutput("PoseLinkPi/SolveMs", solveMs);
+        Logger.recordOutput("PoseLinkPi/Nodes", r.nodeCount());
+        Logger.recordOutput("PoseLinkPi/Factors", r.factorCount());
+        Logger.recordOutput("PoseLinkPi/DroppedOdom", link.droppedCount());
+        Logger.recordOutput("PoseLinkPi/CamerasConnected", photon.allConnected());
+    }
+
+    private void ingestOdometry(OdomSample s) {
+        alliance = s.alliance();
+        isOnBump = s.isOnBump();
+        lastOdomTimestamp = s.timestamp();
+
+        if (s.configHash() != VisionLinkConfig.CONFIG_HASH) {
+            Logger.recordOutput("PoseLinkPi/ConfigMismatch", true);
+        }
+
+        if (s.resetSeqnum() > appliedResetSeqnum) {
+            estimator.reset(
+                s.resetPose().getX(), s.resetPose().getY(), s.resetPose().getRotation().getRadians(),
+                PiVisionConstants.ANCHOR_LINEAR_VARIANCE,
+                PiVisionConstants.ANCHOR_LINEAR_VARIANCE,
+                PiVisionConstants.ANCHOR_ANGULAR_VARIANCE);
+            appliedResetSeqnum = s.resetSeqnum();
+            lastOdomPose = s.odomPose();
+            return;
+        }
+
+        if (lastOdomPose == null) {
+            lastOdomPose = s.odomPose();
+            return;
+        }
+
+        // Relative motion since the last sample, in the last pose's frame. This
+        // spans any dropped packets correctly (cumulative poses), so no drivetrain
+        // kinematics are needed here.
+        Pose2d delta = s.odomPose().relativeTo(lastOdomPose);
+        estimator.addOdometry(
+            s.timestamp(), delta.getX(), delta.getY(), delta.getRotation().getRadians(),
+            PiVisionConstants.ODOM_VARIANCE_LINEAR,
+            PiVisionConstants.ODOM_VARIANCE_LINEAR,
+            PiVisionConstants.ODOM_VARIANCE_ANGULAR);
+
+        lastOdomPose = s.odomPose();
+    }
+
+    /** Map the marginal covariance to a 0..1 trust score. */
+    private static double quality(NativePoseEstimator.Result r) {
+        double trace = r.covXX() + r.covYY() + r.covTheta();
+        double q = 1.0 / (1.0 + trace);
+        return Math.max(0.0, Math.min(1.0, q));
     }
 
     @Override
     public void endCompetition() {
-        if (estimator != null) {
-            estimator.close();
-        }
+        if (estimator != null) estimator.close();
     }
 }

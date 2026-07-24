@@ -5,11 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
-import org.steelhawks.subsystems.vision.VisionConstants;
 import org.steelhawks.util.AllianceFlip;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public interface Toggles {
 
@@ -55,19 +51,6 @@ public interface Toggles {
         new LoggedNetworkBoolean("Toggles/LUT", true);
     LoggedNetworkBoolean useKinematicsTOF =
         new LoggedNetworkBoolean("Toggles/KinematicsTOF", false);
-
-    class Vision {
-        public static final LoggedNetworkBoolean visionEnabled =
-            new LoggedNetworkBoolean("Toggles/Vision/VisionEnabled", true);
-        public static final Map<String, LoggedNetworkBoolean> camerasEnabled;
-
-        static {
-            camerasEnabled = new HashMap<>();
-            for (VisionConstants.CameraConfig config : VisionConstants.getCameraConfig()) {
-                camerasEnabled.put(config.name(), new LoggedNetworkBoolean("Toggles/Vision/" + config.name() + "Enabled", true));
-            }
-        }
-    }
 
     interface Swerve {
         LoggedNetworkBoolean driveOpenLoopOverride =
