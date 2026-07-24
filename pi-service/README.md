@@ -41,6 +41,9 @@ cd pi-service/cpp
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build            # produces build/libposelink_gtsam.so
 
+# (optional) run the estimator sanity test
+cmake --build build --target pose_graph_test && ./build/pose_graph_test
+
 # 2. Service fat jar
 cd ../..
 ./gradlew :pi-service:jar       # build/libs/pi-service-*.jar
