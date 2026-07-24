@@ -39,9 +39,6 @@ public final class Autos {
     private static final Intake s_Intake = RobotContainer.s_Intake;
     private static final Indexer s_Indexer = RobotContainer.s_Indexer;
 
-    static LoggedTunableNumber controllerkP = new  LoggedTunableNumber("controllerkP", 3.8);
-    static LoggedTunableNumber controllerkI = new  LoggedTunableNumber("controllerkI", 0.0);
-    static LoggedTunableNumber controllerkD = new  LoggedTunableNumber("controllerkD", 0.2);
 
 
     static FollowPath.Builder pathBuilder = new FollowPath.Builder(
@@ -49,9 +46,9 @@ public final class Autos {
             () -> RobotState.getInstance().getEstimatedPose(),
             s_Swerve::getChassisSpeeds,
             s_Swerve::runVelocity,
-            new PIDController(2.68, 0, 0.5), // translation
-            new PIDController(controllerkP.getAsDouble(), controllerkI.getAsDouble(), controllerkD.getAsDouble()), // rotation
-            new PIDController(0.2, 0, 0)
+            new PIDController(2.4, 0, 0.0), // translation
+            new PIDController(3.6, 0.0, 0.0), // rotation
+            new PIDController(0.0, 0, 0.0) // cross-track (ct) 1.5, 0.7
     )
             .withDefaultShouldFlip()
             .withTRatioBasedTranslationHandoffs(true);
@@ -163,6 +160,7 @@ public final class Autos {
 
         autoChooser.addOption("square", firstAuto());
         autoChooser.addOption("rotation", secondAuto());
+        autoChooser.addOption("ct path", ctAuto());
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -1080,5 +1078,12 @@ public final class Autos {
 //        autoRotate(firstPath);
 
         return pathBuilder.build(secondPath);
+    }
+
+    public static Command ctAuto() {
+        Path ctPath = new Path("ct-path");
+//        autoRotate(firstPath);
+
+        return pathBuilder.build(ctPath);
     }
 }
