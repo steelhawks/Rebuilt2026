@@ -1,0 +1,26 @@
+# Steel Hawks PoseLink vision/pose service.
+# Install: sudo cp poselink.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#          && sudo systemctl enable poselink
+# Logs:    journalctl -u poselink -f
+#
+# Adjust User / paths if your Pi's deploy dir or login user differ (deploy_pi.sh
+# defaults to user "orangepi" and /home/orangepi/poselink).
+
+[Unit]
+Description=Steel Hawks PoseLink vision/pose service
+After=network-online.target photonvision.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=orangepi
+WorkingDirectory=/home/orangepi/poselink
+# -Djava.library.path points at libposelink_gtsam.so in the deploy dir.
+ExecStart=/usr/bin/java -XX:+UseSerialGC -Djava.library.path=/home/orangepi/poselink -jar /home/orangepi/poselink/poselink.jar
+Restart=always
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

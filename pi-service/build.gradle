@@ -23,6 +23,11 @@ deploy {
 
 wpi.java.debugJni = false
 
+// arm64 native libs for the Pi deploy jar; resolved only by the jar task.
+configurations {
+    piNative
+}
+
 dependencies {
     // Shared wire contract (protobuf classes + VisionLinkConfig / CONFIG_HASH).
     implementation project(':common')
@@ -42,6 +47,13 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
+    // Native libs for the Orange Pi (aarch64), bundled into the deploy jar only
+    // (see the jar task) - kept out of the compile/sim classpath so local builds
+    // don't need arm64 artifacts. The WPILib runtime loader picks the platform at
+    // startup. Resolving these requires network access to the WPILib maven.
+    piNative wpi.java.deps.wpilibJniRelease(wpi.platforms.linuxarm64)
+    piNative wpi.java.vendor.jniRelease(wpi.platforms.linuxarm64)
+
     def akitJson = new groovy.json.JsonSlurper()
         .parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
@@ -50,9 +62,13 @@ dependencies {
 // Fat jar carrying the whole service + deps, deployed to the Pi alongside
 // libposelink_gtsam.so.
 jar {
-    dependsOn configurations.runtimeClasspath
+    dependsOn configurations.runtimeClasspath, configurations.piNative
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    // Unpack the arm64 native jars so the WPILib loader finds them on the Pi.
+    from {
+        configurations.piNative.collect { zipTree(it) }
     }
     from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)

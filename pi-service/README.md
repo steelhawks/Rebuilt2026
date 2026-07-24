@@ -32,7 +32,11 @@ the wire schema and the full design.
   via NT offset). `PiRobot.robotPeriodic` runs it at 50 Hz: odom -> BetweenFactor,
   filtered tags -> PriorFactor, solve, emit (withheld until anchored). Compiles
   against real WPILib/photonlib; **runs on the Pi** (needs the RIO + PhotonVision).
-- **Slice 4 (next):** deploy (systemd + `deploy_pi.sh`).
+- **Slice 4 (this):** deploy. `deploy/poselink.service` (systemd, `Restart=always`,
+  ordered after network + PhotonVision) and `deploy/deploy_pi.sh` (build jar +
+  native shim, rsync to the Pi, restart). The deploy jar bundles **linuxarm64**
+  WPILib/vendordep natives (see the `piNative` config in `build.gradle`) so it is
+  self-contained on the Pi; building it needs network access to the WPILib maven.
 
 ### Config to fill in before running on the robot
 `PiVisionConstants`: the full camera list + extrinsics (only 2 ported so far),
@@ -83,7 +87,26 @@ custom replay harness. Nothing else in the pipeline changes.
 with the same CMake (`libposelink_gtsam.dylib` on macOS); set `java.library.path`
 to `cpp/build` when running locally.
 
-## Deploy (slice 4)
-`deploy_pi.sh` will `rsync` the jar + `libposelink_gtsam.so` to the Pi and
-restart a `Restart=always` systemd unit ordered after network + PhotonVision.
-The Pi is **not** a GradleRIO deploy target — SSH only.
+## Deploy
+
+The Pi is **not** a GradleRIO deploy target — deployment is SSH-based via
+`deploy/deploy_pi.sh`.
+
+**First-time setup on the Pi (once):**
+1. Install JDK 17 (aarch64), `cmake`, `build-essential`.
+2. Build + install GTSAM from source (`-DGTSAM_USE_TBB=OFF -DGTSAM_BUILD_UNSTABLE=ON`,
+   see the slice-2 notes above).
+3. Install the service unit:
+   ```bash
+   sudo cp deploy/poselink.service /etc/systemd/system/
+   sudo systemctl daemon-reload && sudo systemctl enable poselink
+   ```
+
+**Each deploy (from a networked dev machine):**
+```bash
+PI_HOST=10.26.1.11 pi-service/deploy/deploy_pi.sh
+```
+It builds the fat jar (with arm64 natives), rsyncs the jar + `cpp/` source,
+builds `libposelink_gtsam.so` on the Pi, and restarts the service. Override
+`PI_USER`, `PI_HOST`, `DEPLOY_DIR`, `SERVICE` via env. Follow logs with
+`ssh <user>@<pi> journalctl -u poselink -f`.
