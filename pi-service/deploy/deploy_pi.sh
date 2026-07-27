@@ -21,10 +21,17 @@ SERVICE="${SERVICE:-poselink}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TARGET="${PI_USER}@${PI_HOST}"
 
-echo "==> Building Pi service jar (needs internet for arm64 natives)"
-"${REPO_ROOT}/gradlew" :pi-service:jar
-JAR="$(ls -t "${REPO_ROOT}"/pi-service/build/libs/pi-service*.jar | head -1)"
-echo "    jar: ${JAR}"
+# POSELINK_JAR is set when Gradle already built the jar (the deployPi task); build
+# it ourselves otherwise so the script still works standalone.
+if [ -n "${POSELINK_JAR:-}" ]; then
+    JAR="${POSELINK_JAR}"
+    echo "==> Using prebuilt jar: ${JAR}"
+else
+    echo "==> Building Pi service jar (needs internet for arm64 natives)"
+    "${REPO_ROOT}/gradlew" :pi-service:jar
+    JAR="$(ls -t "${REPO_ROOT}"/pi-service/build/libs/pi-service*.jar | head -1)"
+    echo "    jar: ${JAR}"
+fi
 
 echo "==> Preparing deploy dir on ${TARGET}"
 ssh "${TARGET}" "mkdir -p '${DEPLOY_DIR}' '${DEPLOY_DIR}/cpp'"

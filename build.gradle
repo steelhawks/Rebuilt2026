@@ -131,6 +131,30 @@ deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
 
+// Push the Orange Pi vision service to the Pi over SSH. Vision is required to
+// play, so a normal deploy keeps the Pi in sync with the RIO by default. Skip it
+// for bench work / when the Pi isn't on the network with -PskipPi.
+tasks.register('deployPi', Exec) {
+    group = 'deploy'
+    description = 'Build and deploy the pi-service vision program to the Orange Pi.'
+    dependsOn ':pi-service:jar'
+    workingDir projectDir
+    commandLine './pi-service/deploy/deploy_pi.sh'
+    doFirst {
+        // Hand the already-built jar to the script so it doesn't run Gradle again.
+        environment 'POSELINK_JAR',
+            tasks.getByPath(':pi-service:jar').archiveFile.get().asFile.absolutePath
+    }
+}
+
+// `deploy` stays vanilla (roboRIO only) so the WPILib VS Code "Deploy Robot Code"
+// button keeps working. Use deployAll to push both the RIO and the Pi.
+tasks.register('deployAll') {
+    group = 'deploy'
+    description = 'Deploy robot code to the roboRIO and the vision service to the Pi.'
+    dependsOn 'deploy', 'deployPi'
+}
+
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'

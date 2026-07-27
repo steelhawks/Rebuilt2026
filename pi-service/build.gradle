@@ -79,4 +79,9 @@ wpi.java.configureExecutableTasks(jar)
 
 repositories {
     mavenCentral()
+    // The WPILib installer only caches desktop + roboRIO artifacts locally. The
+    // Pi's linuxarm64 natives (opencv, wpiutil, ntcore, hal, ...) come from the
+    // online WPILib maven, so this repo is required to build the deploy jar.
+    maven { url = uri("https://frcmaven.wpi.edu/artifactory/release/") }
+    maven { url = uri("https://maven.photonvision.org/repository/internal") }
 }

@@ -29,6 +29,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Vision Coprocessor (PoseLink)](#vision-coprocessor-poselink)
 - [Branch Naming Scheme](#branch-naming-scheme)
 - [AdvantageScope: Robot\_Shaq Asset](#advantagescope-robot_shaq-asset)
 
@@ -37,6 +38,27 @@
 ## Overview
 
 This repository contains all robot code for **Shaquille O'Steel**, Steel Hawks' 2026 competition robot.
+
+---
+
+## Vision Coprocessor (PoseLink)
+
+AprilTag pose estimation runs on an Orange Pi, not the roboRIO. The Pi fuses wheel odometry and AprilTags with a GTSAM factor graph and sends a fused pose back to the RIO over UDP; the RIO falls back to wheel-only odometry if the Pi goes quiet.
+
+The Pi program lives in [`pi-service/`](pi-service/README.md) — its README covers the architecture, build, and Pi setup.
+
+### Deploying
+
+`deploy` targets the roboRIO only, so the WPILib **Deploy Robot Code** button in VS Code works as usual. To push the Pi vision service too, use `deployAll` (IntelliJ users can save it as a run configuration).
+
+| Command | What it does |
+|---------|--------------|
+| `./gradlew deploy` | roboRIO only (the VS Code button) |
+| `./gradlew deployAll` | roboRIO **and** Pi |
+| `./gradlew deployPi` | Pi only |
+
+> [!NOTE]
+> Vision is required to play, so use `deployAll` for anything real. First-time Pi setup (GTSAM, the systemd service) is a one-time step — see [`pi-service/README.md`](pi-service/README.md). If the Pi is off when you run `deployAll`, the Pi step fails loudly so you know it didn't update; the roboRIO deploy still completes.
 
 ---
 

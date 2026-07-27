@@ -190,15 +190,30 @@ That doesn't touch the arm64 libraries, so it works offline.
 
 ### Every deploy
 
-From a networked dev machine:
+Plain `deploy` only touches the roboRIO, so the WPILib "Deploy Robot Code" button
+in VS Code still works. To deploy both halves, use `deployAll`:
+
+```bash
+./gradlew deployAll         # roboRIO + Pi
+./gradlew deployPi          # Pi only
+./gradlew deploy            # roboRIO only
+```
+
+IntelliJ users: save `deployAll` as a Gradle run configuration so it's one click.
+Vision is required to play, so `deployAll` is what you want for anything real.
+
+You can also run the script directly (it builds its own jar in this case):
 
 ```bash
 PI_HOST=10.26.1.11 pi-service/deploy/deploy_pi.sh
 ```
 
-The script builds the jar, copies it and the `cpp/` source to the Pi, builds
+Either way it builds the jar, copies it and the `cpp/` source to the Pi, builds
 `libposelink_gtsam.so` on the Pi, and restarts the service. Override `PI_USER`,
 `PI_HOST`, `DEPLOY_DIR`, or `SERVICE` with environment variables.
+
+If the Pi is off or unreachable, `deployAll` reports the Pi step as failed (on
+purpose — that's your signal the Pi didn't get updated).
 
 ### Checking it's alive
 
