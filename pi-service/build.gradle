@@ -78,6 +78,7 @@ jar {
 wpi.java.configureExecutableTasks(jar)
 
 repositories {
+    mavenLocal()
     mavenCentral()
     // The WPILib installer only caches desktop + roboRIO artifacts locally. The
     // Pi's linuxarm64 natives (opencv, wpiutil, ntcore, hal, ...) come from the

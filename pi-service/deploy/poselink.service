@@ -13,7 +13,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=orangepi
+User=photon
 WorkingDirectory=/home/orangepi/poselink
 # -Djava.library.path points at libposelink_gtsam.so in the deploy dir.
 ExecStart=/usr/bin/java -XX:+UseSerialGC -Djava.library.path=/home/orangepi/poselink -jar /home/orangepi/poselink/poselink.jar
