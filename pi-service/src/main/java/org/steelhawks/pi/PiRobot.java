@@ -40,6 +40,10 @@ public class PiRobot extends LoggedRobot {
     private Pose2d currentEstimate = new Pose2d();
     private long txSeqnum = 0;
 
+    // Per-camera accept/reject tallies for the observation log.
+    private final int[] acceptedCount = new int[PiVisionConstants.CAMERAS.length];
+    private final int[] rejectedCount = new int[PiVisionConstants.CAMERAS.length];
+
     @Override
     public void robotInit() {
         NetworkTableInstance nt = NetworkTableInstance.getDefault();
@@ -62,10 +66,13 @@ public class PiRobot extends LoggedRobot {
             ingestOdometry(s);
         }
         for (CameraObservation obs : photon.poll()) {
-            VisionFilter.filter(obs, alliance, isOnBump, currentEstimate).ifPresent(a -> {
+            VisionFilter.Result res = VisionFilter.filter(obs, alliance, isOnBump, currentEstimate);
+            logObservation(obs, res);
+            if (res.isAccepted()) {
+                AcceptedObservation a = res.accepted();
                 estimator.addVisionMeasurement(
                     a.timestamp(), a.x(), a.y(), a.theta(), a.varX(), a.varY(), a.varTheta());
-            });
+            }
         }
 
         long t0 = System.nanoTime();
@@ -93,6 +100,43 @@ public class PiRobot extends LoggedRobot {
         Logger.recordOutput("PoseLinkPi/Factors", r.factorCount());
         Logger.recordOutput("PoseLinkPi/DroppedOdom", link.droppedCount());
         Logger.recordOutput("PoseLinkPi/CamerasConnected", photon.allConnected());
+    }
+
+    private void logObservation(CameraObservation obs, VisionFilter.Result res) {
+        int i = obs.cameraIndex();
+        String base = "PoseLinkPi/Cam/" + PiVisionConstants.CAMERAS[i].name() + "/";
+
+        if (res.isAccepted()) {
+            acceptedCount[i]++;
+        } else {
+            rejectedCount[i]++;
+        }
+
+        Pose2d camPose = obs.robotPose().toPose2d();
+        Logger.recordOutput(base + "Pose", camPose);
+        Logger.recordOutput(base + "Pose3d", obs.robotPose());
+        Logger.recordOutput(base + "Timestamp", obs.timestamp());
+        Logger.recordOutput(base + "TagIds", obs.tagIds());
+        Logger.recordOutput(base + "TagCount", obs.tagCount());
+        Logger.recordOutput(base + "AvgTagDistance", obs.avgTagDistance());
+        Logger.recordOutput(base + "Ambiguity", obs.ambiguity());
+        Logger.recordOutput(base + "Accepted", res.isAccepted());
+        Logger.recordOutput(base + "Reason", res.reason());
+        Logger.recordOutput(base + "AcceptedCount", acceptedCount[i]);
+        Logger.recordOutput(base + "RejectedCount", rejectedCount[i]);
+
+        Logger.recordOutput(
+            base + "ErrorVsFusedMeters",
+            camPose.getTranslation().getDistance(currentEstimate.getTranslation()));
+        Logger.recordOutput(
+            base + "ErrorVsFusedDegrees",
+            camPose.getRotation().minus(currentEstimate.getRotation()).getDegrees());
+
+        if (res.isAccepted()) {
+            AcceptedObservation a = res.accepted();
+            Logger.recordOutput(base + "StdDevLinear", Math.sqrt(a.varX()));
+            Logger.recordOutput(base + "StdDevTheta", Math.sqrt(a.varTheta()));
+        }
     }
 
     private void ingestOdometry(OdomSample s) {

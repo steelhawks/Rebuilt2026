@@ -3,7 +3,6 @@ package org.steelhawks.pi.vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import org.steelhawks.common.VisionLinkConfig;
 import org.steelhawks.pi.PiVisionConstants;
@@ -17,6 +16,32 @@ import org.steelhawks.proto.AllianceColor;
 public final class VisionFilter {
 
     private VisionFilter() {}
+
+    /** Why an observation was kept or thrown away. Logged per camera. */
+    public enum Reason {
+        ACCEPTED,
+        NO_ALLOWED_TAG,
+        NO_TAGS,
+        AMBIGUOUS,
+        Z_ERROR,
+        OUT_OF_BOUNDS
+    }
+
+    /**
+     * Outcome of filtering one observation. {@code accepted} is null unless
+     * {@code reason} is {@link Reason#ACCEPTED}; the reason is kept either way so
+     * a rejected frame still leaves a trace in the log.
+     */
+    public record Result(AcceptedObservation accepted, Reason reason) {
+
+        private static Result reject(Reason reason) {
+            return new Result(null, reason);
+        }
+
+        public boolean isAccepted() {
+            return accepted != null;
+        }
+    }
 
     private static final Set<Integer> BLUE = toSet(VisionLinkConfig.BLUE_TAGS);
     private static final Set<Integer> RED = toSet(VisionLinkConfig.RED_TAGS);
@@ -36,7 +61,7 @@ public final class VisionFilter {
         };
     }
 
-    public static Optional<AcceptedObservation> filter(
+    public static Result filter(
         CameraObservation obs,
         AllianceColor alliance,
         boolean isOnBump,
@@ -49,16 +74,20 @@ public final class VisionFilter {
             if (allowed.contains(id)) hasAllowed = true;
             if (VisionLinkConfig.HUB_TAG_IDS.contains(id)) hasHub = true;
         }
-        // Gate the whole observation if it only sees opposing-alliance tags.
-        if (!hasAllowed) return Optional.empty();
-
+        if (!hasAllowed) return Result.reject(Reason.NO_ALLOWED_TAG);
         Pose3d pose = obs.robotPose();
-        boolean reject =
-            obs.tagCount() == 0
-                || (obs.tagCount() == 1 && obs.ambiguity() > PiVisionConstants.MAX_AMBIGUITY)
-                || Math.abs(pose.getZ()) > PiVisionConstants.MAX_ZERROR
-                || PiVisionConstants.outOfBounds(pose.getX(), pose.getY());
-        if (reject) return Optional.empty();
+        if (obs.tagCount() == 0) {
+            return Result.reject(Reason.NO_TAGS);
+        }
+        if (obs.tagCount() == 1 && obs.ambiguity() > PiVisionConstants.MAX_AMBIGUITY) {
+            return Result.reject(Reason.AMBIGUOUS);
+        }
+        if (Math.abs(pose.getZ()) > PiVisionConstants.MAX_ZERROR) {
+            return Result.reject(Reason.Z_ERROR);
+        }
+        if (PiVisionConstants.outOfBounds(pose.getX(), pose.getY())) {
+            return Result.reject(Reason.OUT_OF_BOUNDS);
+        }
 
         double factor = Math.pow(obs.avgTagDistance(), 2.0) / obs.tagCount();
         if (obs.tagCount() == 1) factor *= 3.0;
@@ -80,13 +109,15 @@ public final class VisionFilter {
         }
 
         // GTSAM wants variances (stddev squared).
-        return Optional.of(new AcceptedObservation(
-            obs.timestamp(),
-            pose.getX(),
-            pose.getY(),
-            pose.toPose2d().getRotation().getRadians(),
-            linear * linear,
-            linear * linear,
-            angular * angular));
+        return new Result(
+            new AcceptedObservation(
+                obs.timestamp(),
+                pose.getX(),
+                pose.getY(),
+                pose.toPose2d().getRotation().getRadians(),
+                linear * linear,
+                linear * linear,
+                angular * angular),
+            Reason.ACCEPTED);
     }
 }
