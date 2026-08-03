@@ -116,6 +116,8 @@ public class PiRobot extends LoggedRobot {
         Logger.recordOutput(base + "Pose", camPose);
         Logger.recordOutput(base + "Pose3d", obs.robotPose());
         Logger.recordOutput(base + "Timestamp", obs.timestamp());
+        Logger.recordOutput(
+            base + "SkewVsOdomMs", (obs.timestamp() - lastOdomTimestamp) * 1000.0);
         Logger.recordOutput(base + "TagIds", obs.tagIds());
         Logger.recordOutput(base + "TagCount", obs.tagCount());
         Logger.recordOutput(base + "AvgTagDistance", obs.avgTagDistance());
