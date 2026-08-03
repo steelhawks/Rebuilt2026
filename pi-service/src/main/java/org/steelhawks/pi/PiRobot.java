@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.steelhawks.common.VisionLinkConfig;
 import org.steelhawks.pi.gtsam.NativePoseEstimator;
@@ -49,6 +50,9 @@ public class PiRobot extends LoggedRobot {
         Logger.recordMetadata("Service", "poselink-pi");
         Logger.recordMetadata("ConfigHash", Long.toString(VisionLinkConfig.CONFIG_HASH));
         Logger.addDataReceiver(new WPILOGWriter());
+        if (PiVisionConstants.ALLOW_PUBLISH_NT4_TELEMETRY) {
+            Logger.addDataReceiver(new NT4Publisher());
+        }
         Logger.start();
 
         link = new RioLink();

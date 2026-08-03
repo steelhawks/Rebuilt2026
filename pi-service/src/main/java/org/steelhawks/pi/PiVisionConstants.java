@@ -19,6 +19,8 @@ public final class PiVisionConstants {
 
     private PiVisionConstants() {}
 
+    public static final boolean ALLOW_PUBLISH_NT4_TELEMETRY = true;
+
     public static final AprilTagFieldLayout APRIL_TAG_LAYOUT =
         AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
