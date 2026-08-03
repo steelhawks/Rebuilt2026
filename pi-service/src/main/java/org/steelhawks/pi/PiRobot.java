@@ -46,10 +46,6 @@ public class PiRobot extends LoggedRobot {
 
     @Override
     public void robotInit() {
-        NetworkTableInstance nt = NetworkTableInstance.getDefault();
-        nt.startClient4("poselink-pi");
-        nt.setServerTeam(PiVisionConstants.TEAM_NUMBER);
-
         Logger.recordMetadata("Service", "poselink-pi");
         Logger.recordMetadata("ConfigHash", Long.toString(VisionLinkConfig.CONFIG_HASH));
         Logger.addDataReceiver(new WPILOGWriter());

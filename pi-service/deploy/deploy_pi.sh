@@ -13,9 +13,9 @@
 # Override any of these via env, e.g.  PI_HOST=10.26.1.11 ./deploy_pi.sh
 set -euo pipefail
 
-PI_USER="${PI_USER:-orangepi}"
+PI_USER="${PI_USER:-photon}"
 PI_HOST="${PI_HOST:-10.26.1.11}"
-DEPLOY_DIR="${DEPLOY_DIR:-/home/orangepi/poselink}"
+DEPLOY_DIR="${DEPLOY_DIR:-/home/photon/poselink}"
 SERVICE="${SERVICE:-poselink}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
