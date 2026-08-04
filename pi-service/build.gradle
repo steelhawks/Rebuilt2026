@@ -28,6 +28,12 @@ configurations {
     piNative
 }
 
+// PhotonVision publishes photontargeting-cpp for athena / x86-64 / osx only - there
+// is no linuxarm64 zip in their maven for any 2026.x release (checked through
+// v2026.3.4), even though the vendordep lists linuxarm64 as a valid platform, so
+// resolving it 404s. libphotontargetingJNI.so instead comes off the Pi itself:
+// deploy_pi.sh pulls it out of /opt/photonvision/photonvision.jar, which is
+// version-matched to the PhotonVision instance this service talks to.
 configurations.piNative {
     exclude group: "org.photonvision"
 }
@@ -63,16 +69,34 @@ dependencies {
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
-// Fat jar carrying the whole service + deps, deployed to the Pi alongside
-// libposelink_gtsam.so.
-jar {
-    dependsOn configurations.runtimeClasspath, configurations.piNative
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    // Unpack the arm64 native jars so the WPILib loader finds them on the Pi.
+// Unpack the arm64 natives into a plain directory that deploy_pi.sh rsyncs to
+// the Pi and the systemd unit puts on java.library.path.
+//
+// They deliberately do NOT go inside the fat jar: WPILib's RuntimeLoader just
+// calls System.loadLibrary(), it never extracts an .so out of the classpath, so
+// natives bundled in the jar are invisible at runtime ("no ntcorejni in
+// java.library.path"). The libs are flattened into one directory because each
+// one is linked with RPATH=$ORIGIN and finds its siblings that way.
+tasks.register('piNatives', Sync) {
+    description = 'Unpack the linuxarm64 WPILib natives for the Pi deploy.'
+    dependsOn configurations.piNative
     from {
         configurations.piNative.collect { zipTree(it) }
+    }
+    into layout.buildDirectory.dir('piNatives')
+    include '**/*.so*'
+    exclude '**/*.debug'   // detached debug symbols; ~350 MB of dead weight
+    eachFile { it.path = it.name }
+    includeEmptyDirs = false
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Fat jar carrying the whole service + deps, deployed to the Pi alongside
+// libposelink_gtsam.so and the natives from piNatives.
+jar {
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)

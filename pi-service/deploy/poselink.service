@@ -16,8 +16,11 @@ Wants=network-online.target
 Type=simple
 User=photon
 WorkingDirectory=/home/photon/poselink
-# -Djava.library.path points at libposelink_gtsam.so in the deploy dir.
-ExecStart=/usr/bin/java -XX:+UseSerialGC -Djava.library.path=/home/photon/poselink -jar /home/photon/poselink/poselink.jar
+# java.library.path covers both native sets: lib/ holds the WPILib arm64 .so
+# files rsynced by deploy_pi.sh (ntcorejni, wpiHaljni, wpimathjni, ...), the
+# deploy dir itself holds libposelink_gtsam.so built on the Pi. The WPILib libs
+# are RPATH=$ORIGIN, so keeping them together in lib/ resolves their deps.
+ExecStart=/usr/bin/java -XX:+UseSerialGC -Djava.library.path=/home/photon/poselink/lib:/home/photon/poselink -jar /home/photon/poselink/poselink.jar
 Restart=always
 RestartSec=2
 StandardOutput=journal

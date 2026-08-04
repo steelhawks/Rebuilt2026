@@ -137,7 +137,7 @@ wpi.java.configureTestTasks(test)
 tasks.register('deployPi', Exec) {
     group = 'deploy'
     description = 'Build and deploy the pi-service vision program to the Orange Pi.'
-    dependsOn ':pi-service:jar'
+    dependsOn ':pi-service:jar', ':pi-service:piNatives'
     workingDir projectDir
     commandLine './pi-service/deploy/deploy_pi.sh'
     doFirst {

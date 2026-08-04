@@ -158,13 +158,19 @@ estimate, and the splice path.
 From the repo root:
 
 ```bash
-./gradlew :pi-service:jar
+./gradlew :pi-service:jar :pi-service:piNatives
 ```
 
-This builds a self-contained jar with the arm64 WPILib native libraries baked in,
-so it runs on the Pi as-is. It needs internet the first time to pull those arm64
-artifacts from the WPILib maven repo. The jar lands in
-`pi-service/build/libs/`.
+`jar` builds the service + Java deps into `pi-service/build/libs/`; `piNatives`
+unpacks the arm64 WPILib native libraries into `pi-service/build/piNatives/`.
+It needs internet the first time to pull those arm64 artifacts from the WPILib
+maven repo.
+
+The natives are a separate directory on purpose: they get rsynced to
+`<deploy dir>/lib` and picked up via `-Djava.library.path` in `poselink.service`.
+WPILib's `RuntimeLoader` only calls `System.loadLibrary()` — it never extracts an
+`.so` out of the classpath — so natives stuffed inside the fat jar are invisible
+at runtime and the service dies with `no ntcorejni in java.library.path`.
 
 To compile and iterate on the Java without building the full jar:
 
@@ -210,7 +216,8 @@ You can also run the script directly (it builds its own jar in this case):
 PI_HOST=10.26.1.11 pi-service/deploy/deploy_pi.sh
 ```
 
-Either way it builds the jar, copies it and the `cpp/` source to the Pi, builds
+Either way it builds the jar, copies it, the arm64 natives (into
+`<deploy dir>/lib`), and the `cpp/` source to the Pi, builds
 `libposelink_gtsam.so` on the Pi, and restarts the service. Override `PI_USER`,
 `PI_HOST`, `DEPLOY_DIR`, or `SERVICE` with environment variables.
 
@@ -278,6 +285,15 @@ so it links, or (better) rebuild GTSAM with a clean build directory and
 **`./gradlew :pi-service:jar` fails on a `linuxarm64` artifact.** You're offline
 or behind a school firewall. The arm64 native libraries have to download once.
 Build it on a normal network connection. `compileJava` still works offline.
+
+**`no <something>jni in java.library.path` at startup.** The natives in
+`<deploy dir>/lib` are stale or missing — WPILib only ever calls
+`System.loadLibrary()`, so nothing gets extracted from the jar at runtime. Re-run
+the deploy; if it's specifically `photontargetingJNI`, PhotonVision isn't
+installed at `/opt/photonvision/photonvision.jar` (override with `PHOTON_JAR=`).
+That library can't come from Gradle — PhotonVision doesn't publish an arm64
+`photontargeting-cpp` to their maven, so the deploy lifts it out of the
+PhotonVision install on the Pi.
 
 **No fused pose on the RIO.** Check the Pi service is running
 (`systemctl status poselink`), that both the Pi and RIO are on the robot network
