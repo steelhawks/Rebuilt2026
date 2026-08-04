@@ -92,6 +92,12 @@ public class RobotState {
 
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
         TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
+    // Wheel-only history, keyed by odometry timestamp. Separate from poseBuffer
+    // (which stores the *fused* estimate) because latency compensation has to
+    // measure wheel motion since the Pi's sample - feeding the fused pose back
+    // into itself would compound its own correction every cycle.
+    private final TimeInterpolatableBuffer<Pose2d> wheelPoseBuffer =
+        TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
     private final TimeInterpolatableBuffer<Translation2d> intakeExtensionBuffer =
         TimeInterpolatableBuffer.createBuffer(intakeExtensionBufferSizeSec);
 
@@ -529,6 +535,10 @@ public class RobotState {
         // clear and reinit buffers
         poseBuffer.clear();
         poseBuffer.addSample(Timer.getFPGATimestamp(), pose);
+        // Stale wheel history would make the latency compensation measure motion
+        // across the reset discontinuity, so it has to be re-seeded too.
+        wheelPoseBuffer.clear();
+        wheelPoseBuffer.addSample(Timer.getFPGATimestamp(), pose);
         intakeExtensionBuffer.clear();
         objectHistory.clear();
         Logger.recordOutput("RobotState/PoseReset", pose);
@@ -552,6 +562,7 @@ public class RobotState {
         // Buffer whatever the current best estimate is (fused when fresh, else
         // wheel-only) so RIO-side consumers (SOTM etc.) can query by timestamp.
         poseBuffer.addSample(observation.timestamp(), getEstimatedPose());
+        wheelPoseBuffer.addSample(observation.timestamp(), wheelOdometry.getPoseMeters());
     }
 
     /**
@@ -627,10 +638,29 @@ public class RobotState {
      * otherwise the locally-maintained wheel-only dead-reckoning pose. The
      * fallback runs continuously, so this recovers automatically the moment
      * fresh fused data resumes.
+     *
+     * <p>The fused pose is latency-compensated. What the Pi sends back is its
+     * estimate at {@code fusedSampleTimestamp}, which is already 40-80 ms old by
+     * the time it lands here (UDP out, a Pi cycle, the GTSAM solve, UDP back, a
+     * RIO cycle). Using it raw leaves the pose standing that far behind the robot
+     * - a fifth of a metre at 3 m/s. The old {@code SwerveDrivePoseEstimator} hid
+     * this by replaying its odometry buffer forward after every vision
+     * correction; splitting the estimator across the network means we have to do
+     * that replay ourselves. So: take the wheel-odometry motion measured since the
+     * Pi's sample and compose it onto the fused pose.
      */
     @AutoLogOutput(key = "RobotState/PoseEstimation/PoseEstimation")
     public Pose2d getEstimatedPose() {
-        return isFusedPoseFresh() ? fusedPose : wheelOdometry.getPoseMeters();
+        if (!isFusedPoseFresh()) {
+            return wheelOdometry.getPoseMeters();
+        }
+        Optional<Pose2d> wheelAtFused = wheelPoseBuffer.getSample(fusedSampleTimestamp);
+        if (wheelAtFused.isEmpty()) {
+            // Sample aged out of the buffer (or none yet); the uncompensated pose
+            // is still better than falling back to wheel-only.
+            return fusedPose;
+        }
+        return fusedPose.plus(new Transform2d(wheelAtFused.get(), wheelOdometry.getPoseMeters()));
     }
 
     public Rotation2d getRotation() {

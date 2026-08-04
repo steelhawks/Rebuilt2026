@@ -41,9 +41,21 @@ public final class PiVisionConstants {
     public static final double ANCHOR_LINEAR_VARIANCE = 0.01;
     public static final double ANCHOR_ANGULAR_VARIANCE = 0.02;
 
-    // Per-step wheel-odometry variances (BetweenFactor noise).
-    public static final double ODOM_VARIANCE_LINEAR = 0.002;
-    public static final double ODOM_VARIANCE_ANGULAR = 0.002;
+    // Per-step wheel-odometry variances (BetweenFactor noise). These are PER
+    // ODOMETRY SAMPLE (~20 ms), not per second, so they have to describe how much
+    // a single 20 ms step can be wrong - not how far odometry drifts over a match.
+    //
+    // The old values (2e-3) claimed 4.5 cm of 1-sigma position error and 2.5 deg of
+    // heading error in every 20 ms step. Real swerve odometry over 20 ms is
+    // sub-millimetre and the Pigeon is a small fraction of a degree, so the graph
+    // was under-trusting odometry ~50x and the gyro far more. That makes the
+    // between-factor chain floppy: the smoother can bend the whole 1.5 s window to
+    // chase a single tag observation, which shows up as jitter.
+    //
+    // 1e-5 m^2 = 3.2 mm per step (~2.7 cm accumulated over the 1.5 s lag window);
+    // 1e-6 rad^2 = 0.06 deg per step (~0.5 deg over the window).
+    public static final double ODOM_VARIANCE_LINEAR = 1e-5;
+    public static final double ODOM_VARIANCE_ANGULAR = 1e-6;
 
     /** A camera and its robot->camera transform, plus a per-camera trust factor. */
     public record Cam(String name, Transform3d robotToCamera, double stddevFactor) {}
