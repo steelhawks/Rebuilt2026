@@ -3,8 +3,9 @@
 #          && sudo systemctl enable poselink
 # Logs:    journalctl -u poselink -f
 #
-# Adjust User / paths if your Pi's deploy dir or login user differ (deploy_pi.sh
-# defaults to user "orangepi" and /home/orangepi/poselink).
+# Adjust User / paths if your Pi's deploy dir or login user differ. These MUST
+# stay in sync with PI_USER / DEPLOY_DIR in deploy_pi.sh, or systemd will start a
+# stale jar from the old directory (or crash-loop if it isn't there at all).
 
 [Unit]
 Description=Steel Hawks PoseLink vision/pose service
@@ -14,9 +15,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=photon
-WorkingDirectory=/home/orangepi/poselink
+WorkingDirectory=/home/photon/poselink
 # -Djava.library.path points at libposelink_gtsam.so in the deploy dir.
-ExecStart=/usr/bin/java -XX:+UseSerialGC -Djava.library.path=/home/orangepi/poselink -jar /home/orangepi/poselink/poselink.jar
+ExecStart=/usr/bin/java -XX:+UseSerialGC -Djava.library.path=/home/photon/poselink -jar /home/photon/poselink/poselink.jar
 Restart=always
 RestartSec=2
 StandardOutput=journal

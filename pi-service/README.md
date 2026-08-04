@@ -185,8 +185,10 @@ That doesn't touch the arm64 libraries, so it works offline.
    sudo systemctl daemon-reload
    sudo systemctl enable poselink
    ```
-   If your Pi login user or paths aren't `orangepi` / `/home/orangepi/poselink`,
-   edit the unit first.
+   If your Pi login user or paths aren't `photon` / `/home/photon/poselink`,
+   edit the unit first — and change `PI_USER` / `DEPLOY_DIR` in `deploy_pi.sh` to
+   match. If they disagree, the deploy writes to one directory while systemd
+   starts from another, so you either run stale code or crash-loop.
 
 ### Every deploy
 
@@ -218,7 +220,7 @@ purpose — that's your signal the Pi didn't get updated).
 ### Checking it's alive
 
 ```bash
-ssh orangepi@10.26.1.11 journalctl -u poselink -f
+ssh photon@10.26.1.11 journalctl -u poselink -f
 ```
 
 You'll also see it in AdvantageScope on the RIO under the `PoseLinkPi/*` keys
