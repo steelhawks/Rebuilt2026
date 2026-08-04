@@ -28,6 +28,10 @@ configurations {
     piNative
 }
 
+configurations.piNative {
+    exclude group: "org.photonvision"
+}
+
 dependencies {
     // Shared wire contract (protobuf classes + VisionLinkConfig / CONFIG_HASH).
     implementation project(':common')
