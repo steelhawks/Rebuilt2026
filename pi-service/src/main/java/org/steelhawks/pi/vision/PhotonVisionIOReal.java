@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -46,9 +47,12 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
         List<CameraObservation> out = new ArrayList<>();
         for (int i = 0; i < cameras.length; i++) {
             for (PhotonPipelineResult result : cameras[i].getAllUnreadResults()) {
-                OptionalDouble rioTime = TimeSync.toRioTime(result.getTimestampSeconds());
-                if (rioTime.isEmpty() || !result.hasTargets()) continue;
-                decode(i, result, rioTime.getAsDouble()).ifPresent(out::add);
+                Logger.recordOutput(
+                    "PoseLinkPi/Cam/" + PiVisionConstants.CAMERAS[i].name() + "/PongAgeMs",
+                    TimeSync.pongAgeMillis(result));
+                OptionalDouble captureTime = TimeSync.captureTime(result);
+                if (captureTime.isEmpty() || !result.hasTargets()) continue;
+                decode(i, result, captureTime.getAsDouble()).ifPresent(out::add);
             }
         }
         return out;

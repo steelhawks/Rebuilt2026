@@ -69,6 +69,39 @@ dependencies {
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
 }
 
+// Stamp the jar with the commit it was built from, so a wpilog off the Pi can be
+// traced back to an exact build. Deploying over SSH means there is otherwise no
+// way to confirm the Pi is running what you think it is.
+def buildInfoDir = layout.buildDirectory.dir('generated/buildinfo')
+
+tasks.register('poselinkBuildInfo') {
+    description = 'Write the git SHA / build date consumed by BuildInfo.java.'
+    outputs.dir(buildInfoDir)
+    outputs.upToDateWhen { false }   // the SHA can change without any input changing
+    doLast {
+        def git = { String... argv ->
+            try {
+                def proc = (['git'] + (argv as List)).execute(null, rootDir)
+                proc.waitFor()
+                return proc.exitValue() == 0 ? proc.text.trim() : 'unknown'
+            } catch (Exception ignored) {
+                return 'unknown'
+            }
+        }
+        def sha = git('rev-parse', '--short', 'HEAD')
+        def branch = git('rev-parse', '--abbrev-ref', 'HEAD')
+        def dirty = !git('status', '--porcelain').isEmpty()
+
+        def out = buildInfoDir.get().file('poselink-build.properties').asFile
+        out.parentFile.mkdirs()
+        out.text = "gitSha=${sha}\ngitBranch=${branch}\ngitDirty=${dirty}\n" +
+            "buildDate=${new Date().format('yyyy-MM-dd HH:mm:ss')}\n"
+    }
+}
+
+sourceSets.main.resources.srcDir buildInfoDir
+tasks.named('processResources') { dependsOn 'poselinkBuildInfo' }
+
 // Unpack the arm64 natives into a plain directory that deploy_pi.sh rsyncs to
 // the Pi and the systemd unit puts on java.library.path.
 //
@@ -98,7 +131,11 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    from sourceSets.main.allSource
+    // allSource re-includes the generated resource dir, and the jar already gets
+    // it from sourceSets.main.output - without this it lands in the jar twice.
+    from(sourceSets.main.allSource) {
+        exclude 'poselink-build.properties'
+    }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }

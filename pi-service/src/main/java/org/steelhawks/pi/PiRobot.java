@@ -44,11 +44,13 @@ public class PiRobot extends LoggedRobot {
     // Per-camera accept/reject tallies for the observation log.
     private final int[] acceptedCount = new int[PiVisionConstants.CAMERAS.length];
     private final int[] rejectedCount = new int[PiVisionConstants.CAMERAS.length];
+    private double lastOdomRxSeconds = Double.NEGATIVE_INFINITY;
 
     @Override
     public void robotInit() {
         Logger.recordMetadata("Service", "poselink-pi");
         Logger.recordMetadata("ConfigHash", Long.toString(VisionLinkConfig.CONFIG_HASH));
+        BuildInfo.record();
         Logger.addDataReceiver(new WPILOGWriter());
         if (PiVisionConstants.ALLOW_PUBLISH_NT4_TELEMETRY) {
             Logger.addDataReceiver(new NT4Publisher());
@@ -79,20 +81,30 @@ public class PiRobot extends LoggedRobot {
         int status = estimator.update();
         double solveMs = (System.nanoTime() - t0) / 1e6;
 
+        // A graph that has stopped being fed odometry keeps producing a pose, but
+        // it is no longer an estimate of where the robot is now - so withhold it
+        // rather than let the RIO mistake a steady packet rate for freshness.
+        double odomAgeSec = (Logger.getTimestamp() / 1.0e6) - lastOdomRxSeconds;
+        boolean odomStale = odomAgeSec > PiVisionConstants.MAX_ODOM_AGE_SEC;
+
         NativePoseEstimator.Result r = estimator.getResult();
         if (status == NativePoseEstimator.STATUS_OK) {
             currentEstimate = new Pose2d(r.x(), r.y(), new Rotation2d(r.theta()));
-            link.sendFusedPose(
-                txSeqnum++,
-                lastOdomTimestamp,
-                currentEstimate,
-                quality(r),
-                r.covXX(), r.covYY(), r.covTheta(),
-                VisionLinkConfig.CONFIG_HASH,
-                solveMs,
-                appliedResetSeqnum);
+            if (!odomStale) {
+                link.sendFusedPose(
+                    txSeqnum++,
+                    lastOdomTimestamp,
+                    currentEstimate,
+                    quality(r),
+                    r.covXX(), r.covYY(), r.covTheta(),
+                    VisionLinkConfig.CONFIG_HASH,
+                    solveMs,
+                    appliedResetSeqnum);
+            }
         }
 
+        Logger.recordOutput("PoseLinkPi/SecondsSinceLastOdom", odomAgeSec);
+        Logger.recordOutput("PoseLinkPi/OdomStale", odomStale);
         Logger.recordOutput("PoseLinkPi/Status", status);
         Logger.recordOutput("PoseLinkPi/FusedPose", currentEstimate);
         Logger.recordOutput("PoseLinkPi/SolveMs", solveMs);
@@ -145,6 +157,7 @@ public class PiRobot extends LoggedRobot {
         alliance = s.alliance();
         isOnBump = s.isOnBump();
         lastOdomTimestamp = s.timestamp();
+        lastOdomRxSeconds = Logger.getTimestamp() / 1.0e6;
 
         if (s.configHash() != VisionLinkConfig.CONFIG_HASH) {
             Logger.recordOutput("PoseLinkPi/ConfigMismatch", true);

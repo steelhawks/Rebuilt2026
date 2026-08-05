@@ -27,6 +27,18 @@ public final class PiVisionConstants {
     // Fixed-lag smoother window.
     public static final double LAG_SECONDS = 1.5;
 
+    /**
+     * Stop publishing a fused pose once odometry has been silent this long.
+     *
+     * <p>Without this the service keeps solving and sending at 50 Hz off a frozen
+     * graph: in the 2026-06-06 log the RIO link went quiet at t=904 s and the Pi
+     * transmitted for another 22 minutes, with the pose still wandering because
+     * vision priors kept piling onto the one remaining node with no odometry to
+     * constrain them. The RIO's staleness check is on UDP receive time, so it had
+     * no way to tell - it saw a steady 50 Hz stream and trusted it.
+     */
+    public static final double MAX_ODOM_AGE_SEC = 0.25;
+
     // Rejection thresholds (ported from VisionConstants).
     public static final double MAX_AMBIGUITY = 0.2;
     public static final double MAX_ZERROR = 0.75;
