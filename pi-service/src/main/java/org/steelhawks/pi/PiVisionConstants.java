@@ -75,14 +75,14 @@ public final class PiVisionConstants {
     // The AprilTag cameras, ported from the RIO's old OMEGA_CAMERA_CONFIG (the Pi
     // now owns these extrinsics). Trim/tune per the physical robot.
     public static final Cam[] CAMERAS = {
-        new Cam(
-            "ov2311-west",
-            new Transform3d(
-                Units.inchesToMeters(-10.207),
-                Units.inchesToMeters(12.728),
-                Units.inchesToMeters(20.679),
-                new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(90.0))),
-            2.0),
+//        new Cam(
+//            "ov2311-west",
+//            new Transform3d(
+//                Units.inchesToMeters(-10.207),
+//                Units.inchesToMeters(12.728),
+//                Units.inchesToMeters(20.679),
+//                new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(90.0))),
+//            2.0),
         new Cam(
             "ov2311-northeast",
             new Transform3d(
@@ -98,23 +98,23 @@ public final class PiVisionConstants {
                 Units.inchesToMeters(-12.716),
                 Units.inchesToMeters(20.679),
                 new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(-90.0))),
-            2.0),
-        new Cam(
-            "ov2311-northwest",
-            new Transform3d(
-                Units.inchesToMeters(-11.669),
-                Units.inchesToMeters(-10.676),
-                Units.inchesToMeters(20.773),
-                new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(45.0))),
-            2.0),
-        new Cam(
-            "ov9281-southeast",
-            new Transform3d(
-                Units.inchesToMeters(-13.333),
-                Units.inchesToMeters(-12.339),
-                Units.inchesToMeters(20.774),
-                new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(-135.0))),
-            2.0),
+            2.0)
+//        new Cam(
+//            "ov2311-northwest",
+//            new Transform3d(
+//                Units.inchesToMeters(-11.669),
+//                Units.inchesToMeters(-10.676),
+//                Units.inchesToMeters(20.773),
+//                new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(45.0))),
+//            2.0),
+//        new Cam(
+//            "ov9281-southeast",
+//            new Transform3d(
+//                Units.inchesToMeters(-13.333),
+//                Units.inchesToMeters(-12.339),
+//                Units.inchesToMeters(20.774),
+//                new Rotation3d(0.0, Units.degreesToRadians(-30.0), Units.degreesToRadians(-135.0))),
+//            2.0),
     };
 
     // ---- Networking ----

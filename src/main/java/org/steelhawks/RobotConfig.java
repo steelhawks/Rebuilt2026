@@ -176,13 +176,13 @@ public class RobotConfig {
                 .withLEDMatrix(false)
                 .withVision(true)
                 .withObjectVision(false)
-                .withFlywheel(true, SubsystemConstants.OmegaBot.FLYWHEEL)
-                .withTurret(true, SubsystemConstants.OmegaBot.TURRET)
-                .withHood(true, SubsystemConstants.OmegaBot.HOOD)
+                .withFlywheel(false, SubsystemConstants.OmegaBot.FLYWHEEL)
+                .withTurret(false, SubsystemConstants.OmegaBot.TURRET)
+                .withHood(false, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
-                .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
-                .withAutos(true)
+                .withIndexer(false, SubsystemConstants.OmegaBot.INDEXER)
+                .withAutos(false)
                 .withFactory(new OmegaBotFactory())
                 .build();
 
