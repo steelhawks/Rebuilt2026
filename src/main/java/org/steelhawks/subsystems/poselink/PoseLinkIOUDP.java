@@ -168,6 +168,8 @@ public class PoseLinkIOUDP implements PoseLinkIO {
         inputs.rxConfigHash = msg.getConfigHash();
         inputs.solveLatencyMs = msg.getSolveLatencyMs();
         inputs.ackResetSeqnum = msg.getAckResetSeqnum();
+        inputs.piSessionId = msg.getSessionId();
+        inputs.piBuildSha = msg.getPiBuildSha();
     }
 
     @Override
@@ -189,6 +191,7 @@ public class PoseLinkIOUDP implements PoseLinkIO {
                 .setResetX(packet.resetPose().getX())
                 .setResetY(packet.resetPose().getY())
                 .setResetTheta(packet.resetPose().getRotation().getRadians())
+                .setSessionId(packet.sessionId())
                 .build();
 
         byte[] bytes = out.toByteArray();

@@ -15,8 +15,15 @@ public final class PoseLinkConstants {
     /** Hostname/IP of the Orange Pi vision service on the robot network. */
     public static final String PI_HOST = "10.26.1.11";
 
-    /** UDP port the Pi listens on for {@code RobotOdomInputs}. */
-    public static final int PI_RX_PORT = 5810;
+    /**
+     * UDP port the Pi listens on for {@code RobotOdomInputs}.
+     *
+     * <p>Deliberately not 5810: photonlib reserves that for its
+     * {@code TimeSyncServer}, which runs inside the Pi service process. See the
+     * comment on {@code PiVisionConstants.PI_RX_PORT} - the two must match, and
+     * changing one without redeploying the other kills the link.
+     */
+    public static final int PI_RX_PORT = 5812;
 
     /** UDP port the RIO listens on for {@code FusedPoseOutput}. */
     public static final int RIO_RX_PORT = 5811;

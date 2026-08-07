@@ -46,6 +46,10 @@ public class PiRobot extends LoggedRobot {
     private final int[] rejectedCount = new int[PiVisionConstants.CAMERAS.length];
     private double lastOdomRxSeconds = Double.NEGATIVE_INFINITY;
 
+    // The RIO's per-boot session id, echoed back and logged so this log can be
+    // paired with the RIO's. Zero until the first packet arrives.
+    private long sessionId = 0;
+
     @Override
     public void robotInit() {
         Logger.recordMetadata("Service", "poselink-pi");
@@ -99,9 +103,18 @@ public class PiRobot extends LoggedRobot {
                     r.covXX(), r.covYY(), r.covTheta(),
                     VisionLinkConfig.CONFIG_HASH,
                     solveMs,
-                    appliedResetSeqnum);
+                    appliedResetSeqnum,
+                    sessionId);
             }
         }
+
+        // Pairing + clock alignment for tools/pull_logs.py. SessionId says which
+        // RIO log this one belongs to; RioTimestamp is the RIO clock as of the
+        // newest odometry packet, which against this log's own timestamps gives
+        // the offset between the two logs' time bases. Neither can be recovered
+        // afterwards - the Pi has no RTC and both logs start at their own zero.
+        Logger.recordOutput("PoseLinkPi/SessionId", String.format("%016x", sessionId));
+        Logger.recordOutput("PoseLinkPi/RioTimestamp", lastOdomTimestamp);
 
         Logger.recordOutput("PoseLinkPi/SecondsSinceLastOdom", odomAgeSec);
         Logger.recordOutput("PoseLinkPi/OdomStale", odomStale);
@@ -158,6 +171,7 @@ public class PiRobot extends LoggedRobot {
         isOnBump = s.isOnBump();
         lastOdomTimestamp = s.timestamp();
         lastOdomRxSeconds = Logger.getTimestamp() / 1.0e6;
+        sessionId = s.sessionId();
 
         if (s.configHash() != VisionLinkConfig.CONFIG_HASH) {
             Logger.recordOutput("PoseLinkPi/ConfigMismatch", true);

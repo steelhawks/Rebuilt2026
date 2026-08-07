@@ -15,6 +15,7 @@ import org.steelhawks.RobotState;
 import org.steelhawks.Subsystems;
 import org.steelhawks.proto.AllianceColor;
 import org.steelhawks.subsystems.swerve.Swerve;
+import org.steelhawks.util.LogSession;
 import org.steelhawks.util.LoopTimeUtil;
 
 /**
@@ -40,6 +41,9 @@ public class PoseLink extends SubsystemBase {
         new Alert("PoseLink: Pi config hash != RIO config hash (layout/alliance mismatch).",
             AlertType.kError);
 
+    private final Alert sessionMismatchAlert =
+        new Alert("PoseLink: Pi is not reporting this RIO's session id; logs will not pair.",
+            AlertType.kWarning);
     private final Alert restartedAlert =
         new Alert("PoseLink: the Pi vision service restarted mid-session.", AlertType.kWarning);
 
@@ -76,7 +80,8 @@ public class PoseLink extends SubsystemBase {
                     toProto(DriverStation.getAlliance()),
                     PoseLinkConstants.CONFIG_HASH,
                     rs.getResetRequestSeqnum(),
-                    rs.getResetRequestPose()));
+                    rs.getResetRequestPose(),
+                    LogSession.id()));
         }
 
         // ---- Pi -> RIO: consume the fused pose ----
@@ -110,6 +115,18 @@ public class PoseLink extends SubsystemBase {
         Logger.recordOutput("PoseLink/UsingFallback", usingFallback);
         Logger.recordOutput("PoseLink/ConfigHash", PoseLinkConstants.CONFIG_HASH);
         Logger.recordOutput("PoseLink/SecondsSinceLastRx", inputs.secondsSinceLastRx);
+
+        // Log pairing state so this log alone answers "which Pi log goes with this
+        // one, and which vision build produced it?". The Pi echoes the session id
+        // back; anything other than our own means it has not yet picked up this
+        // boot (0 on a fresh Pi) or is still running off a previous one.
+        Logger.recordOutput("PoseLink/SessionId", LogSession.idHex());
+        Logger.recordOutput("PoseLink/PiSessionId", String.format("%016x", inputs.piSessionId));
+        Logger.recordOutput("PoseLink/PiBuildSha", inputs.piBuildSha);
+        boolean paired = inputs.piSessionId == LogSession.id();
+        Logger.recordOutput("PoseLink/SessionPaired", paired);
+        sessionMismatchAlert.set(inputs.hasNewOutput && !paired);
+
         LoopTimeUtil.record("PoseLink");
     }
 

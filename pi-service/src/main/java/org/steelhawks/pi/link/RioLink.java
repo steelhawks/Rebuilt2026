@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.pi.BuildInfo;
 import org.steelhawks.pi.PiVisionConstants;
 import org.steelhawks.proto.FusedPoseOutput;
 import org.steelhawks.proto.RobotOdomInputs;
@@ -75,7 +76,8 @@ public class RioLink {
             msg.getAlliance(),
             msg.getConfigHash(),
             msg.getResetSeqnum(),
-            new Pose2d(msg.getResetX(), msg.getResetY(), new Rotation2d(msg.getResetTheta())));
+            new Pose2d(msg.getResetX(), msg.getResetY(), new Rotation2d(msg.getResetTheta())),
+            msg.getSessionId());
     }
 
     /** All odom samples received since the last call, in arrival order. */
@@ -97,7 +99,7 @@ public class RioLink {
     public void sendFusedPose(
         long seqnum, double timestamp, Pose2d pose, double qualityScore,
         double covXX, double covYY, double covTheta, long configHash,
-        double solveLatencyMs, long ackResetSeqnum) {
+        double solveLatencyMs, long ackResetSeqnum, long sessionId) {
         if (!running || socket.isClosed()) return;
         FusedPoseOutput out = FusedPoseOutput.newBuilder()
             .setSeqnum(seqnum)
@@ -112,6 +114,8 @@ public class RioLink {
             .setConfigHash(configHash)
             .setSolveLatencyMs(solveLatencyMs)
             .setAckResetSeqnum(ackResetSeqnum)
+            .setSessionId(sessionId)
+            .setPiBuildSha(BuildInfo.gitSha())
             .build();
         byte[] bytes = out.toByteArray();
         try {

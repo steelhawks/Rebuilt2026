@@ -69,6 +69,13 @@ message RobotOdomInputs {
   double reset_x = 10;
   double reset_y = 11;
   double reset_theta = 12;
+
+  // Identifies one RIO boot, generated fresh in the RIO's constructor. The Pi
+  // records it in its own log every cycle, which is the only thing that ties a
+  // Pi log to the RIO log from the same run: the Pi has no RTC, so its clock
+  // (and therefore its log filename) is meaningless - a 2026-08-07 session
+  // produced a Pi log stamped 2026-06-06. See tools/pull_logs.py.
+  int64 session_id = 13;
 }
 
 // Pi -> RIO. Sent every link cycle. Carries the fused pose the RIO consumes in
@@ -103,4 +110,14 @@ message FusedPoseOutput {
   // Echoes the last RobotOdomInputs.reset_seqnum the Pi has applied, so the RIO
   // knows its reset landed.
   int64 ack_reset_seqnum = 12;
+
+  // Echoes RobotOdomInputs.session_id. Zero until the Pi has heard from the RIO.
+  // A value that does not match the RIO's own session means the Pi is still
+  // replaying a previous boot's context, so the pairing is not yet trustworthy.
+  int64 session_id = 13;
+
+  // Short git SHA of the Pi service build, from the jar's build stamp. Lets the
+  // RIO log answer "which vision build produced this session?" without having to
+  // fetch the Pi log first.
+  string pi_build_sha = 14;
 }

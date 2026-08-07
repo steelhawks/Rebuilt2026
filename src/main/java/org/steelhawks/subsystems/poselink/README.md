@@ -40,7 +40,12 @@ GTSAM factor-graph correctness depends on this.
 | `solve_latency_ms` | GTSAM solve time, diagnostics |
 | `ack_reset_seqnum` | echoes the last reset the Pi applied |
 
-Ports/host live in `PoseLinkConstants` (`PI_HOST`, `PI_RX_PORT` 5810, `RIO_RX_PORT` 5811).
+Ports/host live in `PoseLinkConstants` (`PI_HOST`, `PI_RX_PORT` 5812, `RIO_RX_PORT` 5811).
+`PI_RX_PORT` must never be 5810 — photonlib starts a `TimeSyncServer` there inside
+the Pi service process, and stealing it makes PhotonVision drop every frame.
+
+`session_id` is minted per RIO boot (`LogSession`) and echoed by the Pi so the two
+logs can be paired afterwards; `tools/pull_logs.py` does the pairing.
 
 ## Reliability behavior (RIO side)
 

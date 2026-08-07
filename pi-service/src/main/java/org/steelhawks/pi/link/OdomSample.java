@@ -12,4 +12,5 @@ public record OdomSample(
     AllianceColor alliance,
     long configHash,
     long resetSeqnum,
-    Pose2d resetPose) {}
+    Pose2d resetPose,
+    long sessionId) {}

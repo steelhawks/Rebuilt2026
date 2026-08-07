@@ -27,7 +27,8 @@ public interface PoseLinkIO {
         AllianceColor alliance,
         long configHash,
         long resetSeqnum,
-        Pose2d resetPose) {}
+        Pose2d resetPose,
+        long sessionId) {}
 
     @AutoLog
     class PoseLinkIOInputs {
@@ -50,6 +51,10 @@ public interface PoseLinkIO {
         public long rxConfigHash = 0;
         public double solveLatencyMs = 0.0;
         public long ackResetSeqnum = -1;
+        /** Session id the Pi is echoing back; 0 until it has heard from this RIO. */
+        public long piSessionId = 0;
+        /** Short git SHA of the Pi service build, or empty if it did not stamp one. */
+        public String piBuildSha = "";
 
         // ---- Link health counters ----
         public long packetsSent = 0;

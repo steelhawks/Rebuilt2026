@@ -16,8 +16,9 @@ public final class BuildInfo {
 
     private static final String RESOURCE = "/poselink-build.properties";
 
-    /** Record the build stamp as log metadata. Must run before {@code Logger.start()}. */
-    public static void record() {
+    private static final Properties PROPS = load();
+
+    private static Properties load() {
         Properties props = new Properties();
         try (InputStream in = BuildInfo.class.getResourceAsStream(RESOURCE)) {
             if (in != null) {
@@ -26,9 +27,19 @@ public final class BuildInfo {
         } catch (Exception e) {
             // Provenance is diagnostic only; never let it stop the service starting.
         }
-        Logger.recordMetadata("GitSHA", props.getProperty("gitSha", "unknown"));
-        Logger.recordMetadata("GitBranch", props.getProperty("gitBranch", "unknown"));
-        Logger.recordMetadata("GitDirty", props.getProperty("gitDirty", "unknown"));
-        Logger.recordMetadata("BuildDate", props.getProperty("buildDate", "unknown"));
+        return props;
+    }
+
+    /** Git SHA of this build, or {@code "unknown"}. Sent to the RIO over the link. */
+    public static String gitSha() {
+        return PROPS.getProperty("gitSha", "unknown");
+    }
+
+    /** Record the build stamp as log metadata. Must run before {@code Logger.start()}. */
+    public static void record() {
+        Logger.recordMetadata("GitSHA", gitSha());
+        Logger.recordMetadata("GitBranch", PROPS.getProperty("gitBranch", "unknown"));
+        Logger.recordMetadata("GitDirty", PROPS.getProperty("gitDirty", "unknown"));
+        Logger.recordMetadata("BuildDate", PROPS.getProperty("buildDate", "unknown"));
     }
 }

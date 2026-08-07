@@ -120,8 +120,7 @@ public final class PiVisionConstants {
     // ---- Networking ----
     /** Team number, used to point the NT4 client at the RIO's NT server. */
     public static final int TEAM_NUMBER = 2601;
-    /** UDP port the Pi listens on for RobotOdomInputs. */
-    public static final int PI_RX_PORT = 5810;
+    public static final int PI_RX_PORT = 5812;
     /** RIO host + UDP port for FusedPoseOutput. */
     public static final String RIO_HOST = "10.26.1.2";
     public static final int RIO_RX_PORT = 5811;
