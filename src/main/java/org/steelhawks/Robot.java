@@ -27,6 +27,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.steelhawks.generated.TunerConstants;
+import org.photonvision.timesync.TimeSyncSingleton;
 import org.steelhawks.generated.TunerConstantsAlpha;
 import org.steelhawks.generated.TunerConstantsChassis;
 import org.steelhawks.generated.TunerConstantsLastYear;
@@ -78,6 +79,20 @@ public class Robot extends LoggedRobot {
             PortForwarder.add(i, "10.26.1.11", i);
             PortForwarder.add(i, "10.26.1.12", i);
         }
+
+        // PhotonVision coprocessors time-sync by pinging UDP 5810 on their NT
+        // server, which is this RIO. photonlib only starts that server as a side
+        // effect of constructing a PhotonCamera, and now that vision lives on the
+        // Pi the RIO constructs none (OMEGA has object vision disabled), so
+        // nothing here was ever listening. Every camera reported Long.MAX_VALUE
+        // since its last pong, so PiRobot's TimeSync gate threw away every frame
+        // and the factor graph ran on odometry alone.
+        //
+        // It has to be the RIO and not the Pi: photonlib timestamps a frame in
+        // nt::Now *of the time-sync server*, and PoseLink compares that against
+        // RIO odometry timestamps. On the RIO nt::Now is FPGA time, so the two
+        // line up; hosting it on the Pi would put vision in a different epoch.
+        TimeSyncSingleton.load();
 
         // record GIT data
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
