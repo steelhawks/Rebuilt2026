@@ -40,6 +40,9 @@ public class PoseLink extends SubsystemBase {
         new Alert("PoseLink: Pi config hash != RIO config hash (layout/alliance mismatch).",
             AlertType.kError);
 
+    private final Alert restartedAlert =
+        new Alert("PoseLink: the Pi vision service restarted mid-session.", AlertType.kWarning);
+
     private long txSeqnum = 0;
 
     public PoseLink() {
@@ -81,6 +84,7 @@ public class PoseLink extends SubsystemBase {
         Logger.processInputs("PoseLink", inputs);
 
         disconnectedAlert.set(!inputs.linkConnected);
+        restartedAlert.set(inputs.piRestarts > 0);
 
         if (inputs.hasNewOutput) {
             if (inputs.rxConfigHash != PoseLinkConstants.CONFIG_HASH) {

@@ -58,6 +58,8 @@ public interface PoseLinkIO {
         public long packetsDropped = 0;
         /** Count of received packets discarded for being older than the last applied. */
         public long packetsStale = 0;
+        /** Times the Pi's seqnum restarted, i.e. the Pi service restarted. */
+        public long piRestarts = 0;
         /** Wall-clock seconds since the last valid FusedPoseOutput was received. */
         public double secondsSinceLastRx = Double.POSITIVE_INFINITY;
     }

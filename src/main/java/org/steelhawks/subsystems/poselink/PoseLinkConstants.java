@@ -36,6 +36,15 @@ public final class PoseLinkConstants {
     public static final double LINK_PERIOD_SEC = 0.02;
 
     /**
+     * A backwards seqnum jump larger than this means the Pi restarted, not that a
+     * packet was reordered.
+     *
+     * <p>One second of link traffic. Real UDP reordering on the robot LAN is a
+     * handful of packets at most, so this cannot be tripped by a late arrival.
+     */
+    public static final long SEQNUM_RESTART_GAP = 50;
+
+    /**
      * Fingerprint of the config the Pi must agree on (tag sets + version),
      * computed from the shared {@link VisionLinkConfig}. If the Pi reports a
      * different value, poses are logged and flagged rather than silently trusted.

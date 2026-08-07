@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.poselink.PoseLinkConstants;
 import org.steelhawks.subsystems.superstructure.ShooterStructure;
 import org.steelhawks.subsystems.swerve.Swerve;
 import org.steelhawks.util.AllianceFlip;
@@ -575,8 +576,17 @@ public class RobotState {
      * @return true if the observation was applied.
      */
     public boolean applyFusedPose(FusedPoseObservation observation) {
-        if (observation.seqnum() <= fusedSeqnum
-            || observation.timestamp() < fusedSampleTimestamp) {
+        // The Pi restarts its seqnum at 0, so this guard would otherwise reject
+        // every packet from a restarted Pi until its counter climbed back over
+        // fusedSeqnum. PoseLinkIOUDP already detects that at the socket; repeat
+        // the test here so this second guard cannot re-latch behind it.
+        boolean senderRestarted =
+            observation.seqnum() < fusedSeqnum
+                && (fusedSeqnum - observation.seqnum() > PoseLinkConstants.SEQNUM_RESTART_GAP
+                    || !isFusedPoseFresh());
+        if (!senderRestarted
+            && (observation.seqnum() <= fusedSeqnum
+                || observation.timestamp() < fusedSampleTimestamp)) {
             Logger.recordOutput("RobotState/PoseLink/RejectedStale", true);
             return false;
         }

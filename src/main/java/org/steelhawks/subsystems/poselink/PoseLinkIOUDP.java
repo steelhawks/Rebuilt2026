@@ -28,12 +28,14 @@ public class PoseLinkIOUDP implements PoseLinkIO {
     // already reported to its inputs (so updateInputs can flag "new this cycle").
     private final AtomicReference<FusedPoseOutput> latest = new AtomicReference<>(null);
     private long lastReportedSeqnum = -1;
+    private long observedRestarts = 0;
 
     // Health counters (written on the receive thread, read on the robot loop).
     private final AtomicLong packetsReceived = new AtomicLong(0);
     private final AtomicLong packetsDropped = new AtomicLong(0);
     private final AtomicLong packetsStale = new AtomicLong(0);
     private final AtomicLong packetsSent = new AtomicLong(0);
+    private final AtomicLong piRestarts = new AtomicLong(0);
     private volatile double lastRxTimestampWallClock = Double.NEGATIVE_INFINITY;
 
     // Highest seqnum seen (for gap detection) and highest stored (for staleness).
@@ -72,6 +74,30 @@ public class PoseLinkIOUDP implements PoseLinkIO {
                 packetsReceived.incrementAndGet();
 
                 long seq = msg.getSeqnum();
+                double now = Timer.getFPGATimestamp();
+                FusedPoseOutput prev = latest.get();
+
+                // A restarted Pi counts from 0 again, so its packets look stale
+                // forever. Treat a backwards jump as a restart when it is either
+                // too large to be reordering, or arrives after the stream has
+                // already gone stale (a reordered packet turns up while healthy
+                // traffic is still flowing, so it can never satisfy that).
+                if (prev != null && seq < prev.getSeqnum()) {
+                    long backwards = prev.getSeqnum() - seq;
+                    boolean restarted =
+                        backwards > PoseLinkConstants.SEQNUM_RESTART_GAP
+                            || now - lastRxTimestampWallClock
+                                > PoseLinkConstants.STALENESS_TIMEOUT_SEC;
+                    if (!restarted) {
+                        packetsStale.incrementAndGet();
+                        continue;
+                    }
+                    // Adopt the new sequence space wholesale.
+                    piRestarts.incrementAndGet();
+                    highestSeqnumSeen = -1;
+                    prev = null;
+                }
+
                 // Gap detection against the highest seqnum we have ever seen.
                 if (highestSeqnumSeen >= 0 && seq > highestSeqnumSeen + 1) {
                     packetsDropped.addAndGet(seq - highestSeqnumSeen - 1);
@@ -83,14 +109,13 @@ public class PoseLinkIOUDP implements PoseLinkIO {
                 // Never store an output older than the one already staged. The
                 // final monotonic guard against what was applied lives in
                 // RobotState.applyFusedPose; this just avoids regressing latest.
-                FusedPoseOutput prev = latest.get();
                 if (prev != null
                     && (seq <= prev.getSeqnum() || msg.getTimestamp() < prev.getTimestamp())) {
                     packetsStale.incrementAndGet();
                     continue;
                 }
                 latest.set(msg);
-                lastRxTimestampWallClock = Timer.getFPGATimestamp();
+                lastRxTimestampWallClock = now;
             } catch (IOException e) {
                 if (bound) {
                     Logger.recordOutput("PoseLink/SocketError", "rx: " + e.getMessage());
@@ -106,6 +131,7 @@ public class PoseLinkIOUDP implements PoseLinkIO {
         inputs.packetsDropped = packetsDropped.get();
         inputs.packetsStale = packetsStale.get();
         inputs.packetsSent = packetsSent.get();
+        inputs.piRestarts = piRestarts.get();
 
         double now = Timer.getFPGATimestamp();
         inputs.secondsSinceLastRx =
@@ -117,6 +143,14 @@ public class PoseLinkIOUDP implements PoseLinkIO {
         if (msg == null) {
             inputs.hasNewOutput = false;
             return;
+        }
+
+        // A restart moves the stream into a fresh sequence space, so the previous
+        // high-water mark no longer means anything - keeping it would leave
+        // hasNewOutput false forever and starve RobotState.
+        if (inputs.piRestarts != observedRestarts) {
+            observedRestarts = inputs.piRestarts;
+            lastReportedSeqnum = -1;
         }
 
         inputs.hasNewOutput = msg.getSeqnum() > lastReportedSeqnum;
