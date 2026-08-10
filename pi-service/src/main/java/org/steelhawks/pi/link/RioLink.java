@@ -56,6 +56,15 @@ public class RioLink {
                 socket.receive(dp);
                 RobotOdomInputs msg =
                     RobotOdomInputs.parseFrom(Arrays.copyOf(dp.getData(), dp.getLength()));
+                // A backwards seqnum means the RIO restarted and is counting from
+                // zero again. Without this the Math.max below pins the high-water
+                // mark to the old boot's final seqnum, and drop counting stays
+                // suppressed for the rest of this process's life. Treating a
+                // reordered packet as a restart just restarts the count, which is
+                // harmless - this is a diagnostic, nothing steers off it.
+                if (msg.getSeqnum() < lastRxSeqnum) {
+                    lastRxSeqnum = -1;
+                }
                 if (lastRxSeqnum >= 0 && msg.getSeqnum() > lastRxSeqnum + 1) {
                     dropped += msg.getSeqnum() - lastRxSeqnum - 1;
                 }

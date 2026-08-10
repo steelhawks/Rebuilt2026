@@ -3,6 +3,7 @@ package org.steelhawks.pi;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import java.util.Arrays;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -47,8 +48,10 @@ public class PiRobot extends LoggedRobot {
     private double lastOdomRxSeconds = Double.NEGATIVE_INFINITY;
 
     // The RIO's per-boot session id, echoed back and logged so this log can be
-    // paired with the RIO's. Zero until the first packet arrives.
+    // paired with the RIO's. Zero until the first packet arrives. A *change*
+    // means the RIO restarted under us - see adoptRioSession.
     private long sessionId = 0;
+    private long rioSessionChanges = 0;
 
     @Override
     public void robotInit() {
@@ -115,6 +118,9 @@ public class PiRobot extends LoggedRobot {
         // afterwards - the Pi has no RTC and both logs start at their own zero.
         Logger.recordOutput("PoseLinkPi/SessionId", String.format("%016x", sessionId));
         Logger.recordOutput("PoseLinkPi/RioTimestamp", lastOdomTimestamp);
+        // Nonzero means the RIO restarted while this process stayed up. Expected
+        // on a redeploy; if it climbs during a match, the link is flapping.
+        Logger.recordOutput("PoseLinkPi/RioSessionChanges", rioSessionChanges);
 
         Logger.recordOutput("PoseLinkPi/SecondsSinceLastOdom", odomAgeSec);
         Logger.recordOutput("PoseLinkPi/OdomStale", odomStale);
@@ -167,6 +173,13 @@ public class PiRobot extends LoggedRobot {
     }
 
     private void ingestOdometry(OdomSample s) {
+        // A new session id means the RIO restarted - redeploy or reboot - while
+        // this process kept running. Everything below carries state across
+        // samples that is only meaningful within a single RIO boot.
+        if (s.sessionId() != 0 && s.sessionId() != sessionId) {
+            adoptRioSession();
+        }
+
         alliance = s.alliance();
         isOnBump = s.isOnBump();
         lastOdomTimestamp = s.timestamp();
@@ -204,6 +217,41 @@ public class PiRobot extends LoggedRobot {
             PiVisionConstants.ODOM_VARIANCE_ANGULAR);
 
         lastOdomPose = s.odomPose();
+    }
+
+    /**
+     * Return every piece of cross-boot state to its just-started value, so a RIO
+     * restart leaves this service in the same shape a freshly launched one would
+     * be in. The RIO already handles the mirror case (a Pi restart shows up there
+     * as a backwards seqnum); this is the missing other half.
+     *
+     * <p>Left uncorrected, a RIO redeploy corrupts the graph three ways, none of
+     * which raise an alert on either side:
+     *
+     * <ul>
+     *   <li>{@code lastOdomPose} still holds the previous boot's cumulative pose,
+     *       so the first sample of the new session differences into a
+     *       teleport-sized between-factor - injected at {@code
+     *       ODOM_VARIANCE_LINEAR}, i.e. asserted to ~3 mm.
+     *   <li>{@code appliedResetSeqnum} still holds the previous boot's high-water
+     *       mark while {@code RobotState.resetRequestSeqnum} restarts at 0, so
+     *       every reset up to that mark is silently dropped and the graph stays
+     *       anchored to the old session's origin.
+     *   <li>the graph keeps the old boot's nodes and factors.
+     * </ul>
+     *
+     * <p>Dropping {@code appliedResetSeqnum} to -1 is what re-anchors it: the
+     * same packet that triggered this carries {@code resetSeqnum >= 0}, so it
+     * falls through to the reset branch in {@link #ingestOdometry} and rebuilds
+     * the graph around the RIO's reset pose before any odometry is applied.
+     */
+    private void adoptRioSession() {
+        rioSessionChanges++;
+        lastOdomPose = null;
+        appliedResetSeqnum = -1;
+        currentEstimate = new Pose2d();
+        Arrays.fill(acceptedCount, 0);
+        Arrays.fill(rejectedCount, 0);
     }
 
     /** Map the marginal covariance to a 0..1 trust score. */
