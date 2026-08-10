@@ -38,9 +38,17 @@ Usage
 
 Downloads are cached under ``<out>/.cache`` and skipped if already present at
 the same size, so re-running is cheap.
+
+Re-running never duplicates a session. Sessions already laid out under ``<out>``
+are recognised by the id in their ``manifest.json``, not by folder name, so
+renaming a folder to something meaningful ("1", "practice-field") does not make
+the next run write a second copy of it. ``--refresh`` rewrites them in place,
+keeping the folder name you chose. A Pi log that covers several sessions is
+hardlinked rather than copied, so it costs its bytes once.
 """
 
 import argparse
+import glob
 import json
 import os
 import shutil
@@ -201,6 +209,43 @@ def _first(got, key):
     return got[key][0][1] if got.get(key) else None
 
 
+def existing_sessions(out_dir):
+    """{session_id: folder} for everything already laid out under ``out_dir``.
+
+    Keyed on the id inside manifest.json, never on the folder name, because the
+    folder gets renamed - people label them "1", "2", "practice". Matching on the
+    path is what made re-runs duplicate: the script looked for the name it would
+    have chosen, did not find it, and copied a second 80 MB copy of a session
+    that was already sitting there under a different name.
+    """
+    found = {}
+    for manifest in sorted(glob.glob(os.path.join(out_dir, "*", "manifest.json"))):
+        try:
+            with open(manifest) as f:
+                sid = json.load(f).get("session_id")
+        except (OSError, ValueError):
+            continue
+        if sid:
+            found.setdefault(sid, os.path.dirname(manifest))
+    return found
+
+
+def place(src, dest):
+    """Put a cached log at ``dest``: hardlink if we can, copy if we cannot.
+
+    One Pi log can cover several RIO sessions and therefore belong in several
+    folders. These run to tens of megabytes and the content is immutable once
+    written, so linking keeps a single copy on disk however many sessions
+    reference it. Falls back to a copy across filesystems.
+    """
+    if os.path.exists(dest):
+        return
+    try:
+        os.link(src, dest)
+    except OSError:
+        shutil.copy2(src, dest)
+
+
 def stamp_from_name(name):
     """'akit_26-08-07_18-11-27.wpilog' -> '26-08-07_18-11-27'."""
     base = os.path.splitext(name)[0]
@@ -227,6 +272,9 @@ def main():
                     help="pair what is already cached, do not touch the network")
     ap.add_argument("--keep-unpaired", action="store_true",
                     help="also lay out sessions that only have one side")
+    ap.add_argument("--refresh", action="store_true",
+                    help="rewrite sessions already laid out (into their existing "
+                         "folder, so renames are kept); default is to skip them")
     ap.add_argument("--timeout", type=int, default=10, help="ssh connect timeout")
     args = ap.parse_args()
 
@@ -301,6 +349,8 @@ def main():
                 entry["name"] = name
                 info[side].setdefault(entry["session"], []).append(entry)
 
+    existing = existing_sessions(args.out)
+
     sessions = sorted(set(info["rio"]) | set(info["pi"]))
     if args.session:
         sessions = [s for s in sessions if s.startswith(args.session)]
@@ -317,9 +367,36 @@ def main():
                   % (sid[:8], "RIO" if rio else "Pi"))
             continue
 
-        stamp = stamp_from_name(rio[0]["name"]) if rio else "unknown"
         short = sid[:8]
-        folder = os.path.join(args.out, "%s__%s" % (stamp, short))
+        if sid in existing and not args.refresh:
+            print("  == %s: already at %s, skipping (use --refresh to rewrite)"
+                  % (short, existing[sid]))
+            continue
+
+        # Two RIO logs cannot share a session id - the id is minted per boot - so
+        # that case is corruption and largest-wins is a reasonable guess. It shows
+        # up when AdvantageKit writes under a placeholder name and later renames on
+        # DS connect, leaving a stub behind. Two Pi logs sharing one legitimately
+        # means the Pi service restarted mid-session, and both halves are real
+        # data, so keep them all in RIO-clock order. clock_offset_sec is
+        # (rio - pi), and within one session the RIO's clock is monotonic, so
+        # sorting on it orders the Pi processes by when they started.
+        if len(rio) > 1:
+            print("  !! %s: %d RIO logs share this session id, using the largest"
+                  % (short, len(rio)))
+            rio.sort(key=lambda m: os.path.getsize(m["file"]), reverse=True)
+        pi.sort(key=lambda m: (m.get("clock_offset_sec") is None,
+                               m.get("clock_offset_sec") or 0.0))
+        if len(pi) > 1:
+            print("  ** %s: Pi service restarted mid-session, keeping %d Pi logs"
+                  % (short, len(pi)))
+
+        # Name the folder from the log actually kept, which is only known after
+        # the sort above - taking it from the pre-sort entry named one folder
+        # "19ffe10bf1f7cac9__37da3f2a" after the discarded placeholder stub.
+        stamp = stamp_from_name(rio[0]["name"]) if rio else "unknown"
+        # Reuse the existing folder on --refresh so a rename is not undone.
+        folder = existing.get(sid) or os.path.join(args.out, "%s__%s" % (stamp, short))
         os.makedirs(folder, exist_ok=True)
 
         manifest = {
@@ -336,29 +413,12 @@ def main():
                     "clock_offset_sec is the primary Pi log's; entries in pi_extra "
                     "carry their own.",
         }
-        # Two RIO logs cannot share a session id - the id is minted per boot - so
-        # that case is corruption and largest-wins is a reasonable guess. Two Pi
-        # logs sharing one legitimately means the Pi service restarted mid-session,
-        # and both halves are real data, so keep them all in RIO-clock order.
-        # clock_offset_sec is (rio - pi), and within one session the RIO's clock is
-        # monotonic, so sorting on it orders the Pi processes by when they started.
-        if len(rio) > 1:
-            print("  !! %s: %d RIO logs share this session id, using the largest"
-                  % (short, len(rio)))
-            rio.sort(key=lambda m: os.path.getsize(m["file"]), reverse=True)
-        pi.sort(key=lambda m: (m.get("clock_offset_sec") is None,
-                               m.get("clock_offset_sec") or 0.0))
-        if len(pi) > 1:
-            print("  ** %s: Pi service restarted mid-session, keeping %d Pi logs"
-                  % (short, len(pi)))
-
         for side, entries in (("rio", rio), ("pi", pi)):
             written_side = []
             for i, src in enumerate(entries):
                 suffix = side if i == 0 else "%s%d" % (side, i + 1)
                 dest = os.path.join(folder, "%s__%s_%s.wpilog" % (stamp, short, suffix))
-                if not os.path.exists(dest):
-                    shutil.copy2(src["file"], dest)
+                place(src["file"], dest)
                 entry = {k: v for k, v in src.items() if k != "file"}
                 entry["file"] = os.path.basename(dest)
                 entry["size_bytes"] = os.path.getsize(dest)
