@@ -191,3 +191,4 @@ src/main/java/org/steelhawks/BuildConstants.java
 /pi-service/cpp/build
 /pi-service/cpp/cmake-build-*
 /tools/__pycache__
+/matchlogs/paired/.cache

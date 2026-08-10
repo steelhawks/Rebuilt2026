@@ -76,7 +76,7 @@ def remote_listing(user, host, path, timeout):
             "ssh", "-o", "BatchMode=yes",
             "-o", "ConnectTimeout=%d" % timeout,
             "-o", "StrictHostKeyChecking=accept-new",
-            target, "ls -l --time-style=+ %s/*.wpilog 2>/dev/null || true" % path,
+            target, "ls -l %s/*.wpilog 2>/dev/null || true" % path,
         ])
     except subprocess.CalledProcessError as e:
         print("  ! %s unreachable: %s" % (target, e.stderr.strip()), file=sys.stderr)
