@@ -62,6 +62,12 @@ public class RobotContainer {
             autos.init();
         }
 
+        // Restart the Orange Pi vision service from the dashboard. Elastic renders
+        // a published Command as a button. IfPresent because PoseLink is not on
+        // every robot config.
+        Subsystems.poseLinkIfPresent().ifPresent(
+            link -> SmartDashboard.putData("Restart Vision", link.restartVisionCommand()));
+
         configureDrive(swerve);
         configureHood();
         configureIntake();

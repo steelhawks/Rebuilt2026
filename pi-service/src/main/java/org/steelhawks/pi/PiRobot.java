@@ -53,6 +53,10 @@ public class PiRobot extends LoggedRobot {
     private long sessionId = 0;
     private long rioSessionChanges = 0;
 
+    // Dashboard-driven restart. -1 means "no baseline yet" - see adoptRestartSeqnum.
+    private long appliedRestartSeqnum = -1;
+    private boolean restartRequested = false;
+
     @Override
     public void robotInit() {
         Logger.recordMetadata("Service", "poselink-pi");
@@ -107,7 +111,8 @@ public class PiRobot extends LoggedRobot {
                     VisionLinkConfig.CONFIG_HASH,
                     solveMs,
                     appliedResetSeqnum,
-                    sessionId);
+                    sessionId,
+                    appliedRestartSeqnum);
             }
         }
 
@@ -131,6 +136,18 @@ public class PiRobot extends LoggedRobot {
         Logger.recordOutput("PoseLinkPi/Factors", r.factorCount());
         Logger.recordOutput("PoseLinkPi/DroppedOdom", link.droppedCount());
         Logger.recordOutput("PoseLinkPi/CamerasConnected", photon.allConnected());
+        Logger.recordOutput("PoseLinkPi/AckRestartSeqnum", appliedRestartSeqnum);
+        Logger.recordOutput("PoseLinkPi/RestartRequested", restartRequested);
+
+        // Honour a restart last, after this cycle's outputs are recorded, so the
+        // log ends with the reason it ended. endCompetition breaks the loop in
+        // LoggedRobot.startCompetition, which then calls Logger.end() and flushes
+        // the wpilog - so the exit is clean and the file is not truncated. The
+        // systemd unit is Restart=always, so exiting IS the restart.
+        if (restartRequested) {
+            Logger.recordOutput("PoseLinkPi/ExitReason", "restart commanded by RIO");
+            endCompetition();
+        }
     }
 
     private void logObservation(CameraObservation obs, VisionFilter.Result res) {
@@ -180,6 +197,8 @@ public class PiRobot extends LoggedRobot {
             adoptRioSession();
         }
 
+        adoptRestartSeqnum(s.restartSeqnum());
+
         alliance = s.alliance();
         isOnBump = s.isOnBump();
         lastOdomTimestamp = s.timestamp();
@@ -220,6 +239,27 @@ public class PiRobot extends LoggedRobot {
     }
 
     /**
+     * Track the RIO's restart counter, and flag an exit when it advances.
+     *
+     * <p>The first value seen is <em>adopted, not acted on</em>. This process has
+     * by definition already satisfied whatever request was outstanding when it
+     * started - it is the result of it. Acting on the baseline instead would exit
+     * immediately, systemd would restart us two seconds later into the same
+     * pending seqnum, and we would exit again: a restart loop that only ends when
+     * the RIO's code restarts. The same reasoning applies on a session change,
+     * which is why {@link #adoptRioSession} clears the baseline rather than
+     * keeping it - a robot-code redeploy must never restart vision.
+     */
+    private void adoptRestartSeqnum(long seqnum) {
+        if (appliedRestartSeqnum < 0) {
+            appliedRestartSeqnum = seqnum;
+        } else if (seqnum > appliedRestartSeqnum) {
+            appliedRestartSeqnum = seqnum;
+            restartRequested = true;
+        }
+    }
+
+    /**
      * Return every piece of cross-boot state to its just-started value, so a RIO
      * restart leaves this service in the same shape a freshly launched one would
      * be in. The RIO already handles the mirror case (a Pi restart shows up there
@@ -249,6 +289,7 @@ public class PiRobot extends LoggedRobot {
         rioSessionChanges++;
         lastOdomPose = null;
         appliedResetSeqnum = -1;
+        appliedRestartSeqnum = -1;
         currentEstimate = new Pose2d();
         Arrays.fill(acceptedCount, 0);
         Arrays.fill(rejectedCount, 0);
@@ -263,6 +304,11 @@ public class PiRobot extends LoggedRobot {
 
     @Override
     public void endCompetition() {
-        if (estimator != null) estimator.close();
+        super.endCompetition();
+        if (estimator != null) {
+            estimator.close();
+            // A use after this point is a bug; take an NPE over a segfault.
+            estimator = null;
+        }
     }
 }

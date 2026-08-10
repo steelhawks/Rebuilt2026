@@ -28,7 +28,8 @@ public interface PoseLinkIO {
         long configHash,
         long resetSeqnum,
         Pose2d resetPose,
-        long sessionId) {}
+        long sessionId,
+        long restartSeqnum) {}
 
     @AutoLog
     class PoseLinkIOInputs {
@@ -51,6 +52,8 @@ public interface PoseLinkIO {
         public long rxConfigHash = 0;
         public double solveLatencyMs = 0.0;
         public long ackResetSeqnum = -1;
+        /** Restart seqnum the Pi has adopted; lags ours until a request lands. */
+        public long ackRestartSeqnum = -1;
         /** Session id the Pi is echoing back; 0 until it has heard from this RIO. */
         public long piSessionId = 0;
         /** Short git SHA of the Pi service build, or empty if it did not stamp one. */

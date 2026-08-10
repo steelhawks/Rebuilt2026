@@ -76,6 +76,17 @@ message RobotOdomInputs {
   // (and therefore its log filename) is meaningless - a 2026-08-07 session
   // produced a Pi log stamped 2026-06-06. See tools/pull_logs.py.
   int64 session_id = 13;
+
+  // Restart command for the Pi service, driven by a dashboard button. Same
+  // idempotent edge-triggered shape as reset_seqnum: the RIO increments it, and
+  // the Pi exits (systemd restarts it) on a value strictly greater than the one
+  // it has adopted.
+  //
+  // A newly started Pi process must ADOPT the incoming value rather than act on
+  // it - it has by definition already satisfied any outstanding request, and
+  // acting would make it exit again the moment systemd brought it back. Same on
+  // a session_id change, so a robot-code redeploy never restarts vision.
+  int64 restart_seqnum = 14;
 }
 
 // Pi -> RIO. Sent every link cycle. Carries the fused pose the RIO consumes in
@@ -120,4 +131,10 @@ message FusedPoseOutput {
   // RIO log answer "which vision build produced this session?" without having to
   // fetch the Pi log first.
   string pi_build_sha = 14;
+
+  // Echoes the RobotOdomInputs.restart_seqnum this process has adopted. After a
+  // commanded restart the new process reports the RIO's current value, so the
+  // RIO can tell "my request landed and the service cycled" apart from "the
+  // packet was lost and nothing happened".
+  int64 ack_restart_seqnum = 15;
 }

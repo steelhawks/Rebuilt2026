@@ -137,39 +137,63 @@ def read_rio(path):
 
 
 def read_pi(path):
-    """Session id and RIO-clock samples from a Pi log.
+    """Per-session clock fits from a Pi log. One entry per RIO session it covers.
 
-    The session id is logged every cycle but AdvantageKit only writes changes, so
-    the field holds all-zeros until the first odometry packet lands and then flips
-    once to the real value. Take the first non-zero one.
+    A Pi process outlives RIO restarts: it keeps writing a single file while the
+    RIO opens a fresh log and mints a new session id on every code start. So one
+    Pi log can span several RIO sessions. Reading only the first non-zero id (what
+    this used to do) handed the whole file to whichever session happened to be
+    running when the Pi came up, and left every later RIO log with no Pi side at
+    all - even though its data was sitting in that same file.
+
+    The clock fit has to be per segment for the same reason. It is a median of
+    (rio - pi) over the whole file, and FPGA time only survives a code redeploy -
+    a RIO *reboot* restarts it at zero. A file spanning one would otherwise get a
+    median sitting between two unrelated clock regimes, wrong for both halves,
+    and a drift computed straight across the discontinuity.
     """
     log = WpiLog(path)
     got = log.scan([PI_SESSION_KEY, PI_RIO_CLOCK_KEY, "/RealMetadata/GitSHA"])
-    session = None
-    for _ts, value in got[PI_SESSION_KEY]:
-        if isinstance(value, str) and value != NO_SESSION:
-            session = value
-            break
 
-    # Offset between the two clocks: the Pi logs the RIO's odometry sample time,
-    # so (rio_seconds - pi_seconds) converts this log's timeline onto the RIO's.
-    pairs = [(ts / 1e6, v) for ts, v in got[PI_RIO_CLOCK_KEY]
+    # (pi_seconds, session_id) at each change. AdvantageKit only writes changes,
+    # so this is already the edge list; the all-zero prologue before the first
+    # odometry packet is not a session.
+    spans = []
+    for ts, value in got[PI_SESSION_KEY]:
+        if not isinstance(value, str) or value == NO_SESSION:
+            continue
+        if spans and spans[-1][1] == value:
+            continue
+        spans.append((ts / 1e6, value))
+
+    # The Pi logs the RIO's odometry sample time, so (rio - pi) converts this
+    # log's timeline onto the RIO's.
+    clock = [(ts / 1e6, v) for ts, v in got[PI_RIO_CLOCK_KEY]
              if isinstance(v, float) and v > 0.0]
+
+    sessions = {}
+    for i, (start, sid) in enumerate(spans):
+        end = spans[i + 1][0] if i + 1 < len(spans) else float("inf")
+        sessions[sid] = _clock_fit([p for p in clock if start <= p[0] < end])
+
+    return {"git_sha": _first(got, "/RealMetadata/GitSHA"), "sessions": sessions}
+
+
+def _clock_fit(pairs):
+    """Median offset and drift from one session's (pi_seconds, rio_seconds)."""
     offset = drift = None
     if len(pairs) >= 2:
-        offsets = [rio - pi for pi, rio in pairs]
-        offsets.sort()
+        offsets = sorted(rio - pi for pi, rio in pairs)
         offset = offsets[len(offsets) // 2]
         span = pairs[-1][0] - pairs[0][0]
         if span > 30.0:
             drift = ((pairs[-1][1] - pairs[-1][0]) - (pairs[0][1] - pairs[0][0])) / span
-
     return {
-        "session": session,
-        "git_sha": _first(got, "/RealMetadata/GitSHA"),
         "clock_offset_sec": offset,
         "clock_drift_sec_per_sec": drift,
         "rio_clock_samples": len(pairs),
+        # Where in this Pi file the session lives, for trimming in AdvantageScope.
+        "pi_span_sec": [pairs[0][0], pairs[-1][0]] if pairs else None,
     }
 
 
@@ -259,12 +283,23 @@ def main():
             except Exception as e:  # a truncated log should not sink the run
                 print("  ! %s/%s unreadable: %s" % (side, name, e), file=sys.stderr)
                 continue
-            meta["file"] = path
-            meta["name"] = name
-            sid = meta.get("session")
-            print("  %-3s %-40s session=%s" % (side, name, sid or "<none>"))
-            if sid:
-                info[side].setdefault(sid, []).append(meta)
+            # A RIO log is exactly one session; a Pi log is one entry per session
+            # it covers, so it can pair into several folders.
+            if side == "rio":
+                found = [meta] if meta.get("session") else []
+            else:
+                found = []
+                for sid, fit in meta["sessions"].items():
+                    entry = {"session": sid, "git_sha": meta["git_sha"]}
+                    entry.update(fit)
+                    found.append(entry)
+
+            print("  %-3s %-40s session=%s"
+                  % (side, name, ", ".join(e["session"] for e in found) or "<none>"))
+            for entry in found:
+                entry["file"] = path
+                entry["name"] = name
+                info[side].setdefault(entry["session"], []).append(entry)
 
     sessions = sorted(set(info["rio"]) | set(info["pi"]))
     if args.session:
@@ -294,26 +329,49 @@ def main():
             "pi": None,
             "clock_offset_sec": None,
             "clock_drift_sec_per_sec": None,
-            "note": "add clock_offset_sec to a Pi log timestamp to get RIO time",
+            "note": "add clock_offset_sec to a Pi log timestamp to get RIO time. "
+                    "A Pi log can span several RIO sessions, so it may be copied "
+                    "into more than one folder - pi.pi_span_sec is the slice of it "
+                    "that belongs to THIS session, in Pi-log seconds. "
+                    "clock_offset_sec is the primary Pi log's; entries in pi_extra "
+                    "carry their own.",
         }
+        # Two RIO logs cannot share a session id - the id is minted per boot - so
+        # that case is corruption and largest-wins is a reasonable guess. Two Pi
+        # logs sharing one legitimately means the Pi service restarted mid-session,
+        # and both halves are real data, so keep them all in RIO-clock order.
+        # clock_offset_sec is (rio - pi), and within one session the RIO's clock is
+        # monotonic, so sorting on it orders the Pi processes by when they started.
+        if len(rio) > 1:
+            print("  !! %s: %d RIO logs share this session id, using the largest"
+                  % (short, len(rio)))
+            rio.sort(key=lambda m: os.path.getsize(m["file"]), reverse=True)
+        pi.sort(key=lambda m: (m.get("clock_offset_sec") is None,
+                               m.get("clock_offset_sec") or 0.0))
+        if len(pi) > 1:
+            print("  ** %s: Pi service restarted mid-session, keeping %d Pi logs"
+                  % (short, len(pi)))
+
         for side, entries in (("rio", rio), ("pi", pi)):
-            if not entries:
+            written_side = []
+            for i, src in enumerate(entries):
+                suffix = side if i == 0 else "%s%d" % (side, i + 1)
+                dest = os.path.join(folder, "%s__%s_%s.wpilog" % (stamp, short, suffix))
+                if not os.path.exists(dest):
+                    shutil.copy2(src["file"], dest)
+                entry = {k: v for k, v in src.items() if k != "file"}
+                entry["file"] = os.path.basename(dest)
+                entry["size_bytes"] = os.path.getsize(dest)
+                written_side.append(entry)
+            if not written_side:
                 continue
-            if len(entries) > 1:
-                print("  !! %s: %d %s logs share this session id, using the largest"
-                      % (short, len(entries), side))
-                entries.sort(key=lambda m: os.path.getsize(m["file"]), reverse=True)
-            src = entries[0]
-            dest = os.path.join(folder, "%s__%s_%s.wpilog" % (stamp, short, side))
-            if not os.path.exists(dest):
-                shutil.copy2(src["file"], dest)
-            entry = {k: v for k, v in src.items() if k != "file"}
-            entry["file"] = os.path.basename(dest)
-            entry["size_bytes"] = os.path.getsize(dest)
-            manifest[side] = entry
+            manifest[side] = written_side[0]
+            if len(written_side) > 1:
+                manifest[side + "_extra"] = written_side[1:]
             if side == "pi":
-                manifest["clock_offset_sec"] = src.get("clock_offset_sec")
-                manifest["clock_drift_sec_per_sec"] = src.get("clock_drift_sec_per_sec")
+                manifest["clock_offset_sec"] = written_side[0].get("clock_offset_sec")
+                manifest["clock_drift_sec_per_sec"] = \
+                    written_side[0].get("clock_drift_sec_per_sec")
 
         with open(os.path.join(folder, "manifest.json"), "w") as f:
             json.dump(manifest, f, indent=2)

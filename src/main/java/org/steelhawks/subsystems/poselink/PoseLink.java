@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
@@ -15,6 +17,7 @@ import org.steelhawks.RobotState;
 import org.steelhawks.Subsystems;
 import org.steelhawks.proto.AllianceColor;
 import org.steelhawks.subsystems.swerve.Swerve;
+import org.steelhawks.util.Elastic;
 import org.steelhawks.util.LogSession;
 import org.steelhawks.util.LoopTimeUtil;
 
@@ -49,6 +52,13 @@ public class PoseLink extends SubsystemBase {
 
     private long txSeqnum = 0;
 
+    /**
+     * Bumped by {@link #restartVisionCommand()}. Rides along on every packet; the
+     * Pi acts on a strictly higher value than the one it has adopted, so a single
+     * increment survives however many packets get dropped on the way.
+     */
+    private long restartSeqnum = 0;
+
     public PoseLink() {
         if (RobotBase.isReal()) {
             io = new PoseLinkIOUDP();
@@ -81,7 +91,8 @@ public class PoseLink extends SubsystemBase {
                     PoseLinkConstants.CONFIG_HASH,
                     rs.getResetRequestSeqnum(),
                     rs.getResetRequestPose(),
-                    LogSession.id()));
+                    LogSession.id(),
+                    restartSeqnum));
         }
 
         // ---- Pi -> RIO: consume the fused pose ----
@@ -123,11 +134,44 @@ public class PoseLink extends SubsystemBase {
         Logger.recordOutput("PoseLink/SessionId", LogSession.idHex());
         Logger.recordOutput("PoseLink/PiSessionId", String.format("%016x", inputs.piSessionId));
         Logger.recordOutput("PoseLink/PiBuildSha", inputs.piBuildSha);
+        // Restart handshake. Pending means we have asked and the Pi has not yet
+        // come back reporting our number - normal for the few seconds it takes
+        // systemd to cycle it, a stuck problem if it never clears.
+        Logger.recordOutput("PoseLink/RestartSeqnum", restartSeqnum);
+        Logger.recordOutput("PoseLink/AckRestartSeqnum", inputs.ackRestartSeqnum);
+        Logger.recordOutput(
+            "PoseLink/RestartPending", inputs.ackRestartSeqnum < restartSeqnum);
+
         boolean paired = inputs.piSessionId == LogSession.id();
         Logger.recordOutput("PoseLink/SessionPaired", paired);
         sessionMismatchAlert.set(inputs.hasNewOutput && !paired);
 
         LoopTimeUtil.record("PoseLink");
+    }
+
+    /**
+     * A command that asks the Pi to restart its vision service, for a dashboard
+     * button. The Pi exits and systemd (see {@code deploy/poselink.service},
+     * {@code Restart=always}, {@code RestartSec=2}) brings it back, so expect the
+     * link to go stale for a few seconds and the RIO to run on wheel-only
+     * odometry meanwhile - exactly the {@code UsingFallback} path.
+     *
+     * <p>Runs while disabled on purpose: restarting vision from the pit, between
+     * matches, is the whole point. It takes no requirements, so it cannot
+     * interrupt anything.
+     */
+    public Command restartVisionCommand() {
+        return Commands.runOnce(() -> {
+                restartSeqnum++;
+                Elastic.sendNotification(
+                    new Elastic.Notification(
+                        Elastic.Notification.NotificationLevel.INFO,
+                        "Vision restarting",
+                        "Asked the Orange Pi to restart its vision service. Pose falls back to "
+                            + "wheel-only odometry for a few seconds."));
+            })
+            .ignoringDisable(true)
+            .withName("Restart Vision");
     }
 
     private static AllianceColor toProto(Optional<Alliance> alliance) {

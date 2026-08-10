@@ -13,4 +13,5 @@ public record OdomSample(
     long configHash,
     long resetSeqnum,
     Pose2d resetPose,
-    long sessionId) {}
+    long sessionId,
+    long restartSeqnum) {}

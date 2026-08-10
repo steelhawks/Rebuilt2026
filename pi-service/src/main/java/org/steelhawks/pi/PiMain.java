@@ -16,5 +16,12 @@ public final class PiMain {
         nt.startClient4("poselink-pi");
         nt.setServer("10.26.1.2");
         RobotBase.startRobot(PiRobot::new);
+
+        // startRobot returning means the loop ended normally a restart commanded
+        // from the RIO. Exit explicitly so a lingering non-daemon NT thread cannot
+        // keep the JVM alive: the systemd unit is Restart=always, so the process
+        // dying IS the restart, and a process that merely stops looping would sit
+        // there forever with no vision and no restart.
+        System.exit(0);
     }
 }

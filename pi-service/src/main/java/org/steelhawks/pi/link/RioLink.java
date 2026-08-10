@@ -86,7 +86,8 @@ public class RioLink {
             msg.getConfigHash(),
             msg.getResetSeqnum(),
             new Pose2d(msg.getResetX(), msg.getResetY(), new Rotation2d(msg.getResetTheta())),
-            msg.getSessionId());
+            msg.getSessionId(),
+            msg.getRestartSeqnum());
     }
 
     /** All odom samples received since the last call, in arrival order. */
@@ -108,7 +109,7 @@ public class RioLink {
     public void sendFusedPose(
         long seqnum, double timestamp, Pose2d pose, double qualityScore,
         double covXX, double covYY, double covTheta, long configHash,
-        double solveLatencyMs, long ackResetSeqnum, long sessionId) {
+        double solveLatencyMs, long ackResetSeqnum, long sessionId, long ackRestartSeqnum) {
         if (!running || socket.isClosed()) return;
         FusedPoseOutput out = FusedPoseOutput.newBuilder()
             .setSeqnum(seqnum)
@@ -125,6 +126,7 @@ public class RioLink {
             .setAckResetSeqnum(ackResetSeqnum)
             .setSessionId(sessionId)
             .setPiBuildSha(BuildInfo.gitSha())
+            .setAckRestartSeqnum(ackRestartSeqnum)
             .build();
         byte[] bytes = out.toByteArray();
         try {
