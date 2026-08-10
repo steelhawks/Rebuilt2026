@@ -1,0 +1,27 @@
+{
+  "session_id": "37da3f2a02ba1f00",
+  "stamp": "19ffe10bf1f7cac9",
+  "rio": {
+    "session": "37da3f2a02ba1f00",
+    "git_sha": "c6a40db02a0584e742071c4c9ea56da68655ab96",
+    "git_branch": "feat/gtsam",
+    "git_dirty": "All changes committed",
+    "robot": "OMEGA",
+    "name": "akit_26-08-10_01-56-28.wpilog",
+    "file": "19ffe10bf1f7cac9__37da3f2a_rio.wpilog",
+    "size_bytes": 7557120
+  },
+  "pi": {
+    "session": "37da3f2a02ba1f00",
+    "git_sha": "c6a40db",
+    "clock_offset_sec": 22.913205333333295,
+    "clock_drift_sec_per_sec": 0.0003640607877256558,
+    "rio_clock_samples": 2494,
+    "name": "akit_26-06-06_20-37-14.wpilog",
+    "file": "19ffe10bf1f7cac9__37da3f2a_pi.wpilog",
+    "size_bytes": 1249280
+  },
+  "clock_offset_sec": 22.913205333333295,
+  "clock_drift_sec_per_sec": 0.0003640607877256558,
+  "note": "add clock_offset_sec to a Pi log timestamp to get RIO time"
+}
