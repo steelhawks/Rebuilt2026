@@ -19,7 +19,12 @@ public final class PiVisionConstants {
 
     private PiVisionConstants() {}
 
-    public static final boolean ALLOW_PUBLISH_NT4_TELEMETRY = true;
+    /**
+     * Before enabling this please make sure you know what you are doing
+     *
+     * <p>Enabling this will cause conflicts between the OrangePi tables for topics such as PowerDistribution/ </p>
+     */
+    public static final boolean ALLOW_PUBLISH_NT4_TELEMETRY = false;
 
     public static final AprilTagFieldLayout APRIL_TAG_LAYOUT =
         AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
