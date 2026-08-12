@@ -830,11 +830,42 @@ public class Swerve extends SubsystemBase {
         return collisionDebouncer.calculate(linearCollision || angularCollision);
     }
 
+    /**
+     * How far off level the robot is, in degrees.
+     *
+     * <p>Roll cannot be read as-is. The Pigeon is mounted inverted, so a flat
+     * robot reports roll near +-180, not 0 - every sample of every session in the
+     * 2026-08-10 logs read -179.2 to -179.3 deg. {@code hypot(roll, pitch)} then
+     * returned ~179 deg at rest, permanently over the 12 deg threshold, so
+     * {@link #isOnBump()} was stuck true for entire matches. That fed the link as
+     * {@code RobotOdomInputs.is_on_bump} and silently pinned VisionFilter to its
+     * bump stddev branch on every frame.
+     *
+     * <p>Measure the distance from level instead, where level is 0 or +-180. That
+     * is agnostic to which way the sensor is mounted, so it keeps working if the
+     * Pigeon is ever remounted upright.
+     */
+    private static double tiltFromLevelDegrees(Rotation2d roll, Rotation2d pitch) {
+        double r = Math.abs(MathUtil.inputModulus(roll.getDegrees(), -180.0, 180.0));
+        return Math.hypot(Math.min(r, 180.0 - r), pitch.getDegrees());
+    }
+
     @AutoLogOutput(key = "Swerve/IsOnBump")
     public boolean isOnBump() {
-        double tilt = Math.hypot(gyroInputs.rollPosition.getDegrees(), gyroInputs.pitchPosition.getDegrees());
-        boolean rawTilt = tilt > BUMP_ANGLE_THRESHOLD.get();
-        return bumpRisingDebouncer.calculate(rawTilt) || bumpFallingDebouncer.calculate(rawTilt);
+        boolean rawTilt =
+            tiltFromLevelDegrees(gyroInputs.rollPosition, gyroInputs.pitchPosition)
+                > BUMP_ANGLE_THRESHOLD.get();
+        // Chained, not OR-ed. OR-ing let the 0.05 s falling debouncer - which
+        // asserts the instant rawTilt goes true - satisfy the whole expression,
+        // so the 0.25 s rising confirmation could never gate anything. Feeding
+        // rising into falling gives what the two were named for: slow to confirm
+        // a bump, quick to hold through the landing.
+        return bumpFallingDebouncer.calculate(bumpRisingDebouncer.calculate(rawTilt));
+    }
+
+    @AutoLogOutput(key = "Swerve/TiltFromLevelDegrees")
+    public double tiltFromLevel() {
+        return tiltFromLevelDegrees(gyroInputs.rollPosition, gyroInputs.pitchPosition);
     }
 
     public void updateCurrentLimits(double newLimit) {

@@ -89,23 +89,51 @@ public final class VisionFilter {
             return Result.reject(Reason.OUT_OF_BOUNDS);
         }
 
+        // Position error from a tag grows with the SQUARE of range: the tag's
+        // apparent size shrinks linearly, so a fixed pixel error maps to a
+        // depth error that grows quadratically.
         double factor = Math.pow(obs.avgTagDistance(), 2.0) / obs.tagCount();
         if (obs.tagCount() == 1) factor *= 3.0;
-        if (!hasHub) factor *= PiVisionConstants.NON_HUB_STDDEV_FACTOR;
+
+        // Heading does NOT degrade quadratically, and sharing the linear factor
+        // was making the graph ignore vision heading entirely. In the 2026-08-10
+        // logs a 1.75 m single-tag frame produced 0.3 * 9.195 = 2.76 rad of
+        // angular stddev - the solver was told "trust this heading to +-158 deg",
+        // against odometry asserted to 0.057 deg per step. The fused heading sat
+        // ~55 deg off what all three cameras agreed on, from the anchor onward,
+        // and no number of tags could pull it back.
+        //
+        // Scale angle LINEARLY with range instead. The single-tag penalty stays
+        // (a lone tag's orientation really is ambiguity-prone); a two-tag frame
+        // now yields a genuinely strong heading fix, which is the shape we want.
+        double angularFactor = obs.avgTagDistance() / obs.tagCount();
+        if (obs.tagCount() == 1) angularFactor *= 3.0;
+
+        if (!hasHub) {
+            factor *= PiVisionConstants.NON_HUB_STDDEV_FACTOR;
+            angularFactor *= PiVisionConstants.NON_HUB_STDDEV_FACTOR;
+        }
         if (PiVisionConstants.outOfBounds(currentEstimate.getX(), currentEstimate.getY())) {
+            // Our own estimate is off the field, so it cannot be the sane one.
             factor *= 0.3;
+            angularFactor *= 0.3;
         }
 
         double linear = PiVisionConstants.LINEAR_STD_DEV_BASELINE * factor;
-        double angular = PiVisionConstants.ANGULAR_STD_DEV_BASELINE * factor;
+        double angular = PiVisionConstants.ANGULAR_STD_DEV_BASELINE * angularFactor;
 
-        double camFactor = PiVisionConstants.CAMERAS[obs.cameraIndex()].stddevFactor();
+        // The per-camera trust factor always applies. It used to be in an else
+        // against the bump branch, so a bump silently discarded it - and with
+        // isOnBump stuck true (see Swerve.isOnBump) that was every single frame.
+        linear *= PiVisionConstants.CAMERAS[obs.cameraIndex()].stddevFactor();
+        angular *= PiVisionConstants.CAMERAS[obs.cameraIndex()].stddevFactor();
+
+        // On a bump the wheels are slipping, so odometry is the unreliable one
+        // and vision earns extra weight. Now an additional multiplier rather
+        // than a replacement.
         if (isOnBump) {
             linear *= PiVisionConstants.BUMP_STDDEV_FACTOR;
             angular *= PiVisionConstants.BUMP_STDDEV_FACTOR;
-        } else {
-            linear *= camFactor;
-            angular *= camFactor;
         }
 
         // GTSAM wants variances (stddev squared).

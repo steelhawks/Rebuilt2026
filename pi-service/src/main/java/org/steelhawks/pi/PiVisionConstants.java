@@ -48,9 +48,29 @@ public final class PiVisionConstants {
     public static final double MAX_AMBIGUITY = 0.2;
     public static final double MAX_ZERROR = 0.75;
 
-    // Stddev baselines (metres / radians at 1 m, 1 tag) and factors.
-    public static final double LINEAR_STD_DEV_BASELINE = 0.1;
-    public static final double ANGULAR_STD_DEV_BASELINE = 0.3;
+    // Stddev baselines, before the range/tag-count/camera factors in VisionFilter.
+    //
+    // LINEAR was 0.1, which combined with the factors gave 1.84 m at a typical
+    // 1.75 m single-tag frame. It never actually ran at that: isOnBump was stuck
+    // true (Swerve read ~179 deg of roll from an inverted Pigeon), which took the
+    // bump branch and skipped the x2 per-camera factor, so the value really in
+    // use was 0.276 m. 0.015 reproduces that 0.276 m now that both bugs are
+    // fixed - deliberately holding position trust where the 2026-08-10 logs ran
+    // it, so the angular change below is tested on its own rather than
+    // confounded with a 6.7x loosening of position.
+    public static final double LINEAR_STD_DEV_BASELINE = 0.015;
+
+    /**
+     * Angular baseline, in radians, against a factor that is now LINEAR in range
+     * (see VisionFilter). 0.3 against the old quadratic factor produced 0.827 rad
+     * - 47 deg - of heading stddev on every frame in the 2026-08-10 logs, which
+     * is no constraint at all next to odometry at 1e-6 rad^2 per step.
+     *
+     * <p>0.02 gives roughly 12 deg for a 1.75 m single-tag frame and 2 deg for a
+     * two-tag one. Both need a field pass to confirm; the point of this value is
+     * that heading is now observable from vision at all.
+     */
+    public static final double ANGULAR_STD_DEV_BASELINE = 0.02;
     public static final double NON_HUB_STDDEV_FACTOR = 2.0;
     public static final double BUMP_STDDEV_FACTOR = 0.3;
 
