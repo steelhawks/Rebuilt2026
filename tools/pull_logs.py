@@ -34,7 +34,27 @@ Usage
     tools/pull_logs.py --list                 # what is on each host
     tools/pull_logs.py                        # fetch + pair everything new
     tools/pull_logs.py --session a3f1c2d4     # just one session (prefix ok)
+    tools/pull_logs.py --jobs 8               # more parallel transfers
     tools/pull_logs.py --out ~/frclogs --keep-unpaired
+
+Speed
+-----
+RIO logs are the big ones (80 MB is normal) and the radio is the bottleneck, so
+the pull avoids moving bytes it does not need:
+
+* Pi logs come first - they are ~10x smaller, and their session ids decide which
+  RIO logs are worth having at all.
+* Each RIO log is then identified from a 32 KB **head probe** in one batched ssh
+  call, because AdvantageKit writes ``/RealMetadata`` at ``Logger.start()``. Logs
+  whose session has no Pi side, or is already laid out under ``<out>``, are never
+  downloaded. Previously they were fetched in full and then discarded.
+* Transfers run in parallel (``--jobs``) and compressed (``scp -C``); wpilogs
+  measure ~2.8x compressible.
+* ``--no-fetch`` talks to the network not at all, rather than waiting out an ssh
+  timeout per host.
+
+If pulls are still slow, check how many logs have piled up in ``/home/lvuser/logs``
+on the RIO - nothing rotates them.
 
 Downloads are cached under ``<out>/.cache`` and skipped if already present at
 the same size, so re-running is cheap.
@@ -48,12 +68,15 @@ hardlinked rather than copied, so it costs its bytes once.
 """
 
 import argparse
+import base64
 import glob
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
+from concurrent import futures
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from wpilog import WpiLog  # noqa: E402
@@ -106,26 +129,116 @@ def remote_listing(user, host, path, timeout):
 
 
 def fetch(user, host, path, name, dest, timeout):
-    """scp one log into the cache unless an identical-size copy is there."""
+    """scp one log into the cache unless a copy is already there.
+
+    ``-C`` is the cheap win: wpilogs are ~2.8x compressible (measured on the
+    2026-08-10 82 MB RIO log), and over the robot radio the link, not the CPU on
+    either end, is the constraint.
+    """
     if os.path.exists(dest):
         return dest
     os.makedirs(os.path.dirname(dest), exist_ok=True)
-    tmp = dest + ".part"
-    print("    downloading %s" % name)
+    tmp = "%s.%d.part" % (dest, os.getpid())
     try:
         run([
-            "scp", "-q", "-o", "BatchMode=yes",
+            "scp", "-q", "-C", "-o", "BatchMode=yes",
             "-o", "ConnectTimeout=%d" % timeout,
             "-o", "StrictHostKeyChecking=accept-new",
             "%s@%s:%s/%s" % (user, host, path, name), tmp,
         ])
     except subprocess.CalledProcessError as e:
-        print("    ! failed: %s" % e.stderr.strip(), file=sys.stderr)
+        print("    ! %s failed: %s" % (name, e.stderr.strip()), file=sys.stderr)
         if os.path.exists(tmp):
             os.remove(tmp)
         return None
     os.replace(tmp, dest)
     return dest
+
+
+def fetch_all(jobs, timeout, jobs_parallel):
+    """Fetch in parallel. Transfers are link-bound, so overlap them."""
+    todo = [j for j in jobs if not os.path.exists(j[4])]
+    if not todo:
+        return
+    total = sum(j[5] for j in todo)
+    print("    %d file(s), %.0f MB to transfer (compressed on the wire)"
+          % (len(todo), total / 1e6))
+    done = [0]
+    with futures.ThreadPoolExecutor(max_workers=jobs_parallel) as ex:
+        fs = {ex.submit(fetch, j[0], j[1], j[2], j[3], j[4], timeout): j for j in todo}
+        for f in futures.as_completed(fs):
+            j = fs[f]
+            done[0] += 1
+            print("      [%d/%d] %s (%.0f MB)"
+                  % (done[0], len(todo), j[3], j[5] / 1e6))
+
+
+HEAD_PROBE_BYTES = 32768
+
+
+def probe_sessions(user, host, path, names, timeout):
+    """{filename: session_id} for RIO logs, without downloading them.
+
+    A RIO log's identity lives in its ``/RealMetadata`` records, which
+    AdvantageKit writes at ``Logger.start()`` - the first 32 KB is enough to read
+    session id, git sha, branch and robot (verified against the 2026-08-10 logs,
+    where a full log is 83 MB, so this is 0.04% of the bytes).
+
+    That matters because sessions with no Pi side are skipped during pairing.
+    Downloading an 83 MB RIO log in full only to discard it is most of why a pull
+    took so long. One batched ssh call keeps this to a single round trip.
+
+    Returns {} if the probe fails for any reason; the caller then falls back to
+    downloading everything, which is merely slow rather than wrong.
+    """
+    if not names:
+        return {}
+    script = (
+        "for f in %s; do "
+        "  [ -f \"$f\" ] || continue; "
+        "  echo \"@@@$(basename \"$f\")\"; "
+        "  head -c %d \"$f\" | base64; "
+        "done"
+    ) % (" ".join("%s/%s" % (path, n) for n in sorted(names)), HEAD_PROBE_BYTES)
+    try:
+        proc = run([
+            "ssh", "-o", "BatchMode=yes", "-C",
+            "-o", "ConnectTimeout=%d" % timeout,
+            "-o", "StrictHostKeyChecking=accept-new",
+            "%s@%s" % (user, host), script,
+        ])
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        print("  ! head probe unavailable (%s); will download in full"
+              % getattr(e, "stderr", e), file=sys.stderr)
+        return {}
+
+    out, cur, buf = {}, None, []
+
+    def flush():
+        if cur is None:
+            return
+        try:
+            blob = base64.b64decode("".join(buf))
+        except Exception:
+            return
+        tmp = tempfile.NamedTemporaryFile(suffix=".wpilog", delete=False)
+        try:
+            tmp.write(blob)
+            tmp.close()
+            out[cur] = read_rio(tmp.name).get("session")
+        except Exception:
+            pass  # truncated head, or a log with no session id
+        finally:
+            os.unlink(tmp.name)
+
+    for line in proc.stdout.splitlines():
+        if line.startswith("@@@"):
+            flush()
+            cur, buf = line[3:], []
+        elif cur is not None:
+            buf.append(line)
+    flush()
+    return out
 
 
 def read_rio(path):
@@ -276,6 +389,8 @@ def main():
                     help="rewrite sessions already laid out (into their existing "
                          "folder, so renames are kept); default is to skip them")
     ap.add_argument("--timeout", type=int, default=10, help="ssh connect timeout")
+    ap.add_argument("--jobs", type=int, default=4,
+                    help="parallel transfers (default 4)")
     args = ap.parse_args()
 
     sides = {
@@ -283,19 +398,29 @@ def main():
         "pi": (args.pi_user, args.pi_host, args.pi_path),
     }
 
-    print("==> Listing remote logs")
-    listings = {}
-    for side, (user, host, path) in sides.items():
-        files = remote_listing(user, host, path, args.timeout)
-        listings[side] = files
-        print("  %-3s %s@%s:%s  %d log(s)" % (side, user, host, path, len(files)))
-        if args.list:
-            for name, size in sorted(files):
-                print("        %-40s %8.1f MB" % (name, size / 1e6))
+    listings = {"rio": [], "pi": []}
+    if args.no_fetch:
+        # Nothing here is going to be used, and an unreachable robot costs a full
+        # ssh connect timeout per host before we even start.
+        print("==> Skipping remote listing (--no-fetch)")
+    else:
+        print("==> Listing remote logs")
+        with futures.ThreadPoolExecutor(max_workers=len(sides)) as ex:
+            fs = {ex.submit(remote_listing, u, h, p, args.timeout): side
+                  for side, (u, h, p) in sides.items()}
+            for f in futures.as_completed(fs):
+                listings[fs[f]] = f.result()
+        for side, (user, host, path) in sides.items():
+            print("  %-3s %s@%s:%s  %d log(s)"
+                  % (side, user, host, path, len(listings[side])))
+            if args.list:
+                for name, size in sorted(listings[side]):
+                    print("        %-40s %8.1f MB" % (name, size / 1e6))
     if args.list:
         return 0
 
     cache = os.path.join(args.out, ".cache")
+    already = existing_sessions(args.out)
     if args.no_fetch:
         print("\n==> Skipping download (--no-fetch), using %s" % cache)
     else:
@@ -303,10 +428,55 @@ def main():
             print("  ! neither host had logs - is the robot on and are you on its"
                   " network? Falling back to whatever is already cached.")
         print("\n==> Fetching into %s" % cache)
-        for side, (user, host, path) in sides.items():
-            for name, _size in sorted(listings[side]):
-                fetch(user, host, path, name, os.path.join(cache, side, name),
-                      args.timeout)
+
+        # Pi logs first, and all of them: they are ~10x smaller than the RIO's,
+        # and their session ids are what decide which RIO logs are worth pulling.
+        # A Pi log can also span several sessions, so its id list needs the whole
+        # file - there is no useful head probe on this side.
+        puser, phost, ppath = sides["pi"]
+        fetch_all([(puser, phost, ppath, n, os.path.join(cache, "pi", n), s)
+                   for n, s in sorted(listings["pi"])], args.timeout, args.jobs)
+
+        wanted = set(already)
+        for name in sorted(os.listdir(os.path.join(cache, "pi"))
+                           if os.path.isdir(os.path.join(cache, "pi")) else []):
+            if not name.endswith(".wpilog"):
+                continue
+            try:
+                wanted |= set(read_pi(os.path.join(cache, "pi", name))["sessions"])
+            except Exception:
+                continue
+
+        ruser, rhost, rpath = sides["rio"]
+        rio_names = [n for n, _ in listings["rio"]]
+        rio_sizes = dict(listings["rio"])
+        probe = {} if args.keep_unpaired else probe_sessions(
+            ruser, rhost, rpath, rio_names, args.timeout)
+
+        if probe:
+            skipped = []
+            keep = []
+            for n in rio_names:
+                sid = probe.get(n)
+                if sid is None:            # unreadable head - do not guess, fetch it
+                    keep.append(n)
+                elif sid in already and not args.refresh:
+                    skipped.append((n, "already laid out"))
+                elif sid in wanted:
+                    keep.append(n)
+                else:
+                    skipped.append((n, "no Pi log for this session"))
+            for n, why in skipped:
+                print("    -- skipping %s (%.0f MB): %s"
+                      % (n, rio_sizes.get(n, 0) / 1e6, why))
+            saved = sum(rio_sizes.get(n, 0) for n, _ in skipped)
+            if saved:
+                print("    saved %.0f MB of transfer via head probe" % (saved / 1e6))
+            rio_names = keep
+
+        fetch_all([(ruser, rhost, rpath, n, os.path.join(cache, "rio", n),
+                    rio_sizes.get(n, 0)) for n in sorted(rio_names)],
+                  args.timeout, args.jobs)
 
     # Pair over everything in the cache, not just this run's downloads, so a
     # re-run works offline and picks up logs pulled by hand.
@@ -349,7 +519,7 @@ def main():
                 entry["name"] = name
                 info[side].setdefault(entry["session"], []).append(entry)
 
-    existing = existing_sessions(args.out)
+    existing = already  # scanned before fetching, to decide what to skip
 
     sessions = sorted(set(info["rio"]) | set(info["pi"]))
     if args.session:
