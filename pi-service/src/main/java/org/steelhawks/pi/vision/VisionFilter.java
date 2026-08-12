@@ -24,7 +24,8 @@ public final class VisionFilter {
         NO_TAGS,
         AMBIGUOUS,
         Z_ERROR,
-        OUT_OF_BOUNDS
+        OUT_OF_BOUNDS,
+        RESIDUAL_TOO_LARGE
     }
 
     /**
@@ -61,11 +62,18 @@ public final class VisionFilter {
         };
     }
 
+    /**
+     * @param estimateTrusted whether {@code currentEstimate} is worth gating
+     *     against. The caller owns this because the decision is stateful (see
+     *     {@code PiRobot.visionEstimateTrusted}) and this function is a pure
+     *     function of its inputs so it stays replayable.
+     */
     public static Result filter(
         CameraObservation obs,
         AllianceColor alliance,
         boolean isOnBump,
-        Pose2d currentEstimate) {
+        Pose2d currentEstimate,
+        boolean estimateTrusted) {
 
         Set<Integer> allowed = allowedFor(alliance);
         boolean hasAllowed = false;
@@ -87,6 +95,14 @@ public final class VisionFilter {
         }
         if (PiVisionConstants.outOfBounds(pose.getX(), pose.getY())) {
             return Result.reject(Reason.OUT_OF_BOUNDS);
+        }
+        // Only meaningful once we have an estimate worth disagreeing with, and
+        // never when that estimate is itself off the field.
+        if (estimateTrusted
+            && !PiVisionConstants.outOfBounds(currentEstimate.getX(), currentEstimate.getY())
+            && pose.toPose2d().getTranslation().getDistance(currentEstimate.getTranslation())
+                > PiVisionConstants.MAX_VISION_RESIDUAL_METERS) {
+            return Result.reject(Reason.RESIDUAL_TOO_LARGE);
         }
 
         // Position error from a tag grows with the SQUARE of range: the tag's

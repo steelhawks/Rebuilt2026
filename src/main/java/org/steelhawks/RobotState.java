@@ -590,6 +590,20 @@ public class RobotState {
             Logger.recordOutput("RobotState/PoseLink/RejectedStale", true);
             return false;
         }
+        // Sanity, not tuning. A pose that is off the field or carries a quality
+        // score near zero is not a worse estimate, it is not an estimate - see
+        // the divergence documented on MAX_POSE_OUT_OF_BOUNDS_METERS. Refusing it
+        // leaves fusedAppliedWallClock alone, so isFusedPoseFresh() goes false and
+        // the robot falls back to wheel-only odometry, which is exactly the
+        // behaviour that path already exists for.
+        String insane = insanityReason(observation);
+        if (insane != null) {
+            Logger.recordOutput("RobotState/PoseLink/RejectedInsane", true);
+            Logger.recordOutput("RobotState/PoseLink/RejectedReason", insane);
+            return false;
+        }
+        Logger.recordOutput("RobotState/PoseLink/RejectedInsane", false);
+
         fusedSeqnum = observation.seqnum();
         fusedSampleTimestamp = observation.timestamp();
         fusedPose = observation.pose();
@@ -598,6 +612,31 @@ public class RobotState {
         Logger.recordOutput("RobotState/PoseLink/AppliedPose", fusedPose);
         Logger.recordOutput("RobotState/PoseLink/QualityScore", observation.qualityScore());
         return true;
+    }
+
+    /**
+     * Why a fused pose is unusable, or null if it is fine.
+     *
+     * <p>Kept separate and side-effect free so the reason can be logged verbatim;
+     * "the pose was rejected" is not actionable at 1am, "OffField" is.
+     */
+    private static String insanityReason(FusedPoseObservation observation) {
+        Pose2d p = observation.pose();
+        double x = p.getX();
+        double y = p.getY();
+        double theta = p.getRotation().getRadians();
+        if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(theta)) {
+            return "NonFinite";
+        }
+        double m = PoseLinkConstants.MAX_POSE_OUT_OF_BOUNDS_METERS;
+        if (x < -m || x > FieldConstants.FIELD_LENGTH + m
+            || y < -m || y > FieldConstants.FIELD_WIDTH + m) {
+            return "OffField";
+        }
+        if (observation.qualityScore() < PoseLinkConstants.MIN_FUSED_QUALITY) {
+            return "LowQuality";
+        }
+        return null;
     }
 
     /** True while the last fused pose is within the staleness window. */

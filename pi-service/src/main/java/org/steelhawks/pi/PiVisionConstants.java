@@ -48,6 +48,60 @@ public final class PiVisionConstants {
     public static final double MAX_AMBIGUITY = 0.2;
     public static final double MAX_ZERROR = 0.75;
 
+    /**
+     * OFF until the fused estimate actually tracks. Do not flip this on to fix a
+     * bad pose - it will make it worse.
+     *
+     * <p>The gate compares each frame against our own estimate, which only means
+     * anything while that estimate is roughly right. Replayed against the real
+     * logs it rejects the overwhelming majority of good vision, because the
+     * estimate is currently offset by metres and so nearly every frame
+     * "disagrees":
+     *
+     * <pre>
+     *   threshold   37da3f2a rejected   4c07ec09 rejected
+     *     1.5 m          70.3%               94.5%
+     *     3.0 m          26.1%               65.9%
+     *     4.0 m           3.1%               25.7%
+     * </pre>
+     *
+     * <p>Enabling it now would starve the graph of exactly the corrections that
+     * would fix the offset. Turn it on once the fused pose tracks vision to well
+     * inside {@link #MAX_VISION_RESIDUAL_METERS}, at which point it is worth
+     * having: with several cameras live, one badly-solved single-tag frame can
+     * drag the graph and there is no way to spot it by eye.
+     *
+     * <p>Note that this is the wrong instrument for "is one camera bad" - that is
+     * better answered by comparing cameras against EACH OTHER, which does not
+     * depend on the estimate being right. In the 2026-08-10 logs the cameras
+     * agreed with each other to 2-5 cm while the estimate was 2 m out.
+     */
+    public static final boolean ENABLE_RESIDUAL_GATE = false;
+
+    /**
+     * Reject an observation this far from the current estimate, in metres, when
+     * {@link #ENABLE_RESIDUAL_GATE} is on.
+     *
+     * <p>Generous, because vision is ~100 ms old by the time it is filtered: at
+     * full speed the robot has legitimately moved ~0.5 m in that window, and the
+     * graph splices the measurement in at its capture time anyway. This is only
+     * meant to catch a frame that cannot be right. Position only - heading is not
+     * gated, since a robot spinning at 360 deg/s is genuinely tens of degrees
+     * away from a 100 ms old frame.
+     */
+    public static final double MAX_VISION_RESIDUAL_METERS = 3.0;
+
+    /**
+     * Give up on the residual gate after this many consecutive rejections.
+     *
+     * <p>The gate compares against our own estimate, so an estimate that has
+     * already gone wrong would reject every correction that could fix it and stay
+     * wrong forever - the classic innovation-gate deadlock. Once this many frames
+     * in a row disagree, the estimate is the thing more likely to be wrong, so
+     * the gate stands down and lets vision re-anchor. ~0.5 s at 50 Hz.
+     */
+    public static final int MAX_CONSECUTIVE_RESIDUAL_REJECTS = 25;
+
     // Stddev baselines, before the range/tag-count/camera factors in VisionFilter.
     //
     // LINEAR was 0.1, which combined with the factors gave 1.84 m at a typical

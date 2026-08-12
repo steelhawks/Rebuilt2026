@@ -57,6 +57,12 @@ public class PiRobot extends LoggedRobot {
     private long appliedRestartSeqnum = -1;
     private boolean restartRequested = false;
 
+    // Residual gate state. False means "do not gate on currentEstimate", either
+    // because there is not one yet or because it has lost an argument with too
+    // many frames in a row - see noteResidualOutcome.
+    private boolean estimateTrusted = false;
+    private int consecutiveResidualRejects = 0;
+
     @Override
     public void robotInit() {
         Logger.recordMetadata("Service", "poselink-pi");
@@ -79,7 +85,9 @@ public class PiRobot extends LoggedRobot {
             ingestOdometry(s);
         }
         for (CameraObservation obs : photon.poll()) {
-            VisionFilter.Result res = VisionFilter.filter(obs, alliance, isOnBump, currentEstimate);
+            VisionFilter.Result res =
+                VisionFilter.filter(obs, alliance, isOnBump, currentEstimate, estimateTrusted);
+            noteResidualOutcome(res);
             logObservation(obs, res);
             if (res.isAccepted()) {
                 AcceptedObservation a = res.accepted();
@@ -137,6 +145,11 @@ public class PiRobot extends LoggedRobot {
         Logger.recordOutput("PoseLinkPi/DroppedOdom", link.droppedCount());
         Logger.recordOutput("PoseLinkPi/CamerasConnected", photon.allConnected());
         Logger.recordOutput("PoseLinkPi/AckRestartSeqnum", appliedRestartSeqnum);
+        // If EstimateTrusted sits false, the residual gate has given up and every
+        // frame is going in unchecked - the estimate and the cameras are not
+        // agreeing on anything.
+        Logger.recordOutput("PoseLinkPi/EstimateTrusted", estimateTrusted);
+        Logger.recordOutput("PoseLinkPi/ConsecutiveResidualRejects", consecutiveResidualRejects);
         Logger.recordOutput("PoseLinkPi/RestartRequested", restartRequested);
 
         // Honour a restart last, after this cycle's outputs are recorded, so the
@@ -239,6 +252,28 @@ public class PiRobot extends LoggedRobot {
     }
 
     /**
+     * Decide whether the residual gate should keep gating.
+     *
+     * <p>The gate measures each frame against our own estimate, so it is only
+     * trustworthy while that estimate is. If enough frames in a row disagree,
+     * the cameras outnumber us: stand the gate down so vision can re-anchor the
+     * graph, rather than defending a wrong pose against every correction for it.
+     */
+    private void noteResidualOutcome(VisionFilter.Result res) {
+        if (res.reason() == VisionFilter.Reason.RESIDUAL_TOO_LARGE) {
+            consecutiveResidualRejects++;
+            if (consecutiveResidualRejects >= PiVisionConstants.MAX_CONSECUTIVE_RESIDUAL_REJECTS) {
+                estimateTrusted = false;
+            }
+        } else if (res.isAccepted()) {
+            // An accepted frame means the estimate and the cameras agree, so it
+            // is worth defending again.
+            consecutiveResidualRejects = 0;
+            estimateTrusted = PiVisionConstants.ENABLE_RESIDUAL_GATE;
+        }
+    }
+
+    /**
      * Track the RIO's restart counter, and flag an exit when it advances.
      *
      * <p>The first value seen is <em>adopted, not acted on</em>. This process has
@@ -291,6 +326,10 @@ public class PiRobot extends LoggedRobot {
         appliedResetSeqnum = -1;
         appliedRestartSeqnum = -1;
         currentEstimate = new Pose2d();
+        // The graph is about to be re-anchored, so the old estimate is not
+        // something to gate incoming frames against.
+        estimateTrusted = false;
+        consecutiveResidualRejects = 0;
         Arrays.fill(acceptedCount, 0);
         Arrays.fill(rejectedCount, 0);
     }

@@ -52,6 +52,34 @@ public final class PoseLinkConstants {
     public static final long SEQNUM_RESTART_GAP = 50;
 
     /**
+     * How far outside the field a fused pose may sit before the RIO refuses it,
+     * in metres.
+     *
+     * <p>Until this existed the RIO applied whatever the Pi sent. In the
+     * 2026-08-12 session e4d44f66 the graph diverged into a growing oscillation -
+     * 63 m, then -96 m, then 138 m, ending at 2.25e8 m with a covariance of
+     * 2.4e10 - and every one of those poses went straight into
+     * {@link org.steelhawks.RobotState#applyFusedPose}. The Pi reported
+     * STATUS_OK throughout, so nothing upstream caught it either.
+     *
+     * <p>The margin is generous on purpose: a real pose can sit slightly off the
+     * field when the robot is against the wall, and this is a last-resort guard
+     * against nonsense, not a tuning knob.
+     */
+    public static final double MAX_POSE_OUT_OF_BOUNDS_METERS = 1.0;
+
+    /**
+     * Reject a fused pose whose quality score is below this.
+     *
+     * <p>{@code quality = 1 / (1 + trace(covariance))}, so a diverging graph
+     * drives it to essentially zero - it was ~4e-11 at the worst point of
+     * e4d44f66. Set low deliberately: this catches numerical garbage, not a pose
+     * that is merely uncertain. Normal operation sits at 0.7 to 0.99, and a
+     * legitimately unsure estimate is still far better than dead reckoning.
+     */
+    public static final double MIN_FUSED_QUALITY = 0.02;
+
+    /**
      * Fingerprint of the config the Pi must agree on (tag sets + version),
      * computed from the shared {@link VisionLinkConfig}. If the Pi reports a
      * different value, poses are logged and flagged rather than silently trusted.
