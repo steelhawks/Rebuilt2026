@@ -43,15 +43,25 @@ namespace poselink {
         int status() const { return status_; }
 
     private:
+        // One absolute measurement landing on a node. A node can carry several:
+        // with N cameras at 30 Hz, frames routinely land within spliceEps of the
+        // same node (~10% of them with three cameras, measured on the 2026-08-10
+        // logs). This used to be a single hasPrior/priorPose/priorVar triple that
+        // the next arrival silently overwrote, so simultaneous observations from
+        // two cameras produced exactly the estimate one of them would have -
+        // adding cameras bought far less than it should have.
+        struct Prior {
+            gtsam::Pose2 pose;
+            gtsam::Vector3 var;
+        };
+
         struct Node {
             double t;
             gtsam::Pose2 value; // best estimate; refreshed from the smoother once committed
             gtsam::Pose2 delta; // motion from the previous node (identity for the anchor)
             gtsam::Vector3 odomVar;
             bool isAnchor = false;
-            bool hasPrior = false;
-            gtsam::Pose2 priorPose;
-            gtsam::Vector3 priorVar;
+            std::vector<Prior> priors;
             bool committed = false;
             gtsam::Key key = 0;
         };

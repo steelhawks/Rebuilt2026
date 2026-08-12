@@ -143,9 +143,39 @@ public final class PiVisionConstants {
     // between-factor chain floppy: the smoother can bend the whole 1.5 s window to
     // chase a single tag observation, which shows up as jitter.
     //
-    // 1e-5 m^2 = 3.2 mm per step (~2.7 cm accumulated over the 1.5 s lag window);
-    // 1e-6 rad^2 = 0.06 deg per step (~0.5 deg over the window).
-    public static final double ODOM_VARIANCE_LINEAR = 1e-5;
+    // 2e-3 m^2 = 4.5 cm per step. That is NOT a claim about wheel-encoder noise -
+    // it is how much the between-factor chain is allowed to flex so vision can
+    // reposition it. Everything odometry does not model lands here: wheel slip,
+    // scrub, timing error, and above all the positional consequence of a heading
+    // that is slightly wrong.
+    //
+    // 52dd31a tightened this 200x, from 2e-3 to 1e-5, reasoning that real swerve
+    // odometry over 20 ms is sub-millimetre. True about the sensor, wrong about
+    // the parameter: at 1e-5 the chain is rigid enough that vision cannot pull the
+    // trajectory into place, so any heading error becomes permanent position
+    // error. test_pose_graph case 5b sweeps it against an injected heading bias
+    // with five cameras streaming clean tags:
+    //
+    //     ODOM_VARIANCE_LINEAR    residual error
+    //         1e-5 (52dd31a)          0.372 m
+    //         1e-4                    0.154 m
+    //         1e-3                    0.008 m
+    //
+    // The angular term moves this by about 10% at any of those, so it is not the
+    // lever and is left alone. Restoring the original value.
+    public static final double ODOM_VARIANCE_LINEAR = 2e-3;
+
+    /**
+     * Per-step heading variance, 0.057 deg per 20 ms step.
+     *
+     * <p>Left at its original value on purpose. The obvious guess is that this is
+     * what stops vision correcting a heading error, but the sweep in
+     * {@code test_pose_graph} case 5b says otherwise - varying it across two
+     * orders of magnitude moves the residual by about 10%, while
+     * {@link #ODOM_VARIANCE_LINEAR} moves it by 46x. A heading error reaches the
+     * estimate as accumulating POSITION error along the chain, so the linear term
+     * is what has to give for vision to fix it.
+     */
     public static final double ODOM_VARIANCE_ANGULAR = 1e-6;
 
     /** A camera and its robot->camera transform, plus a per-camera trust factor. */

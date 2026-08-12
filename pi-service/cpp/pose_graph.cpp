@@ -51,9 +51,7 @@ namespace poselink {
         n.delta = Pose2();
         n.odomVar = Vector3::Zero();
         n.isAnchor = true;
-        n.hasPrior = true;
-        n.priorPose = anchorPose_;
-        n.priorVar = anchorVar_;
+        n.priors.push_back({anchorPose_, anchorVar_});
         nodes_.push_back(n);
         return true;
     }
@@ -125,9 +123,9 @@ namespace poselink {
             if (n.committed) {
                 extraPriors_.push_back({n.key, v.pose, v.var});
             } else {
-                n.hasPrior = true;
-                n.priorPose = v.pose;
-                n.priorVar = v.var;
+                // Append. Two cameras seeing the same instant are two independent
+                // measurements and both belong in the graph.
+                n.priors.push_back({v.pose, v.var});
             }
         };
 
@@ -155,9 +153,7 @@ namespace poselink {
             mid.delta = d1;
             mid.odomVar = nodes_[i].odomVar * f;
             mid.value = nodes_[i - 1].value.compose(d1);
-            mid.hasPrior = true;
-            mid.priorPose = v.pose;
-            mid.priorVar = v.var;
+            mid.priors.push_back({v.pose, v.var});
 
             nodes_[i].delta = d1.between(d);
             nodes_[i].odomVar = nodes_[i].odomVar * (1.0 - f);
@@ -191,16 +187,21 @@ namespace poselink {
             stamps[n.key] = n.t;
 
             if (n.isAnchor || prev < 0) {
-                newFactors.addPrior(n.key, n.priorPose, noise(n.priorVar));
-                ++factorCount_;
+                // No predecessor to chain from, so this node needs an absolute
+                // constraint or it enters the graph unconstrained. Fall back to
+                // the anchor pose if nothing else has landed on it - the previous
+                // code read an uninitialised priorPose/priorVar here.
+                if (n.priors.empty()) {
+                    n.priors.push_back({anchorPose_, anchorVar_});
+                }
             } else {
                 newFactors.emplace_shared<BetweenFactor<Pose2> >(
                     nodes_[prev].key, n.key, n.delta, noise(n.odomVar));
                 ++factorCount_;
-                if (n.hasPrior) {
-                    newFactors.addPrior(n.key, n.priorPose, noise(n.priorVar));
-                    ++factorCount_;
-                }
+            }
+            for (const Prior &pr : n.priors) {
+                newFactors.addPrior(n.key, pr.pose, noise(pr.var));
+                ++factorCount_;
             }
             n.committed = true;
             prev = i;

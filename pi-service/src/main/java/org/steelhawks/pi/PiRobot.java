@@ -33,7 +33,24 @@ public class PiRobot extends LoggedRobot {
 
     // Previous cumulative odometry pose, differenced into between-factors.
     private Pose2d lastOdomPose = null;
-    private long appliedResetSeqnum = -1;
+
+    /**
+     * Highest reset the RIO has asked for that we have applied.
+     *
+     * <p>Starts at 0, not -1, because {@code RobotState.resetRequestSeqnum} also
+     * starts at 0 and only increments on a real {@code resetPose()}. Seqnum 0
+     * therefore means "no reset has ever been requested", and its companion
+     * {@code resetRequestPose} is still {@code new Pose2d()} - the field origin.
+     *
+     * <p>At -1 a fresh service took that 0 as a command and anchored the graph to
+     * the origin with a 10 cm / 8 deg prior while the robot sat mid-field. It fired
+     * every time the Pi restarted under a live RIO, which is why restarting vision
+     * alone brought the jitter back; AckResetSeqnum reads [-1, 0] in every log from
+     * this period. Starting at 0 makes {@code 0 > 0} false, so an un-reset RIO no
+     * longer anchors us anywhere and the graph localizes from the first tag
+     * instead - which is the one source that actually knows where the robot is.
+     */
+    private long appliedResetSeqnum = 0;
 
     // Context carried between odom and vision within a cycle
     private AllianceColor alliance = AllianceColor.ALLIANCE_UNKNOWN;
@@ -323,7 +340,7 @@ public class PiRobot extends LoggedRobot {
     private void adoptRioSession() {
         rioSessionChanges++;
         lastOdomPose = null;
-        appliedResetSeqnum = -1;
+        appliedResetSeqnum = 0; // see the field comment: 0 is "never reset", not a command
         appliedRestartSeqnum = -1;
         currentEstimate = new Pose2d();
         // The graph is about to be re-anchored, so the old estimate is not
