@@ -134,6 +134,21 @@ public class RobotState {
     public static final double FUSED_STALENESS_TIMEOUT_SEC = 0.2;
 
     private Pose2d fusedPose = new Pose2d();
+
+    /**
+     * Wheel-odometry pose as it read at {@link #fusedSampleTimestamp}, i.e. the
+     * odometry-frame counterpart of {@link #fusedPose}. The pair is what lets
+     * getEstimatedPose() convert odometry motion into field motion.
+     *
+     * <p>Snapshotted when the fused pose is applied rather than looked up from
+     * wheelPoseBuffer on demand: the buffer has a finite horizon, so after a long
+     * Pi outage the lookup would start failing and the pose would freeze exactly
+     * when dead reckoning matters most.
+     */
+    private Pose2d wheelAtFusedSample = new Pose2d();
+
+    /** False until the first fused pose (or reset) gives us a field-frame anchor. */
+    private boolean hasFusedAnchor = false;
     private double fusedSampleTimestamp = 0.0;
     private long fusedSeqnum = -1;
     private double fusedAppliedWallClock = Double.NEGATIVE_INFINITY;
@@ -528,6 +543,12 @@ public class RobotState {
         fusedSampleTimestamp = 0.0;
         fusedSeqnum = -1;
         fusedAppliedWallClock = Double.NEGATIVE_INFINITY;
+        // wheelOdometry was just reset to `pose` above, so the two agree here and
+        // the composition in getEstimatedPose() is the identity until the robot
+        // moves. This is also the other way to acquire a field-frame anchor, so a
+        // dashboard reset gives a usable pose with no Pi involved.
+        wheelAtFusedSample = pose;
+        hasFusedAnchor = true;
 
         // Tell the Pi to reset its factor graph to this pose.
         resetRequestSeqnum++;
@@ -607,6 +628,12 @@ public class RobotState {
         fusedSeqnum = observation.seqnum();
         fusedSampleTimestamp = observation.timestamp();
         fusedPose = observation.pose();
+        // Pair the fused pose with the odometry reading from the same instant, so
+        // the two stay a valid frame conversion even after the link goes away.
+        wheelAtFusedSample =
+            wheelPoseBuffer.getSample(observation.timestamp())
+                .orElseGet(wheelOdometry::getPoseMeters);
+        hasFusedAnchor = true;
         fusedAppliedWallClock = Timer.getFPGATimestamp();
         Logger.recordOutput("RobotState/PoseLink/RejectedStale", false);
         Logger.recordOutput("RobotState/PoseLink/AppliedPose", fusedPose);
@@ -700,16 +727,22 @@ public class RobotState {
      */
     @AutoLogOutput(key = "RobotState/PoseEstimation/PoseEstimation")
     public Pose2d getEstimatedPose() {
-        if (!isFusedPoseFresh()) {
+        // Raw wheel odometry only until the very first fix. Its frame is wherever
+        // the robot happened to boot - the origin, in practice, since resetPose()
+        // is only reached from an auto routine - so it is not interchangeable with
+        // the field-frame fused pose.
+        if (!hasFusedAnchor) {
             return wheelOdometry.getPoseMeters();
         }
-        Optional<Pose2d> wheelAtFused = wheelPoseBuffer.getSample(fusedSampleTimestamp);
-        if (wheelAtFused.isEmpty()) {
-            // Sample aged out of the buffer (or none yet); the uncompensated pose
-            // is still better than falling back to wheel-only.
-            return fusedPose;
-        }
-        return fusedPose.plus(new Transform2d(wheelAtFused.get(), wheelOdometry.getPoseMeters()));
+        // Otherwise always dead-reckon FROM the last accepted fused pose, whether
+        // or not it is still fresh. Fresh, this is the latency correction the
+        // comment above describes. Stale - Pi restarted, link dropped - the anchor
+        // simply stops advancing and this becomes pure dead reckoning from the last
+        // known field position, which is what a fallback should be.
+        //
+        // Returning wheelOdometry raw when stale (what this did before) teleported
+        // the robot to its boot frame the instant the Pi restarted.
+        return fusedPose.plus(new Transform2d(wheelAtFusedSample, wheelOdometry.getPoseMeters()));
     }
 
     public Rotation2d getRotation() {
