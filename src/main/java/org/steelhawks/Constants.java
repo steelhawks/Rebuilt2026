@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.steelhawks.util.Maths;
 import org.steelhawks.util.LoggedTunableNumber;
 
@@ -110,6 +111,29 @@ public final class Constants {
         // accel, down if they over-lead. Set to 0 to disable latency compensation.
         public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =
             new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.135);
+        // Which acceleration source SOTM uses. Defaults to the velocity derivative,
+        // NOT the Pigeon, on measured behaviour: the turret does not jitter at all on
+        // the derivative and does on the Pigeon, and filtering the Pigeon hard enough
+        // to match never got there.
+        //
+        // The Pigeon was originally preferred for measuring the chassis' real
+        // acceleration, including what odometry cannot resolve (defense hits, wheel
+        // slip). The problem is that "everything the chassis really does" also
+        // includes gear and wheel vibration, chassis rock on the bumpers, and the
+        // firmware's own gravity-vector estimate wandering - none of which move the
+        // shooter along the trajectory SOTM is trying to lead.
+        //
+        // There is also a consistency argument. The lead is v*TOF + (accel terms),
+        // and v comes from currentChassisSpeeds, which is module-derived. Taking a
+        // from a different sensor than v means the two disagree about what the robot
+        // is doing; differentiating the same signal keeps them consistent, and the
+        // accel term is a small correction on top of the velocity term anyway
+        // (gain 0.185 m per m/s^2, against 1.3 m per m/s for velocity).
+        //
+        // Left as a live toggle rather than deleted so the Pigeon path stays testable
+        // without a redeploy.
+        public static final LoggedNetworkBoolean PREFER_GYRO_ACCEL =
+            new LoggedNetworkBoolean("SOTM/PreferGyroAccel", false);
         // Low-pass filter time constants for the acceleration estimate fed into SOTM.
         // Two of them because the two sources have very different noise floors: the
         // Pigeon measures the chassis' REAL acceleration, which includes gear and

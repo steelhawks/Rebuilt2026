@@ -337,15 +337,14 @@ public class RobotState {
         double now = Timer.getFPGATimestamp();
         double dt = now - previousFieldVelocityTimestampSec;
 
-        // Pick the acceleration source. Pigeon is preferred because it measures the
-        // robot's REAL body acceleration (including defense hits, wheel slip) with
-        // ~1ms latency, whereas the velocity derivative only sees motion the
-        // odometry can resolve. Falls back to the derivative if the IMU isn't
-        // reporting valid linear-accel signals.
+        // Pick the acceleration source. The velocity derivative is the default and
+        // the Pigeon is opt-in; see SOTMConstants.PREFER_GYRO_ACCEL for why that is
+        // the way round it is. Either way this falls through to the derivative when
+        // the IMU is not reporting valid linear-accel signals.
         Translation2d rawAccel = null;
         String accelSource;
         boolean usingGyroAccel = false;
-        if (gyroBodyAccelValid) {
+        if (gyroBodyAccelValid && Constants.SOTMConstants.PREFER_GYRO_ACCEL.get()) {
             rawAccel = gyroBodyLinearAccelMps2.rotateBy(getRotation());
             accelSource = "Pigeon";
             usingGyroAccel = true;
