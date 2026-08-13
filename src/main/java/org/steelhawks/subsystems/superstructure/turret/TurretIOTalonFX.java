@@ -117,7 +117,7 @@ public class TurretIOTalonFX implements TurretIO {
     public void updateInputs(TurretIOInputs inputs) {
         inputs.connected = BaseStatusSignal.isAllGood(position, velocity, voltage, current, torqueCurrent, temp);
         inputs.positionRad = Rotation2d.fromRotations(position.getValueAsDouble());
-        inputs.velocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
+        inputs.velocityRadPerSec = Rotation2d.fromRotations(velocity.getValueAsDouble());
         inputs.appliedVolts = voltage.getValueAsDouble();
         inputs.supplyCurrentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
