@@ -73,7 +73,7 @@ public class Turret extends SubsystemBase {
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
     private final LoggedTunableNumber constantForceFF =
-        new LoggedTunableNumber("Turret/ConstantForceFF", 45.0);
+        new LoggedTunableNumber("Turret/ConstantForceFF", 20.0);
 
     private static final double JAM_VELOCITY_THRESHOLD = Units.degreesToRadians(2.0); // rad/s
     private static final double JAM_ERROR_THRESHOLD = Units.degreesToRadians(5.0);
