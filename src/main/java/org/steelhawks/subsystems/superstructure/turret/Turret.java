@@ -75,6 +75,13 @@ public class Turret extends SubsystemBase {
     private final LoggedTunableNumber constantForceFF =
         new LoggedTunableNumber("Turret/ConstantForceFF", 20.0);
 
+    // Rolloff widths for the Coulomb-friction feedforward that replaced Slot0.kS -
+    // see the comment on TurretIOTalonFX's Slot0 config for why it moved out of the
+    // motor. Each is the span over which its term reaches full kS, so smaller is
+    // more aggressive and more chatter-prone.
+    private final LoggedTunableNumber staticFFVelocityRolloff;
+    private final LoggedTunableNumber staticFFErrorRolloff;
+
     private static final double JAM_VELOCITY_THRESHOLD = Units.degreesToRadians(2.0); // rad/s
     private static final double JAM_ERROR_THRESHOLD = Units.degreesToRadians(5.0);
     private static final double JAM_DETECTION_TIME = 0.3; // seconds
@@ -97,6 +104,10 @@ public class Turret extends SubsystemBase {
             new LoggedTunableNumber("Turret/MaxAccelerationRadPerSecSq", constants.maxAccelerationRadPerSecSq());
         maxJerkRadPerSecCubed =
             new LoggedTunableNumber("Turret/MaxJerkRadPerSecCubed", 0.0);
+        staticFFVelocityRolloff =
+            new LoggedTunableNumber("Turret/StaticFFVelocityRolloffRadPerSec", Units.degreesToRadians(20.0));
+        staticFFErrorRolloff =
+            new LoggedTunableNumber("Turret/StaticFFErrorRolloffRad", Units.degreesToRadians(2.0));
         manualIncrement = new LoggedTunableNumber("Turret/ManualIncrement", constants.manualIncrement());
         currentHomingThres = new LoggedTunableNumber("Turret/CurrentHomingThresholdAmps", constants.currentHomingThreshold());
         isHomed = Constants.getRobot().equals(RobotType.OMEGABOT);
@@ -124,7 +135,7 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/IsJammedOrDeadSpot")
     public boolean isJammedOrInDeadSpot() {
         boolean stuckWithError =
-            Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
+            Math.abs(inputs.velocityRadPerSec) < JAM_VELOCITY_THRESHOLD
                 && Math.abs(getPosition().getRadians() - desiredRotation.getRadians()) > JAM_ERROR_THRESHOLD
                 && shouldRun;
         boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
@@ -143,7 +154,7 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/IsTraversing")
     public boolean isTraversing() {
         return Math.abs(inputs.positionRad.getRadians() - desiredRotation.getRadians()) > tolerance
-            || Math.abs(inputs.velocityRadPerSec.getRadians()) > Units.degreesToRadians(10.0);
+            || Math.abs(inputs.velocityRadPerSec) > Units.degreesToRadians(10.0);
     }
 
     private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
@@ -202,6 +213,39 @@ public class Turret extends SubsystemBase {
 
         double tangentialVelocity = turretVelocity.dot(rHatPerpendicular);
         return (tangentialVelocity / distance) - omegaRobot;
+    }
+
+    /**
+     * Coulomb-friction feedforward in amps, replacing {@code Slot0.kS}.
+     *
+     * <p>Same term Phoenix would apply, with the sign <em>ramped</em> rather than
+     * switched. Phoenix uses {@code kS*sign(reference velocity)}, falling back to
+     * {@code kS*sign(position error)} at zero reference velocity, and neither has a
+     * deadband. A settled turret tracking a live SOTM goal sees its error sign flip
+     * on setpoint noise of a milliradian or so, which toggles the full +-kS every
+     * loop - 36 A peak to peak at kS=18. That is the buzz, and no amount of upstream
+     * filtering removes it, because the flip needs only for the noise to cross zero.
+     *
+     * <p>Both regimes are kept, because they model different physics: while moving,
+     * friction opposes actual motion, so the term follows measured velocity; while
+     * stopped, static friction holds any load up to breakaway, so the term has to
+     * pick a direction from the error to break away at all. Summing the two ramps
+     * and clamping handles the handoff, and makes the two disagree constructively:
+     * on an overshoot (moving one way, error the other) they partially cancel, which
+     * is the damping you want there anyway.
+     */
+    private double calculateStaticFF(double errorRad) {
+        double magnitude = kS.getAsDouble();
+        if (magnitude == 0.0) return 0.0;
+        double velRolloff = staticFFVelocityRolloff.getAsDouble();
+        double errRolloff = staticFFErrorRolloff.getAsDouble();
+        double fromVelocity = velRolloff > 0.0
+            ? inputs.velocityRadPerSec / velRolloff
+            : Math.signum(inputs.velocityRadPerSec);
+        double fromError = errRolloff > 0.0
+            ? errorRad / errRolloff
+            : Math.signum(errorRad);
+        return magnitude * MathUtil.clamp(fromVelocity + fromError, -1.0, 1.0);
     }
 
     private List<Translation3d> createTrajectory(Translation3d target3d, Translation2d target2d) {
@@ -442,10 +486,14 @@ public class Turret extends SubsystemBase {
                 constantForceSpringFF = -constantForceFF.getAsDouble() * Math.min(depth, 1.0);
             }
             Logger.recordOutput("Turret/ForceSpringActive", springPullsNegative || springPullsPositive);
+            double staticFF =
+                calculateStaticFF(desiredRotation.getRadians() - getPosition().getRadians());
+            Logger.recordOutput("Turret/StaticFF", staticFF);
             io.runPivotMM(
                 desiredRotation.getRadians(),
                 kV.getAsDouble() * calculateTurretVelocityFF(velocityTargetFF)
                     + constantForceSpringFF
+                    + staticFF
             );
             Logger.recordOutput("Turret/GoalPosition", desiredRotation.getRadians());
         } else {
@@ -514,7 +562,7 @@ public class Turret extends SubsystemBase {
                     () -> {
                         double current = timer.get() * FF_RAMP_RATE;
                         io.runOpenLoop(current, true);
-                        velocitySamples.add(inputs.velocityRadPerSec.getRadians());
+                        velocitySamples.add(inputs.velocityRadPerSec);
                         currentSamples.add(current);
                     },
                     this)

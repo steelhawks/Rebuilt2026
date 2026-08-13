@@ -53,7 +53,7 @@ public class TurretIOSim implements TurretIO {
 
         inputs.connected = true;
         inputs.positionRad = new Rotation2d(mMotor.getAngularPosition());
-        inputs.velocityRadPerSec = new Rotation2d(mMotor.getAngularVelocityRadPerSec());
+        inputs.velocityRadPerSec = mMotor.getAngularVelocityRadPerSec();
         inputs.appliedVolts = mMotor.getInputVoltage();
         inputs.supplyCurrentAmps = mMotor.getCurrentDrawAmps();
         inputs.torqueCurrentAmps = mMotor.getTorqueNewtonMeters() / DCMotor.getKrakenX60Foc(1).KtNMPerAmp;
