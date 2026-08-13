@@ -181,7 +181,7 @@ public class RobotConfig {
                 .withHood(true, SubsystemConstants.OmegaBot.HOOD)
                 .withOldIntake(false)
                 .withIntake(true, SubsystemConstants.OmegaBot.INTAKE)
-                .withIndexer(false, SubsystemConstants.OmegaBot.INDEXER)
+                .withIndexer(true, SubsystemConstants.OmegaBot.INDEXER)
                 .withAutos(false)
                 .withFactory(new OmegaBotFactory())
                 .build();

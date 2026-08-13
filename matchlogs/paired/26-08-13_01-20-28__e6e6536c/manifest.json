@@ -1,0 +1,47 @@
+{
+  "session_id": "e6e6536c3a24225a",
+  "stamp": "26-08-13_01-20-28",
+  "rio": {
+    "session": "e6e6536c3a24225a",
+    "git_sha": "c55e55385c94bb4f531110ccdc4914b7745fb553",
+    "git_branch": "fix/gtsam-jumps",
+    "git_dirty": "Uncommitted changes",
+    "robot": "OMEGA",
+    "name": "akit_26-08-13_01-20-28.wpilog",
+    "file": "26-08-13_01-20-28__e6e6536c_rio.wpilog",
+    "size_bytes": 31059968
+  },
+  "pi": {
+    "session": "e6e6536c3a24225a",
+    "git_sha": "ea77a32",
+    "clock_offset_sec": -69.24830766666669,
+    "clock_drift_sec_per_sec": 0.09068244506827922,
+    "rio_clock_samples": 3419,
+    "pi_span_sec": [
+      87.051532,
+      174.171524
+    ],
+    "name": "akit_26-06-07_01-45-33.wpilog",
+    "file": "26-08-13_01-20-28__e6e6536c_pi.wpilog",
+    "size_bytes": 3100672
+  },
+  "clock_offset_sec": -69.24830766666669,
+  "clock_drift_sec_per_sec": 0.09068244506827922,
+  "note": "add clock_offset_sec to a Pi log timestamp to get RIO time. A Pi log can span several RIO sessions, so it may be copied into more than one folder - pi.pi_span_sec is the slice of it that belongs to THIS session, in Pi-log seconds. clock_offset_sec is the primary Pi log's; entries in pi_extra carry their own.",
+  "pi_extra": [
+    {
+      "session": "e6e6536c3a24225a",
+      "git_sha": "ea77a32",
+      "clock_offset_sec": 107.77737499999998,
+      "clock_drift_sec_per_sec": -8.559194896788001e-05,
+      "rio_clock_samples": 10309,
+      "pi_span_sec": [
+        0.714345,
+        228.198098
+      ],
+      "name": "akit_26-06-07_01-48-30.wpilog",
+      "file": "26-08-13_01-20-28__e6e6536c_pi2.wpilog",
+      "size_bytes": 12014051
+    }
+  ]
+}

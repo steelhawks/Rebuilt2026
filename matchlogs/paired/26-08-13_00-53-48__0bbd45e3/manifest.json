@@ -1,0 +1,61 @@
+{
+  "session_id": "0bbd45e35c4a2b11",
+  "stamp": "26-08-13_00-53-48",
+  "rio": {
+    "session": "0bbd45e35c4a2b11",
+    "git_sha": "ea77a32bd4d3698ad21891df3f653297aafaba6c",
+    "git_branch": "fix/gtsam-jumps",
+    "git_dirty": "Unknown",
+    "robot": "OMEGA",
+    "name": "akit_26-08-13_00-53-48.wpilog",
+    "file": "26-08-13_00-53-48__0bbd45e3_rio.wpilog",
+    "size_bytes": 28831744
+  },
+  "pi": {
+    "session": "0bbd45e35c4a2b11",
+    "git_sha": "ea77a32",
+    "clock_offset_sec": 29.058741999999995,
+    "clock_drift_sec_per_sec": -0.0025534651225908793,
+    "rio_clock_samples": 3065,
+    "pi_span_sec": [
+      0.643904,
+      72.475488
+    ],
+    "name": "akit_26-06-07_01-20-21.wpilog",
+    "file": "26-08-13_00-53-48__0bbd45e3_pi.wpilog",
+    "size_bytes": 1480678
+  },
+  "clock_offset_sec": 29.058741999999995,
+  "clock_drift_sec_per_sec": -0.0025534651225908793,
+  "note": "add clock_offset_sec to a Pi log timestamp to get RIO time. A Pi log can span several RIO sessions, so it may be copied into more than one folder - pi.pi_span_sec is the slice of it that belongs to THIS session, in Pi-log seconds. clock_offset_sec is the primary Pi log's; entries in pi_extra carry their own.",
+  "pi_extra": [
+    {
+      "session": "0bbd45e35c4a2b11",
+      "git_sha": "ea77a32",
+      "clock_offset_sec": 104.29019777777776,
+      "clock_drift_sec_per_sec": 5.071938920397998e-05,
+      "rio_clock_samples": 9607,
+      "pi_span_sec": [
+        0.706063,
+        203.440278
+      ],
+      "name": "akit_26-06-07_01-21-37.wpilog",
+      "file": "26-08-13_00-53-48__0bbd45e3_pi2.wpilog",
+      "size_bytes": 6545198
+    },
+    {
+      "session": "0bbd45e35c4a2b11",
+      "git_sha": "ea77a32",
+      "clock_offset_sec": null,
+      "clock_drift_sec_per_sec": null,
+      "rio_clock_samples": 1,
+      "pi_span_sec": [
+        37.236857,
+        37.236857
+      ],
+      "name": "akit_26-06-07_01-19-42.wpilog",
+      "file": "26-08-13_00-53-48__0bbd45e3_pi3.wpilog",
+      "size_bytes": 524288
+    }
+  ]
+}
