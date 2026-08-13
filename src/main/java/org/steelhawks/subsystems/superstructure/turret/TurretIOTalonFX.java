@@ -58,16 +58,7 @@ public class TurretIOTalonFX implements TurretIO {
         motorConfig.Slot0.kP = constants.kP();
         motorConfig.Slot0.kI = constants.kI();
         motorConfig.Slot0.kD = constants.kD();
-        // Slot0.kS is deliberately left at zero. Phoenix applies kS as
-        // kS*sign(reference velocity), falling back to kS*sign(position error) once
-        // the reference velocity reaches zero - and that fallback has no deadband. A
-        // settled turret tracking a live SOTM goal sees the error sign flip on
-        // sub-milliradian setpoint noise, so kS toggles +-18 A (roughly 6 Nm at the
-        // mechanism, 12 Nm peak to peak) at loop rate. That is the buzz.
-        // Turret.calculateStaticFF reimplements the same term with a ramped sign
-        // instead of a switched one and feeds it in through the arbitrary
-        // feedforward; constants.kS() is still its magnitude.
-        motorConfig.Slot0.kS = 0.0;
+        motorConfig.Slot0.kS = constants.kS();
 
         motorConfig.Slot1.kP = 5000.0;
         motorConfig.Slot1.kI = 125.0;
@@ -122,7 +113,7 @@ public class TurretIOTalonFX implements TurretIO {
     public void updateInputs(TurretIOInputs inputs) {
         inputs.connected = BaseStatusSignal.isAllGood(position, velocity, voltage, current, torqueCurrent, temp);
         inputs.positionRad = Rotation2d.fromRotations(position.getValueAsDouble());
-        inputs.velocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
+        inputs.velocityRadPerSec = Rotation2d.fromRotations(velocity.getValueAsDouble());
         inputs.appliedVolts = voltage.getValueAsDouble();
         inputs.supplyCurrentAmps = current.getValueAsDouble();
         inputs.torqueCurrentAmps = torqueCurrent.getValueAsDouble();
