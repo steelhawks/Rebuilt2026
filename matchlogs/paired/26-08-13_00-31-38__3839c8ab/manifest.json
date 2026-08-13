@@ -1,0 +1,31 @@
+{
+  "session_id": "3839c8abb4acc665",
+  "stamp": "26-08-13_00-31-38",
+  "rio": {
+    "session": "3839c8abb4acc665",
+    "git_sha": "ea77a32bd4d3698ad21891df3f653297aafaba6c",
+    "git_branch": "fix/gtsam-jumps",
+    "git_dirty": "Unknown",
+    "robot": "OMEGA",
+    "name": "akit_26-08-13_00-31-38.wpilog",
+    "file": "26-08-13_00-31-38__3839c8ab_rio.wpilog",
+    "size_bytes": 4427776
+  },
+  "pi": {
+    "session": "3839c8abb4acc665",
+    "git_sha": "ea77a32",
+    "clock_offset_sec": 31.82861299999997,
+    "clock_drift_sec_per_sec": null,
+    "rio_clock_samples": 176,
+    "pi_span_sec": [
+      0.679198,
+      4.858178
+    ],
+    "name": "akit_26-06-07_01-01-27.wpilog",
+    "file": "26-08-13_00-31-38__3839c8ab_pi.wpilog",
+    "size_bytes": 98304
+  },
+  "clock_offset_sec": 31.82861299999997,
+  "clock_drift_sec_per_sec": null,
+  "note": "add clock_offset_sec to a Pi log timestamp to get RIO time. A Pi log can span several RIO sessions, so it may be copied into more than one folder - pi.pi_span_sec is the slice of it that belongs to THIS session, in Pi-log seconds. clock_offset_sec is the primary Pi log's; entries in pi_extra carry their own."
+}
