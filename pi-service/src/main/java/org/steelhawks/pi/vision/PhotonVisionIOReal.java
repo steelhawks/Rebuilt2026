@@ -24,10 +24,19 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
     private final PhotonCamera[] cameras;
     private final Transform3d[] robotToCamera;
 
+    // Where frames go. Everything the estimator never sees is counted here, so a
+    // silent pipeline can be explained from the log alone.
+    private final long[] framesSeen;
+    private final long[] framesNoTimeSync;
+    private final long[] framesNoTargets;
+
     public PhotonVisionIOReal() {
         PiVisionConstants.Cam[] cfg = PiVisionConstants.CAMERAS;
         cameras = new PhotonCamera[cfg.length];
         robotToCamera = new Transform3d[cfg.length];
+        framesSeen = new long[cfg.length];
+        framesNoTimeSync = new long[cfg.length];
+        framesNoTargets = new long[cfg.length];
         for (int i = 0; i < cfg.length; i++) {
             cameras[i] = new PhotonCamera(cfg[i].name());
             robotToCamera[i] = cfg[i].robotToCamera();
@@ -46,14 +55,31 @@ public class PhotonVisionIOReal implements PhotonVisionIO {
     public List<CameraObservation> poll() {
         List<CameraObservation> out = new ArrayList<>();
         for (int i = 0; i < cameras.length; i++) {
+            String base = "PoseLinkPi/Cam/" + PiVisionConstants.CAMERAS[i].name() + "/";
             for (PhotonPipelineResult result : cameras[i].getAllUnreadResults()) {
-                Logger.recordOutput(
-                    "PoseLinkPi/Cam/" + PiVisionConstants.CAMERAS[i].name() + "/PongAgeMs",
-                    TimeSync.pongAgeMillis(result));
+                framesSeen[i]++;
+                Logger.recordOutput(base + "PongAgeMs", TimeSync.pongAgeMillis(result));
                 OptionalDouble captureTime = TimeSync.captureTime(result);
-                if (captureTime.isEmpty() || !result.hasTargets()) continue;
+                // These were one silent `continue`, which made a camera that sees
+                // nothing indistinguishable from one whose frames are all being
+                // thrown away for unconverged time sync. That distinction is the
+                // whole diagnosis when the pose never appears after a cold boot:
+                // no tags in view is a driver problem, dropped timestamps is a
+                // PhotonVision/NT startup-ordering problem.
+                if (captureTime.isEmpty()) {
+                    framesNoTimeSync[i]++;
+                    continue;
+                }
+                if (!result.hasTargets()) {
+                    framesNoTargets[i]++;
+                    continue;
+                }
                 decode(i, result, captureTime.getAsDouble()).ifPresent(out::add);
             }
+            Logger.recordOutput(base + "FramesSeen", framesSeen[i]);
+            Logger.recordOutput(base + "FramesDroppedNoTimeSync", framesNoTimeSync[i]);
+            Logger.recordOutput(base + "FramesDroppedNoTargets", framesNoTargets[i]);
+            Logger.recordOutput(base + "Connected", cameras[i].isConnected());
         }
         return out;
     }
