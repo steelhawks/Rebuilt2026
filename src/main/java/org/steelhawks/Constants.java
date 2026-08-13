@@ -110,10 +110,34 @@ public final class Constants {
         // accel, down if they over-lead. Set to 0 to disable latency compensation.
         public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =
             new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.135);
-        // Low-pass filter time constant for the acceleration estimate fed into SOTM.
-        // Trades responsiveness for jitter rejection on the differentiated velocity.
+        // Low-pass filter time constants for the acceleration estimate fed into SOTM.
+        // Two of them because the two sources have very different noise floors: the
+        // Pigeon measures the chassis' REAL acceleration, which includes gear and
+        // wheel vibration (easily +-5 m/s^2 peak), while the velocity derivative
+        // physically cannot see shake because the wheels do not measure it.
+        //
+        // Acceleration reaches the aim solution only through the launch-latency term,
+        // with gain D*(TOF + D/2) ~= 0.185 m of virtual-target shift per m/s^2. At
+        // 3.5 m from the hub that is ~3 deg of turret setpoint per m/s^2 of noise, so
+        // the accel estimate has to be quiet or the turret chases it. Real chassis
+        // acceleration changes on ~0.3 s timescales, so the 0.64 Hz corner below
+        // (tau = 0.25) costs essentially nothing in responsiveness.
         public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
             new LoggedTunableNumber("SOTM/AccelLPFTimeConstantSec", 0.05);
+        public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_GYRO_SEC =
+            new LoggedTunableNumber("SOTM/AccelLPFTimeConstantGyroSec", 0.25);
+        // Reject accelerations the drivetrain cannot physically produce. Applied to
+        // the RAW estimate, before the filter: a spike that reaches the accumulator
+        // takes ~tau to bleed back out, so it has to be rejected at the input.
+        public static final LoggedTunableNumber ACCEL_MAX_MPS2 =
+            new LoggedTunableNumber("SOTM/AccelMaxMps2", 7.0);
+        // Below this the accel lead is worth under 10 cm of virtual-target shift, which
+        // is inside the shot's own error budget. Zeroing it keeps residual sensor bias
+        // (uncalibrated Pigeon mount tilt leaves g*sin(theta): 2 deg = 0.34 m/s^2) from
+        // biasing the aim while the robot is parked. Scaled, not hard-cut - see
+        // RobotState.applyAccelDeadband.
+        public static final LoggedTunableNumber ACCEL_DEADBAND_MPS2 =
+            new LoggedTunableNumber("SOTM/AccelDeadbandMps2", 0.5);
     }
 
     public static final class RobotConstants {

@@ -31,6 +31,12 @@ public class GyroIOPigeon2 implements GyroIO {
     private final DoubleRingBuffer yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity;
 
+    // Mount pose as calibrated on the device, kept only for logging so an
+    // uncalibrated Pigeon is visible in the log instead of quietly biasing SOTM.
+    private final double mountPoseYawDeg;
+    private final double mountPosePitchDeg;
+    private final double mountPoseRollDeg;
+
     public GyroIOPigeon2(int pigeon2Id, CANBus canBus) {
         pigeon = new Pigeon2(pigeon2Id, canBus);
 
@@ -44,10 +50,24 @@ public class GyroIOPigeon2 implements GyroIO {
         gravityVectorZ = pigeon.getGravityVectorZ();
         yawVelocity = pigeon.getAngularVelocityZDevice();
 
-        // NOTE: mount pose must be calibrated separately so the firmware reports
-        // a correct gravity vector and tilt-aware yaw. Configure via
-        // Pigeon2Configuration.MountPose.{Yaw,Pitch,Roll} or the CTRE tuner.
-        pigeon.getConfigurator().apply(new Pigeon2Configuration());
+        // Mount pose lives on the device (Tuner X's "Mount Calibration" writes it
+        // there) and the firmware needs it to report a correct gravity vector and
+        // tilt-aware yaw. We deliberately do NOT apply a default-constructed
+        // Pigeon2Configuration here: that call zeroes MountPose.{Yaw,Pitch,Roll} on
+        // every boot, silently undoing the calibration. The fallout lands on SOTM,
+        // which subtracts the gravity vector from the raw accelerometer to get linear
+        // acceleration (see Swerve.periodic):
+        //   - residual tilt leaves a standing bias of g*sin(theta), so 2 deg of mount
+        //     error is 0.34 m/s^2 of phantom acceleration even while parked;
+        //   - a mount YAW error rotates the acceleration vector out of the robot
+        //     frame, so the shot lead is applied in the wrong direction entirely.
+        // Nothing else in this class depends on a factory-default config, so read the
+        // device's calibration back for logging and otherwise leave it alone.
+        Pigeon2Configuration onDeviceConfig = new Pigeon2Configuration();
+        PhoenixUtil.tryUntilOk(5, () -> pigeon.getConfigurator().refresh(onDeviceConfig));
+        mountPoseYawDeg = onDeviceConfig.MountPose.MountPoseYaw;
+        mountPosePitchDeg = onDeviceConfig.MountPose.MountPosePitch;
+        mountPoseRollDeg = onDeviceConfig.MountPose.MountPoseRoll;
         pigeon.getConfigurator().setYaw(0.0);
         roll.setUpdateFrequency(50.0);
         pitch.setUpdateFrequency(50.0);
@@ -87,6 +107,23 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
         Logger.recordOutput("Swerve/Gyro/AccelerationInGs", Math.hypot(inputs.accelerationXInGs, inputs.accelerationYInGs));
+        // Diagnostics for the SOTM acceleration path. With the robot flat and still:
+        //   GravityHorizontalComponent should be ~0 - anything above ~0.035 (2 deg of
+        //     tilt) means the mount pose is not calibrated and is feeding SOTM a
+        //     standing acceleration bias;
+        //   LinearAccelMagnitudeMps2 is the raw noise floor - read it off a log with
+        //     the robot driving to size SOTM/AccelDeadbandMps2 and SOTM/AccelMaxMps2.
+        Logger.recordOutput(
+            "Swerve/Gyro/GravityHorizontalComponent",
+            Math.hypot(inputs.gravityVectorX, inputs.gravityVectorY));
+        Logger.recordOutput(
+            "Swerve/Gyro/LinearAccelMagnitudeMps2",
+            Math.hypot(
+                inputs.accelerationXInGs - inputs.gravityVectorX,
+                inputs.accelerationYInGs - inputs.gravityVectorY) * 9.80665);
+        Logger.recordOutput("Swerve/Gyro/MountPose/YawDeg", mountPoseYawDeg);
+        Logger.recordOutput("Swerve/Gyro/MountPose/PitchDeg", mountPosePitchDeg);
+        Logger.recordOutput("Swerve/Gyro/MountPose/RollDeg", mountPoseRollDeg);
 
         int sampleCount = yawTimestampQueue.size();
         inputs.odometryYawTimestamps = new double[sampleCount];

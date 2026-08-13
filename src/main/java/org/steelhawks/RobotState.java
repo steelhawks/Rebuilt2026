@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -343,9 +344,11 @@ public class RobotState {
         // reporting valid linear-accel signals.
         Translation2d rawAccel = null;
         String accelSource;
+        boolean usingGyroAccel = false;
         if (gyroBodyAccelValid) {
             rawAccel = gyroBodyLinearAccelMps2.rotateBy(getRotation());
             accelSource = "Pigeon";
+            usingGyroAccel = true;
         } else if (previousFieldVelocityTimestampSec > 0.0 && dt > 1e-4 && dt < 0.1) {
             rawAccel = currentFieldVelocity.minus(previousFieldVelocity).div(dt);
             accelSource = "Derivative";
@@ -353,19 +356,39 @@ public class RobotState {
             accelSource = "Hold";
         }
         if (rawAccel != null) {
-            double tau = Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_SEC.get();
-            double effectiveDt = dt > 1e-4 ? dt : Constants.UPDATE_LOOP_DT;
+            // Clamp the raw estimate before it reaches the accumulator.
+            double maxAccel = Constants.SOTMConstants.ACCEL_MAX_MPS2.get();
+            double rawNorm = rawAccel.getNorm();
+            if (maxAccel > 0.0 && rawNorm > maxAccel) {
+                rawAccel = rawAccel.times(maxAccel / rawNorm);
+            }
+            // The Pigeon needs far more filtering than the derivative; see the two
+            // tau constants in SOTMConstants.
+            double tau = usingGyroAccel
+                ? Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_GYRO_SEC.get()
+                : Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_SEC.get();
+            // dt is garbage on the first loop (previousFieldVelocityTimestampSec is 0,
+            // so dt is the full FPGA time) and after any loop overrun. Both cases used
+            // to drive alpha to ~1 and snap the filter straight to the raw sample.
+            double effectiveDt =
+                (dt > 1e-4 && dt < 0.1) ? dt : Constants.UPDATE_LOOP_DT;
             double alpha = tau > 0.0 ? effectiveDt / (tau + effectiveDt) : 1.0;
             filteredFieldAcceleration =
                 filteredFieldAcceleration.times(1.0 - alpha).plus(rawAccel.times(alpha));
+            Logger.recordOutput("SOTM/RawFieldAccel", rawAccel);
+            Logger.recordOutput("SOTM/RawFieldAccelMagnitude", rawNorm);
+            Logger.recordOutput("SOTM/AccelLPFTauSec", tau);
         }
         previousFieldVelocity = currentFieldVelocity;
         previousFieldVelocityTimestampSec = now;
+
+        Translation2d commandedAcceleration = applyAccelDeadband(filteredFieldAcceleration);
         Logger.recordOutput("SOTM/FieldAccelEstimate", filteredFieldAcceleration);
+        Logger.recordOutput("SOTM/FieldAccelCommanded", commandedAcceleration);
         Logger.recordOutput("SOTM/AccelSource", accelSource);
 
         Translation3d fieldAcceleration = new Translation3d(
-            filteredFieldAcceleration.getX(), filteredFieldAcceleration.getY(), 0.0);
+            commandedAcceleration.getX(), commandedAcceleration.getY(), 0.0);
 
         movingShotSolution = ShooterStructure.Moving.solveMovingShot(
             target,
@@ -376,6 +399,27 @@ public class RobotState {
             Constants.SOTMConstants.MAX_ITERATIONS,
             Constants.SOTMConstants.TIME_TOLERANCE
         );
+    }
+
+    /**
+     * Scaled deadband on the acceleration magnitude, direction preserved.
+     *
+     * <p>Scaled rather than hard-cut so the output stays continuous across the
+     * threshold. A hard cut would step the virtual target by
+     * {@code deadband * D * (TOF + D/2)} (about 9 cm at 0.5 m/s^2) every time the
+     * estimate crossed it, which is exactly the kind of setpoint discontinuity the
+     * turret's motion profile cannot absorb.
+     */
+    private static Translation2d applyAccelDeadband(Translation2d accel) {
+        double deadband = Constants.SOTMConstants.ACCEL_DEADBAND_MPS2.get();
+        if (deadband <= 0.0) return accel;
+        double norm = accel.getNorm();
+        if (norm <= deadband) return Translation2d.kZero;
+        double max = Constants.SOTMConstants.ACCEL_MAX_MPS2.get();
+        // Guard against a max below the deadband, which would make applyDeadband
+        // rescale upward instead of down.
+        if (max <= deadband) return accel;
+        return accel.times(MathUtil.applyDeadband(norm, deadband, max) / norm);
     }
 
     public ShooterStructure.MovingShotSolution getMovingShotSolution() {
