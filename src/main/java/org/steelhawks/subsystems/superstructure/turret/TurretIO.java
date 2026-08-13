@@ -10,11 +10,7 @@ public interface TurretIO {
     class TurretIOInputs {
         public boolean connected = false;
         public Rotation2d positionRad = new Rotation2d();
-        // Plain double, not a Rotation2d: Rotation2d normalizes to (-pi, pi], so
-        // storing a velocity in one silently wrapped anything past 3.14 rad/s - and
-        // the cruise velocity is 30 rad/s. That corrupted jam detection, isTraversing,
-        // and the feedforward characterization's kV/kS fit.
-        public double velocityRadPerSec = 0.0;
+        public Rotation2d velocityRadPerSec = new Rotation2d();
         public double appliedVolts = 0.0;
         public double supplyCurrentAmps = 0.0;
         public double torqueCurrentAmps = 0.0;

@@ -124,7 +124,7 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/IsJammedOrDeadSpot")
     public boolean isJammedOrInDeadSpot() {
         boolean stuckWithError =
-            Math.abs(inputs.velocityRadPerSec) < JAM_VELOCITY_THRESHOLD
+            Math.abs(inputs.velocityRadPerSec.getRadians()) < JAM_VELOCITY_THRESHOLD
                 && Math.abs(getPosition().getRadians() - desiredRotation.getRadians()) > JAM_ERROR_THRESHOLD
                 && shouldRun;
         boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
@@ -143,7 +143,7 @@ public class Turret extends SubsystemBase {
     @AutoLogOutput(key = "Turret/IsTraversing")
     public boolean isTraversing() {
         return Math.abs(inputs.positionRad.getRadians() - desiredRotation.getRadians()) > tolerance
-            || Math.abs(inputs.velocityRadPerSec) > Units.degreesToRadians(10.0);
+            || Math.abs(inputs.velocityRadPerSec.getRadians()) > Units.degreesToRadians(10.0);
     }
 
     private Rotation2d findBestTurretAngle(double targetAngle, double currentAngle) {
@@ -514,7 +514,7 @@ public class Turret extends SubsystemBase {
                     () -> {
                         double current = timer.get() * FF_RAMP_RATE;
                         io.runOpenLoop(current, true);
-                        velocitySamples.add(inputs.velocityRadPerSec);
+                        velocitySamples.add(inputs.velocityRadPerSec.getRadians());
                         currentSamples.add(current);
                     },
                     this)
