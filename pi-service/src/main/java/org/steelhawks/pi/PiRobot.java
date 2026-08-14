@@ -57,6 +57,12 @@ public class PiRobot extends LoggedRobot {
     private boolean isOnBump = false;
     private double lastOdomTimestamp = 0.0;
     private Pose2d currentEstimate = new Pose2d();
+    // Whether currentEstimate is an estimate at all, or still the placeholder it
+    // was constructed with. Without this, "carry the pose across a RIO restart"
+    // reads as "anchor the graph at the field origin" for a service that has not
+    // localized yet - the same mistake appliedResetSeqnum used to make.
+    private boolean hasEstimate = false;
+    private NativePoseEstimator.Result lastResult = null;
     private long txSeqnum = 0;
 
     // Per-camera accept/reject tallies for the observation log.
@@ -126,6 +132,8 @@ public class PiRobot extends LoggedRobot {
         NativePoseEstimator.Result r = estimator.getResult();
         if (status == NativePoseEstimator.STATUS_OK) {
             currentEstimate = new Pose2d(r.x(), r.y(), new Rotation2d(r.theta()));
+            hasEstimate = true;
+            lastResult = r;
             if (!odomStale) {
                 link.sendFusedPose(
                     txSeqnum++,
@@ -159,6 +167,10 @@ public class PiRobot extends LoggedRobot {
         Logger.recordOutput("PoseLinkPi/SolveMs", solveMs);
         Logger.recordOutput("PoseLinkPi/Nodes", r.nodeCount());
         Logger.recordOutput("PoseLinkPi/Factors", r.factorCount());
+        // Should stay at zero: adoptRioSession is supposed to rebuild the graph
+        // before a restarted RIO clock ever reaches it. Nonzero means the shim had
+        // to catch it instead - the link's session id and its timestamps disagree.
+        Logger.recordOutput("PoseLinkPi/GraphTimeJumps", r.timeJumps());
         Logger.recordOutput("PoseLinkPi/DroppedOdom", link.droppedCount());
         Logger.recordOutput("PoseLinkPi/CamerasConnected", photon.allConnected());
         Logger.recordOutput("PoseLinkPi/AckRestartSeqnum", appliedRestartSeqnum);
@@ -329,20 +341,41 @@ public class PiRobot extends LoggedRobot {
      *       mark while {@code RobotState.resetRequestSeqnum} restarts at 0, so
      *       every reset up to that mark is silently dropped and the graph stays
      *       anchored to the old session's origin.
-     *   <li>the graph keeps the old boot's nodes and factors.
+     *   <li>the graph keeps the old boot's nodes and factors - and their
+     *       timestamps, which the new session's clock is now ~100 s behind. The
+     *       staging window in {@code PoseGraph::commitAgedNodes} compares each
+     *       node against the newest one it holds, so nodes stranded in the future
+     *       stop it committing anything, permanently. That is the failure the
+     *       2026-08-13 logs were full of: after a redeploy the pose looked right
+     *       for a moment and then went its own way, because the graph had quietly
+     *       stopped taking in odometry and vision and was dead-reckoning off a
+     *       node from the previous boot.
      * </ul>
      *
-     * <p>Dropping {@code appliedResetSeqnum} to -1 is what re-anchors it: the
-     * same packet that triggered this carries {@code resetSeqnum >= 0}, so it
-     * falls through to the reset branch in {@link #ingestOdometry} and rebuilds
-     * the graph around the RIO's reset pose before any odometry is applied.
+     * <p>The graph is therefore rebuilt here, anchored on the pose we currently
+     * hold - the robot does not move while its own code restarts, so that pose is
+     * still correct, and re-anchoring on it is what keeps the RIO's estimate
+     * continuous across a deploy instead of snapping somewhere else. Its variance
+     * is the graph's own marginal, floored at the commanded-reset anchor: a pose
+     * that survived someone else's reboot should never claim to be better known
+     * than one the RIO asserted. With no estimate yet there is nothing to carry,
+     * and the graph is left to localize from the first tag.
      */
     private void adoptRioSession() {
         rioSessionChanges++;
+        if (hasEstimate && lastResult != null) {
+            estimator.reset(
+                currentEstimate.getX(),
+                currentEstimate.getY(),
+                currentEstimate.getRotation().getRadians(),
+                Math.max(lastResult.covXX(), PiVisionConstants.ANCHOR_LINEAR_VARIANCE),
+                Math.max(lastResult.covYY(), PiVisionConstants.ANCHOR_LINEAR_VARIANCE),
+                Math.max(lastResult.covTheta(), PiVisionConstants.ANCHOR_ANGULAR_VARIANCE));
+            Logger.recordOutput("PoseLinkPi/SessionCarryoverPose", currentEstimate);
+        }
         lastOdomPose = null;
         appliedResetSeqnum = 0; // see the field comment: 0 is "never reset", not a command
         appliedRestartSeqnum = -1;
-        currentEstimate = new Pose2d();
         // The graph is about to be re-anchored, so the old estimate is not
         // something to gate incoming frames against.
         estimateTrusted = false;

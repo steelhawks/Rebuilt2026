@@ -287,6 +287,78 @@ int main() {
               "a second simultaneous observation changes the estimate");
     }
 
+    // 7. The RIO redeploying restarts its clock at zero. Before the guard in
+    //    addOdometry, the staged nodes from the old boot were left dated ~100 s in
+    //    the future, commitAgedNodes() broke on the first of them every cycle, and
+    //    the graph never committed another node - it reported STATUS_OK the whole
+    //    time while dead-reckoning off a frozen anchor and silently discarding
+    //    every tag. Nodes flat with Factors still climbing is the signature; every
+    //    Pi log from 2026-08-13 that outlived a redeploy has it.
+    {
+        std::printf("RIO clock restart (redeploy) mid-session:\n");
+        PoseGraph g(1.5);
+        g.reset(truthAt(0.0), var(0.01, 0.01, 0.02));
+
+        // 20 s of ordinary tracking on the first boot's clock.
+        double t = 0.0;
+        double nextFrame = kVisionLatency;
+        auto step = [&](double clock) {
+            Pose2 d = truthAt(t - kOdomDt).between(truthAt(t));
+            g.addOdometry(clock, d, kOdomVar);
+            while (nextFrame <= t) {
+                double capture = nextFrame - kVisionLatency;
+                if (capture > 0.0) {
+                    g.addVision(clock - (t - capture), truthAt(capture),
+                                var(2.5e-3, 2.5e-3, 4e-4));
+                }
+                nextFrame += 1.0 / 30.0;
+            }
+            g.update();
+        };
+        while (t < 20.0) {
+            t += kOdomDt;
+            step(t);
+        }
+        Pose2 before = g.pose();
+        int nodesBefore = g.nodeCount();
+        check(g.timeJumps() == 0, "no time jump reported during normal tracking");
+
+        // The robot does not move while the RIO reboots; when it comes back, its
+        // clock reads a few seconds rather than twenty-odd.
+        double newClock = 0.0;
+        t += kOdomDt;
+        newClock += kOdomDt;
+        step(newClock);
+        Pose2 seam = g.pose();
+
+        while (newClock < 1.0) {
+            t += kOdomDt;
+            newClock += kOdomDt;
+            step(newClock);
+        }
+        int nodesEarly = g.nodeCount();
+        while (newClock < 10.0) {
+            t += kOdomDt;
+            newClock += kOdomDt;
+            step(newClock);
+        }
+
+        Pose2 after = g.pose();
+        Pose2 truth = truthAt(t);
+        double err = std::hypot(after.x() - truth.x(), after.y() - truth.y());
+        std::printf("    nodes %d -> %d -> %d, timeJumps=%d, pos err after resume %.3f m\n",
+                    nodesBefore, nodesEarly, g.nodeCount(), g.timeJumps(), err);
+        check(g.timeJumps() == 1, "the backwards clock jump is detected once");
+        check(g.nodeCount() > nodesEarly,
+              "nodes keep being committed on the new clock");
+        check(g.status() == poselink::STATUS_OK, "status stays OK across the jump");
+        check(err < 0.15, "vision still corrects the pose after the restart");
+        // Continuity: crossing the seam must not move the robot. Re-anchoring keeps
+        // the pose it was holding; rebuilding empty would drop it at the origin.
+        check(std::hypot(seam.x() - before.x(), seam.y() - before.y()) < 0.05,
+              "the pose is carried across the restart, not reset to the origin");
+    }
+
     std::printf("\n%s (%d failure%s)\n", g_failures == 0 ? "ALL PASS" : "FAILED",
                 g_failures, g_failures == 1 ? "" : "s");
     return g_failures == 0 ? 0 : 1;

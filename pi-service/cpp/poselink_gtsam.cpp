@@ -72,20 +72,21 @@ JNIEXPORT jdoubleArray JNICALL
 
 Java_org_steelhawks_pi_gtsam_NativePoseEstimator_nativeGetResult(JNIEnv *env, jclass,
                                                                  jlong h) {
-    jdoubleArray out = env->NewDoubleArray(9);
+    jdoubleArray out = env->NewDoubleArray(10);
     auto *g = asGraph(h);
     if (!g) return out;
 
     gtsam::Pose2 p = g->pose();
     gtsam::Vector3 m = g->marginal();
-    jdouble buf[9] = {
+    jdouble buf[10] = {
         p.x(), p.y(), p.theta(),
         m(0), m(1), m(2),
         static_cast<jdouble>(g->nodeCount()),
         static_cast<jdouble>(g->factorCount()),
-        static_cast<jdouble>(g->status())
+        static_cast<jdouble>(g->status()),
+        static_cast<jdouble>(g->timeJumps())
     };
-    env->SetDoubleArrayRegion(out, 0, 9, buf);
+    env->SetDoubleArrayRegion(out, 0, 10, buf);
     return out;
 }
 

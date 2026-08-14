@@ -43,6 +43,18 @@ namespace poselink {
         status_ = STATUS_OK;
     }
 
+    void PoseGraph::reanchorHere() {
+        // pose() and marginal() both walk the staged nodes, so they must be read
+        // before rebuild() throws that list away.
+        Pose2 here = pose();
+        Vector3 m = marginal();
+        Vector3 v(std::max(std::fabs(m(0)), kMinReanchorLinearVar),
+                  std::max(std::fabs(m(1)), kMinReanchorLinearVar),
+                  std::max(std::fabs(m(2)), kMinReanchorAngularVar));
+        reset(here, v);
+        ++timeJumps_;
+    }
+
     bool PoseGraph::ensureAnchorNode(double t) {
         if (!nodes_.empty() || !haveAnchor_) return false;
         Node n;
@@ -57,6 +69,24 @@ namespace poselink {
     }
 
     void PoseGraph::addOdometry(double t, const Pose2 &delta, const Vector3 &variances) {
+        // The RIO's clock restarts at zero on every code deploy, and this graph
+        // stages nodes by measuring them against the newest timestamp it holds.
+        // A backwards jump strands every staged node in the future, so
+        // commitAgedNodes() breaks on the first of them and never commits another
+        // node for the rest of the process's life: odometry piles up uncommitted,
+        // accepted tags attach to nodes the smoother will never see, and the output
+        // free-runs from a frozen anchor while still reporting STATUS_OK. Every Pi
+        // log from 2026-08-13 that outlived a redeploy shows it - Nodes flat from
+        // the instant the RIO went quiet, Factors still climbing, vision-vs-fused
+        // error walking out to 17 cm with the quality score decaying to 0.05.
+        //
+        // Starting the graph over on the new time base costs nothing real: the robot
+        // does not move while its own code is rebooting, so the pose we are holding
+        // is still the right answer and is what we re-anchor on.
+        if (!nodes_.empty() && t < nodes_.back().t - kBackwardsJumpTolerance) {
+            reanchorHere();
+        }
+
         if (nodes_.empty()) {
             // The first sample after an anchor only fixes the anchor's timestamp; it has
             // no previous node, so its delta is dropped.

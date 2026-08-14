@@ -42,6 +42,14 @@ namespace poselink {
 
         int status() const { return status_; }
 
+        /**
+         * How many times the odometry clock has jumped backwards under us. Nonzero
+         * means something restarted the RIO's timer - normally a code deploy. It
+         * should match the Pi's RioSessionChanges; if it climbs on its own, the
+         * timestamps on the link are not trustworthy.
+         */
+        int timeJumps() const { return timeJumps_; }
+
     private:
         // One absolute measurement landing on a node. A node can carry several:
         // with N cameras at 30 Hz, frames routinely land within spliceEps of the
@@ -80,6 +88,8 @@ namespace poselink {
 
         void rebuild();
 
+        void reanchorHere(); // start over on a new time base, keeping the current pose
+
         bool ensureAnchorNode(double t); // materialize node 0 at the first timestamp we see
         void placeVision(const PendingVision &v);
 
@@ -95,6 +105,19 @@ namespace poselink {
         double stageWindow_ = 0.15; // hold odom edges this long so late tags can still splice
         double spliceEps_ = 0.005; // within this of a node -> attach instead of splice
 
+        // Odometry older than the newest node by more than this is a new time base,
+        // not a late packet. Generous by design: the link is in RIO-clock seconds and
+        // never reorders by anything close to a second, so nothing but a restarted
+        // clock reaches it, while anything smaller stays inside the normal splice path.
+        static constexpr double kBackwardsJumpTolerance = 1.0;
+
+        // Floor on the variance a carried-over pose is re-anchored with. Mirrors
+        // PiVisionConstants.ANCHOR_* : a pose we are keeping across someone else's
+        // reboot must never enter the new graph asserting more confidence than one
+        // the RIO explicitly commanded.
+        static constexpr double kMinReanchorLinearVar = 0.01;
+        static constexpr double kMinReanchorAngularVar = 0.02;
+
         gtsam::ISAM2Params isamParams_;
         gtsam::IncrementalFixedLagSmoother smoother_;
 
@@ -109,6 +132,7 @@ namespace poselink {
 
         gtsam::Vector3 frontierMargin_;
         int factorCount_ = 0;
+        int timeJumps_ = 0; // diagnostic only; deliberately survives rebuild()
         int status_ = STATUS_NOT_INITIALIZED;
     };
 } // namespace poselink

@@ -69,7 +69,8 @@ public final class NativePoseEstimator implements AutoCloseable {
             r[0], r[1], r[2],           // x, y, theta
             r[3], r[4], r[5],           // covXX, covYY, covTheta
             (int) r[6], (int) r[7],     // node count, factor count
-            (int) r[8]);                // status
+            (int) r[8],                 // status
+            (int) r[9]);                // backwards clock jumps absorbed
     }
 
     @Override
@@ -80,11 +81,19 @@ public final class NativePoseEstimator implements AutoCloseable {
         }
     }
 
-    /** Immutable snapshot returned by {@link #getResult()}. */
+    /**
+     * Immutable snapshot returned by {@link #getResult()}.
+     *
+     * <p>{@code timeJumps} counts the times the shim had to rebuild itself because
+     * odometry arrived on a clock that had restarted - the RIO redeploying under
+     * us. PiRobot normally gets there first via {@code adoptRioSession}, so this
+     * staying at zero across a deploy is the expected reading; it climbing means
+     * the session id did not tell us what the timestamps did.
+     */
     public record Result(
         double x, double y, double theta,
         double covXX, double covYY, double covTheta,
-        int nodeCount, int factorCount, int status) {}
+        int nodeCount, int factorCount, int status, int timeJumps) {}
 
     // ---- native surface (see cpp/poselink_gtsam.cpp) ----
     private static native String nativeVersion();
