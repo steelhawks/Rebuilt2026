@@ -81,7 +81,7 @@ public interface Toggles {
         LoggedNetworkBoolean toggleAdaptiveFeedforward =
             new LoggedNetworkBoolean("Toggles/Flywheel/ToggleAdaptiveFeedforward", true);
         LoggedNetworkBoolean useEnvelopeGate =
-            new LoggedNetworkBoolean("Toggles/Flywheel/UseEnvelopeGate", true);
+            new LoggedNetworkBoolean("Toggles/Flywheel/UseEnvelopeGate", false);
     }
 
     interface Turret {
