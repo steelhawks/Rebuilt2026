@@ -283,8 +283,7 @@ public class ShooterStructure {
             Rotation2d robotHeading,
             double chassisOmegaRadPerSec,
             int maxIterations,
-            double timeTolerance,
-            double tofSpeedScale
+            double timeTolerance
         ) {
             boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
             // Correct the LUT time-of-flight (hub shots only) for the actual launch
@@ -293,7 +292,6 @@ public class ShooterStructure {
             // flight time differs, and the turret lead would otherwise be wrong.
             // tofSpeedScale = setpoint/measured ≈ 1 when settled, so this is a no-op
             // for a steady-state shot. Ferry uses a kinematic TOF and is left alone.
-            double tofScale = isFerry ? 1.0 : tofSpeedScale;
             Translation2d turretXY = getTurretTranslation();
             // add turrets tangential velocity from chassis rotation.
             // for a point at (dx, dy) in robot frame rotating at omega rad/s:
@@ -332,7 +330,7 @@ public class ShooterStructure {
                     : Static.calculateShot(actualTarget, actualTarget, false, rawDist);
             double v = projectile.exitVelocity();
             double theta = projectile.hoodAngle();
-            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry) * tofScale;
+            double tGuess = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry);
             int convergedAt = maxIterations;
             for (int i = 0; i < maxIterations; i++) {
                 double dragC = Constants.SOTMConstants.DRAG_COEFFICIENT.get();
@@ -352,44 +350,11 @@ public class ShooterStructure {
                     : Static.calculateShot(virtualTarget, virtualTarget, false, rawDist);
                 v = projectile.exitVelocity();
                 theta = projectile.hoodAngle();
-                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry) * tofScale;
+                double newTof = calculateTimeOfFlight(v, theta, virtualDist, deltaH, !isFerry);
 
-                // Newton step: f(t) = LUT(d(t)) - t = 0
-                // f'(t) estimated via central finite difference on the TOF function,
-                // chained through the virtual distance which itself depends on t.
-                // dPrime = d/dt [ LUT(d(t)) ] = (dLUT/dd) * (dd/dt)
-                // dd/dt = d/dt ||hub - v*g(t)|| = -(v . (hub - v*g(t))) / d * e^(-c*t)
-                // where e^(-c*t) = d/dt g(t)
-                final double H = 0.005; // 5ms finite difference step
-                double tofHigh = calculateTimeOfFlight(
-                    projectile.exitVelocity(), projectile.hoodAngle(),
-                    MathUtil.clamp(
-                        turretXY.getDistance(new Translation3d(
-                            actualTarget.getX() + posOffsetX + (-velX * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess + H))) / dragC : (tGuess + H))),
-                            actualTarget.getY() + posOffsetY + (-velY * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess + H))) / dragC : (tGuess + H))),
-                            actualTarget.getZ()).toTranslation2d()),
-                        minShootDistance, maxShootDistance),
-                    deltaH, !isFerry) * tofScale;
-                double tofLow = calculateTimeOfFlight(
-                    projectile.exitVelocity(), projectile.hoodAngle(),
-                    MathUtil.clamp(
-                        turretXY.getDistance(new Translation3d(
-                            actualTarget.getX() + posOffsetX + (-velX * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess - H))) / dragC : (tGuess - H))),
-                            actualTarget.getY() + posOffsetY + (-velY * (dragC > 1e-6 ? (1.0 - Math.exp(-dragC * (tGuess - H))) / dragC : (tGuess - H))),
-                            actualTarget.getZ()).toTranslation2d()),
-                        minShootDistance, maxShootDistance),
-                    deltaH, !isFerry) * tofScale;
-                double dPrime = (tofHigh - tofLow) / (2.0 * H);
-                // f(t) = newTof - tGuess, f'(t) = dPrime - 1
-                double f = newTof - tGuess;
-                double fPrime = dPrime - 1.0;
-                double nextTof;
-                if (Math.abs(fPrime) > 0.01) {
-                    nextTof = tGuess - f / fPrime;
-                } else {
-                    nextTof = newTof; // fallback to fixed-point if derivative is degenerate
-                }
-                nextTof = MathUtil.clamp(nextTof, 0.05, 2.0);
+                // fixed point instead of newtons method
+                // im worried this will blow up when ever the tof is steep and get stuck to clamped values; returning to newtons method after brunswick may be benefital
+                double nextTof = MathUtil.clamp(newTof, 0.05, 2.0);
                 if (Math.abs(nextTof - tGuess) < timeTolerance) {
                     convergedAt = i + 1;
                     tGuess = nextTof;
@@ -401,7 +366,6 @@ public class ShooterStructure {
             Logger.recordOutput("SOTM/VirtualTarget", virtualTarget);
             Logger.recordOutput("SOTM/VirtualDistance", virtualDist);
             Logger.recordOutput("SOTM/TOF", tGuess);
-            Logger.recordOutput("SOTM/TofScaleApplied", tofScale);
             Logger.recordOutput("SOTM/LaunchLatency", D);
             Logger.recordOutput("SOTM/ExitVelocity", v);
             Logger.recordOutput("SOTM/HoodAngleDeg", Math.toDegrees(theta));
