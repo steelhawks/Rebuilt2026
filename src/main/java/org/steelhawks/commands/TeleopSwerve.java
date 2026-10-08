@@ -30,7 +30,7 @@ public class TeleopSwerve extends Command {
         new LoggedTunableNumber("TeleopSwerve/AnglekD", 0.0);
 
     private static final LoggedTunableNumber maxMetersPerSec =
-        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 3.0);
+        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 2.0); // was 3.0
     private static final LoggedTunableNumber maxMetersPerSecSq =
         new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSecSq", 4.0);
 
