@@ -102,7 +102,7 @@ public final class Constants {
         // 0.135s is the empirical median; tune up if shots still trail under hard
         // accel, down if they over-lead. Set to 0 to disable latency compensation.
         public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =
-            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.135);
+            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.05); // was 0.135
         // Low-pass filter time constant for the acceleration estimate fed into SOTM.
         // Trades responsiveness for jitter rejection on the differentiated velocity.
         public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
