@@ -91,6 +91,8 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleCurrentOverride", false);
+        LoggedNetworkBoolean rotateRobotWhenStuck =
+            new LoggedNetworkBoolean("Toggles/Turret/RotateRobotWhenStuck", false);
     }
 
     interface Intake {

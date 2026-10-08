@@ -401,6 +401,8 @@ public class ShooterStructure {
         shootingFlywheelVelocityMap.clear();
         shootingHoodAngleMap.clear();
         shootingTimeOfFlightMap.clear();
+        shootingFlywheelVelocityCloseMap.clear();
+        shootingFlywheelVelocityFarMap.clear();
 
         shootingFlywheelVelocityMap.put(1.743, 10.89);
         shootingFlywheelVelocityMap.put(2.086, 11.13);

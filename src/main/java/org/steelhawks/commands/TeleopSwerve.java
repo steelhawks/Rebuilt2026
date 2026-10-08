@@ -91,6 +91,7 @@ public class TeleopSwerve extends Command {
             .onTrue(setDriveState(DriveState.NORMAL));
 
         RobotState.getInstance().getTurretJamTrigger()
+            .and(Toggles.Turret.rotateRobotWhenStuck::get)
             .onTrue(setDriveState(DriveState.TURRET_ALIGN))
             .onFalse(Commands.runOnce(() -> {
                 if (currentDriveState == DriveState.TURRET_ALIGN) {
