@@ -144,8 +144,8 @@ public class Flywheel extends SubsystemBase {
                 && Toggles.Flywheel.isEnabled.get()
                 && !Toggles.Flywheel.toggleVoltageOverride.get()
                 && !Toggles.Flywheel.toggleCurrentOverride.get()
-                && RobotContainer.s_Hood.isHomed()
-                && RobotContainer.s_Hood.isZeroed();
+                && Subsystems.hood().isHomed()
+                && Subsystems.hood().isZeroed();
 
         if (Toggles.tuningMode.get()) {
             if (Toggles.Flywheel.toggleVoltageOverride.get()) {
@@ -304,8 +304,8 @@ public class Flywheel extends SubsystemBase {
                     RebuiltFuelOnFly fuelOnFly = new RebuiltFuelOnFly(
                         RobotState.getInstance().getEstimatedPose().getTranslation(),
                         Constants.RobotConstants.ROBOT_TO_TURRET.inverse().getTranslation().toTranslation2d(),
-                        RobotContainer.s_Swerve.getChassisSpeeds(),
-                        RobotContainer.s_Turret.getRotation().plus(Rotation2d.kPi),
+                        Subsystems.swerve().getChassisSpeeds(),
+                        Subsystems.turret().getRotation().plus(Rotation2d.kPi),
                         Meters.of(Constants.RobotConstants.ROBOT_TO_TURRET.getZ()),
                         MetersPerSecond.of(sol.exitVelocity()),
                         Radians.of(sol.hoodAngleRad())

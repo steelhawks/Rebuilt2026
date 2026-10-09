@@ -79,7 +79,15 @@ public final class Constants {
         };
     }
 
+    private static RobotType robotTypeOverride = null;
+
+    /** Test-only hook so RobotContainerTest can exercise every RobotType. */
+    public static void overrideRobotForTest(RobotType type) {
+        robotTypeOverride = type;
+    }
+
     public static RobotType getRobot() {
+        if (robotTypeOverride != null) return robotTypeOverride;
         if (RobotBase.isReal() && ROBOT_TYPE == RobotType.SIMBOT) {
 //            new Alert("Invalid robot selected, using omega robot as default.", AlertType.kError)
 //                .set(true);
@@ -96,9 +104,9 @@ public final class Constants {
         // empirically by combining the indexer-entry beam-break with the flywheel
         // velocity dip (the dip = ball passing through the rollers = real "ball
         // gone"). Across 5 worlds matches (q19,q37,q45,q54,q62), n=59 shots:
-        //     feeder→flywheel-dip: median 136ms, p25 103ms, p75 180ms
-        //     beam-fall→flywheel-dip: ~25ms (indexer→exit leg)
-        //     feeder→beam-fall: 111ms median (feeder→indexer leg)
+        //     feeder->flywheel-dip: median 136ms, p25 103ms, p75 180ms
+        //     beam-fall->flywheel-dip: ~25ms (indexer->exit leg)
+        //     feeder->beam-fall: 111ms median (feeder->indexer leg)
         // 0.135s is the empirical median; tune up if shots still trail under hard
         // accel, down if they over-lead. Set to 0 to disable latency compensation.
         public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =

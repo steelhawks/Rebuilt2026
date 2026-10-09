@@ -73,23 +73,22 @@ public class ShooterTuner {
             ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
             : manualDistance.get();
 
-        double currentAmps = RobotContainer.s_Flywheel.getStatorCurrentAmps();
+        double currentAmps = Subsystems.flywheel().getStatorCurrentAmps();
         updateCurrentBaseline(currentAmps);
         double baseline = getBaselineCurrent();
 
         if (Toggles.shooterTuningMode.get()) {
             double rps = ShooterStructure.linearToAngularVelocity(manualFlywheelSpeed.get(), FLYWHEEL_RADIUS);
-            RobotContainer.s_Flywheel.setTargetVelocityForced(rps);
-            if (RobotConfig.getConfig().hasHood && RobotContainer.s_Hood != null) {
-                RobotContainer.s_Hood.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get()));
-            }
+            Subsystems.flywheel().setTargetVelocityForced(rps);
+            Subsystems.hoodIfPresent().ifPresent(h ->
+                h.setDesiredPositionForced(Rotation2d.fromDegrees(manualHoodAngleDeg.get())));
         }
 
         if (feedBallTrigger.get()) {
             feedBallTrigger.set(false);
             tofState = ToFState.IDLE;
             lastTof = Double.NaN;
-            CommandScheduler.getInstance().schedule(RobotContainer.s_Indexer.feed());
+            CommandScheduler.getInstance().schedule(Subsystems.indexer().feed());
         }
 
         switch (tofState) {
@@ -112,7 +111,7 @@ public class ShooterTuner {
             saveTrigger.set(false);
             savedPoints.add(new double[]{activeDistance, manualHoodAngleDeg.get(), manualFlywheelSpeed.get(), lastTof});
             System.out.printf(
-                "[ShooterTuner] Saved point #%d → dist=%.2fm, hood=%.1f°, flywheel=%.1f, ToF=%s%n",
+                "[ShooterTuner] Saved point #%d -> dist=%.2fm, hood=%.1f deg, flywheel=%.1f, ToF=%s%n",
                 savedPoints.size(), activeDistance, manualHoodAngleDeg.get(), manualFlywheelSpeed.get(),
                 Double.isNaN(lastTof) ? "N/A" : String.format("%.4fs", lastTof));
             logAllSavedPoints();

@@ -152,10 +152,10 @@ public class SubsystemConstants {
             new FlywheelConstants(
                 5, 6, 0.85, 10.0, 0.0, 0.0, 6.94627, 0.02, 10.0, 1.0, 50, 1.68, Units.inchesToMeters(2.0), (1.0 / 1.0));
 
-//    ﻿﻿﻿﻿﻿﻿﻿﻿Warning ﻿﻿ 44000 ﻿﻿ DS Return Key Disable ﻿﻿ Driver Station ﻿﻿﻿
-//            ﻿﻿﻿﻿﻿﻿ ********** Flywheel FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: 7.44627 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.04831
+//    Warning  44000  DS Return Key Disable  Driver Station 
+//             ********** Flywheel FF Characterization Results ********** 
+//             	kS: 7.44627 
+//             	kV: 0.04831
 
         public static final TurretConstants TURRET =
             new TurretConstants(
@@ -191,9 +191,9 @@ public class SubsystemConstants {
             new HoodConstants(
                     7, 8, 200.0, 0.0, 0.0, 0.42170, 0.0, 0.0,  10.0, 12.0, 81.95, Rotation2d.fromDegrees(40.0), Rotation2d.fromDegrees(80.0), Rotation2d.fromRotations(0.382080078125).plus(Rotation2d.fromDegrees(80.0)), 4.0);
 
-//        ﻿﻿﻿﻿﻿﻿ ********** Hood FF Characterization Results ********** ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kS: -0.42170 ﻿
-//            ﻿﻿﻿﻿﻿﻿ 	kV: 0.02385 ﻿
+//         ********** Hood FF Characterization Results ********** 
+//             	kS: -0.42170 
+//             	kV: 0.02385 
 
 
         public static final IndexerConstants INDEXER =

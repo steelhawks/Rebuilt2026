@@ -69,7 +69,7 @@ public class Vision extends SubsystemBase {
 
     /**
      * Returns true if at least one of the tags currently seen by this camera is whitelisted.
-     * This is used to gate pose observations — if a camera is only seeing tags from the
+     * This is used to gate pose observations - if a camera is only seeing tags from the
      * opposing alliance, we reject all of its observations to prevent pose corruption.
      */
     private boolean cameraHasAllowedTag(int cameraIndex) {
@@ -194,7 +194,7 @@ public class Vision extends SubsystemBase {
                 if (cameraIndex < Objects.requireNonNull(VisionConstants.getCameraConfig()).length) {
                     double cameraLinearFactor = getCameraConfig()[cameraIndex].factors().getFactors()[0];
                     double cameraAngularFactor = getCameraConfig()[cameraIndex].factors().getFactors()[1];
-                    if (RobotContainer.s_Swerve.isOnBump()) {
+                    if (Subsystems.swerve().isOnBump()) {
                         linearStdDev *= VisionConstants.baselineDropOdomFactor.get();
                         angularStdDev *= VisionConstants.baselineDropOdomFactor.get();
                     } else {

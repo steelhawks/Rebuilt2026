@@ -80,7 +80,7 @@ public class RobotFootprint {
         for (double[] corner : corners) {
             points.add(toFieldFrame(robotPose, corner[0], corner[1]));
         }
-        // Extension tips — measured from robot center, so we add the bumper
+        // Extension tips - measured from robot center, so we add the bumper
         // projection in the extension direction plus the mechanism extension
         for (Extension ext : extensions) {
             double extLength = ext.getExtensionMeters();
