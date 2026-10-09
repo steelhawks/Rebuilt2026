@@ -108,7 +108,7 @@ public final class Constants {
         public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
             new LoggedTunableNumber("SOTM/AccelLPFTimeConstantSec", 0.05);
         public static final LoggedTunableNumber DRAG_COEFFICIENT =
-            new LoggedTunableNumber("SOTMConstants/DragCoefficient");
+            new LoggedTunableNumber("SOTMConstants/DragCoefficient", 0.17); // derived from quadratic drag force equation
     }
 
     public static final class RobotConstants {
