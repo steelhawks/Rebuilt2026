@@ -1,6 +1,7 @@
 package org.steelhawks;
 
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -41,7 +42,7 @@ public final class Constants {
     }
 
     // Change this based on what robot is being used.
-    private static final RobotType ROBOT = RobotType.OMEGABOT;
+    private static final RobotType ROBOT = RobotType.SIMBOT;
 
     /**
      * The robot type.
@@ -109,11 +110,13 @@ public final class Constants {
         // 0.135s is the empirical median; tune up if shots still trail under hard
         // accel, down if they over-lead. Set to 0 to disable latency compensation.
         public static final LoggedTunableNumber LAUNCH_LATENCY_SECONDS =
-            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.135);
+            new LoggedTunableNumber("SOTM/LaunchLatencySeconds", 0.05); // was 0.135
         // Low-pass filter time constant for the acceleration estimate fed into SOTM.
         // Trades responsiveness for jitter rejection on the differentiated velocity.
         public static final LoggedTunableNumber ACCEL_LPF_TIME_CONSTANT_SEC =
             new LoggedTunableNumber("SOTM/AccelLPFTimeConstantSec", 0.05);
+        public static final LoggedTunableNumber DRAG_COEFFICIENT =
+            new LoggedTunableNumber("SOTMConstants/DragCoefficient", 0.17); // derived from quadratic drag force equation
     }
 
     public static final class RobotConstants {

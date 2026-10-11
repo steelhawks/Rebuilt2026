@@ -16,23 +16,20 @@ public interface Toggles {
     static void configureOverrides() {
         if (Constants.getRobot() != Constants.RobotType.OMEGABOT) {
             Subsystems.turretIfPresent().ifPresent(t ->
-                bindMomentary("Dashboard/Zero/Turret", t.zeroTurret()));
+                    bindMomentary("Dashboard/Zero/Turret", t.zeroTurret()));
         }
         Subsystems.hoodIfPresent().ifPresent(h ->
-            bindMomentary("Dashboard/Zero/Hood", h.zeroHood()));
+                bindMomentary("Dashboard/Zero/Hood", h.zeroHood()));
         Subsystems.intakeIfPresent().ifPresent(i ->
-            bindMomentary("Dashboard/Zero/Intake", i.zeroIntake()));
+                bindMomentary("Dashboard/Zero/Intake", i.zeroIntake()));
         Subsystems.visionIfPresent().ifPresent(v -> {
             bindMomentary("Dashboard/VisionReset/LeftCorner", Commands.runOnce(
-                    () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getLeftCorner()))
-                .ignoringDisable(true));
+                            () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getLeftCorner()))
+                    .ignoringDisable(true));
             bindMomentary("Dashboard/VisionReset/RightCorner", Commands.runOnce(
-                    () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getRightCorner()))
-                .ignoringDisable(true));
+                            () -> RobotState.getInstance().resetToPose(FieldConstants.FieldCorners.getRightCorner()))
+                    .ignoringDisable(true));
         });
-
-        bindMomentary("Dashboard/LUT/UseLUTHardBalls", Commands.runOnce(ShooterStructure::loadLUTHard).ignoringDisable(true));
-        bindMomentary("Dashboard/LUT/UseLUTSoftBalls", Commands.runOnce(ShooterStructure::loadLUTSoft).ignoringDisable(true));
     }
 
     private static void bindMomentary(String key, Command command) {
@@ -85,6 +82,8 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Flywheel/ToggleCurrentOverride", false);
         LoggedNetworkBoolean toggleAdaptiveFeedforward =
             new LoggedNetworkBoolean("Toggles/Flywheel/ToggleAdaptiveFeedforward", true);
+        LoggedNetworkBoolean useEnvelopeGate =
+            new LoggedNetworkBoolean("Toggles/Flywheel/UseEnvelopeGate", false);
     }
 
     interface Turret {
@@ -94,6 +93,8 @@ public interface Toggles {
             new LoggedNetworkBoolean("Toggles/Turret/ToggleVoltageOverride", false);
         LoggedNetworkBoolean toggleCurrentOverride =
             new LoggedNetworkBoolean("Toggles/Turret/ToggleCurrentOverride", false);
+        LoggedNetworkBoolean rotateRobotWhenStuck =
+            new LoggedNetworkBoolean("Toggles/Turret/RotateRobotWhenStuck", false);
     }
 
     interface Intake {

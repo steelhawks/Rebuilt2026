@@ -544,12 +544,14 @@ public class Swerve extends SubsystemBase {
     public void followTrajectory(SwerveSample sample) {
         var robot = RobotState.getInstance().getEstimatedPose();
         var nextSetpoint = new Pose2d(sample.x, sample.y, new Rotation2d(sample.heading));
-        var speeds = autonController.getOutput(robot, nextSetpoint)
-            .plus(new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
+        var feedforward = ChassisSpeeds.fromFieldRelativeSpeeds(
+            sample.vx, sample.vy, sample.omega, robot.getRotation());
+        var pid = autonController.getOutput(robot, nextSetpoint);
+        var speeds = pid.plus(feedforward);
         Logger.recordOutput("Swerve/Auto/Setpoint", nextSetpoint);
         Logger.recordOutput("Swerve/Auto/Speeds", speeds);
-        Logger.recordOutput("Swerve/Auto/PID", speeds.minus(new ChassisSpeeds(sample.vx, sample.vy, sample.omega)));
-        Logger.recordOutput("Swerve/Auto/Feedforward", new ChassisSpeeds(sample.vx, sample.vy, sample.omega));
+        Logger.recordOutput("Swerve/Auto/PID", pid);
+        Logger.recordOutput("Swerve/Auto/Feedforward", feedforward);
         runVelocity(speeds);
     }
 

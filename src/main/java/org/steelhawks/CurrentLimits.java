@@ -3,6 +3,7 @@ package org.steelhawks;
 public interface CurrentLimits {
 
     interface SupplyLimit {
+        double driveCurrent = 45.0;
         double flywheelCurrent = 60.0;
         double hoodCurrent = 20.0;
         double turretCurrent = 20.0;

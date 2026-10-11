@@ -30,7 +30,7 @@ public class TeleopSwerve extends Command {
         new LoggedTunableNumber("TeleopSwerve/AnglekD", 0.0);
 
     private static final LoggedTunableNumber maxMetersPerSec =
-        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 3.0);
+        new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSec", 2.0); // was 3.0
     private static final LoggedTunableNumber maxMetersPerSecSq =
         new LoggedTunableNumber("TeleopSwerve/MaxMetersPerSecSq", 4.0);
 
@@ -91,6 +91,7 @@ public class TeleopSwerve extends Command {
             .onTrue(setDriveState(DriveState.NORMAL));
 
         RobotState.getInstance().getTurretJamTrigger()
+            .and(Toggles.Turret.rotateRobotWhenStuck::get)
             .onTrue(setDriveState(DriveState.TURRET_ALIGN))
             .onFalse(Commands.runOnce(() -> {
                 if (currentDriveState == DriveState.TURRET_ALIGN) {

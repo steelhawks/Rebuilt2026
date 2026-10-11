@@ -257,7 +257,7 @@ public class Turret extends SubsystemBase {
     }
 
     public Rotation2d getMaxRotation() {
-        return constants.minRotation();
+        return constants.maxRotation();
     }
 
     @Override

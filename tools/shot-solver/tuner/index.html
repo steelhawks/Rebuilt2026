@@ -3,16 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Shot Solver — Steelhawks</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Shot Solver — Live Tuner</title>
+  <link rel="stylesheet" href="../styles.css" />
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <span class="brand-name">SHOT SOLVER</span>
-      <span class="brand-sub">physics envelope · slip · LUT</span>
-      <a class="brand-link" href="tuner/">live tuner →</a>
+      <span class="brand-name">SHOT SOLVER · TUNER</span>
+      <span class="brand-sub">generate LUT · push over NT4 · drive &amp; verify</span>
     </div>
     <div class="readout" id="readout">
       <div class="rdo"><label>Optimal</label><span id="rd-optimal">—</span></div>
@@ -23,7 +22,7 @@
     </div>
   </header>
 
-  <main class="layout">
+  <main class="layout tuner-layout">
     <aside class="panel">
       <details open>
         <summary>Target</summary>
@@ -108,7 +107,7 @@
         </div>
       </details>
 
-      <details>
+      <details open>
         <summary>LUT export</summary>
         <div class="grid">
           <label>Distance min (m) <input id="i-lut-min" type="number" step="0.05" value="1.40"/></label>
@@ -133,8 +132,80 @@
         <div id="plot-env" class="plot"></div>
       </div>
     </section>
+
+    <!-- ─── live NT tuning overlay ─────────────────────────────────────── -->
+    <aside class="panel nt-panel">
+      <section class="nt-card">
+        <h3 class="nt-h">Robot connection</h3>
+        <div class="nt-row">
+          <span id="nt-dot" class="nt-dot down"></span>
+          <span id="nt-conn-text" class="nt-mono">disconnected</span>
+        </div>
+        <div class="nt-row">
+          <input id="nt-host" type="text" class="nt-input" value="localhost"
+                 placeholder="localhost · 10.44.14.2 · team #"/>
+          <button id="nt-connect">Connect</button>
+        </div>
+        <p class="nt-hint">Sim → <code>localhost</code>. Tethered → robot IP / <code>roborio-TEAM-frc.local</code> / team number.</p>
+      </section>
+
+      <section class="nt-card">
+        <h3 class="nt-h">Gate</h3>
+        <label class="nt-check">
+          <input id="nt-enable" type="checkbox"/>
+          Accept pushes <code>/GeneratedLUTTuner/Enabled</code>
+        </label>
+        <div class="nt-row"><span id="nt-enable-state" class="nt-flag">—</span></div>
+        <div class="nt-row">
+          <span id="nt-uselut-state" class="nt-flag">—</span>
+          <button id="nt-uselut-on" style="display:none">Turn useLUT on</button>
+        </div>
+      </section>
+
+      <section class="nt-card">
+        <h3 class="nt-h">Push</h3>
+        <div class="nt-row nt-btns">
+          <button id="nt-push" class="primary" disabled>Generate + Push</button>
+          <button id="nt-revert" disabled>Revert to baked</button>
+        </div>
+        <div id="nt-confirm" class="nt-confirm">No table pushed yet.</div>
+        <div class="nt-kv">
+          <span>status</span><span id="nt-status" class="nt-mono">—</span>
+          <span>rows</span><span id="nt-rows" class="nt-mono">—</span>
+          <span>min&nbsp;dist</span><span id="nt-min" class="nt-mono">—</span>
+          <span>max&nbsp;dist</span><span id="nt-max" class="nt-mono">—</span>
+        </div>
+      </section>
+
+      <section class="nt-card">
+        <h3 class="nt-h">Align helper</h3>
+        <div class="nt-kv">
+          <span>live dist</span><span id="nt-live" class="nt-mono">—</span>
+        </div>
+        <div class="nt-row">
+          <input id="nt-target" type="number" step="0.05" class="nt-input" placeholder="target distance (m)"/>
+          <button id="nt-set-target" disabled>Set</button>
+        </div>
+        <div class="nt-row"><span id="nt-error" class="nt-flag">set a target</span></div>
+      </section>
+
+      <details class="nt-card nt-docs">
+        <summary>How to run &amp; use</summary>
+        <ol class="nt-ol">
+          <li><b>Serve the site over HTTP</b> (an HTTPS page can't open a plaintext NT4 socket). From <code>tools/shot-solver</code>:
+            <pre class="nt-pre">python3 -m http.server 8080</pre>
+            then open <code>http://localhost:8080/tuner/</code>.</li>
+          <li><b>Tether</b> to the robot (USB / radio). For sim, just leave the host as <code>localhost</code>.</li>
+          <li><b>Connect</b> — type the robot host and hit Connect; the dot turns green.</li>
+          <li><b>Enable the gate</b> — check <code>Accept pushes</code> (sets <code>/GeneratedLUTTuner/Enabled</code>). Make sure <code>useLUT</code> reads ON, or the table won't be used when shooting.</li>
+          <li><b>Tune &amp; push</b> — adjust the solver sliders on the left, then <b>Generate + Push</b>. The confirm box turns green when the robot's echoed hash matches (it's running your exact table).</li>
+          <li><b>Drive &amp; verify</b> — drive and shoot normally; the robot uses the pushed table live. Use the align helper to park at a test distance. Nudge a slider, push again, repeat.</li>
+          <li><b>Revert</b> restores the baked LUT. The pushed table is RAM-only — a reboot also restores it, so just re-push. When happy, copy the Java (left panel) into <code>loadLUTSolved</code> to make it permanent.</li>
+        </ol>
+      </details>
+    </aside>
   </main>
 
-  <script type="module" src="src/app.js"></script>
+  <script type="module" src="../src/tuner.js"></script>
 </body>
 </html>

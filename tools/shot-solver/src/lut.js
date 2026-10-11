@@ -11,7 +11,7 @@
 // linear per the team's notes, with η_slip baked in). So this generator emits
 // the same units the existing code consumes.
 
-import { solveEnvelope, pickOptimal } from "./solver.js";
+import { solveEnvelope, pickOptimal, tolerances } from "./solver.js";
 import { simulateToGoalY } from "./physics.js";
 import { wheelRpsForBall, wheelMpsForBall } from "./slip.js";
 
@@ -48,6 +48,15 @@ export function generateLUT(sweep, geomBase, search, env, slip, wheelRadius, ang
     const revPerSec = wheelRpsForBall(opt.v0, slip, wheelRadius);
     const wheelMps = wheelMpsForBall(opt.v0, slip);
     const physDeg = opt.thetaRad * 180 / Math.PI;
+
+    // Envelope band at the chosen θ: speedLow/High are ball-exit margins to the
+    // close/far rim. Convert to commanded wheel m/s the same way as the centroid.
+    const tol = tolerances(envSolve, opt);
+    const ballClose = tol.speedLow != null ? opt.v0 - tol.speedLow : opt.v0;
+    const ballFar = tol.speedHigh != null ? opt.v0 + tol.speedHigh : opt.v0;
+    const wheelCloseMps = wheelMpsForBall(ballClose, slip);
+    const wheelFarMps = wheelMpsForBall(ballFar, slip);
+
     rows.push({
       distance: d,
       ok: true,
@@ -55,6 +64,11 @@ export function generateLUT(sweep, geomBase, search, env, slip, wheelRadius, ang
       hoodDeg: physDeg + angleBiasDeg, // what the hood motor should target
       exitMps: opt.v0,
       wheelMps,
+      wheelCloseMps,             // min commanded wheel m/s that still makes the goal
+      wheelFarMps,               // max commanded wheel m/s that still makes the goal
+      angleLowDeg: tol.angleLow != null ? tol.angleLow * 180 / Math.PI : 0,
+      angleHighDeg: tol.angleHigh != null ? tol.angleHigh * 180 / Math.PI : 0,
+      robustness: opt.score,
       wheelRevPerSec: revPerSec,
       wheelRadPerSec: revPerSec * 2 * Math.PI,
       tof: tofRes.t,
@@ -117,24 +131,36 @@ export function toJava(name, rows, params = null) {
     const tof = r.tof != null ? r.tof.toFixed(3) : "0.000";
     lines.push(`    shootingTimeOfFlightMap.put(${f3(r.distance)}, ${tof});`);
   }
+  if (params && params.emitEnvelope) {
+    lines.push(``);
+    lines.push(`    // Envelope band — min/max commanded wheel m/s that still scores at`);
+    lines.push(`    // each distance. Used by the distance-dependent ready gate.`);
+    for (const r of ok) {
+      lines.push(`    shootingFlywheelVelocityCloseMap.put(${f3(r.distance)}, ${f2(r.wheelCloseMps)});`);
+    }
+    lines.push(``);
+    for (const r of ok) {
+      lines.push(`    shootingFlywheelVelocityFarMap.put(${f3(r.distance)}, ${f2(r.wheelFarMps)});`);
+    }
+  }
   lines.push(`}`);
   return lines.join("\n");
 }
 
 /** Compact preview table for the UI. */
 export function toPreview(rows) {
-  const header = "dist(m)   hood°   ball m/s   wheel m/s   rev/s   rad/s   TOF(s)";
-  const sep    = "────────────────────────────────────────────────────────────────";
+  const header = "dist(m)   hood°   wheel m/s   band [close..far]   TOF(s)   robust";
+  const sep    = "──────────────────────────────────────────────────────────────────────";
   const body = rows.map(r => {
-    if (!r.ok) return `${r.distance.toFixed(3).padStart(7)}   —      —          —          —      —       —`;
+    if (!r.ok) return `${r.distance.toFixed(3).padStart(7)}   —       —          —                  —        —`;
+    const band = `${r.wheelCloseMps.toFixed(2)}..${r.wheelFarMps.toFixed(2)}`;
     return [
       r.distance.toFixed(3).padStart(7),
       r.hoodDeg.toFixed(1).padStart(5),
-      r.exitMps.toFixed(2).padStart(8),
       r.wheelMps.toFixed(2).padStart(9),
-      r.wheelRevPerSec.toFixed(1).padStart(5),
-      r.wheelRadPerSec.toFixed(1).padStart(6),
-      (r.tof ?? 0).toFixed(3).padStart(6),
+      band.padStart(17),
+      (r.tof ?? 0).toFixed(3).padStart(7),
+      (r.robustness ?? 0).toFixed(3).padStart(6),
     ].join("   ");
   }).join("\n");
   return [header, sep, body].join("\n");

@@ -42,6 +42,8 @@ public class Flywheel extends SubsystemBase {
     private final SysIdRoutine routine;
     private final Debouncer setpointDebouncer =
         new Debouncer(0.1, DebounceType.kRising);
+    private final Debouncer bandDebouncer =
+        new Debouncer(0.05, DebounceType.kRising);
 
     private LoggedTunableNumber tuningVolts;
     private LoggedTunableNumber tuningAmps;
@@ -50,6 +52,9 @@ public class Flywheel extends SubsystemBase {
     private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
     private boolean nearTargetVelocity = false;
+    private boolean inVelocityBand = false;
+    private double bandLoRadPerSec = Double.NaN;
+    private double bandHiRadPerSec = Double.NaN;
     private double targetVelocityRadPerSec = 0.0;
 
     private double cachedStationaryMps = Double.NaN;
@@ -63,12 +68,10 @@ public class Flywheel extends SubsystemBase {
     private static LoggedTunableNumber kV;
 
     private static double redBullConstant;
+    private static double manualRequestedSpeedInc = 1.0;
     private static final double ferryVelocityMultiplier = 1.61;
     private static final double ferryLongDistanceMultiplier = 1.20;
     private static final double ferryLongDistanceThresholdMeters = 8.0;
-
-    private boolean bumpUpSpeed = true;
-
     private static LoggedTunableNumber velocityTolerance;
     SubsystemConstants.FlywheelConstants constants;
 
@@ -81,6 +84,7 @@ public class Flywheel extends SubsystemBase {
         kS = new LoggedTunableNumber("Flywheel/kS", constants.kS());
         kV = new LoggedTunableNumber("Flywheel/kV", constants.kV());
         redBullConstant = constants.stationaryHoodVelocityFactor();
+        Logger.recordOutput("Flywheel/RedBullConstant", redBullConstant);
         velocityTolerance =
             new LoggedTunableNumber("Flywheel/VelocityToleranceRadPerSec", constants.velocityToleranceRadPerSec());
         routine =
@@ -100,12 +104,40 @@ public class Flywheel extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Flywheel", inputs);
         BatteryUtil.recordCurrentUsage("Flywheel", inputs.leftSupplyCurrentAmps + inputs.rightSupplyCurrentAmps);
-        Logger.recordOutput("Flywheel/BumpSpeed", bumpUpSpeed);
-        redBullConstant = Toggles.useLUT.get() ? ((bumpUpSpeed ? 1.04 : 1.0)) : constants.stationaryHoodVelocityFactor();
+        redBullConstant = Toggles.useLUT.get() ? manualRequestedSpeedInc : constants.stationaryHoodVelocityFactor();
 
+        double avgVelocityRadPerSec = (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
         nearTargetVelocity =
             setpointDebouncer.calculate(
-                Maths.epsilonEquals((inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0, targetVelocityRadPerSec, velocityTolerance.get()));
+                Maths.epsilonEquals(avgVelocityRadPerSec, targetVelocityRadPerSec, velocityTolerance.get()));
+
+        // Envelope band gate: accept any wheel speed inside the physics-valid
+        // [close, far] band for the current distance. The band edges come from the
+        // LUT as ratios of the centroid velocity, so scaling by the actual
+        // commanded target carries through every multiplier (redbull/ferry/auton).
+        // Only active for to-hub shots with an envelope-carrying LUT; otherwise
+        // bandLo stays NaN and isReadyToShoot() falls back to the symmetric check.
+        bandLoRadPerSec = Double.NaN;
+        bandHiRadPerSec = Double.NaN;
+        boolean rawInBand = false;
+        if (Toggles.Flywheel.useEnvelopeGate.get()
+                && Toggles.useLUT.get()
+                && targetVelocityRadPerSec > 0.0
+                && RobotState.getInstance().getAimState().equals(AimState.TO_HUB)
+        ) {
+            double dist = ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D));
+            double[] ratios = ShooterStructure.getVelocityBandRatios(dist);
+            if (ratios != null) {
+                bandLoRadPerSec = targetVelocityRadPerSec * ratios[0];
+                bandHiRadPerSec = targetVelocityRadPerSec * ratios[1];
+                rawInBand = avgVelocityRadPerSec >= bandLoRadPerSec
+                    && avgVelocityRadPerSec <= bandHiRadPerSec;
+            }
+        }
+        inVelocityBand = bandDebouncer.calculate(rawInBand);
+        Logger.recordOutput("Flywheel/BandLoRadPerSec", bandLoRadPerSec);
+        Logger.recordOutput("Flywheel/BandHiRadPerSec", bandHiRadPerSec);
+        Logger.recordOutput("Flywheel/InVelocityBand", inVelocityBand);
 
         final boolean shouldRun =
             DriverStation.isEnabled()
@@ -149,14 +181,13 @@ public class Flywheel extends SubsystemBase {
                         if (sol != null) {
                             boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
                             double ferryDist = isFerry
-                                ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
+                                ? ShooterStructure.distanceToTarget(ShooterStructure.Static.calculateFerryShot(ShooterStructure.Static.calculateFerryShotSetpoint()).target())
                                 : 0.0;
                             double ferryFactor = isFerry
                                 ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
                                 : 1.0;
                             double rps = ShooterStructure.linearToAngularVelocity(
-                                redBullConstant * sol.exitVelocity() * ferryFactor
-                                    * (DriverStation.isAutonomous() ? 1.02 : 1.0),
+                                redBullConstant * sol.exitVelocity() * ferryFactor,
                                 constants.flywheelRadius());
                             setTargetVelocity(rps);
                         }
@@ -165,7 +196,7 @@ public class Flywheel extends SubsystemBase {
                         double mps = getStationaryExitVelocityMps(hubCenter);
                         boolean isFerry = RobotState.getInstance().getAimState().equals(AimState.FERRY);
                         double ferryDist = isFerry
-                            ? ShooterStructure.distanceToTarget(AllianceFlip.apply(FieldConstants.Hub.HUB_CENTER_3D))
+                            ? ShooterStructure.distanceToTarget(ShooterStructure.Static.calculateFerryShot(ShooterStructure.Static.calculateFerryShotSetpoint()).target())
                             : 0.0;
                         double ferryFactor = isFerry
                             ? ferryVelocityMultiplier * (ferryDist > ferryLongDistanceThresholdMeters ? ferryLongDistanceMultiplier : 1.0)
@@ -185,7 +216,29 @@ public class Flywheel extends SubsystemBase {
 
     @AutoLogOutput(key = "Flywheel/ReadyToShoot")
     public boolean isReadyToShoot() {
+        // Prefer the physics-valid band when the active LUT carries one; the band
+        // is distance-correct and asymmetric (back-rim biased). Fall back to the
+        // symmetric velocity tolerance when no band is available (hard/soft LUT,
+        // ferry shots, or the gate toggled off).
+        if (Toggles.Flywheel.useEnvelopeGate.get() && !Double.isNaN(bandLoRadPerSec)) {
+            return inVelocityBand;
+        }
         return nearTargetVelocity;
+    }
+
+    /**
+     * Ratio of commanded setpoint to actual wheel speed, for correcting the SOTM
+     * time-of-flight (and therefore the turret lead) when firing off-setpoint —
+     * e.g. a band-gated shot taken mid spin-up. 1.0 when settled at the setpoint
+     * (no-op, preserves the drag-calibrated LUT TOF). >1 when the wheel is below
+     * setpoint (slower ball -> longer flight -> more lead needed). Clamped, and
+     * 1.0 when not spun up so it never perturbs idle/aim.
+     */
+    @AutoLogOutput(key = "Flywheel/TofSpeedScale")
+    public double getTofSpeedScale() {
+        double measured = (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
+        if (targetVelocityRadPerSec < 1.0 || measured < 1.0) return 1.0;
+        return Math.max(0.7, Math.min(1.4, targetVelocityRadPerSec / measured));
     }
 
     private double getStationaryExitVelocityMps(Translation3d hubCenter) {
@@ -221,10 +274,24 @@ public class Flywheel extends SubsystemBase {
     /* COMMAND FACTORIES */
     ///////////////////////
 
-    public Command toggleBumpUp() {
-        return Commands.runOnce(
-            () -> bumpUpSpeed = !bumpUpSpeed)
-            .alongWith(RumbleAPI.steady(1.0, 1.0));
+    public Command requestSpeedMultiplier(double multiplier) {
+        return Commands.runOnce(() -> {
+            manualRequestedSpeedInc += multiplier;
+        }, this);
+    }
+
+    public Command speedUp() {
+        return requestSpeedMultiplier(0.05);
+    }
+
+    public Command speedDown() {
+        return requestSpeedMultiplier(-0.05);
+    }
+
+    public Command reset() {
+        return Commands.runOnce(() -> {
+            manualRequestedSpeedInc = 1.0;
+        }, this);
     }
 
     public Command simFire() {

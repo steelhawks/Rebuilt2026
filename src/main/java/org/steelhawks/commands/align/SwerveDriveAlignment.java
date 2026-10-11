@@ -89,6 +89,7 @@ public class SwerveDriveAlignment extends Command {
                 new TrapezoidProfile.Constraints(
                     AutonConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                     AutonConstants.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
+        angleController.enableContinuousInput(-Math.PI, Math.PI);
         profile = new APProfile(CONSTRAINTS)
             .withErrorXY(Meters.of(XY_TOLERANCE))
             .withErrorTheta(Radians.of(THETA_TOLERANCE))

@@ -291,44 +291,45 @@ public class RobotState {
             currentChassisSpeeds.vyMetersPerSecond,
             0.0);
 
-        Translation2d currentFieldVelocity =
-            new Translation2d(
-                currentChassisSpeeds.vxMetersPerSecond,
-                currentChassisSpeeds.vyMetersPerSecond)
-            .rotateBy(getRotation());
-        double now = Timer.getFPGATimestamp();
-        double dt = now - previousFieldVelocityTimestampSec;
+//        Translation2d currentFieldVelocity =
+//            new Translation2d(
+//                currentChassisSpeeds.vxMetersPerSecond,
+//                currentChassisSpeeds.vyMetersPerSecond)
+//            .rotateBy(getRotation());
+//        double now = Timer.getFPGATimestamp();
+//        double dt = now - previousFieldVelocityTimestampSec;
 
         // Pick the acceleration source. Pigeon is preferred because it measures the
         // robot's REAL body acceleration (including defense hits, wheel slip) with
         // ~1ms latency, whereas the velocity derivative only sees motion the
         // odometry can resolve. Falls back to the derivative if the IMU isn't
         // reporting valid linear-accel signals.
-        Translation2d rawAccel = null;
-        String accelSource;
-        if (gyroBodyAccelValid) {
-            rawAccel = gyroBodyLinearAccelMps2.rotateBy(getRotation());
-            accelSource = "Pigeon";
-        } else if (previousFieldVelocityTimestampSec > 0.0 && dt > 1e-4 && dt < 0.1) {
-            rawAccel = currentFieldVelocity.minus(previousFieldVelocity).div(dt);
-            accelSource = "Derivative";
-        } else {
-            accelSource = "Hold";
-        }
-        if (rawAccel != null) {
-            double tau = Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_SEC.get();
-            double effectiveDt = dt > 1e-4 ? dt : Constants.UPDATE_LOOP_DT;
-            double alpha = tau > 0.0 ? effectiveDt / (tau + effectiveDt) : 1.0;
-            filteredFieldAcceleration =
-                filteredFieldAcceleration.times(1.0 - alpha).plus(rawAccel.times(alpha));
-        }
-        previousFieldVelocity = currentFieldVelocity;
-        previousFieldVelocityTimestampSec = now;
-        Logger.recordOutput("SOTM/FieldAccelEstimate", filteredFieldAcceleration);
-        Logger.recordOutput("SOTM/AccelSource", accelSource);
+//        Translation2d rawAccel = null;
+//        String accelSource;
+//        if (gyroBodyAccelValid) {
+//            rawAccel = gyroBodyLinearAccelMps2.rotateBy(getRotation());
+//            accelSource = "Pigeon";
+//        } else if (previousFieldVelocityTimestampSec > 0.0 && dt > 1e-4 && dt < 0.1) {
+//            rawAccel = currentFieldVelocity.minus(previousFieldVelocity).div(dt);
+//            accelSource = "Derivative";
+//        } else {
+//            accelSource = "Hold";
+//        }
+//        if (rawAccel != null) {
+//            double tau = Constants.SOTMConstants.ACCEL_LPF_TIME_CONSTANT_SEC.get();
+//            double effectiveDt = dt > 1e-4 ? dt : Constants.UPDATE_LOOP_DT;
+//            double alpha = tau > 0.0 ? effectiveDt / (tau + effectiveDt) : 1.0;
+//            filteredFieldAcceleration =
+//                filteredFieldAcceleration.times(1.0 - alpha).plus(rawAccel.times(alpha));
+//        }
+//        previousFieldVelocity = currentFieldVelocity;
+//        previousFieldVelocityTimestampSec = now;
+//        Logger.recordOutput("SOTM/FieldAccelEstimate", filteredFieldAcceleration);
+//        Logger.recordOutput("SOTM/AccelSource", accelSource);
 
-        Translation3d fieldAcceleration = new Translation3d(
-            filteredFieldAcceleration.getX(), filteredFieldAcceleration.getY(), 0.0);
+//        Translation3d fieldAcceleration = new Translation3d(
+//            filteredFieldAcceleration.getX(), filteredFieldAcceleration.getY(), 0.0);
+        Translation3d fieldAcceleration = new Translation3d();
 
         movingShotSolution = ShooterStructure.Moving.solveMovingShot(
             target,
