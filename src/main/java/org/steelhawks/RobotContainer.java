@@ -123,5 +123,10 @@ public class RobotContainer {
 
         driver.leftTrigger().whileTrue(shootingCommands.shootWhileIntaking());
         driver.leftBumper().whileTrue(shootingCommands.shoot());
+
+        Subsystems.turretIfPresent().ifPresent(turret ->
+            driver.povLeft()
+                .whileTrue(turret.enableForcedJammed(true))
+                .onFalse(turret.enableForcedJammed(false)));
     }
 }
