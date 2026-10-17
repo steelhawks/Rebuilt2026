@@ -125,6 +125,7 @@ public final class Autos {
         autoChooser.addOption("Right Not So OP Auton", rightNotSoOP().cmd().withName(ChoreoTraj.RNotSoOPAuton.name()));
         autoChooser.addOption("Left Not So OP Auton", leftNotSoOP().cmd().withName(ChoreoTraj.LNotSoOPAuton.name()));
         autoChooser.addOption("Middle Depot Auton", middleDepotAuton().cmd().withName(ChoreoTraj.MiddleDepotAuton.name()));
+        autoChooser.addOption("Dumb Middle Depot Auton", dumbMiddleDepotAuton().cmd().withName(ChoreoTraj.DumbMiddleDepotAuton.name()));
         autoChooser.addOption("Middle Depot Auton 2", middleDepotAuton2().cmd().withName(ChoreoTraj.MiddleDepotAuton2.name()));
         autoChooser.addOption("Right Stuy Auton", rightStuy().cmd().withName(ChoreoTraj.RStuyAuton.name()));
         autoChooser.addOption("Left Stuy Auton", leftStuy().cmd().withName(ChoreoTraj.LStuyAuton.name()));
@@ -752,6 +753,44 @@ public final class Autos {
                 Commands.runOnce(swerve::stopWithX),
                 recoverToTrajectoryEnd(shootToDepotToShoot),
                 shootingCommands.autonShoot().withTimeout(3.0),
+                shootToDepotToShoot.spawnCmd()
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine dumbMiddleDepotAuton() {
+        AutoRoutine routine = factory.newRoutine("Dumb Middle Depot Auton");
+
+        AutoTrajectory moveToShootPose = ChoreoTraj.DumbMiddleDepotAuton$0.asAutoTraj(routine);
+        AutoTrajectory shootToDepotToShoot = ChoreoTraj.DumbMiddleDepotAuton$1.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                moveToShootPose.resetOdometry(),
+                intake.setDesiredStateCommand(State.INTAKE),
+                moveToShootPose.spawnCmd()
+            )
+        );
+
+        moveToShootPose.active().whileTrue(intake.runIntake());
+        shootToDepotToShoot.active().whileTrue(intake.runIntake());
+
+        moveToShootPose.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(swerve::stopWithX),
+                recoverToTrajectoryEnd(moveToShootPose),
+                shootingCommands.autonShoot().withTimeout(2.0),
+                shootToDepotToShoot.spawnCmd()
+            )
+        );
+
+        shootToDepotToShoot.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(swerve::stopWithX),
+                recoverToTrajectoryEnd(shootToDepotToShoot),
+                shootingCommands.autonShoot().withTimeout(5.0),
                 shootToDepotToShoot.spawnCmd()
             )
         );

@@ -1,6 +1,7 @@
-// spotless:off
 package org.steelhawks;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 
@@ -11,9 +12,5 @@ import edu.wpi.first.units.measure.*;
  */
 public final class ChoreoVars {
 
-
-    public static final class Poses {
-
-    }
+    private ChoreoVars() {}
 }
-// spotless:on
