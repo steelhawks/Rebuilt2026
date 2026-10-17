@@ -131,6 +131,7 @@ public final class Autos {
         autoChooser.addOption("Right Bump Hub Depot Auton", rightBumpHubDepot().cmd().withName(ChoreoTraj.RBumpHubDepot.name()));
         autoChooser.addOption("Left Bump Hub Depot Auton", leftBumpHubDepot().cmd().withName(ChoreoTraj.LBumpHubDepot.name()));
         autoChooser.addOption("Stationary Shoot", shootingCommands.shoot());
+        autoChooser.addOption("Middle Straight Back", middleShoot().cmd().withName(ChoreoTraj.MiddleShoot.name()));
 
         if (Toggles.tuningMode.get()) {
             pollTuningMode();
@@ -1086,6 +1087,23 @@ public final class Autos {
                 Commands.runOnce(swerve::stopWithX),
                 recoverToTrajectoryEnd(trenchToShoot2),
                 shootingCommands.autonShoot(),
+                hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+            )
+        );
+
+        return routine;
+    }
+
+    public AutoRoutine middleShoot() {
+        AutoRoutine routine = factory.newRoutine("Middle Shoot");
+
+        AutoTrajectory traj = ChoreoTraj.MiddleShoot.asAutoTraj(routine);
+
+        traj.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(swerve::stopWithX),
+                recoverToTrajectoryEnd(traj),
+                shootingCommands.autonShoot().withTimeout(5.0),
                 hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
             )
         );

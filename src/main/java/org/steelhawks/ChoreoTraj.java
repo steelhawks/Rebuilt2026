@@ -549,6 +549,13 @@ public record ChoreoTraj(
 	    new Pose2d(0.394, 4.753, Rotation2d.fromRadians(1.571)),
 	    new Pose2d(0.394, 5.864, Rotation2d.fromRadians(1.571))
 	);
+	public static final ChoreoTraj MiddleShoot = new ChoreoTraj(
+	    "MiddleShoot",
+	    OptionalInt.empty(),
+	    0.72388,
+	    new Pose2d(3.33, 4.035, Rotation2d.fromRadians(0)),
+	    new Pose2d(2.185, 4.035, Rotation2d.fromRadians(0))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -629,7 +636,8 @@ public record ChoreoTraj(
 		Map.entry("RStuyAuton$1", RStuyAuton$1),
 		Map.entry("RStuyAuton$2", RStuyAuton$2),
 		Map.entry("RStuyAuton$3", RStuyAuton$3),
-		Map.entry("RStuyAuton$4", RStuyAuton$4)
+		Map.entry("RStuyAuton$4", RStuyAuton$4),
+		Map.entry("MiddleShoot", MiddleShoot)
     );
 
     /**
