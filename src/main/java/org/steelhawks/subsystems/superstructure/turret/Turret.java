@@ -70,6 +70,7 @@ public class Turret extends SubsystemBase {
     private boolean atGoal = true;
     private boolean isHomed = false;
     private boolean isZeroed = false;
+    private boolean forceJammed = false;
     private DoubleSupplier joystickAxis = null;
     private SubsystemConstants.TurretConstants constants;
     private final LoggedTunableNumber constantForceFF =
@@ -128,7 +129,7 @@ public class Turret extends SubsystemBase {
                 && Math.abs(getPosition().getRadians() - desiredRotation.getRadians()) > JAM_ERROR_THRESHOLD
                 && shouldRun;
         boolean jammed = unjamDebouncer.calculate(jamDebouncer.calculate(stuckWithError));
-        return jammed || isAtDeadSpot();
+        return jammed || isAtDeadSpot() || forcedJammed();
     }
 
     @AutoLogOutput(key = "Turret/IsAtDeadSpot")
@@ -138,6 +139,11 @@ public class Turret extends SubsystemBase {
         boolean atMinLimit = Math.abs(goalRad - constants.minRotation().getRadians()) < tolerance;
         boolean atMaxLimit = Math.abs(goalRad - constants.maxRotation().getRadians()) < tolerance;
         return (atMinLimit || atMaxLimit) && !atGoal;
+    }
+
+    @AutoLogOutput(key = "Turret/ForcedJammed")
+    private boolean forcedJammed() {
+        return forceJammed;
     }
 
     @AutoLogOutput(key = "Turret/IsTraversing")
@@ -539,5 +545,9 @@ public class Turret extends SubsystemBase {
                         System.out.println("\tkS: " + formatter.format(kS));
                         System.out.println("\tkV: " + formatter.format(kV));
                     }));
+    }
+
+    public Command enableForcedJammed(boolean enabled) {
+        return Commands.runOnce(() -> forceJammed = enabled);
     }
 }
