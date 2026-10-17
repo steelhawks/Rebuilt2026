@@ -115,6 +115,7 @@ public final class Autos {
 //        autoChooser.addOption("4 Meter Spin Test", fourMeterTestSpin().cmd().withName(ChoreoTraj.FourMeterSpinTest.name()));
 //        autoChooser.addOption("Center Path Test", centerPathTest().cmd().withName(ChoreoTraj.CenterPath.name()));
         autoChooser.addOption("Right Rebound Auton", rightRebound().cmd().withName(ChoreoTraj.RRebound.name()));
+        autoChooser.addOption("Right Dumb Rebound Auton", rightDumbRebound().cmd().withName(ChoreoTraj.RDumbRebound.name()));
         autoChooser.addOption("Left Rebound Auton", leftRebound().cmd().withName(ChoreoTraj.LRebound.name()));
         autoChooser.addOption("Left Rebound Auton Q112", leftRebound112().cmd().withName(ChoreoTraj.LRebound.name() + "112"));
         autoChooser.addOption("Right Double Rebound Auton", rightDoubleRebound().cmd().withName(ChoreoTraj.RDoubleRebound.name()));
@@ -1029,6 +1030,65 @@ public final class Autos {
         shootIntoDepot.active().whileTrue(shootingCommands.shootWhileIntaking());
 
         shootIntoDepot.done().onTrue(shootingCommands.autonShoot());
+
+        return routine;
+    }
+
+    public AutoRoutine rightDumbRebound() {
+        AutoRoutine routine = factory.newRoutine("Right Dumb Rebound Auton");
+
+        AutoTrajectory trenchToMidToTrench = ChoreoTraj.RDumbRebound$0.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot1 = ChoreoTraj.RDumbRebound$1.asAutoTraj(routine);
+        AutoTrajectory shootToMidToTrench = ChoreoTraj.RDumbRebound$2.asAutoTraj(routine);
+        AutoTrajectory trenchToShoot2 = ChoreoTraj.RDumbRebound$3.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                trenchToMidToTrench.resetOdometry(),
+                hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                intake.setDesiredStateCommand(State.INTAKE),
+                trenchToMidToTrench.spawnCmd()
+            )
+        );
+
+        trenchToMidToTrench.active().whileTrue(intake.runIntake());
+        shootToMidToTrench.active().whileTrue(intake.runIntake());
+
+        trenchToMidToTrench.done().onTrue(
+            Commands.sequence(
+                hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot1.spawnCmd()
+            )
+        );
+
+        trenchToShoot1.active().whileTrue(intake.outtakeIntake());
+        trenchToShoot2.active().whileTrue(intake.outtakeIntake());
+
+        trenchToShoot1.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot1),
+                shootingCommands.autonShoot().withTimeout(5.0),
+                hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                shootToMidToTrench.spawnCmd()
+            )
+        );
+
+        shootToMidToTrench.done().onTrue(
+            Commands.sequence(
+                hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0)),
+                trenchToShoot2.spawnCmd()
+            )
+        );
+
+        trenchToShoot2.done().onTrue(
+            Commands.sequence(
+                Commands.runOnce(swerve::stopWithX),
+                recoverToTrajectoryEnd(trenchToShoot2),
+                shootingCommands.autonShoot(),
+                hood.setDesiredPositionCommand(Rotation2d.fromDegrees(80.0))
+            )
+        );
 
         return routine;
     }
