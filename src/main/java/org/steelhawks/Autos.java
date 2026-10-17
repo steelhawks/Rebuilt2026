@@ -1096,8 +1096,14 @@ public final class Autos {
 
     public AutoRoutine middleShoot() {
         AutoRoutine routine = factory.newRoutine("Middle Shoot");
-
         AutoTrajectory traj = ChoreoTraj.MiddleShoot.asAutoTraj(routine);
+
+        routine.active().onTrue(
+            Commands.sequence(
+                traj.resetOdometry(),
+                traj.spawnCmd()
+            )
+        );
 
         traj.done().onTrue(
             Commands.sequence(
