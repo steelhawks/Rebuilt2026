@@ -88,6 +88,7 @@ public class TeleopSwerve extends Command {
         RobotState.getInstance().getBumpTrigger()
             .onTrue(setDriveState(DriveState.BUMP_ALIGN));
         RobotState.getInstance().getSOTMTrigger().negate().and(RobotState.getInstance().getTrenchTrigger().negate()).and(RobotState.getInstance().getBumpTrigger().negate())
+            .and(RobotState.getInstance().getTurretJamTrigger().and(Toggles.Turret.rotateRobotWhenStuck::get).negate())
             .onTrue(setDriveState(DriveState.NORMAL));
 
         RobotState.getInstance().getTurretJamTrigger()
@@ -204,6 +205,12 @@ public class TeleopSwerve extends Command {
                     Subsystems.turret().getMaxRotation().getRadians() - Turret.tolerance);
                 double desiredRobotAngle = MathUtil.angleModulus(
                     targetFieldAngle - turretMountingYaw - clampedTurretAngle);
+                if (Subsystems.turret().forcedJammed()) {
+                    var sol = RobotState.getInstance().getMovingShotSolution();
+                    double shotTurretAngle = sol != null ? sol.turretAngle().getRadians() : requiredTurretAngle;
+                    desiredRobotAngle = MathUtil.angleModulus(
+                        currentRad + MathUtil.angleModulus(shotTurretAngle - Subsystems.turret().getRotation().getRadians()));
+                }
 
                 double controllerOmega = angleController.calculate(currentRad, desiredRobotAngle);
                 omega = controllerOmega + omega * 0.3;

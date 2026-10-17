@@ -119,6 +119,12 @@ public class Turret extends SubsystemBase {
 
     @AutoLogOutput(key = "Turret/AtGoal")
     public boolean atGoal() {
+        if (forceJammed) {
+            // Align button: the robot turns to aim the frozen turret, so wait until it lines up with the shot.
+            var sol = RobotState.getInstance().getMovingShotSolution();
+            return sol != null
+                && Math.abs(MathUtil.angleModulus(sol.turretAngle().getRadians() - getPosition().getRadians())) < tolerance;
+        }
         return atGoal;
     }
 
@@ -142,7 +148,7 @@ public class Turret extends SubsystemBase {
     }
 
     @AutoLogOutput(key = "Turret/ForcedJammed")
-    private boolean forcedJammed() {
+    public boolean forcedJammed() {
         return forceJammed;
     }
 
