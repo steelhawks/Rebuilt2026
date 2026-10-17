@@ -71,7 +71,7 @@ public class ShootingCommands {
             }),
             Commands.waitUntil(() ->
                 (flywheel.isReadyToShoot()
-                    && !turret.isTraversing()
+//                    && !turret.isTraversing()
                     && turret.atGoal())
                     || RobotState.getInstance().getAimState().equals(AimState.FERRY)),
             indexer.feed()

@@ -67,7 +67,7 @@ public class Turret extends SubsystemBase {
     private boolean brakeModeEnabled = false;
     private boolean shouldRun = false;
     private boolean isManual = false;
-    private boolean atGoal = false;
+    private boolean atGoal = true;
     private boolean isHomed = false;
     private boolean isZeroed = false;
     private DoubleSupplier joystickAxis = null;
@@ -424,7 +424,8 @@ public class Turret extends SubsystemBase {
                 Rotation2d.fromRadians(
                     MathUtil.clamp(
                         desiredRotation.getRadians(), constants.minRotation().getRadians(), constants.maxRotation().getRadians()));
-            atGoal = Maths.epsilonEquals(getPosition().getRadians(), desiredRotation.getRadians(), tolerance);
+              atGoal = true;
+//            atGoal = Maths.epsilonEquals(getPosition().getRadians(), desiredRotation.getRadians(), tolerance);
 
             boolean springPullsNegative = getPosition().getRadians() <= -0.984816 + SPRING_HYSTERESIS;
             boolean springPullsPositive = getPosition().getRadians() >= 1.810097 - SPRING_HYSTERESIS;
